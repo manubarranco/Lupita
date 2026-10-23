@@ -2,33 +2,41 @@ import AppKit
 import SwiftUI
 import LupitaCore
 
-/// How the lens follows the pointer while the chord is held. Two feels to compare by eye.
+/// How the lens follows the pointer while the chord is held. Feels to compare by eye.
 enum LensStyle: String, CaseIterable {
-    case smooth, playful, off
+    case smooth, elastic, looseElastic, off
 
     static let defaultsKey = "lens"
     static var current: LensStyle {
-        get { UserDefaults.standard.string(forKey: defaultsKey).flatMap(LensStyle.init) ?? .smooth }
+        get { UserDefaults.standard.string(forKey: defaultsKey).flatMap(LensStyle.init) ?? .elastic }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: defaultsKey) }
     }
 
     var label: String {
         switch self {
         case .smooth: S.lensSmooth
-        case .playful: S.lensPlayful
+        case .elastic: S.lensElastic
+        case .looseElastic: S.lensLooseElastic
         case .off: S.lensOff
         }
     }
 
-    /// Spring stiffness and damping ratio. Smooth catches up in ~0.15 s with no visible
-    /// overshoot; playful is a bit slower and bounces once when it arrives.
-    var spring: (stiffness: CGFloat, dampingRatio: CGFloat)? {
+    var motion: LensMotion? {
         switch self {
-        case .smooth: (600, 0.85)
-        case .playful: (380, 0.5)
+        // Springs to a fixed spot below-right of the pointer, ~0.12 s, no overshoot.
+        case .smooth: .follow(stiffness: 600, dampingRatio: 0.85)
+        // Tied to the pointer by a loose elastic string: it starts late, and when the pointer
+        // stops it swings past to the other side and back until it rests a string away.
+        case .elastic: .tether(length: 34, stiffness: 70, drag: 3.2)
+        case .looseElastic: .tether(length: 40, stiffness: 35, drag: 2.6)
         case .off: nil
         }
     }
+}
+
+enum LensMotion {
+    case follow(stiffness: CGFloat, dampingRatio: CGFloat)
+    case tether(length: CGFloat, stiffness: CGFloat, drag: CGFloat)
 }
 
 /// A magnifying glass that trails the pointer while the shortcut is held: "I'm following you,
@@ -41,6 +49,8 @@ final class CursorLens: NSObject {
     private static let offset = CGVector(dx: 24, dy: -22)
     /// Waits this long before showing, so ⌃⌥⌘+key shortcuts of other apps do not flash it.
     private static let delay: Duration = .milliseconds(150)
+    /// The string never stretches beyond this, however fast the pointer goes.
+    private static let maxDistance: CGFloat = 180
 
     private var panel: NSPanel?
     private var link: CADisplayLink?
@@ -78,7 +88,7 @@ final class CursorLens: NSObject {
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-        position = target()
+        position = badge()
         velocity = .zero
         place(panel)
         panel.alphaValue = 0
@@ -92,25 +102,45 @@ final class CursorLens: NSObject {
         self.link = link
     }
 
-    /// One spring step per frame toward the pointer (semi-implicit Euler).
+    /// One physics step per frame (semi-implicit Euler).
     @objc private func tick(_ link: CADisplayLink) {
         guard let panel else { return }
-        let goal = target()
         let dt = lastTick == 0 ? link.duration : min(link.timestamp - lastTick, 1.0 / 30)
         lastTick = link.timestamp
-        if NSWorkspace.shared.accessibilityDisplayShouldReduceMotion || LensStyle.current.spring == nil {
-            position = goal
-        } else if let spring = LensStyle.current.spring {
-            let damping = 2 * spring.dampingRatio * spring.stiffness.squareRoot()
-            velocity.dx += (spring.stiffness * (goal.x - position.x) - damping * velocity.dx) * dt
-            velocity.dy += (spring.stiffness * (goal.y - position.y) - damping * velocity.dy) * dt
-            position.x += velocity.dx * dt
-            position.y += velocity.dy * dt
+        let motion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : LensStyle.current.motion
+        switch motion {
+        case nil:
+            position = badge()
+        case let .follow(stiffness, dampingRatio)?:
+            let goal = badge()
+            let damping = 2 * dampingRatio * stiffness.squareRoot()
+            step(force: CGVector(dx: stiffness * (goal.x - position.x) - damping * velocity.dx,
+                                 dy: stiffness * (goal.y - position.y) - damping * velocity.dy), dt: dt)
+        case let .tether(length, stiffness, drag)?:
+            let pointer = NSEvent.mouseLocation
+            let d = CGVector(dx: position.x - pointer.x, dy: position.y - pointer.y)
+            let r = max(hypot(d.dx, d.dy), 0.001)
+            // Taut, the string pulls; slack, a softer push keeps the lens off the pointer tip.
+            let pull = stiffness * (r - length) / r * (r > length ? 1 : 0.5)
+            step(force: CGVector(dx: -pull * d.dx - drag * velocity.dx,
+                                 dy: -pull * d.dy - drag * velocity.dy), dt: dt)
+            let nr = hypot(position.x - pointer.x, position.y - pointer.y)
+            if nr > Self.maxDistance {
+                let k = Self.maxDistance / nr
+                position = CGPoint(x: pointer.x + (position.x - pointer.x) * k, y: pointer.y + (position.y - pointer.y) * k)
+            }
         }
         place(panel)
     }
 
-    private func target() -> CGPoint {
+    private func step(force: CGVector, dt: CGFloat) {
+        velocity.dx += force.dx * dt
+        velocity.dy += force.dy * dt
+        position.x += velocity.dx * dt
+        position.y += velocity.dy * dt
+    }
+
+    private func badge() -> CGPoint {
         let mouse = NSEvent.mouseLocation
         return CGPoint(x: mouse.x + Self.offset.dx, y: mouse.y + Self.offset.dy)
     }

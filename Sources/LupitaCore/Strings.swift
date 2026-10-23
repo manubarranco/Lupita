@@ -50,7 +50,8 @@ public enum S {
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
     public static var lens: String { t("Lens while holding", "Lupa al mantener") }
     public static var lensSmooth: String { t("Smooth", "Suave") }
-    public static var lensPlayful: String { t("Playful", "Juguetona") }
+    public static var lensElastic: String { t("Elastic", "Elástica") }
+    public static var lensLooseElastic: String { t("Loose elastic", "Elástica floja") }
     public static var lensOff: String { t("No lens", "Sin lupa") }
     public static var folders: String { t("Folders", "Carpetas") }
     public static var remove: String { t("Remove", "Quitar") }
