@@ -97,3 +97,17 @@ After the shortcut fires the lens searches with narrowed eyes, reacts on top of 
 leaves when it closes. The tooltip shows at once: the reaction never delays the answer.
 The "not known" notice closes 2 s after the lens reaches its side (3.5 s without the lens).
 Sequence in docs/lens-behavior.md. Approved by Manu, 2026-10-24.
+
+## D19 — Commits, branches, files and commands are looked up on demand, not indexed
+Besides defined IDs, the tooltip resolves what agents cite from git and disk: a commit SHA, a
+branch, a file path (`docs/a.md:12`) and a Claude Code command or skill (`/retro`). They are
+looked up when the user points, never indexed, so there is nothing to keep fresh and the
+`.claude` folders stay out of the index. Why: in 80 real agent sessions these were ~570
+citations against ~250 ID citations; 68 % now resolve (the rest are deleted branches with no
+trace, localhost URLs and built-in commands). Approved by Manu, 2026-10-24.
+
+## D20 — Git only when the Command Line Tools are installed
+Commits and branches are read by running `git` (Homebrew's, or the Command Line Tools'). Without
+it `/usr/bin/git` is a stub that opens an install dialog, so it is never called and commits and
+branches are simply not recognised. Reading `.git` by hand (packfiles, zlib) is not worth it:
+people who use coding agents have git. Approved by Manu, 2026-10-24.

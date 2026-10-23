@@ -78,6 +78,8 @@ public struct Resolver: Sendable {
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let fromPath = named == nil || named == preferredRepo ? fromPath : nil
         let preferredRepo = named ?? preferredRepo
+        // Commits, branches, files and commands never look like IDs: no OCR correction for them.
+        if let ref = RepoRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo) { return ref }
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))

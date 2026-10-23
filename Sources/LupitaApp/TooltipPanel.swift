@@ -98,7 +98,11 @@ enum FileOpener {
     /// Opens the file at the line: in VS Code when installed, otherwise the default app.
     @MainActor static func open(_ d: Definition) {
         let workspace = NSWorkspace.shared
-        if workspace.urlForApplication(withBundleIdentifier: "com.microsoft.VSCode") != nil,
+        if let link = d.openURL, let url = URL(string: link) {
+            workspace.open(url)
+        } else if d.rule == .commit || d.rule == .branch {
+            workspace.activateFileViewerSelecting([URL(fileURLWithPath: d.absolutePath)])
+        } else if workspace.urlForApplication(withBundleIdentifier: "com.microsoft.VSCode") != nil,
            let path = d.absolutePath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
            let url = URL(string: "vscode://file\(path):\(max(d.line, 1))") {
             workspace.open(url)
@@ -154,8 +158,15 @@ struct TooltipView: View {
                     Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
                 }
                 HStack(spacing: 6) {
+                    if let kind = Self.kind(d.rule) {
+                        Text(kind).font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(.secondary.opacity(0.15), in: Capsule())
+                    }
                     Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor)
-                    Text("\(d.path):\(d.line)").font(.caption.monospaced()).foregroundStyle(.secondary)
+                    if let location = Self.location(d) {
+                        Text(location).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                    }
                     if isFirst && resolution.fromOtherRepo {
                         Text(S.fromAnotherRepo).font(.caption2.weight(.semibold))
                             .padding(.horizontal, 5).padding(.vertical, 1)
@@ -167,7 +178,33 @@ struct TooltipView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(S.openAt(d.path, line: d.line))
+        .help(Self.help(d))
+    }
+
+    static func kind(_ rule: DefinitionRule) -> String? {
+        switch rule {
+        case .commit: S.kindCommit
+        case .branch: S.kindBranch
+        case .file: S.kindFile
+        case .command: S.kindCommand
+        default: nil
+        }
+    }
+
+    /// `path:line` under an ID or a file; nothing for commits and branches (the repo says it all).
+    static func location(_ d: Definition) -> String? {
+        switch d.rule {
+        case .commit, .branch: nil
+        case .command: d.path
+        case .file: d.line > 1 ? "\(d.path):\(d.line)" : d.path
+        default: "\(d.path):\(d.line)"
+        }
+    }
+
+    static func help(_ d: Definition) -> String {
+        if d.openURL != nil { return S.openOnGitHub }
+        if d.rule == .commit || d.rule == .branch { return S.showFolder }
+        return S.openAt(d.path, line: max(d.line, 1))
     }
 }
 

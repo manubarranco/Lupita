@@ -7,6 +7,8 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     /// A heading with no title (`## P1`) or the same ID heading several sections of one
     /// file (`## D034 bloque 2`): a section *about* the ID, not where it is defined.
     case section
+    /// Not IDs: looked up on demand in git and on disk, never indexed (D19).
+    case commit, branch, file, command
 
     public var weight: Int {
         switch self {
@@ -16,11 +18,15 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .listOrColon: 60
         case .tableRow: 40
         case .section: 20
+        case .commit, .branch, .file, .command: 0
         }
     }
 
     /// Weak definitions never beat a real one from another repo.
     public var isWeak: Bool { self == .section }
+
+    /// A repo reference (commit, branch, file, command) rather than an ID definition.
+    public var isRepoRef: Bool { [.commit, .branch, .file, .command].contains(self) }
 }
 
 /// A definition found on one line (or in a file name), before snippet extraction.
