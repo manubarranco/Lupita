@@ -18,9 +18,9 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         item.menu = menu
     }
 
-    /// Lupita at rest, facing forward (D17): the lens drawing of `LensFace` without the disc,
-    /// as an 18 pt template image so it follows the menu bar's colour. Stroke and eyes are a
-    /// little heavier than the lens's so they hold at this size.
+    /// Lupita looking slightly down-left, at the screen below (D17): the lens drawing of
+    /// `LensFace` without the disc, as an 18 pt template image so it follows the menu bar's
+    /// colour. Stroke and eyes are a little heavier than the lens's so they hold at this size.
     private static func icon() -> NSImage {
         let image = NSImage(size: NSSize(width: 18, height: 18), flipped: true) { rect in
             guard let cg = NSGraphicsContext.current?.cgContext else { return false }
@@ -39,7 +39,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
                 path.stroke()
             }
             for cx: CGFloat in [-10, 10] {
-                NSBezierPath(roundedRect: NSRect(x: cx - 5.5, y: -12, width: 11, height: 24), xRadius: 5.5, yRadius: 5.5).fill()
+                NSBezierPath(roundedRect: NSRect(x: cx - 5.5 - 6, y: -12 + 5, width: 11, height: 24), xRadius: 5.5, yRadius: 5.5).fill()
             }
             return true
         }
