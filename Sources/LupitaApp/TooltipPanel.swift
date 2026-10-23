@@ -20,9 +20,17 @@ final class TooltipPanel {
         }), at: mouse, autoDismiss: nil)
     }
 
+    /// Closes on its own only through `close(after:)` or `close()`, or a click or Esc.
     func showNotice(_ text: String, at mouse: NSPoint) {
-        // Stays until a click, Esc or the next lookup, like a tooltip: 1.5 s was too short to read.
         present(NoticeView(text: text), at: mouse, autoDismiss: nil)
+    }
+
+    func close(after seconds: TimeInterval) {
+        dismissTask?.cancel()
+        dismissTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(seconds))
+            if !Task.isCancelled { self?.close() }
+        }
     }
 
     func close() {

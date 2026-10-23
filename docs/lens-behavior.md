@@ -46,12 +46,13 @@ Approved by Manu on 2026-10-24. The lens stays on screen after the shortcut is r
 | Not found | Looks left, right, left, then narrows | 1.1 s |
 | Moving | Glides to the tooltip's right side (left if it does not fit), eyes on the tooltip | On arrival |
 | Reading | Sweeps the lines, one line lower every 0.9 s (found only) | 2.7 s |
-| Waiting | Looks at the tooltip, blinks | When the tooltip closes: closes its eyes and goes |
+| Waiting | Looks at the tooltip, blinks | When the tooltip closes: closes its eyes and goes. Beside a "not known" notice, 2 s after arriving: both close |
 
 Pressing the shortcut again picks the same lens back up. With Reduce Motion none of this
 happens: the lens goes when the shortcut is released, as before. The "not known" notice
-stays until a click or Esc, like the tooltip: closing on its own after 1.5 s, it went before
-it could be read, with the lens covering it for most of that time. The prototype's three
+closes 2 s after the lens gets beside it (3.5 s when there is no lens), or on a click or Esc.
+It used to close after 1.5 s, before it could be read, with the lens covering it for most of
+that time. The prototype's three
 phase 2 buttons are an earlier take on this; the table wins.
 
 ## Check

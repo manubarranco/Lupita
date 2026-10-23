@@ -50,8 +50,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let point = Screen.topLeft(mouse)  // what AX and ScreenCaptureKit use
         lens.keep()
         guard let resolver = store.resolver else {
-            tooltip.showNotice(S.indexingTryAgain, at: mouse)
-            lens.react(found: false, near: tooltip.frame)
+            notice(S.indexingTryAgain, at: mouse)
             return
         }
         let context = ActiveContext.at(point, resolver: resolver)
@@ -105,11 +104,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 tooltip.show(result!, at: mouse)
                 lens.react(found: true, near: tooltip.frame)
             default:
-                tooltip.showNotice(S.notAReference, at: mouse)
-                lens.react(found: false, near: tooltip.frame)
+                notice(S.notAReference, at: mouse)
             }
         }
         TriggerLog.append(app: app, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
+    }
+
+    /// With the lens beside it, the notice closes 2 s after the lens gets there (D18); without
+    /// the lens, after about the same time.
+    private func notice(_ text: String, at mouse: NSPoint) {
+        tooltip.showNotice(text, at: mouse)
+        let reacting = lens.react(found: false, near: tooltip.frame) { [weak self] in self?.tooltip.close() }
+        if !reacting { tooltip.close(after: 3.5) }
     }
 
     /// Dev aid: resolve a given text without reading the screen (`lupita poke --query D001 --repo atlas`).

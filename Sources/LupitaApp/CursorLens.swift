@@ -61,13 +61,20 @@ final class CursorLens: NSObject {
     private var target = CGPoint.zero
     private var toTooltip = CGVector.zero
     private var timeoutTask: Task<Void, Never>?
+    /// For a "not known" notice: closes it once the lens has waited beside it.
+    private var doneWaiting: (() -> Void)?
+    private static let noticeWait: CFTimeInterval = 2
 
     func begin() {
         guard Self.isOn else { return }
         if panel != nil {
-            // Pressed again while closing or beside a tooltip: the same lens follows again.
-            reopen()
+            // Pressed again while closing or beside a tooltip: the same lens follows again. A
+            // notice it was waiting beside closes now, or nothing would close it.
+            let done = doneWaiting
+            doneWaiting = nil
             enter(.following)
+            done?()
+            reopen()
             velocity = .zero
             return
         }
@@ -97,9 +104,12 @@ final class CursorLens: NSObject {
         }
     }
 
-    /// The answer is on screen in `frame`: react on top of it, then move to its side.
-    func react(found: Bool, near frame: NSRect?) {
-        guard phase == .searching, let panel else { return }
+    /// The answer is on screen in `frame`: react on top of it, then move to its side. Not
+    /// found, `done` runs after waiting beside it. false: no lens is reacting.
+    @discardableResult
+    func react(found: Bool, near frame: NSRect?, done: (() -> Void)? = nil) -> Bool {
+        guard phase == .searching, let panel else { return false }
+        doneWaiting = found ? nil : done
         timeoutTask?.cancel()
         self.found = found
         enter(found ? .found : .notFound)
@@ -109,6 +119,7 @@ final class CursorLens: NSObject {
         let right = frame.maxX + 26 + Self.size / 2 < bounds.maxX
         target = CGPoint(x: right ? frame.maxX + 26 : frame.minX - 26, y: frame.maxY - 24)
         toTooltip = CGVector(dx: right ? -1 : 1, dy: 0.3)
+        return true
     }
 
     /// The tooltip went away: so does the lens, unless it is already on a new lookup.
@@ -149,6 +160,7 @@ final class CursorLens: NSObject {
         panel?.orderOut(nil)
         panel = nil
         face = nil
+        doneWaiting = nil
         enter(.following)
     }
 
@@ -288,6 +300,10 @@ final class CursorLens: NSObject {
         case .waiting:
             look = CGVector(dx: toTooltip.dx * 4, dy: toTooltip.dy * 4)
             canBlink = true
+            if t >= Self.noticeWait, let done = doneWaiting {
+                doneWaiting = nil
+                done()
+            }
         }
         if let panel { place(panel) }
         animate(face, look: look, height: height, canBlink: canBlink, now: now, dt: dt, ease: ease)
