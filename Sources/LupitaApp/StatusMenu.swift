@@ -12,10 +12,40 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         self.store = store
         self.onHotkeyChange = onHotkeyChange
         super.init()
-        item.button?.image = NSImage(systemSymbolName: "number.square", accessibilityDescription: S.appName)
+        item.button?.image = Self.icon()
         let menu = NSMenu()
         menu.delegate = self
         item.menu = menu
+    }
+
+    /// Lupita looking slightly down-left, at the screen below (D17): the lens drawing of
+    /// `LensFace` without the disc, as an 18 pt template image so it follows the menu bar's
+    /// colour. Stroke and eyes are a little heavier than the lens's so they hold at this size.
+    private static func icon() -> NSImage {
+        let image = NSImage(size: NSSize(width: 18, height: 18), flipped: true) { rect in
+            guard let cg = NSGraphicsContext.current?.cgContext else { return false }
+            // The drawing spans -42...56 units on both axes: centre that box in the image.
+            let scale = rect.width / 100
+            cg.translateBy(x: rect.midX - 7 * scale, y: rect.midY - 7 * scale)
+            cg.scaleBy(x: scale, y: scale)
+            let ring = NSBezierPath(ovalIn: NSRect(x: -38, y: -38, width: 76, height: 76))
+            let handle = NSBezierPath()
+            handle.move(to: NSPoint(x: 28, y: 28))
+            handle.line(to: NSPoint(x: 52, y: 52))
+            NSColor.black.set()
+            for path in [ring, handle] {
+                path.lineWidth = 9
+                path.lineCapStyle = .round
+                path.stroke()
+            }
+            for cx: CGFloat in [-10, 10] {
+                NSBezierPath(roundedRect: NSRect(x: cx - 5.5 - 6, y: -12 + 5, width: 11, height: 24), xRadius: 5.5, yRadius: 5.5).fill()
+            }
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = S.appName
+        return image
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
