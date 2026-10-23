@@ -1,3 +1,5 @@
+<img src="docs/brand/lupita.svg" width="80" alt="Lupita: una lupa con dos ojos de píldora">
+
 # Lupita
 
 **Tu agente dice `D23`, `L04`, `E2-S4`. Lupita te dice qué significan.**

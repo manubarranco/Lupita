@@ -1,3 +1,5 @@
+<img src="docs/brand/lupita.svg" width="80" alt="Lupita: a magnifying glass with two pill eyes">
+
 # Lupita
 
 **Your agent says `D23`, `L04`, `E2-S4`. Lupita tells you what they mean.**
