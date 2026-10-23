@@ -35,13 +35,22 @@ All eye changes ease (about 0.2-0.3 per frame towards the target), never snap.
 
 Sticks below-right of the pointer as today, eyes straight ahead, no blinking, no easing.
 
-## Phase 2 (not approved yet)
+## After the shortcut fires (D18)
 
-Reactions to the lookup result: reading (eyes sweep side to side, 1.6 s), found (small hop
-and a blink, 1.2 s), not found (looks left, right, then narrows, 1.6 s). They are in the
-prototype's buttons. Open question: today the lens hides when the shortcut is released and
-the lookup runs after that, so these need the lens to stay on screen until the tooltip or
-the "not known" answer appears. That changes behaviour, not only looks.
+Approved by Manu on 2026-10-24. The lens stays on screen after the shortcut is released:
+
+| Moment | Gesture | Ends |
+|---|---|---|
+| Searching | Narrowed eyes on the word, the string no longer pulls | When the answer is on screen (gives up after 5 s) |
+| Found | On top of the tooltip, which shows at once: eyes stretch, a 6 pt hop, a blink | 0.4 s |
+| Not found | Looks left, right, left, then narrows | 1.1 s |
+| Moving | Glides to the tooltip's right side (left if it does not fit), eyes on the tooltip | On arrival |
+| Reading | Sweeps the lines, one line lower every 0.9 s (found only) | 2.7 s |
+| Waiting | Looks at the tooltip, blinks | When the tooltip closes: closes its eyes and goes |
+
+Pressing the shortcut again picks the same lens back up. With Reduce Motion none of this
+happens: the lens goes when the shortcut is released, as before. The prototype's three
+phase 2 buttons are an earlier take on this; the table wins.
 
 ## Check
 

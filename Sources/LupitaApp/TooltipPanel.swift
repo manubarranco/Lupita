@@ -8,6 +8,10 @@ final class TooltipPanel {
     private var panel: NSPanel?
     private var monitors: [Any] = []
     private var dismissTask: Task<Void, Never>?
+    /// Called when a shown tooltip or notice goes away, whatever closed it.
+    var onClose: (() -> Void)?
+    /// Where the tooltip or notice is on screen, while it is shown.
+    var frame: NSRect? { panel?.frame }
 
     func show(_ resolution: Resolution, at mouse: NSPoint) {
         present(TooltipView(resolution: resolution, open: { [weak self] d in
@@ -24,8 +28,10 @@ final class TooltipPanel {
         dismissTask?.cancel()
         monitors.forEach(NSEvent.removeMonitor)
         monitors = []
-        panel?.orderOut(nil)
-        panel = nil
+        guard let panel else { return }
+        panel.orderOut(nil)
+        self.panel = nil
+        onClose?()
     }
 
     private func present<V: View>(_ view: V, at mouse: NSPoint, autoDismiss: TimeInterval?) {
