@@ -1,6 +1,8 @@
 # Lupita
 
-**Point at `D23` in any app, press a shortcut, see what D23 means.**
+**Your agent says `D23`, `L04`, `E2-S4`. Lupita tells you what they mean.**
+
+Point at any reference, in any app, press a shortcut, and read its definition from your repos.
 
 Coding agents (Claude Code, Cursor, Devin, Copilot…) keep their memory in Markdown files
 and cite it by ID: *"as decided in D23, and pending Q07, I applied L34"*. The agent knows
@@ -9,6 +11,8 @@ of the reference under your pointer, in any app: an agent chat, an editor, a ter
 browser.
 
 ![Lupita demo: pointing at D003 in an agent chat shows its definition](docs/demo.gif)
+
+**[⬇ Download Lupita for macOS](https://github.com/manubarranco/lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 or later)
 
 [Leer en español](README.es.md)
 

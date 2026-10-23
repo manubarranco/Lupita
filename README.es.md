@@ -1,6 +1,8 @@
 # Lupita
 
-**Apunta a `D23` en cualquier app, pulsa un atajo y ve qué es D23.**
+**Tu agente dice `D23`, `L04`, `E2-S4`. Lupita te dice qué significan.**
+
+Apunta a cualquier referencia, en cualquier app, pulsa un atajo y lee su definición en tus repos.
 
 Los agentes de código (Claude Code, Cursor, Devin, Copilot…) guardan su memoria en archivos
 Markdown y la citan por ID: *"como se decidió en D23, y a la espera de Q07, he aplicado
@@ -9,6 +11,8 @@ macOS que te enseña la definición de la referencia que tienes bajo el ratón, 
 app: un chat con un agente, un editor, una terminal, el navegador.
 
 ![Demo de Lupita: al apuntar a D003 en un chat con un agente aparece su definición](docs/demo.gif)
+
+**[⬇ Descarga Lupita para macOS](https://github.com/manubarranco/lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 o posterior)
 
 [Read in English](README.md)
 
