@@ -1,7 +1,7 @@
 import Foundation
 
-/// References that are not IDs but point at something in a repo: a commit, a branch, a file
-/// or an agent command (D19). Looked up on demand, never indexed: git and the disk are always
+/// References that are not IDs but point at something in a repo: the repo itself, a commit,
+/// a branch, a file or an agent command (D19). Looked up on demand, never indexed: git and the disk are always
 /// current, so there is nothing to keep fresh.
 public enum RepoRefs {
     /// `e455cf7`, `749e5fd9f2af`: 7-40 lowercase hex characters, at least one digit and one letter.
@@ -31,7 +31,9 @@ public enum RepoRefs {
         }
 
         var defs: [Definition] = []
-        if matches(command, text) {
+        if let named = repos.first(where: { $0.name.caseInsensitiveCompare(text) == .orderedSame }) {
+            defs = [repoInfo(named)]
+        } else if matches(command, text) {
             defs = commands(String(text.dropFirst()), repos: ordered)
         } else if matches(sha, text) {
             defs = commits(text, repos: ordered)
@@ -51,10 +53,36 @@ public enum RepoRefs {
             // `nib/CLAUDE.md` says which repo it means: that is not "another repo". Nor is a
             // commit or branch: it lives in one repo only, so there is no local meaning to confuse.
             let named = text.lowercased().hasPrefix(first.repo.lowercased() + "/")
-            let unique = first.rule == .commit || first.rule == .branch
+            let unique = first.rule == .commit || first.rule == .branch || first.rule == .repo
             r.fromOtherRepo = !named && !unique && first.repo.caseInsensitiveCompare(preferredRepo) != .orderedSame
         }
         return r
+    }
+
+    // MARK: - Repos
+
+    /// The repo's own description (README, then CLAUDE.md or AGENTS.md) and where it stands.
+    static func repoInfo(_ repo: Repo) -> Definition {
+        let docs = ["README.md", "CLAUDE.md", "AGENTS.md"].compactMap { name -> (String, String?)? in
+            guard let head = readHead((repo.path as NSString).appendingPathComponent(name)) else { return nil }
+            let (title, summary) = markdownHead(head)
+            return title.map { ($0, summary) }
+        }
+        var state: [String] = []
+        if let branch = Git.output(repo.path, ["branch", "--show-current"])?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !branch.isEmpty {
+            state.append(S.onBranch(branch))
+        }
+        if let date = Git.output(repo.path, ["log", "-1", "--format=%ad", "--date=short"])?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !date.isEmpty {
+            state.append(S.lastCommit(date))
+        }
+        if let changes = Git.lines(repo.path, ["status", "--porcelain"]), !changes.isEmpty {
+            state.append(S.uncommitted(changes.count))
+        }
+        let summary = [state.joined(separator: " · "), docs.first?.1 ?? ""].filter { !$0.isEmpty }.joined(separator: "\n")
+        return Definition(id: repo.name, key: repo.path, repo: repo.name, path: "", line: 0, rule: .repo,
+                          title: docs.first?.0 ?? S.kindRepo, summary: summary, absolutePath: repo.path)
     }
 
     // MARK: - Commits

@@ -35,6 +35,11 @@ public enum S {
     }
 
     // MARK: Repo references (D19)
+    public static var kindRepo: String { t("repo", "repo") }
+    public static func onBranch(_ branch: String) -> String { t("On \(branch)", "En \(branch)") }
+    public static func uncommitted(_ n: Int) -> String {
+        t("\(n) uncommitted \(n == 1 ? "change" : "changes")", "\(n) \(n == 1 ? "cambio" : "cambios") sin commitear")
+    }
     public static var kindCommit: String { t("commit", "commit") }
     public static var kindBranch: String { t("branch", "rama") }
     public static var kindFile: String { t("file", "archivo") }
@@ -61,6 +66,7 @@ public enum S {
         t("Folder · \(items) \(items == 1 ? "item" : "items")", "Carpeta · \(items) \(items == 1 ? "elemento" : "elementos")")
     }
     public static var openOnGitHub: String { t("Open on GitHub", "Abrir en GitHub") }
+    public static var openFolder: String { t("Open the repo folder", "Abrir la carpeta del repo") }
     public static var showFolder: String { t("Show the repo folder", "Mostrar la carpeta del repo") }
 
     // MARK: Menu

@@ -57,6 +57,21 @@ import Testing
         #expect(d?.line == 5)
     }
 
+    @Test func repoNameShowsItsReadmeAndState() throws {
+        try "# Atlas\n\nMaps for agents.\n".write(to: URL(fileURLWithPath: repo.path + "/README.md"), atomically: true, encoding: .utf8)
+        let r = RepoRefs.resolve("Atlas", repos: [repo], preferredRepo: "other")
+        let d = r?.definitions.first
+        #expect(d?.rule == .repo)
+        #expect(d?.title == "Atlas")
+        #expect(d?.summary.hasSuffix("Maps for agents.") == true)
+        #expect(r?.fromOtherRepo == false)
+        if Git.executable != nil {
+            #expect(d?.summary.hasPrefix(S.onBranch("main")) == true)
+            #expect(d?.summary.contains(S.uncommitted(1)) == true)
+        }
+        #expect(resolve("atla") == nil)
+    }
+
     @Test func pathNamingTheRepoFindsIt() {
         let r = RepoRefs.resolve("atlas/docs/decisions.md", repos: [repo], preferredRepo: "other")
         #expect(r?.definitions.first?.path == "docs/decisions.md")

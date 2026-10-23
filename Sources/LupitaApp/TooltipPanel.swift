@@ -100,6 +100,8 @@ enum FileOpener {
         let workspace = NSWorkspace.shared
         if let link = d.openURL, let url = URL(string: link) {
             workspace.open(url)
+        } else if d.rule == .repo {
+            workspace.open(URL(fileURLWithPath: d.absolutePath))
         } else if d.rule == .commit || d.rule == .branch {
             workspace.activateFileViewerSelecting([URL(fileURLWithPath: d.absolutePath)])
         } else if workspace.urlForApplication(withBundleIdentifier: "com.microsoft.VSCode") != nil,
@@ -183,6 +185,7 @@ struct TooltipView: View {
 
     static func kind(_ rule: DefinitionRule) -> String? {
         switch rule {
+        case .repo: S.kindRepo
         case .commit: S.kindCommit
         case .branch: S.kindBranch
         case .file: S.kindFile
@@ -194,7 +197,7 @@ struct TooltipView: View {
     /// `path:line` under an ID or a file; nothing for commits and branches (the repo says it all).
     static func location(_ d: Definition) -> String? {
         switch d.rule {
-        case .commit, .branch: nil
+        case .repo, .commit, .branch: nil
         case .command: d.path
         case .file: d.line > 1 ? "\(d.path):\(d.line)" : d.path
         default: "\(d.path):\(d.line)"
@@ -203,6 +206,7 @@ struct TooltipView: View {
 
     static func help(_ d: Definition) -> String {
         if d.openURL != nil { return S.openOnGitHub }
+        if d.rule == .repo { return S.openFolder }
         if d.rule == .commit || d.rule == .branch { return S.showFolder }
         return S.openAt(d.path, line: max(d.line, 1))
     }

@@ -54,6 +54,7 @@ point, so they are never stale:
 
 | You point at | The tooltip shows |
 |---|---|
+| A repo name (`atlas`) | Its README title and first line, current branch, last commit and uncommitted changes |
 | A commit (`e455cf7`) | Its message, date, and whether it is in `main`. Click: the commit on GitHub |
 | A branch (`fix/search`) | Its last commit and how far ahead of `main` it is, or, if deleted, the merge that closed it |
 | A file (`docs/decisions.md:12`) | Its title and first line (Markdown) or its last change. Click: opens it at the line |

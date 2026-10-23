@@ -99,7 +99,7 @@ The "not known" notice closes 2 s after the lens reaches its side (3.5 s without
 Sequence in docs/lens-behavior.md. Approved by Manu, 2026-10-24.
 
 ## D19 — Commits, branches, files and commands are looked up on demand, not indexed
-Besides defined IDs, the tooltip resolves what agents cite from git and disk: a commit SHA, a
+Besides defined IDs, the tooltip resolves what agents cite from git and disk: a repo name, a commit SHA, a
 branch, a file path (`docs/a.md:12`) and a Claude Code command or skill (`/retro`). They are
 looked up when the user points, never indexed, so there is nothing to keep fresh and the
 `.claude` folders stay out of the index. Why: in 80 real agent sessions these were ~570
