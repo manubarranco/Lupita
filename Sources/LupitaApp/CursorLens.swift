@@ -2,46 +2,11 @@ import AppKit
 import SwiftUI
 import LupitaCore
 
-/// How the lens follows the pointer while the chord is held. Feels to compare by eye.
-enum LensStyle: String, CaseIterable {
-    case smooth, elastic, looseElastic, off
-
-    static let defaultsKey = "lens"
-    static var current: LensStyle {
-        get { UserDefaults.standard.string(forKey: defaultsKey).flatMap(LensStyle.init) ?? .elastic }
-        set { UserDefaults.standard.set(newValue.rawValue, forKey: defaultsKey) }
-    }
-
-    var label: String {
-        switch self {
-        case .smooth: S.lensSmooth
-        case .elastic: S.lensElastic
-        case .looseElastic: S.lensLooseElastic
-        case .off: S.lensOff
-        }
-    }
-
-    var motion: LensMotion? {
-        switch self {
-        // Springs to a fixed spot below-right of the pointer, ~0.12 s, no overshoot.
-        case .smooth: .follow(stiffness: 600, dampingRatio: 0.85)
-        // Tied to the pointer by a loose elastic string: it starts late, and when the pointer
-        // stops it swings past to the other side and back until it rests a string away.
-        case .elastic: .tether(length: 34, stiffness: 70, drag: 3.2)
-        case .looseElastic: .tether(length: 40, stiffness: 35, drag: 2.6)
-        case .off: nil
-        }
-    }
-}
-
-enum LensMotion {
-    case follow(stiffness: CGFloat, dampingRatio: CGFloat)
-    case tether(length: CGFloat, stiffness: CGFloat, drag: CGFloat)
-}
-
 /// A magnifying glass that trails the pointer while the shortcut is held: "I'm following you,
-/// I'll look wherever you say". Click-through, never takes focus. With Reduce Motion it sticks
-/// to the pointer instead of trailing.
+/// I'll look wherever you say". It is tied to the pointer by a loose elastic string: it starts
+/// late, and when the pointer stops it swings past to the other side and back until it rests a
+/// string away, off the word being pointed at. Click-through, never takes focus, never in the
+/// OCR capture (own windows are excluded). With Reduce Motion it sticks below-right instead.
 @MainActor
 final class CursorLens: NSObject {
     private static let size: CGFloat = 30
@@ -49,8 +14,17 @@ final class CursorLens: NSObject {
     private static let offset = CGVector(dx: 24, dy: -22)
     /// Waits this long before showing, so ⌃⌥⌘+key shortcuts of other apps do not flash it.
     private static let delay: Duration = .milliseconds(150)
-    /// The string never stretches beyond this, however fast the pointer goes.
+    /// The string: rest length, pull when taut, air drag. Never stretches beyond `maxDistance`.
+    private static let length: CGFloat = 40
+    private static let stiffness: CGFloat = 35
+    private static let drag: CGFloat = 2.6
     private static let maxDistance: CGFloat = 180
+
+    static let defaultsKey = "lens"
+    static var isOn: Bool {
+        get { UserDefaults.standard.object(forKey: defaultsKey) as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: defaultsKey) }
+    }
 
     private var panel: NSPanel?
     private var link: CADisplayLink?
@@ -60,7 +34,7 @@ final class CursorLens: NSObject {
     private var lastTick: CFTimeInterval = 0
 
     func begin() {
-        guard LensStyle.current != .off else { return }
+        guard Self.isOn else { return }
         showTask?.cancel()
         showTask = Task { [weak self] in
             try? await Task.sleep(for: Self.delay)
@@ -102,42 +76,31 @@ final class CursorLens: NSObject {
         self.link = link
     }
 
-    /// One physics step per frame (semi-implicit Euler).
+    /// One step of the string per frame (semi-implicit Euler).
     @objc private func tick(_ link: CADisplayLink) {
         guard let panel else { return }
         let dt = lastTick == 0 ? link.duration : min(link.timestamp - lastTick, 1.0 / 30)
         lastTick = link.timestamp
-        let motion = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion ? nil : LensStyle.current.motion
-        switch motion {
-        case nil:
+        let pointer = NSEvent.mouseLocation
+        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else {
             position = badge()
-        case let .follow(stiffness, dampingRatio)?:
-            let goal = badge()
-            let damping = 2 * dampingRatio * stiffness.squareRoot()
-            step(force: CGVector(dx: stiffness * (goal.x - position.x) - damping * velocity.dx,
-                                 dy: stiffness * (goal.y - position.y) - damping * velocity.dy), dt: dt)
-        case let .tether(length, stiffness, drag)?:
-            let pointer = NSEvent.mouseLocation
-            let d = CGVector(dx: position.x - pointer.x, dy: position.y - pointer.y)
-            let r = max(hypot(d.dx, d.dy), 0.001)
-            // Taut, the string pulls; slack, a softer push keeps the lens off the pointer tip.
-            let pull = stiffness * (r - length) / r * (r > length ? 1 : 0.5)
-            step(force: CGVector(dx: -pull * d.dx - drag * velocity.dx,
-                                 dy: -pull * d.dy - drag * velocity.dy), dt: dt)
-            let nr = hypot(position.x - pointer.x, position.y - pointer.y)
-            if nr > Self.maxDistance {
-                let k = Self.maxDistance / nr
-                position = CGPoint(x: pointer.x + (position.x - pointer.x) * k, y: pointer.y + (position.y - pointer.y) * k)
-            }
+            place(panel)
+            return
         }
-        place(panel)
-    }
-
-    private func step(force: CGVector, dt: CGFloat) {
-        velocity.dx += force.dx * dt
-        velocity.dy += force.dy * dt
+        let d = CGVector(dx: position.x - pointer.x, dy: position.y - pointer.y)
+        let r = max(hypot(d.dx, d.dy), 0.001)
+        // Taut, the string pulls; slack, a softer push keeps the lens off the pointer tip.
+        let pull = Self.stiffness * (r - Self.length) / r * (r > Self.length ? 1 : 0.5)
+        velocity.dx += (-pull * d.dx - Self.drag * velocity.dx) * dt
+        velocity.dy += (-pull * d.dy - Self.drag * velocity.dy) * dt
         position.x += velocity.dx * dt
         position.y += velocity.dy * dt
+        let nr = hypot(position.x - pointer.x, position.y - pointer.y)
+        if nr > Self.maxDistance {
+            let k = Self.maxDistance / nr
+            position = CGPoint(x: pointer.x + (position.x - pointer.x) * k, y: pointer.y + (position.y - pointer.y) * k)
+        }
+        place(panel)
     }
 
     private func badge() -> CGPoint {
