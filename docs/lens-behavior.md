@@ -49,7 +49,9 @@ Approved by Manu on 2026-10-24. The lens stays on screen after the shortcut is r
 | Waiting | Looks at the tooltip, blinks | When the tooltip closes: closes its eyes and goes |
 
 Pressing the shortcut again picks the same lens back up. With Reduce Motion none of this
-happens: the lens goes when the shortcut is released, as before. The prototype's three
+happens: the lens goes when the shortcut is released, as before. The "not known" notice
+stays until a click or Esc, like the tooltip: closing on its own after 1.5 s, it went before
+it could be read, with the lens covering it for most of that time. The prototype's three
 phase 2 buttons are an earlier take on this; the table wins.
 
 ## Check

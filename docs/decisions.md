@@ -95,4 +95,5 @@ about 42 pt so the eyes read. Spec and prototype in docs/lens-behavior.md. Appro
 After the shortcut fires the lens searches with narrowed eyes, reacts on top of the tooltip
 (found: hop and blink; not found: looks around), moves to the tooltip's side, reads it, and
 leaves when it closes. The tooltip shows at once: the reaction never delays the answer.
+The "not known" notice no longer closes on its own: it stays until a click or Esc.
 Sequence in docs/lens-behavior.md. Approved by Manu, 2026-10-24.

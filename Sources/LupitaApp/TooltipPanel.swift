@@ -21,7 +21,8 @@ final class TooltipPanel {
     }
 
     func showNotice(_ text: String, at mouse: NSPoint) {
-        present(NoticeView(text: text), at: mouse, autoDismiss: 1.5)
+        // Stays until a click, Esc or the next lookup, like a tooltip: 1.5 s was too short to read.
+        present(NoticeView(text: text), at: mouse, autoDismiss: nil)
     }
 
     func close() {
