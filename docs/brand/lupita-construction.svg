@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 300" width="560" height="300" role="img"><title>Lupita construction</title><style>
+  .ink { fill: none; stroke: #1f1f1d; stroke-width: 8; stroke-linecap: round; }
+  .eye { fill: #1f1f1d; }
+  .disc { fill: #ffffff; }
+  .label { fill: #6b6a65; font: 11px -apple-system, system-ui, sans-serif; }
+  @media (prefers-color-scheme: dark) {
+    .ink { stroke: #f0efe9; } .eye { fill: #f0efe9; } .disc { fill: #31312e; } .label { fill: #a3a29b; }
+  }
+</style><g transform="translate(150 150) scale(2.2)"><rect x="-42" y="-42" width="98" height="98" fill="none" stroke="#c8c6bd" stroke-width="0.4" stroke-dasharray="2 2"/><line x1="-50" y1="0" x2="60" y2="0" stroke="#c8c6bd" stroke-width="0.4"/><line x1="0" y1="-50" x2="0" y2="60" stroke="#c8c6bd" stroke-width="0.4"/><circle class="disc" r="38"/><circle class="ink" r="38"/><line class="ink" x1="28" y1="28" x2="52" y2="52"/><rect class="eye" x="-14" y="-11" width="10" height="22" rx="5"/><rect class="eye" x="4" y="-11" width="10" height="22" rx="5"/></g><text class="label" x="300" y="80">Box: 98 × 98 units, ring centre at (0, 0)</text><text class="label" x="300" y="106">Ring: radius 38, stroke 8, round caps</text><text class="label" x="300" y="132">Handle: (28, 28) → (52, 52), stroke 8</text><text class="label" x="300" y="158">Eyes: 10 × 22, fully rounded, centres x = ±9</text><text class="label" x="300" y="184">Lens on screen: scale 0.42 (≈ 42 pt)</text><text class="label" x="300" y="210">Icon: stroke 9, eyes 11 × 24 at ±10, 18 pt</text></svg>
