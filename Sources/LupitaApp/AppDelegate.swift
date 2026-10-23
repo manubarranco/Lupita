@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             HotkeyChoice.current = choice
             self?.installTrigger()
         }
+        tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
         // Dev aid: `lupita poke` does what ⌃⌥R does, for automated checks that cannot press keys.
         DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
@@ -47,8 +48,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let start = Date()
         let mouse = NSEvent.mouseLocation  // bottom-left origin
         let point = Screen.topLeft(mouse)  // what AX and ScreenCaptureKit use
+        lens.keep()
         guard let resolver = store.resolver else {
-            tooltip.showNotice(S.indexingTryAgain, at: mouse)
+            notice(S.indexingTryAgain, at: mouse)
             return
         }
         let context = ActiveContext.at(point, resolver: resolver)
@@ -100,11 +102,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             switch result?.kind {
             case .exact?, .corrected?, .ambiguous?:
                 tooltip.show(result!, at: mouse)
+                lens.react(found: true, near: tooltip.frame)
             default:
-                tooltip.showNotice(S.notAReference, at: mouse)
+                notice(S.notAReference, at: mouse)
             }
         }
         TriggerLog.append(app: app, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
+    }
+
+    /// With the lens beside it, the notice closes 2 s after the lens gets there (D18); without
+    /// the lens, after about the same time.
+    private func notice(_ text: String, at mouse: NSPoint) {
+        tooltip.showNotice(text, at: mouse)
+        let reacting = lens.react(found: false, near: tooltip.frame) { [weak self] in self?.tooltip.close() }
+        if !reacting { tooltip.close(after: 3.5) }
     }
 
     /// Dev aid: resolve a given text without reading the screen (`lupita poke --query D001 --repo atlas`).

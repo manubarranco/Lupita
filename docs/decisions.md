@@ -90,3 +90,10 @@ pointer, rest facing forward, narrow when the string is taut and blink. No mouth
 size it turns to a smudge, and the eyes alone keep it apart from Copilot's face. It grows to
 about 42 pt so the eyes read. Spec and prototype in docs/lens-behavior.md. Approved by Manu,
 2026-10-24; reactions to the lookup result are not approved yet.
+
+## D18 — The lens stays until the tooltip closes
+After the shortcut fires the lens searches with narrowed eyes, reacts on top of the tooltip
+(found: hop and blink; not found: looks around), moves to the tooltip's side, reads it, and
+leaves when it closes. The tooltip shows at once: the reaction never delays the answer.
+The "not known" notice closes 2 s after the lens reaches its side (3.5 s without the lens).
+Sequence in docs/lens-behavior.md. Approved by Manu, 2026-10-24.

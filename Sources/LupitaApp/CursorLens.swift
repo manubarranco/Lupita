@@ -9,6 +9,8 @@ import LupitaCore
 ///
 /// It is Lupita's character (D17, docs/lens-behavior.md): two pill eyes that look at the
 /// pointer while it follows, face forward at rest, narrow when the string is taut, and blink.
+/// After the shortcut fires it stays: it searches, reacts to the result on top of the
+/// tooltip, moves to the tooltip's side, reads it, and leaves when the tooltip closes (D18).
 @MainActor
 final class CursorLens: NSObject {
     /// The panel: the ring is about 35 pt across, about 42 pt with the handle.
@@ -28,6 +30,10 @@ final class CursorLens: NSObject {
     private static let restSpeed: CGFloat = 18
     private static let restAfter: CFTimeInterval = 0.35
     private static let fade: CFTimeInterval = 0.12
+    /// Gives up if a lookup never answers.
+    private static let searchTimeout: Duration = .seconds(5)
+
+    private enum Phase { case following, searching, found, notFound, moving, reading, waiting }
 
     static let defaultsKey = "lens"
     static var isOn: Bool {
@@ -46,15 +52,30 @@ final class CursorLens: NSObject {
     private var still: CFTimeInterval = 0
     private var blink: CGFloat = 0
     private var nextBlink: CFTimeInterval = 0
+    private var phase = Phase.following
+    private var phaseTime: CFTimeInterval = 0
+    private var blinked = false
+    private var hop: CGFloat = 0
+    private var found = false
+    /// Beside the tooltip, and the way the eyes turn to look at it (flipped: y grows down).
+    private var target = CGPoint.zero
+    private var toTooltip = CGVector.zero
+    private var timeoutTask: Task<Void, Never>?
+    /// For a "not known" notice: closes it once the lens has waited beside it.
+    private var doneWaiting: (() -> Void)?
+    private static let noticeWait: CFTimeInterval = 2
 
     func begin() {
         guard Self.isOn else { return }
-        if hideTask != nil, let panel, let face {
-            // Released and pressed again while closing: open the eyes again, same lens.
-            hideTask?.cancel()
-            hideTask = nil
-            face.openTarget = 1
-            NSAnimationContext.runAnimationGroup { $0.duration = Self.fade; panel.animator().alphaValue = 1 }
+        if panel != nil {
+            // Pressed again while closing or beside a tooltip: the same lens follows again. A
+            // notice it was waiting beside closes now, or nothing would close it.
+            let done = doneWaiting
+            doneWaiting = nil
+            enter(.following)
+            done?()
+            reopen()
+            velocity = .zero
             return
         }
         showTask?.cancel()
@@ -64,10 +85,65 @@ final class CursorLens: NSObject {
         }
     }
 
-    /// Closes the eyes while it fades out, then goes.
+    /// The shortcut is up. If it fired, `keep()` follows at once and the lens stays.
     func end() {
         showTask?.cancel()
         showTask = nil
+        if phase == .following { close() }
+    }
+
+    /// The shortcut fired a lookup: stay and search until `react` (not with Reduce Motion).
+    func keep() {
+        guard panel != nil, !reduceMotion else { return }
+        reopen()
+        enter(.searching)
+        timeoutTask?.cancel()
+        timeoutTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.searchTimeout)
+            if !Task.isCancelled, self?.phase == .searching { self?.close() }
+        }
+    }
+
+    /// The answer is on screen in `frame`: react on top of it, then move to its side. Not
+    /// found, `done` runs after waiting beside it. false: no lens is reacting.
+    @discardableResult
+    func react(found: Bool, near frame: NSRect?, done: (() -> Void)? = nil) -> Bool {
+        guard phase == .searching, let panel else { return false }
+        doneWaiting = found ? nil : done
+        timeoutTask?.cancel()
+        self.found = found
+        enter(found ? .found : .notFound)
+        panel.orderFrontRegardless()
+        let frame = frame ?? NSRect(origin: position, size: .zero)
+        let bounds = (NSScreen.screens.first { $0.frame.intersects(frame) } ?? NSScreen.main)?.visibleFrame ?? .infinite
+        let right = frame.maxX + 26 + Self.size / 2 < bounds.maxX
+        target = CGPoint(x: right ? frame.maxX + 26 : frame.minX - 26, y: frame.maxY - 24)
+        toTooltip = CGVector(dx: right ? -1 : 1, dy: 0.3)
+        return true
+    }
+
+    /// The tooltip went away: so does the lens, unless it is already on a new lookup.
+    func tooltipClosed() {
+        if [.found, .notFound, .moving, .reading, .waiting].contains(phase) { close() }
+    }
+
+    private func enter(_ next: Phase) {
+        phase = next
+        phaseTime = 0
+        blinked = false
+    }
+
+    private func reopen() {
+        hideTask?.cancel()
+        hideTask = nil
+        guard let panel, let face else { return }
+        face.openTarget = 1
+        NSAnimationContext.runAnimationGroup { $0.duration = Self.fade; panel.animator().alphaValue = 1 }
+    }
+
+    /// Closes the eyes while it fades out, then goes.
+    private func close() {
+        timeoutTask?.cancel()
         guard let panel, hideTask == nil else { return }
         face?.openTarget = 0
         NSAnimationContext.runAnimationGroup { $0.duration = Self.fade; panel.animator().alphaValue = 0 }
@@ -84,6 +160,8 @@ final class CursorLens: NSObject {
         panel?.orderOut(nil)
         panel = nil
         face = nil
+        doneWaiting = nil
+        enter(.following)
     }
 
     private func show() {
@@ -103,6 +181,8 @@ final class CursorLens: NSObject {
         still = 0
         blink = 0
         nextBlink = 0
+        hop = 0
+        enter(.following)
         face.openTarget = 1
         if reduceMotion { face.open = 1 }
         place(panel)
@@ -137,6 +217,13 @@ final class CursorLens: NSObject {
             face.needsDisplay = true
             return
         }
+        // Ease towards a value: the prototype's per-frame factors, made frame-rate independent.
+        func ease(_ k: CGFloat) -> CGFloat { 1 - pow(1 - k, CGFloat(dt) * 60) }
+        phaseTime += dt
+        if phase != .following {
+            afterLookup(face, pointer: pointer, now: now, dt: CGFloat(dt), ease: ease)
+            return
+        }
         let d = CGVector(dx: position.x - pointer.x, dy: position.y - pointer.y)
         let r = max(hypot(d.dx, d.dy), 0.001)
         // Taut, the string pulls; slack, a softer push keeps the lens off the pointer tip.
@@ -166,20 +253,76 @@ final class CursorLens: NSObject {
             height = 20
         }
 
-        // Ease towards it: the prototype's per-frame factors, made frame-rate independent.
-        func ease(_ k: CGFloat) -> CGFloat { 1 - pow(1 - k, CGFloat(dt) * 60) }
+        animate(face, look: look, height: height, canBlink: !focused, now: now, dt: CGFloat(dt), ease: ease)
+    }
+
+    /// The sequence after the shortcut fired (D18). The string no longer pulls: the lens stays
+    /// where it was, then glides to the tooltip's side.
+    private func afterLookup(_ face: LensFace, pointer: CGPoint, now: CFTimeInterval, dt: CGFloat,
+                             ease: (CGFloat) -> CGFloat) {
+        let t = phaseTime
+        var look = CGVector.zero, height = LensFace.eyeHeight, canBlink = false
+        hop = 0
+        switch phase {
+        case .following:
+            return
+        case .searching:
+            // Narrowed eyes on the word being read.
+            let r = max(hypot(pointer.x - position.x, pointer.y - position.y), 0.001)
+            look = CGVector(dx: (pointer.x - position.x) / r * 5, dy: -(pointer.y - position.y) / r * 5 + 3)
+            height = 7
+        case .found:
+            // A hop and a blink on top of the tooltip.
+            height = t < 0.18 ? 28 : LensFace.eyeHeight
+            hop = t < 0.25 ? sin(t / 0.25 * .pi) * 6 : 0
+            if t >= 0.3, !blinked { blink = 1; blinked = true }
+            if t >= 0.4 { enter(.moving) }
+        case .notFound:
+            // Looks left, right, left, then narrows.
+            let side: CGFloat = t < 0.3 ? -1 : t < 0.6 ? 1 : t < 0.85 ? -1 : 0
+            look = CGVector(dx: side * 7, dy: 0)
+            height = t > 0.85 ? 14 : LensFace.eyeHeight
+            if t >= 1.1 { enter(.moving) }
+        case .moving:
+            position.x += (target.x - position.x) * ease(0.18)
+            position.y += (target.y - position.y) * ease(0.18)
+            look = CGVector(dx: toTooltip.dx * 7, dy: toTooltip.dy * 7)
+            height = 20
+            if hypot(target.x - position.x, target.y - position.y) < 1 {
+                position = target
+                enter(found ? .reading : .waiting)  // only a found answer has text to read
+            }
+        case .reading:
+            // Sweeps along the lines, one line lower every 0.9 s.
+            look = CGVector(dx: toTooltip.dx * 3 + sin(t * 7) * 5, dy: 2 + CGFloat(Int(t / 0.9) % 3) * 2)
+            height = 18
+            if t >= 2.7 { enter(.waiting) }
+        case .waiting:
+            look = CGVector(dx: toTooltip.dx * 4, dy: toTooltip.dy * 4)
+            canBlink = true
+            if t >= Self.noticeWait, let done = doneWaiting {
+                doneWaiting = nil
+                done()
+            }
+        }
+        if let panel { place(panel) }
+        animate(face, look: look, height: height, canBlink: canBlink, now: now, dt: dt, ease: ease)
+    }
+
+    private func animate(_ face: LensFace, look: CGVector, height: CGFloat, canBlink: Bool,
+                         now: CFTimeInterval, dt: CGFloat, ease: (CGFloat) -> CGFloat) {
         face.look.dx += (look.dx - face.look.dx) * ease(0.2)
         face.look.dy += (look.dy - face.look.dy) * ease(0.2)
         face.height += (height - face.height) * ease(0.3)
         face.open += (face.openTarget - face.open) * ease(0.25)
 
         if nextBlink == 0 { nextBlink = now + .random(in: 2.2...5.2) }
-        if !focused, now > nextBlink {
+        if canBlink, now > nextBlink {
             blink = 1
             nextBlink = now + .random(in: 2.2...5.2)
         }
         face.blink = blink > 0 ? max(0.08, 1 - sin(min(blink, 1) * .pi)) : 1
-        blink = max(0, blink - CGFloat(dt) / 0.15)
+        blink = max(0, blink - dt / 0.15)
         face.needsDisplay = true
     }
 
@@ -189,7 +332,7 @@ final class CursorLens: NSObject {
     }
 
     private func place(_ panel: NSPanel) {
-        panel.setFrameOrigin(NSPoint(x: position.x - Self.size / 2, y: position.y - Self.size / 2))
+        panel.setFrameOrigin(NSPoint(x: position.x - Self.size / 2, y: position.y + hop - Self.size / 2))
     }
 }
 
