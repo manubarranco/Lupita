@@ -63,11 +63,16 @@ final class ModifierChord: Trigger {
     private static let relevant: NSEvent.ModifierFlags = [.control, .option, .command, .shift, .function]
     private let target: NSEvent.ModifierFlags
     private let action: () -> Void
-    private var armed = false
+    /// true when the full chord is down, false when it fires or is cancelled (drives the lens).
+    private let hold: (Bool) -> Void
+    private var armed = false {
+        didSet { if armed != oldValue { hold(armed) } }
+    }
     private var monitors: [Any] = []
 
-    init(_ target: NSEvent.ModifierFlags, action: @escaping () -> Void) {
+    init(_ target: NSEvent.ModifierFlags, hold: @escaping (Bool) -> Void, action: @escaping () -> Void) {
         self.target = target
+        self.hold = hold
         self.action = action
         let flags: (NSEvent) -> Void = { [weak self] e in MainActor.assumeIsolated { self?.flagsChanged(e) } }
         let key: (NSEvent) -> Void = { [weak self] _ in MainActor.assumeIsolated { self?.armed = false } }
@@ -84,8 +89,9 @@ final class ModifierChord: Trigger {
         if flags == target {
             armed = true
         } else if flags.isEmpty {
-            if armed { action() }
+            let fire = armed
             armed = false
+            if fire { action() }
         } else if !target.isSuperset(of: flags) {
             armed = false  // an extra modifier (e.g. ⇧) joined: not our chord
         }
@@ -93,10 +99,10 @@ final class ModifierChord: Trigger {
 }
 
 @MainActor
-func makeTrigger(_ choice: HotkeyChoice, action: @escaping () -> Void) -> Trigger {
+func makeTrigger(_ choice: HotkeyChoice, hold: @escaping (Bool) -> Void, action: @escaping () -> Void) -> Trigger {
     switch choice {
-    case .controlOptionCommand: ModifierChord([.control, .option, .command], action: action)
-    case .fnControlOption: ModifierChord([.function, .control, .option], action: action)
+    case .controlOptionCommand: ModifierChord([.control, .option, .command], hold: hold, action: action)
+    case .fnControlOption: ModifierChord([.function, .control, .option], hold: hold, action: action)
     case .controlOptionR: Hotkey(keyCode: UInt32(kVK_ANSI_R), modifiers: UInt32(controlKey | optionKey), action: action)
     }
 }

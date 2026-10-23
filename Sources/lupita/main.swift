@@ -42,8 +42,10 @@ case "index":
 case "poke":
     // Asks the running app to look up the ID under the mouse, as if the hotkey was pressed.
     // With --query, it resolves that text instead (logged, not shown): `lupita poke --query D001 --repo atlas`.
+    // With --lens, it shows the lens for that many seconds instead, as if the chord was held.
     args.removeFirst()
     var info: [String: String] = [:]
+    if let lens = take("--lens", &args) { info["lens"] = lens }
     if let query = take("--query", &args) { info["query"] = query }
     if let repo = take("--repo", &args) { info["repo"] = repo }
     DistributedNotificationCenter.default().postNotificationName(

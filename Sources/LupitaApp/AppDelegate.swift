@@ -5,6 +5,7 @@ import LupitaCore
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let store = IndexStore()
     let tooltip = TooltipPanel()
+    let lens = CursorLens()
     var menu: StatusMenu?
     var trigger: Trigger?
     private var inFlight = false
@@ -19,8 +20,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
+            let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
             MainActor.assumeIsolated {
-                if let query { self?.lookUp(query: query, repo: repo) } else { self?.lookUp() }
+                if let lens {
+                    self?.lens.begin()
+                    Task { try? await Task.sleep(for: .seconds(lens)); self?.lens.end() }
+                } else if let query { self?.lookUp(query: query, repo: repo) } else { self?.lookUp() }
             }
         }
         store.rebuild()
@@ -29,7 +34,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func installTrigger() {
         trigger = nil
-        trigger = makeTrigger(HotkeyChoice.current) { [weak self] in self?.lookUp() }
+        lens.end()
+        trigger = makeTrigger(HotkeyChoice.current, hold: { [weak self] down in
+            if down { self?.lens.begin() } else { self?.lens.end() }
+        }) { [weak self] in self?.lookUp() }
     }
 
     /// Hotkey pressed: read the text under the cursor, resolve it, show the tooltip.

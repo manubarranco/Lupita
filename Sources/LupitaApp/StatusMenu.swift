@@ -31,6 +31,15 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         shortcut.submenu = choices
         menu.addItem(shortcut)
+        let lens = NSMenuItem(title: S.lens, action: nil, keyEquivalent: "")
+        let styles = NSMenu()
+        for style in LensStyle.allCases {
+            let item = action(style.label, #selector(chooseLens(_:)), represented: style.rawValue)
+            item.state = style == LensStyle.current ? .on : .off
+            styles.addItem(item)
+        }
+        lens.submenu = styles
+        menu.addItem(lens)
         menu.addItem(.separator())
 
         menu.addItem(disabled(S.folders))
@@ -89,6 +98,11 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     @objc private func chooseHotkey(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String, let choice = HotkeyChoice(rawValue: raw) else { return }
         onHotkeyChange(choice)
+    }
+
+    @objc private func chooseLens(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String, let style = LensStyle(rawValue: raw) else { return }
+        LensStyle.current = style
     }
 
     @objc private func openPane(_ sender: NSMenuItem) {
