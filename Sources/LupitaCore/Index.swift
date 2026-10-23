@@ -13,6 +13,8 @@ public struct Definition: Codable, Hashable, Sendable {
     public let summary: String
     /// Absolute path, for "click to open".
     public let absolutePath: String
+    /// Where a click goes instead of `absolutePath`: a commit or branch on GitHub (D19).
+    public var openURL: String? = nil
 }
 
 public struct Mentions: Codable, Sendable {

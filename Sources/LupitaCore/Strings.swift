@@ -34,6 +34,41 @@ public enum S {
         t("Open \(path) at line \(line)", "Abrir \(path) en la línea \(line)")
     }
 
+    // MARK: Repo references (D19)
+    public static var kindRepo: String { t("repo", "repo") }
+    public static func onBranch(_ branch: String) -> String { t("On \(branch)", "En \(branch)") }
+    public static func uncommitted(_ n: Int) -> String {
+        t("\(n) uncommitted \(n == 1 ? "change" : "changes")", "\(n) \(n == 1 ? "cambio" : "cambios") sin commitear")
+    }
+    public static var kindCommit: String { t("commit", "commit") }
+    public static var kindBranch: String { t("branch", "rama") }
+    public static var kindFile: String { t("file", "archivo") }
+    public static var kindCommand: String { t("command", "comando") }
+    public static func inBranch(_ main: String) -> String { t("in \(main)", "en \(main)") }
+    public static func onlyInBranch(_ branch: String) -> String { t("only in \(branch)", "solo en \(branch)") }
+    public static var inNoBranch: String { t("in no branch", "en ninguna rama") }
+    public static func lastCommit(_ date: String) -> String { t("Last commit \(date)", "Último commit \(date)") }
+    public static func mergedInto(_ main: String) -> String { t("merged into \(main)", "fusionada en \(main)") }
+    public static func ahead(_ n: Int, of main: String) -> String {
+        t("\(n) \(n == 1 ? "commit" : "commits") ahead of \(main)", "\(n) \(n == 1 ? "commit" : "commits") por delante de \(main)")
+    }
+    public static var branchDeleted: String { t("Deleted branch", "Rama borrada") }
+    public static func branchMergedOn(_ date: String, _ subject: String) -> String {
+        t("Merged \(date): \(subject)", "Fusionada el \(date): \(subject)")
+    }
+    public static func branchCitedIn(_ date: String, _ subject: String) -> String {
+        t("Named in a commit of \(date): \(subject)", "Citada en un commit del \(date): \(subject)")
+    }
+    public static func lastChange(_ date: String, _ subject: String) -> String {
+        t("Last change \(date): \(subject)", "Último cambio \(date): \(subject)")
+    }
+    public static func folder(_ items: Int) -> String {
+        t("Folder · \(items) \(items == 1 ? "item" : "items")", "Carpeta · \(items) \(items == 1 ? "elemento" : "elementos")")
+    }
+    public static var openOnGitHub: String { t("Open on GitHub", "Abrir en GitHub") }
+    public static var openFolder: String { t("Open the repo folder", "Abrir la carpeta del repo") }
+    public static var showFolder: String { t("Show the repo folder", "Mostrar la carpeta del repo") }
+
     // MARK: Menu
     public static var noIndex: String { t("No index", "Sin índice") }
     public static func summary(ids: Int, repos: Int, files: Int) -> String {

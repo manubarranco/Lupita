@@ -47,6 +47,21 @@ ID escrito hace unos segundos se encuentra igualmente.
 Todo lo demás es una mención. Las secciones *sobre* un ID (`## D34 parte 2`) y las etiquetas
 de prioridad (`## P1`) se reconocen y no estorban.
 
+### Más allá de los IDs: commits, ramas, archivos y comandos
+
+Los agentes también citan cosas que viven en git y en el disco. Lupita las busca en el momento
+en que las señalas, así que nunca están desactualizadas:
+
+| Señalas | La ficha muestra |
+|---|---|
+| Un nombre de repo (`atlas`) | El título y la primera línea de su README, la rama actual, el último commit y los cambios sin commitear |
+| Un commit (`e455cf7`) | Su mensaje, la fecha y si está en `main`. Clic: el commit en GitHub |
+| Una rama (`fix/search`) | Su último commit y cuánto va por delante de `main`, o, si se borró, el merge que la cerró |
+| Un archivo (`docs/decisions.md:12`) | Su título y primera línea (Markdown) o su último cambio. Clic: lo abre en la línea |
+| Un comando (`/retro`) | Su descripción, de `.claude/commands` o `.claude/skills`, en el repo o en `~/.claude` |
+
+Commits y ramas necesitan git (las Command Line Tools); sin ellas, simplemente no se reconocen.
+
 ### Qué repo, cuando los IDs coinciden
 
 `D001` suele existir en todos los repos. Lupita elige el bueno por este orden: un repo nombrado
@@ -105,7 +120,8 @@ de **Firma de código** llamado `Lupita Dev` y `scripts/bundle.sh` lo usará.
 - Los IDs muy cortos leídos por OCR (`D5` a partir de "DS") se muestran como sugerencia,
   "¿Querías decir D5?", nunca como respuesta.
 - Un ID citado de otro repo sin nombrarlo se resuelve con el del repo local.
-- Solo se indexan archivos Markdown.
+- Solo se indexan archivos Markdown para los IDs. Archivos, commits y ramas se buscan al momento.
+- Una rama borrada solo se encuentra si algún mensaje de commit la nombra (un merge suele hacerlo).
 
 ## Herramientas parecidas
 

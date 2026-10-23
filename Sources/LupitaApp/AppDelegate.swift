@@ -22,11 +22,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
+            let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
                 if let lens {
                     self?.lens.begin()
                     Task { try? await Task.sleep(for: .seconds(lens)); self?.lens.end() }
-                } else if let query { self?.lookUp(query: query, repo: repo) } else { self?.lookUp() }
+                } else if let query {
+                    self?.lookUp(query: query, repo: repo, at: at.flatMap { $0.count == 2 ? NSPoint(x: $0[0], y: $0[1]) : nil })
+                } else { self?.lookUp() }
             }
         }
         store.rebuild()
@@ -119,12 +122,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     /// Dev aid: resolve a given text without reading the screen (`lupita poke --query D001 --repo atlas`).
-    func lookUp(query: String, repo: String?) {
+    /// With `at` (`--at 400,600`, Cocoa screen points) the tooltip is shown there, for screenshots.
+    func lookUp(query: String, repo: String?, at point: NSPoint? = nil) {
         guard let resolver = store.resolver else { return }
         var context = ActiveContext()
         context.repo = repo
         context.bundleID = "poke"
-        show(resolver.resolve(query, preferredRepo: repo), at: nil, method: "query", start: Date(), context: context)
+        show(resolver.resolve(query, preferredRepo: repo), at: point, method: "query", start: Date(), context: context)
     }
 }
 

@@ -47,6 +47,21 @@ ID that was written seconds ago is found anyway.
 Everything else is a mention. Sections *about* an ID (`## D34 part 2`) and priority labels
 (`## P1`) are recognised and kept out of the way.
 
+### Beyond IDs: commits, branches, files and commands
+
+Agents also cite things that live in git and on disk. Lupita looks them up at the moment you
+point, so they are never stale:
+
+| You point at | The tooltip shows |
+|---|---|
+| A repo name (`atlas`) | Its README title and first line, current branch, last commit and uncommitted changes |
+| A commit (`e455cf7`) | Its message, date, and whether it is in `main`. Click: the commit on GitHub |
+| A branch (`fix/search`) | Its last commit and how far ahead of `main` it is, or, if deleted, the merge that closed it |
+| A file (`docs/decisions.md:12`) | Its title and first line (Markdown) or its last change. Click: opens it at the line |
+| A command (`/retro`) | Its description, from `.claude/commands` or `.claude/skills`, in the repo or in `~/.claude` |
+
+Commits and branches need git (the Command Line Tools); without it they are simply not recognised.
+
 ### Which repo, when IDs collide
 
 `D001` usually exists in every repo. Lupita picks the right one by, in order: a repo named
@@ -105,7 +120,8 @@ signed with a stable certificate: create a self-signed **Code Signing** certific
 - Very short IDs read by OCR (`D5` from "DS") are shown as a suggestion, "Did you mean D5?",
   never as the answer.
 - An ID cited from another repo without naming it resolves to the local one.
-- Only Markdown files are indexed.
+- Only Markdown files are indexed for IDs. Files, commits and branches are looked up on demand.
+- A deleted branch is found only if a commit message names it (a merge usually does).
 
 ## Similar tools
 
