@@ -48,9 +48,11 @@ public enum RepoRefs {
         var r = Resolution(query: text, kind: .exact, key: first.key, definitions: Array(defs.prefix(5)),
                            mentions: nil, alternatives: [])
         if let preferredRepo, repos.contains(where: { $0.name == first.repo }) {
-            // `nib/CLAUDE.md` says which repo it means: that is not "another repo".
+            // `nib/CLAUDE.md` says which repo it means: that is not "another repo". Nor is a
+            // commit or branch: it lives in one repo only, so there is no local meaning to confuse.
             let named = text.lowercased().hasPrefix(first.repo.lowercased() + "/")
-            r.fromOtherRepo = !named && first.repo.caseInsensitiveCompare(preferredRepo) != .orderedSame
+            let unique = first.rule == .commit || first.rule == .branch
+            r.fromOtherRepo = !named && !unique && first.repo.caseInsensitiveCompare(preferredRepo) != .orderedSame
         }
         return r
     }

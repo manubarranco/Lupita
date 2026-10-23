@@ -92,6 +92,8 @@ import Testing
         #expect(d?.rule == .branch)
         #expect(d?.title == "feat: search box")
         #expect(d?.summary.hasSuffix(S.ahead(1, of: "main")) == true)
+        // A branch lives in one repo: never flagged as "from another repo".
+        #expect(RepoRefs.resolve("feature/search", repos: [repo], preferredRepo: "other")?.fromOtherRepo == false)
     }
 
     @Test func deletedBranchFoundInItsMergeCommit() throws {
