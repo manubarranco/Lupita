@@ -31,6 +31,9 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         shortcut.submenu = choices
         menu.addItem(shortcut)
+        let lens = action(S.lens, #selector(toggleLens))
+        lens.state = CursorLens.isOn ? .on : .off
+        menu.addItem(lens)
         menu.addItem(.separator())
 
         menu.addItem(disabled(S.folders))
@@ -90,6 +93,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         guard let raw = sender.representedObject as? String, let choice = HotkeyChoice(rawValue: raw) else { return }
         onHotkeyChange(choice)
     }
+
+    @objc private func toggleLens() { CursorLens.isOn.toggle() }
 
     @objc private func openPane(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String, let pane = Permissions.Pane(rawValue: raw) else { return }

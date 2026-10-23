@@ -48,6 +48,7 @@ public enum S {
         t("Shortcut: \(keys) with the pointer on an ID", "Atajo: \(keys) con el ratón sobre un ID")
     }
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
+    public static var lens: String { t("Lens while holding", "Lupa al mantener") }
     public static var folders: String { t("Folders", "Carpetas") }
     public static var remove: String { t("Remove", "Quitar") }
     public static var addFolder: String { t("Add folder…", "Añadir carpeta…") }
