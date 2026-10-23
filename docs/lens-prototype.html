@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lupita lens prototype</title>
+<style>
+:root { --bg: #f5f4ef; --stage: #ebe9e2; --ink: #1f1f1d; --muted: #8a8983; --disc: #ffffff; }
+@media (prefers-color-scheme: dark) { :root { --bg: #1b1b1a; --stage: #262624; --ink: #f0efe9; --muted: #77766f; --disc: #31312e; } }
+body { margin: 0; padding: 24px 16px; background: var(--bg); color: var(--ink); font: 14px/1.5 -apple-system, system-ui, sans-serif; }
+main { max-width: 680px; margin: 0 auto; }
+#stage { position: relative; height: 380px; background: var(--stage); border-radius: 12px; overflow: hidden; touch-action: none; }
+.hint { position: absolute; left: 16px; font-size: 13px; color: var(--muted); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+button { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--muted); border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+<div id="stage">
+  <div class="hint" style="top:12px">Move the pointer in here. Move fast and stop to stretch the string.</div>
+  <div class="hint" style="bottom:12px">State: <span id="st" style="color:var(--ink)">outside</span></div>
+  <svg width="100%" height="100%" style="position:absolute;inset:0">
+    <line id="band" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>
+    <g id="lens" opacity="0" fill="none" stroke="var(--ink)" stroke-width="8" stroke-linecap="round">
+      <circle r="38" fill="var(--disc)"/>
+      <line x1="28" y1="28" x2="52" y2="52"/>
+      <rect id="eL" fill="var(--ink)" stroke="none"/>
+      <rect id="eR" fill="var(--ink)" stroke="none"/>
+    </g>
+  </svg>
+</div>
+<div class="controls">
+  <span>Phase 2, after the shortcut is released:</span>
+  <button data-a="reading">Reading</button><button data-a="found">Found</button><button data-a="none">Not found</button>
+  <label style="margin-left:auto"><input type="checkbox" id="showBand" checked> show the string</label>
+</div>
+</main>
+<script>
+// Same string as CursorLens.swift: rest length, stiffness, drag, max distance (points).
+const S = 0.42, LEN = 40, K = 35, DRAG = 2.6, MAX = 180, TENSE = 0.62 * MAX;
+const $ = id => document.getElementById(id);
+const stage = $('stage'), lens = $('lens'), eL = $('eL'), eR = $('eR'), st = $('st'), band = $('band'), showBand = $('showBand');
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let inside = false, ptr = {x: 0, y: 0}, pos = {x: 0, y: 0}, vel = {x: 0, y: 0}, last = 0, still = 0;
+let open = 0, openT = 0, look = {x: 0, y: 0}, h = 22, blinkAt = 0, blink = 0, action = null, actT = 0, hop = 0, mode = 'outside';
+
+const nextBlink = t => { blinkAt = t + 2200 + Math.random() * 3000; };
+const rel = e => { const r = stage.getBoundingClientRect(); return {x: e.clientX - r.left, y: e.clientY - r.top}; };
+const lerp = (a, b, k) => a + (b - a) * k;
+const enter = p => { ptr = p; pos = {x: p.x + 24, y: p.y + 22}; vel = {x: 0, y: 0}; inside = true; openT = 1; };
+
+stage.addEventListener('pointerenter', e => { enter(rel(e)); action = null; });
+stage.addEventListener('pointermove', e => { ptr = rel(e); });
+stage.addEventListener('pointerleave', () => { inside = false; openT = 0; });
+document.querySelectorAll('button[data-a]').forEach(b => b.onclick = () => {
+  action = b.dataset.a; actT = 0;
+  if (!inside) { const r = stage.getBoundingClientRect(); enter({x: r.width / 2, y: r.height / 2}); }
+});
+
+function frame(t) {
+  const dt = last ? Math.min((t - last) / 1000, 1 / 30) : 1 / 60;
+  last = t;
+  if (!blinkAt) nextBlink(t);
+
+  // The string (semi-implicit Euler), as in the app.
+  let r = 0, speed = 0;
+  if (inside && !action) {
+    if (RM) pos = {x: ptr.x + 24, y: ptr.y + 22};
+    else {
+      const dx = pos.x - ptr.x, dy = pos.y - ptr.y;
+      r = Math.max(Math.hypot(dx, dy), 0.001);
+      const pull = K * (r - LEN) / r * (r > LEN ? 1 : 0.5);
+      vel.x += (-pull * dx - DRAG * vel.x) * dt;
+      vel.y += (-pull * dy - DRAG * vel.y) * dt;
+      pos.x += vel.x * dt; pos.y += vel.y * dt;
+      const nr = Math.hypot(pos.x - ptr.x, pos.y - ptr.y);
+      if (nr > MAX) { const k = MAX / nr; pos.x = ptr.x + (pos.x - ptr.x) * k; pos.y = ptr.y + (pos.y - ptr.y) * k; }
+      r = Math.hypot(pos.x - ptr.x, pos.y - ptr.y);
+    }
+    speed = Math.hypot(vel.x, vel.y);
+  }
+
+  // Where the eyes want to be: look offset and eye height, in lens units.
+  let tl = {x: 0, y: 0}, th = 22;
+  if (!inside) mode = 'outside';
+  else if (action) {
+    actT += dt; const a = actT;
+    if (action === 'reading') { mode = 'reading'; tl = {x: Math.sin(a * 9) * 6, y: 4}; th = 18; if (a > 1.6) action = null; }
+    else if (action === 'found') {
+      mode = 'found'; th = a < 0.18 ? 28 : 22;
+      hop = a < 0.25 ? -Math.sin(a / 0.25 * Math.PI) * 6 : 0;
+      if (a > 0.35 && a < 0.5) blink = 1;
+      if (a > 1.2) { action = null; hop = 0; }
+    } else {
+      mode = 'not found'; const p = a < 0.35 ? -1 : a < 0.7 ? 1 : a < 1.0 ? -1 : 0;
+      tl = {x: p * 7, y: 0}; th = a > 1.0 ? 14 : 22; if (a > 1.6) action = null;
+    }
+  } else if (RM) mode = 'resting (reduced motion)';
+  else {
+    still = speed < 18 ? still + dt : 0;
+    const ux = (ptr.x - pos.x) / (r || 1), uy = (ptr.y - pos.y) / (r || 1);
+    if (r > TENSE) { mode = 'focused'; tl = {x: ux * 5, y: uy * 5 + 3}; th = 7; }
+    else if (still > 0.35) { mode = 'resting, facing forward'; th = 22; }
+    else { mode = 'following'; tl = {x: ux * 7, y: uy * 7}; th = 20; }
+  }
+
+  open = lerp(open, openT, RM ? 1 : 0.25);
+  look.x = lerp(look.x, tl.x, 0.2); look.y = lerp(look.y, tl.y, 0.2); h = lerp(h, th, 0.3);
+  if (!RM && inside && !action && mode !== 'focused' && t > blinkAt) { blink = 1; nextBlink(t); }
+  const bk = blink > 0 ? Math.max(0.08, 1 - Math.sin(Math.min(blink, 1) * Math.PI)) : 1;
+  if (blink > 0) blink = Math.max(0, blink - dt / 0.15);
+
+  const eh = Math.max(1.5, h * bk * open), w = 10;
+  for (const [el, cx] of [[eL, -9], [eR, 9]]) {
+    el.setAttribute('x', cx - w / 2 + look.x); el.setAttribute('y', -eh / 2 + look.y);
+    el.setAttribute('width', w); el.setAttribute('height', eh); el.setAttribute('rx', Math.min(5, eh / 2));
+  }
+  lens.setAttribute('opacity', open.toFixed(2));
+  lens.setAttribute('transform', `translate(${pos.x.toFixed(1)},${(pos.y + hop).toFixed(1)}) scale(${S})`);
+  band.setAttribute('x1', ptr.x); band.setAttribute('y1', ptr.y); band.setAttribute('x2', pos.x); band.setAttribute('y2', pos.y);
+  band.setAttribute('opacity', inside && showBand.checked && !action ? (0.3 + 0.7 * Math.min(r / MAX, 1)).toFixed(2) : 0);
+  st.textContent = mode;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

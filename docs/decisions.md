@@ -83,3 +83,10 @@ lookup finds an ID-shaped token that nothing defines, the window's repo is resca
 before saying "not known" (34-90 ms per repo measured; skipped when a repo costs > 300 ms).
 Why: ripgrep is not on macOS and bundling it adds weight, licensing and signing; the
 existing indexer gives the same answer. Approved with the step 4 plan, 2026-10-22.
+
+## D17 — The lens is a character: pill eyes, no mouth, bigger
+The cursor lens becomes Lupita's character: a magnifier with two pill eyes that follow the
+pointer, rest facing forward, narrow when the string is taut and blink. No mouth: at lens
+size it turns to a smudge, and the eyes alone keep it apart from Copilot's face. It grows to
+about 42 pt so the eyes read. Spec and prototype in docs/lens-behavior.md. Approved by Manu,
+2026-10-24; reactions to the lookup result are not approved yet.
