@@ -85,7 +85,7 @@ public enum S {
     }
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
     public static var lens: String { t("Show Lupita", "Mostrar a Lupita") }
-    public static var folders: String { t("Folders", "Carpetas") }
+    public static var folders: String { t("Folders to search", "Carpetas de búsqueda") }
     public static var permissions: String { t("Permissions", "Permisos") }
     /// The question around the folder path, which the alert draws in its own style.
     public static var removeFolderAround: (before: String, after: String) {
