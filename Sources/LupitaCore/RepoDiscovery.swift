@@ -13,7 +13,8 @@ public enum RepoDiscovery {
         "archive", "archived", "vendor",
     ]
 
-    public static func repos(under roots: [String]) -> [Repo] {
+    /// `excluding`: repo paths the user switched off; they are found but left out.
+    public static func repos(under roots: [String], excluding: Set<String> = []) -> [Repo] {
         var found: [Repo] = []
         for root in roots {
             // Real paths: FSEvents reports them, and relative paths need them.
@@ -25,7 +26,7 @@ public enum RepoDiscovery {
                 found.append(Repo(name: url.lastPathComponent, path: url.path))
             }
         }
-        return found
+        return excluding.isEmpty ? found : found.filter { !excluding.contains($0.path) }
     }
 
     /// Folders where people usually keep their repos, relative to the home folder.

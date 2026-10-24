@@ -37,6 +37,35 @@ final class IndexStore {
         set { UserDefaults.standard.set(newValue, forKey: defaultsKey); rebuild() }
     }
 
+    /// Folders and repos the user switched off (D28): kept in the list, left out of the index.
+    var disabledRoots: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "disabledRoots") ?? []) }
+        set { UserDefaults.standard.set(newValue.sorted(), forKey: "disabledRoots") }
+    }
+    var disabledRepos: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "disabledRepos") ?? []) }
+        set { UserDefaults.standard.set(newValue.sorted(), forKey: "disabledRepos") }
+    }
+    private var activeRoots: [String] { roots.filter { !disabledRoots.contains($0) } }
+
+    func setRoot(_ root: String, enabled: Bool) {
+        if enabled { disabledRoots.remove(root) } else { disabledRoots.insert(root) }
+        rebuild()
+    }
+
+    func setRepo(_ path: String, enabled: Bool) {
+        if enabled { disabledRepos.remove(path) } else { disabledRepos.insert(path) }
+        rebuild()
+    }
+
+    /// Forgets a folder and what was switched off inside it.
+    func removeRoot(_ root: String) {
+        let base = RepoDiscovery.realPath((root as NSString).expandingTildeInPath)
+        disabledRoots.remove(root)
+        disabledRepos = disabledRepos.filter { $0 != base && !$0.hasPrefix(base + "/") }
+        roots = roots.filter { $0 != root }
+    }
+
     var summary: String {
         guard let index else { return isBuilding ? S.indexing : S.noIndex }
         return S.summary(ids: index.definitions.count, repos: index.repos.count, files: index.fileCount)
@@ -50,13 +79,13 @@ final class IndexStore {
     /// Full build from the roots, and (re)start watching them.
     func rebuild() {
         isBuilding = true
-        onChange?()
-        let roots = self.roots
+        notify()
+        let roots = activeRoots, excluding = disabledRepos
         watcher.watch(roots)
         Task.detached(priority: .utility) {
-            let index = RefIndex.build(roots: roots)
+            let index = RefIndex.build(roots: roots, excluding: excluding)
             await self.install(index)
-            await MainActor.run { self.isBuilding = false; self.onChange?() }
+            await MainActor.run { self.isBuilding = false; self.notify() }
         }
     }
 
@@ -95,12 +124,12 @@ final class IndexStore {
     private func drain() {
         guard !running, var index, rediscoverQueued || !queued.isEmpty else { return }
         running = true
-        let repos = Array(queued.values), rediscover = rediscoverQueued, roots = self.roots
+        let repos = Array(queued.values), rediscover = rediscoverQueued, roots = activeRoots, excluding = disabledRepos
         queued = [:]
         rediscoverQueued = false
         Task.detached(priority: .utility) {
             var costs: [String: Duration] = [:]
-            if rediscover { index.sync(repos: RepoDiscovery.repos(under: roots)) }
+            if rediscover { index.sync(repos: RepoDiscovery.repos(under: roots, excluding: excluding)) }
             for repo in repos where index.repos.contains(repo) {
                 let start = ContinuousClock.now
                 index.rebuild(repo: repo)
@@ -115,11 +144,17 @@ final class IndexStore {
         }
     }
 
+    static let changed = Notification.Name("LupitaIndexChanged")
+    private func notify() {
+        onChange?()
+        NotificationCenter.default.post(name: Self.changed, object: self)
+    }
+
     private func install(_ index: RefIndex) {
         self.index = index
         resolver = Resolver(index: index)
         updatedAt = Date()
-        onChange?()
+        notify()
     }
 }
 

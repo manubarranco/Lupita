@@ -18,6 +18,7 @@ final class Watcher {
 
     func watch(_ roots: [String]) {
         stop()
+        guard !roots.isEmpty else { return }  // every folder switched off
         let paths = roots.map { RepoDiscovery.realPath(($0 as NSString).expandingTildeInPath) }
         var context = FSEventStreamContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(),
                                            retain: nil, release: nil, copyDescription: nil)

@@ -86,6 +86,8 @@ public enum S {
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
     public static var lens: String { t("Lens while holding", "Lupa al mantener") }
     public static var folders: String { t("Folders", "Carpetas") }
+    public static var permissions: String { t("Permissions", "Permisos") }
+    public static var expand: String { t("Show repos", "Mostrar repos") }
     public static var remove: String { t("Remove", "Quitar") }
     public static var addFolder: String { t("Add folder…", "Añadir carpeta…") }
     public static var add: String { t("Add", "Añadir") }

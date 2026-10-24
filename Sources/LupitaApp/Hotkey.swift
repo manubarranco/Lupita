@@ -5,7 +5,7 @@ import Carbon.HIToolbox
 /// The shortcut that triggers a lookup. Modifier-only chords fire on release, and only if no
 /// other key was pressed meanwhile, so ⌃⌥⌘+key shortcuts of other apps keep working.
 enum HotkeyChoice: String, CaseIterable {
-    case controlOptionCommand, fnControlOption, controlOptionR
+    case controlOptionCommand, fnControlOption
 
     static let defaultsKey = "hotkey"
     static var current: HotkeyChoice {
@@ -17,7 +17,6 @@ enum HotkeyChoice: String, CaseIterable {
         switch self {
         case .controlOptionCommand: "⌃⌥⌘ (\(S.pressAndRelease))"
         case .fnControlOption: "fn⌃⌥ (\(S.pressAndRelease))"
-        case .controlOptionR: "⌃⌥R"
         }
     }
 
@@ -25,7 +24,6 @@ enum HotkeyChoice: String, CaseIterable {
         switch self {
         case .controlOptionCommand: "⌃⌥⌘"
         case .fnControlOption: "fn⌃⌥"
-        case .controlOptionR: "⌃⌥R"
         }
     }
 }
@@ -103,6 +101,5 @@ func makeTrigger(_ choice: HotkeyChoice, hold: @escaping (Bool) -> Void, action:
     switch choice {
     case .controlOptionCommand: ModifierChord([.control, .option, .command], hold: hold, action: action)
     case .fnControlOption: ModifierChord([.function, .control, .option], hold: hold, action: action)
-    case .controlOptionR: Hotkey(keyCode: UInt32(kVK_ANSI_R), modifiers: UInt32(controlKey | optionKey), action: action)
     }
 }
