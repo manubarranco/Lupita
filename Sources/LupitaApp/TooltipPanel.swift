@@ -12,8 +12,13 @@ final class TooltipPanel {
     var onClose: (() -> Void)?
     /// Where the tooltip or notice is on screen, while it is shown.
     var frame: NSRect? { panel?.frame }
+    /// The tooltip's own window number, so a lookup on top of it can read it.
+    var windowID: CGWindowID? { panel.map { CGWindowID($0.windowNumber) } }
+    /// The answer on screen, if it is a tooltip (not a notice).
+    private(set) var resolution: Resolution?
 
     func show(_ resolution: Resolution, at mouse: NSPoint) {
+        defer { self.resolution = resolution }
         present(TooltipView(resolution: resolution, open: { [weak self] d in
             self?.close()
             FileOpener.open(d)
@@ -37,6 +42,7 @@ final class TooltipPanel {
         dismissTask?.cancel()
         monitors.forEach(NSEvent.removeMonitor)
         monitors = []
+        resolution = nil
         guard let panel else { return }
         panel.orderOut(nil)
         self.panel = nil

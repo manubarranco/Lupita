@@ -10,14 +10,15 @@ enum OCR {
 
     /// - Parameter point: cursor in global top-left coordinates.
     /// - Returns: recognised words with boxes in the same coordinates.
-    static func words(around point: CGPoint) async throws -> [OCRWord] {
+    /// - Parameter keeping: one of our own windows to read anyway (the tooltip, to look up what it cites).
+    static func words(around point: CGPoint, keeping: CGWindowID? = nil) async throws -> [OCRWord] {
         guard CGPreflightScreenCaptureAccess() else { return [] }
         let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
         guard let display = content.displays.first(where: { $0.frame.contains(point) }) else { return [] }
 
         let rect = CGRect(x: point.x - strip.width / 2, y: point.y - strip.height / 2,
                           width: strip.width, height: strip.height).intersection(display.frame)
-        let ownWindows = content.windows.filter { $0.owningApplication?.processID == ProcessInfo.processInfo.processIdentifier }
+        let ownWindows = content.windows.filter { $0.owningApplication?.processID == ProcessInfo.processInfo.processIdentifier && $0.windowID != keeping }
         let filter = SCContentFilter(display: display, excludingWindows: ownWindows)
         let config = SCStreamConfiguration()
         config.sourceRect = rect.offsetBy(dx: -display.frame.minX, dy: -display.frame.minY)

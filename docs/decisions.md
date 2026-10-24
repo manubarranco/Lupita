@@ -168,3 +168,6 @@ model (Foundation Models), working only on what Lupita already found: the litera
 marked as such. A feature that needs the network ships switched off, clearly labelled, and works only after the user turns it on;
 the update check (D25) is the only network call today. The promise is in both READMEs. Why: users must be able to trust that their
 text never goes to a cloud service, and the on-device model covers the uses we foresee without one. Approved by Manu, 2026-10-24.
+
+## D27 — The tooltip can be looked up: pointing at it reads it by OCR
+With the cursor over the tooltip, the shortcut skips Accessibility, lets the OCR capture include the tooltip window (the lens stays excluded) and prefers the repo and file of the definition shown, so `answered by D006` in a `Q01` tooltip resolves in the same repo. Why: the tooltip's text is not reachable through Accessibility and OCR used to exclude every own window. Not yet validated on a real screen.

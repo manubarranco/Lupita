@@ -72,6 +72,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             notice(S.indexingTryAgain, at: mouse)
             return
         }
+        // Pointing at the tooltip itself: read it by OCR (its text is not reachable through AX) and look
+        // up in the repo and file of what it shows, so `answered by D006` resolves where Q01 lives.
+        if let shown = tooltip.resolution, let frame = tooltip.frame, frame.contains(mouse) {
+            var context = ActiveContext()
+            context.bundleID = Bundle.main.bundleIdentifier
+            context.repo = shown.definitions.first?.repo
+            context.path = shown.definitions.first?.path
+            inFlight = true
+            let keeping = tooltip.windowID
+            Task {
+                defer { inFlight = false }
+                let words = (try? await OCR.words(around: point, keeping: keeping)) ?? []
+                let result = CandidatePicker.pick(words: words, cursor: point, resolver: resolver,
+                                                  preferredRepo: context.repo, fromPath: context.path)
+                show(result, at: mouse, method: (words.isEmpty ? "none" : "ocr") + "<tooltip>",
+                     start: start, context: context)
+            }
+            return
+        }
         let context = ActiveContext.at(point, resolver: resolver)
 
         var ax = TextUnderCursor.viaAccessibility(at: point)
