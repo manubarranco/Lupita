@@ -18,7 +18,7 @@ func makeCodeRepo(_ name: String, _ files: [String: String], in parent: URL? = n
 }
 
 func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Resolution? {
-    CodeRefs.FileListCache.shared.clear()
+    CodeRefs.FileListCache.shared.clear(); CodeRefs.TableCache.shared.clear()
     return CodeRefs.resolve(text, repos: repos, preferredRepo: window)
 }
 
@@ -234,7 +234,7 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
             "a.py": "def settle_up():\n    \"\"\"Code.\"\"\"\n\ndef spine():\n    \"\"\"Code too.\"\"\"\n",
         ])
         let resolver = Resolver(index: RefIndex.build(repos: [r]))
-        CodeRefs.FileListCache.shared.clear()
+        CodeRefs.FileListCache.shared.clear(); CodeRefs.TableCache.shared.clear()
         // No code shape (a plain word): the glossary term wins.
         #expect(resolver.resolve("spine", preferredRepo: "g").definitions.first?.rule == .term)
         // Code shape (`_`, `()` or backticks): the symbol wins.
@@ -278,7 +278,7 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
     func resolve(_ text: String, listener: CodeRefs.Addresses.Listener? = nil, repos: [Repo]? = nil) -> Definition? {
         CodeRefs.Addresses.listener = { _ in listener }
         defer { CodeRefs.Addresses.listener = CodeRefs.Addresses.lsofListener }
-        CodeRefs.FileListCache.shared.clear()
+        CodeRefs.FileListCache.shared.clear(); CodeRefs.TableCache.shared.clear()
         return CodeRefs.resolve(text, repos: repos ?? [repo], preferredRepo: "atlas")?.definitions.first
     }
 
@@ -351,5 +351,127 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         index.repos = [repo]
         let r = Resolver(index: index).resolve("http://127.0.0.1:8130/mesa.html", preferredRepo: "atlas")
         #expect(r.definitions.first?.rule == .address)
+    }
+}
+
+@Suite(.serialized) struct TokenTests {
+    let repo: Repo
+
+    init() throws {
+        repo = try makeCodeRepo("site", [
+            "src/styles/tokens.css": """
+            /* Palette */
+            :root {
+              --brand: #0E5400;
+              --accent: var(--brand);
+              --ink: rgb(10, 20, 30);
+              --muted: hsl(0, 0%, 50%);
+              --space: 8px;
+              --shadow-card: 0 1px 2px rgba(0,0,0,.2);
+            }
+            @media (prefers-color-scheme: dark) {
+              :root {
+                --brand: #6BFF3F;
+                --ink: #F5F5F5;
+              }
+            }
+            """,
+            "src/theme.scss": """
+            :root { --solo: #123ABC; }
+            [data-theme="dark"] { --solo: #FEDCBA; --only-dark: #111; }
+            // line comment with --not-a-token: red;
+            """,
+            "src/Button.astro": "---\nconst x = {a: 1};\n---\n<style>\n  .b { --btn-bg: var(--accent); background: var(--btn-bg); }\n</style>\n",
+            "node_modules/pkg/x.css": ":root { --hidden: #000000; }",
+        ])
+    }
+
+    func first(_ text: String) -> Definition? {
+        CodeRefs.FileListCache.shared.clear(); CodeRefs.TableCache.shared.clear()
+        return CodeRefs.resolve(text, repos: [repo], preferredRepo: "site")?.definitions.first
+    }
+
+    @Test func aTokenShowsItsValueSwatchAndPlace() {
+        let d = first("--brand")
+        #expect(d?.rule == .token)
+        #expect(d?.path == "src/styles/tokens.css")
+        #expect(d?.line == 3)
+        #expect(d?.title.contains("#0E5400") == true)
+    }
+
+    @Test func darkAndLightValuesAreBothShown() {
+        let d = first("--brand")
+        #expect(d?.title.contains("#6BFF3F") == true)
+        #expect(d?.colors?.map(\.hex) == ["#0E5400", "#6BFF3F"])
+        #expect(d?.colors?.map(\.label) == [S.light, S.dark])
+        let solo = first("--solo")
+        #expect(solo?.colors?.map(\.hex) == ["#123ABC", "#FEDCBA"])
+        #expect(first("--only-dark")?.colors?.map(\.hex) == ["#111111"])
+    }
+
+    @Test func varChainsAreFollowedPerTheme() {
+        let d = first("var(--accent)")
+        #expect(d?.colors?.map(\.hex) == ["#0E5400", "#6BFF3F"])
+        #expect(d?.summary.contains("var(--brand)") == true)
+        let deep = first("--btn-bg")
+        #expect(deep?.colors?.first?.hex == "#0E5400")
+        #expect(deep?.path == "src/Button.astro")
+    }
+
+    @Test func fallbacksAndFunctionColours() {
+        #expect(first("var(--ink, red)")?.colors?.first?.hex == "#0A141E")
+        #expect(first("--muted")?.colors?.first?.hex == "#808080")
+        let space = first("--space")
+        #expect(space?.title == "8px")
+        #expect(space?.colors == nil)
+        #expect(first("--shadow-card")?.colors == nil)
+    }
+
+    @Test func unknownTokensAndFlagsAreNotAnswered() {
+        #expect(first("--repo") == nil)
+        #expect(first("--hidden") == nil)
+        #expect(first("--not-a-token") == nil)
+    }
+
+    @Test func aHexColourShowsASwatchAndTheTokensThatDefineIt() {
+        let d = first("#0e5400")
+        #expect(d?.rule == .color)
+        #expect(d?.id == "#0E5400")
+        #expect(d?.title == "rgb(14, 84, 0)")
+        #expect(d?.colors?.map(\.hex) == ["#0E5400"])
+        #expect(d?.summary.contains("--brand") == true)
+        #expect(d?.summary.contains("--accent") == true)
+        #expect(d?.path == "src/styles/tokens.css")
+    }
+
+    @Test func shortHexAndColoursNoTokenUses() {
+        let d = first("#abc")
+        #expect(d?.id == "#AABBCC")
+        #expect(d?.path == "")
+        #expect(first("#12") == nil)
+        #expect(first("#GGGGGG") == nil)
+        // A short hex is expanded before comparing: `--only-dark: #111` is #111111.
+        #expect(first("#111111")?.summary.contains("--only-dark") == true)
+    }
+
+    @Test func allDigitHexIsLeftToPullRequests() {
+        // `#333` could be a PR number: the PR type decides (see PullRequestTests).
+        #expect(first("#333") == nil || first("#333")?.rule != .token)
+    }
+
+    @Test func colourParsing() {
+        #expect(CodeRefs.Tokens.color(of: "rgb(255 0 0 / 50%)") == "#FF000080")
+        #expect(CodeRefs.Tokens.color(of: "rgba(0,128,255,1)") == "#0080FF")
+        #expect(CodeRefs.Tokens.color(of: "hsl(120, 100%, 25%)") == "#007F00" || CodeRefs.Tokens.color(of: "hsl(120, 100%, 25%)") == "#008000")
+        #expect(CodeRefs.Tokens.color(of: "#fff") == "#FFFFFF")
+        #expect(CodeRefs.Tokens.color(of: "1rem") == nil)
+    }
+}
+
+@Suite struct BareHSLTests {
+    @Test func shadcnComponentsAreAColour() {
+        #expect(CodeRefs.Tokens.color(of: "0 0% 100%") == "#FFFFFF")
+        #expect(CodeRefs.Tokens.color(of: "240 4.8% 95.9%") != nil)
+        #expect(CodeRefs.Tokens.color(of: "10 20 30") == nil)
     }
 }

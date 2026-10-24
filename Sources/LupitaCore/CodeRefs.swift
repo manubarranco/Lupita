@@ -29,12 +29,13 @@ public enum CodeRefs {
         // but the priority above decides what gets built and what is cut.
         defs = defs ?? Symbols.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Addresses.resolve(text, repos: ordered, preferredRepo: preferredRepo)
+        defs = defs ?? Tokens.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         guard let found = defs, let first = found.first else { return nil }
         var r = Resolution(query: text.text, kind: .exact, key: first.key, definitions: Array(found.prefix(5)),
                            mentions: nil, alternatives: [])
         if let preferredRepo, repos.contains(where: { $0.name.caseInsensitiveCompare(preferredRepo) == .orderedSame }) {
             let home = first.repo.components(separatedBy: " · ").first ?? first.repo
-            r.fromOtherRepo = first.rule == .symbol && home.caseInsensitiveCompare(preferredRepo) != .orderedSame
+            r.fromOtherRepo = (first.rule == .symbol || first.rule == .token) && home.caseInsensitiveCompare(preferredRepo) != .orderedSame
         }
         return r
     }

@@ -80,6 +80,13 @@ public enum S {
     public static func page(_ route: String) -> String { t("page \(route)", "página \(route)") }
     public static var homePage: String { t("home page", "página de inicio") }
     public static func running(pid: Int) -> String { t("running (pid \(pid))", "encendido (pid \(pid))") }
+    public static var kindToken: String { t("CSS token", "token CSS") }
+    public static var kindColor: String { t("colour", "color") }
+    public static var light: String { t("light", "claro") }
+    public static var dark: String { t("dark", "oscuro") }
+    public static func writtenAs(_ value: String) -> String { t("written as \(value)", "escrito como \(value)") }
+    public static func definedAs(_ names: String) -> String { t("defined as \(names)", "definido como \(names)") }
+    public static var noTokenUsesIt: String { t("no token has this colour", "ningún token tiene este color") }
     public static var notRunning: String { t("not running", "apagado") }
 
     // MARK: Menu

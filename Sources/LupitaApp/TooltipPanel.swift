@@ -167,6 +167,9 @@ struct TooltipView: View {
                         Text(d.title).font(.body.weight(.medium)).lineLimit(2)
                     }
                 }
+                if let colors = d.colors, !colors.isEmpty {
+                    HStack(spacing: 10) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Swatch(sample: c) } }
+                }
                 if !d.summary.isEmpty {
                     Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
                 }
@@ -204,6 +207,8 @@ struct TooltipView: View {
         case .term: S.kindTerm
         case .symbol: S.kindSymbol
         case .address: S.kindAddress
+        case .token: S.kindToken
+        case .color: S.kindColor
         default: nil
         }
     }
@@ -224,6 +229,35 @@ struct TooltipView: View {
         if d.rule == .repo { return S.openFolder }
         if d.rule == .commit || d.rule == .branch { return S.showFolder }
         return S.openAt(d.path, line: max(d.line, 1))
+    }
+}
+
+/// A colour sample (D29): a rounded square with a hairline so white and black stay visible on any tooltip background.
+struct Swatch: View {
+    let sample: ColorSample
+
+    var body: some View {
+        HStack(spacing: 5) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(hex: sample.hex))
+                .frame(width: 28, height: 18)
+                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(.primary.opacity(0.25)))
+            if !sample.label.isEmpty { Text(sample.label).font(.caption).foregroundStyle(.secondary) }
+        }
+    }
+}
+
+extension Color {
+    /// `#RRGGBB` or `#RRGGBBAA`.
+    init(hex: String) {
+        let digits = hex.dropFirst()
+        let v = UInt64(digits, radix: 16) ?? 0
+        let hasAlpha = digits.count == 8
+        let r = Double((v >> (hasAlpha ? 24 : 16)) & 255) / 255
+        let g = Double((v >> (hasAlpha ? 16 : 8)) & 255) / 255
+        let b = Double((v >> (hasAlpha ? 8 : 0)) & 255) / 255
+        let a = hasAlpha ? Double(v & 255) / 255 : 1
+        self.init(.sRGB, red: r, green: g, blue: b, opacity: a)
     }
 }
 
