@@ -174,3 +174,16 @@ With the cursor over the tooltip, the shortcut skips Accessibility, lets the OCR
 
 ## D28 — The menu has switches: lens, folders and each repo inside them
 The menu header is a view (name, stats), not disabled rows, so it keeps the full text colour. "Show Lupita" (was "Lens while holding") is a switch. Each folder has a switch (search in it or not), a trash button instead of "Remove", and a chevron that opens its repos, each with its own switch. Off means left out of the index but kept in the list, so it can be turned back on; a folder that is off locks its repos' switches without losing their state. The switches are drawn by hand because `NSSwitch` paints grey in a menu. The ⌃⌥R shortcut is gone: only ⌃⌥⌘ and fn⌃⌥ remain, and a saved ⌃⌥R falls back to ⌃⌥⌘ (a custom shortcut comes later). Validated on a real screen by Manu, 2026-10-24.
+
+## D29 — Code layer: symbols, local addresses, CSS tokens, commands, errors and PRs, in that order
+The tooltip also explains what agents cite from code, looked up on demand like D19 and never with a language model: a
+symbol (function, variable, constant) shows its own comment and where it is defined, or only where it is defined and says
+it has no comment; a local address (`localhost:8130`) shows which repo serves it, which page, and whether it is running; a
+CSS token or hex colour shows its value, a swatch and where it is defined; a terminal command shows what it does (an
+`npm run` script from the repo's `package.json`, common git and shell commands from a fixed dictionary); an error code or
+HTML tag gets one line from a fixed dictionary; a PR number (`#123`) shows the title and date of the merge that closed it,
+read from the local git history. Open PRs need the network and stay out until a switch per D26 is decided. Packages and
+components are left out: almost never cited. Why: in 150 real agent sessions symbols were ~900 citations (45 % defined in
+the user's repos, 30 % with a comment), local addresses 94, CSS tokens and colours ~120, commands ~90, errors and HTML
+~80, packages, components and PRs ~5 together; PRs are kept because Manu sees them constantly at work. Approved by Manu,
+2026-10-24.
