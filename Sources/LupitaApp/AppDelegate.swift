@@ -27,9 +27,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
             let openOnboarding = note.userInfo?["onboarding"] != nil
+            let openAbout = note.userInfo?["about"] != nil
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
-                if openOnboarding {
+                if openAbout {
+                    NSApp.activate(ignoringOtherApps: true)
+                    NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
+                } else if openOnboarding {
                     self?.onboarding?.show()
                 } else if let lens {
                     self?.lens.begin()

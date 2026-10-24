@@ -54,6 +54,8 @@ case "poke":
     if let at = take("--at", &args) { info["at"] = at }
     // With --onboarding, it opens the "Prepare your repos" window instead.
     if args.contains("--onboarding") { info["onboarding"] = "1" }
+    // With --about, the About panel.
+    if args.contains("--about") { info["about"] = "1" }
     DistributedNotificationCenter.default().postNotificationName(
         .init("com.manubarranco.lupita.lookup"), object: nil, userInfo: info.isEmpty ? nil : info, deliverImmediately: true)
 
