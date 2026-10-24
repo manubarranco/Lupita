@@ -161,10 +161,18 @@ extension CodeRefs {
             let sorted = hits.sorted { a, b in
                 (a.kind.rawValue, a.comment.isEmpty ? 1 : 0, a.indent, a.path, a.line) < (b.kind.rawValue, b.comment.isEmpty ? 1 : 0, b.indent, b.path, b.line)
             }
-            // Snapshots of a file (`engine.py`, `reference_engine_pre_x.py`) repeat the same comment: show it once.
+            // Snapshots of a file (`reference_engine_pre_x.py`, `app_old.py`, `backup/…`) only count when nothing else defines it (D37).
+            let live = sorted.filter { !isSnapshot($0.path) }
+            // Copies with the same comment show it once.
             var seen = Set<String>()
-            return sorted.filter { hit in hit.comment.isEmpty || seen.insert(hit.comment.joined(separator: "\n")).inserted }
+            return (live.isEmpty ? sorted : live).filter { hit in hit.comment.isEmpty || seen.insert(hit.comment.joined(separator: "\n")).inserted }
         }
+
+        static let snapshotName = try! NSRegularExpression(
+            pattern: #"(?:^|/)reference_[^/]*$|_pre_|_old(?:[._]|$)|_bak(?:[._]|$)|backup|[-_]copy(?:[._ ]|$)|\.orig$"#, options: [.caseInsensitive])
+
+        /// A file that looks like a frozen copy of another one.
+        static func isSnapshot(_ path: String) -> Bool { matches(snapshotName, path) }
 
         /// Byte offsets where `needle` starts in `data` (at most 200: a name that frequent is noise anyway).
         static func occurrences(of needle: Data, in data: Data) -> [Int] {

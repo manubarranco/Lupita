@@ -195,6 +195,20 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         #expect(first("ignoredBuilt()") == nil)
     }
 
+    @Test func frozenCopiesOnlyCountWhenNothingElseDefinesTheSymbol() throws {
+        let r = try makeCodeRepo("snap", [
+            "engine.py": "def shared_fn():\n    \"\"\"Live.\"\"\"\n",
+            "reference_engine_pre_x.py": "def shared_fn():\n    \"\"\"Old one.\"\"\"\n\ndef only_old():\n    \"\"\"Only here.\"\"\"\n",
+            "backup/engine.py": "def shared_fn():\n    \"\"\"Backup.\"\"\"\n",
+        ])
+        let live = resolveCode("shared_fn", [r])
+        #expect(live?.definitions.count == 1)
+        #expect(live?.definitions.first?.title == "Live.")
+        #expect(resolveCode("only_old", [r])?.definitions.first?.title == "Only here.")
+        #expect(CodeRefs.Symbols.isSnapshot("a/app_old.py"))
+        #expect(!CodeRefs.Symbols.isSnapshot("a/gold.py"))
+    }
+
     @Test func theWindowsRepoWinsAndTheOtherIsFlagged() throws {
         let other = try makeCodeRepo("other", ["x.py": "def shared_name():\n    \"\"\"Other.\"\"\"\n"])
         let mine = try makeCodeRepo("mine", ["y.py": "def shared_name():\n    \"\"\"Mine.\"\"\"\n"])
