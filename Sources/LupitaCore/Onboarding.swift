@@ -43,15 +43,25 @@ public enum Onboarding {
         }
     }
 
-    /// Mentions in `repo`'s files of IDs that no definition in `repo` covers.
+    /// Mentions in `repo`'s files of keys that no repo defines for real (weak `.section`
+    /// rules do not count): what Lupita cannot explain. A key defined in another repo is
+    /// explained, so it does not count. Priority labels (`P0`-`P9`) and ranges (`L0-L3`)
+    /// are not references and are left out.
     public static func undefinedCitations(of repo: Repo, in index: RefIndex) -> Int {
         let prefix = repo.name + "/"
         var total = 0
         for (key, mentions) in index.mentions {
-            if index.definitions[key]?.contains(where: { $0.repo == repo.name }) == true { continue }
+            if index.definitions[key]?.contains(where: { !$0.rule.isWeak }) == true { continue }
+            if isLabelOrRange(key) { continue }
             total += mentions.byFile.filter { $0.key.hasPrefix(prefix) }.values.reduce(0, +)
         }
         return total
+    }
+
+    private static let labelOrRange = try! NSRegularExpression(pattern: #"^(?:P\d|([A-Za-z]+)\d+-\1\d+)$"#, options: [.caseInsensitive])
+
+    static func isLabelOrRange(_ key: String) -> Bool {
+        labelOrRange.firstMatch(in: key, range: NSRange(location: 0, length: (key as NSString).length)) != nil
     }
 
     /// Status of every repo with agent files, most undefined citations first.

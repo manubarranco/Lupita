@@ -167,6 +167,15 @@ import Testing
         #expect(!rows[0].ruleInstalled)
     }
 
+    @Test func definedElsewhereLabelsAndRangesDoNotCount() throws {
+        let a = try makeRepo(["AGENTS.md": "x", "docs/a.md": "See D1, D7, P1, P2 and L0-L3 and Q3.\n"])
+        let b = try makeRepo(["docs/decisions.md": "## D1 — Defined elsewhere\nSummary.\n\n## Q3\n"])
+        let index = RefIndex.build(repos: [a, b])
+        // D1 is defined in the other repo; Q3 only has a weak section; P1/P2 and L0-L3 are not references.
+        let row = Onboarding.status(of: index).first { $0.repo == a }
+        #expect(row?.undefinedCitations == 2)  // D7 and Q3
+    }
+
     @Test func promptsFollowTheLanguage() {
         #expect(Onboarding.rulePrompt(spanish: true).contains("Añade este bloque"))
         #expect(Onboarding.rulePrompt(spanish: true).contains(Onboarding.marker))
