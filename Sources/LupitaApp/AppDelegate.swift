@@ -25,9 +25,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
+            let openOnboarding = note.userInfo?["onboarding"] != nil
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
-                if let lens {
+                if openOnboarding {
+                    self?.onboarding?.show()
+                } else if let lens {
                     self?.lens.begin()
                     Task { try? await Task.sleep(for: .seconds(lens)); self?.lens.end() }
                 } else if let query {

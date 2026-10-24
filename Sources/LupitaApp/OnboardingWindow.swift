@@ -36,16 +36,22 @@ final class OnboardingWindow {
                     self.model.reload(from: self.store)
                 }
             }, addFolder: addFolder)
-            let w = NSWindow(contentViewController: NSHostingController(rootView: view))
+            let host = NSHostingController(rootView: view)
+            // Let the window keep its size: the list scrolls, and three or four repos fit at once.
+            host.sizingOptions = []
+            let w = NSWindow(contentViewController: host)
             w.title = S.onboardingTitle
             w.styleMask = [.titled, .closable, .resizable]
-            w.setContentSize(NSSize(width: 520, height: 460))
+            w.setContentSize(NSSize(width: 520, height: 600))
             w.isReleasedWhenClosed = false
             w.center()
             window = w
         }
-        NSApp.activate()
+        // A menu bar app is never the active one: a plain `activate()` is only a request, and
+        // macOS leaves the window behind the app in front. Bring it forward regardless.
+        NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
+        window?.orderFrontRegardless()
     }
 }
 

@@ -52,6 +52,8 @@ case "poke":
     if let query = take("--query", &args) { info["query"] = query }
     if let repo = take("--repo", &args) { info["repo"] = repo }
     if let at = take("--at", &args) { info["at"] = at }
+    // With --onboarding, it opens the "Prepare your repos" window instead.
+    if args.contains("--onboarding") { info["onboarding"] = "1" }
     DistributedNotificationCenter.default().postNotificationName(
         .init("com.manubarranco.lupita.lookup"), object: nil, userInfo: info.isEmpty ? nil : info, deliverImmediately: true)
 
