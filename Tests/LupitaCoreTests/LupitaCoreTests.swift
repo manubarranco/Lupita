@@ -318,7 +318,7 @@ import Testing
 // D22, D23: glossary terms.
 
 @Suite struct GlossaryTests {
-    static let nibGlossary = """
+    static let harborGlossary = """
     # Glosario
 
     ## Conceptos
@@ -327,7 +327,7 @@ import Testing
       con todas las cuentas a la vez.
     - **cuenta** *(canónico)* — la pluma elíptica del motor
     - **`Ledger`** — el saldo del mes [?]
-    - **nib** — también un término homónimo del repo
+    - **harbor** — también un término homónimo del repo
 
     **plan**: lo que se paga
     **saldo:** lo que queda
@@ -343,8 +343,8 @@ import Testing
 
     static func makeResolver() -> Resolver {
         var index = RefIndex()
-        index.repos = [Repo(name: "nib", path: "/x/nib"), Repo(name: "atlas", path: "/x/atlas")]
-        index.add(text: nibGlossary, fileName: "glosario.md", repo: "nib", relativePath: "docs/glosario.md", absolutePath: "/x/nib/docs/glosario.md")
+        index.repos = [Repo(name: "harbor", path: "/x/harbor"), Repo(name: "atlas", path: "/x/atlas")]
+        index.add(text: harborGlossary, fileName: "glosario.md", repo: "harbor", relativePath: "docs/glosario.md", absolutePath: "/x/harbor/docs/glosario.md")
         index.add(text: otherGlossary, fileName: "glossary.md", repo: "atlas", relativePath: "docs/glossary.md", absolutePath: "/x/atlas/docs/glossary.md")
         index.add(text: "## D001 — Usar SQLite\nPorque sí.\n", fileName: "decisions.md", repo: "atlas", relativePath: "docs/decisions.md", absolutePath: "/x/atlas/docs/decisions.md")
         index.add(text: "- **ignorado** — fuera de un glosario\n", fileName: "notes.md", repo: "atlas", relativePath: "notes.md", absolutePath: "/x/atlas/notes.md")
@@ -361,9 +361,9 @@ import Testing
     }
 
     @Test func parsesTheFourFormatsAndAliases() {
-        let hits = Glossary.terms(fileName: "glosario.md", lines: Self.nibGlossary.components(separatedBy: "\n"))
+        let hits = Glossary.terms(fileName: "glosario.md", lines: Self.harborGlossary.components(separatedBy: "\n"))
         let names = hits.flatMap(\.names)
-        #expect(names == ["Banco", "Banco de Pagos", "cuenta", "Ledger", "nib", "plan", "saldo", "cobro"])
+        #expect(names == ["Banco", "Banco de Pagos", "cuenta", "Ledger", "harbor", "plan", "saldo", "cobro"])
         let banco = hits.first
         #expect(banco?.definition == "el banco de pruebas de facturas con todas las cuentas a la vez.")
         #expect(banco?.line == 4)
@@ -385,9 +385,9 @@ import Testing
 
     @Test(arguments: ["Banco", "banco", "la Banco", "La  banco", "los bancos", "the Banco", "`banco`", "BANCO."])
     func normalizesCaseArticlesAndPlurals(text: String) {
-        let r = Self.makeResolver().resolve(text, preferredRepo: "nib")
+        let r = Self.makeResolver().resolve(text, preferredRepo: "harbor")
         #expect(r.kind == .exact)
-        #expect(r.definitions.first?.repo == "nib")
+        #expect(r.definitions.first?.repo == "harbor")
         #expect(r.definitions.first?.rule == .term)
     }
 
@@ -401,32 +401,32 @@ import Testing
 
     @Test func aliasesResolveToTheSameDefinition() {
         let r = Self.makeResolver()
-        #expect(r.resolve("Banco de Pagos", preferredRepo: "nib").definitions.first?.line == 5)
-        #expect(r.resolve("el banco de pagos", preferredRepo: "nib").definitions.first?.title == "Banco de Pagos")
-        #expect(r.resolve("Ledger", preferredRepo: "nib").definitions.first?.summary == "el saldo del mes [?]")
+        #expect(r.resolve("Banco de Pagos", preferredRepo: "harbor").definitions.first?.line == 5)
+        #expect(r.resolve("el banco de pagos", preferredRepo: "harbor").definitions.first?.title == "Banco de Pagos")
+        #expect(r.resolve("Ledger", preferredRepo: "harbor").definitions.first?.summary == "el saldo del mes [?]")
     }
 
     @Test func termInTwoReposPutsTheWindowRepoFirst() {
         let r = Self.makeResolver()
-        let nib = r.resolve("banco", preferredRepo: "nib")
-        #expect(nib.definitions.map(\.repo) == ["atlas", "nib"].sorted { $0 == "nib" ? true : $1 != "nib" })
-        #expect(!nib.fromOtherRepo)
+        let harbor = r.resolve("banco", preferredRepo: "harbor")
+        #expect(harbor.definitions.map(\.repo) == ["atlas", "harbor"].sorted { $0 == "harbor" ? true : $1 != "harbor" })
+        #expect(!harbor.fromOtherRepo)
         let atlas = r.resolve("banco", preferredRepo: "atlas")
         #expect(atlas.definitions.first?.repo == "atlas")
         #expect(!atlas.fromOtherRepo)
-        let third = r.resolve("pipeline", preferredRepo: "nib")
+        let third = r.resolve("pipeline", preferredRepo: "harbor")
         #expect(third.definitions.first?.repo == "atlas")
         #expect(third.fromOtherRepo)
     }
 
     @Test func idsRepoNamesAndFilesBeatAHomonymousTerm() {
         var index = GlossaryTests.makeResolver().index
-        index.add(text: "- **d001** — homónimo\n- **atlas** — homónimo\n- **docs/a.md** — homónimo\n- **nib** — otro\n",
-                  fileName: "glossary.md", repo: "nib", relativePath: "glossary.md", absolutePath: "/x/nib/glossary.md")
+        index.add(text: "- **d001** — homónimo\n- **atlas** — homónimo\n- **docs/a.md** — homónimo\n- **harbor** — otro\n",
+                  fileName: "glossary.md", repo: "harbor", relativePath: "glossary.md", absolutePath: "/x/harbor/glossary.md")
         index.rank()
         let r = Resolver(index: index)
         #expect(r.resolve("D001", preferredRepo: "atlas").definitions.first?.rule == .heading)
-        #expect(r.resolve("nib", preferredRepo: "atlas").definitions.first?.rule == .repo)
+        #expect(r.resolve("harbor", preferredRepo: "atlas").definitions.first?.rule == .repo)
         #expect(r.resolve("atlas", preferredRepo: "atlas").definitions.first?.rule == .repo)
     }
 
@@ -435,19 +435,19 @@ import Testing
         let line = "Abre el Banco de Pagos para ver la cuenta, luego sigue."
         // Cursor on "el", "Banco", "de" and "Pagos".
         for offset in [5, 9, 15, 19] {
-            let hit = CandidatePicker.pick(line: line, cursorOffset: offset, resolver: r, preferredRepo: "nib")
+            let hit = CandidatePicker.pick(line: line, cursorOffset: offset, resolver: r, preferredRepo: "harbor")
             #expect(hit?.definitions.first?.title == "Banco de Pagos", "offset \(offset)")
         }
         // Cursor on "cuenta": a one-word term.
-        #expect(CandidatePicker.pick(line: line, cursorOffset: 37, resolver: r, preferredRepo: "nib")?.definitions.first?.title == "cuenta")
+        #expect(CandidatePicker.pick(line: line, cursorOffset: 37, resolver: r, preferredRepo: "harbor")?.definitions.first?.title == "cuenta")
         // A word that is no term.
-        #expect(CandidatePicker.pick(line: line, cursorOffset: 29, resolver: r, preferredRepo: "nib")?.kind == .notAnID)
+        #expect(CandidatePicker.pick(line: line, cursorOffset: 29, resolver: r, preferredRepo: "harbor")?.kind == .notAnID)
     }
 
     @Test func pickerStopsAtPunctuation() {
         let r = Self.makeResolver()
         // "Banco, de Pagos" is not the term: the comma closes the phrase, so the single word wins.
-        let hit = CandidatePicker.pick(line: "el Banco, de Pagos", cursorOffset: 5, resolver: r, preferredRepo: "nib")
+        let hit = CandidatePicker.pick(line: "el Banco, de Pagos", cursorOffset: 5, resolver: r, preferredRepo: "harbor")
         #expect(hit?.definitions.first?.title == "Banco")
     }
 
@@ -462,9 +462,9 @@ import Testing
         let words = ["abre", "la", "Banco", "de", "Pagos", "ya"].enumerated().map { i, text in
             OCRWord(text: text, box: CGRect(x: CGFloat(i) * 50, y: 100, width: 44, height: 14))
         }
-        let hit = CandidatePicker.pick(words: words, cursor: CGPoint(x: 160, y: 106), resolver: r, preferredRepo: "nib")
+        let hit = CandidatePicker.pick(words: words, cursor: CGPoint(x: 160, y: 106), resolver: r, preferredRepo: "harbor")
         #expect(hit?.definitions.first?.title == "Banco de Pagos")
-        let far = CandidatePicker.pick(words: words, cursor: CGPoint(x: 10, y: 106), resolver: r, preferredRepo: "nib")
+        let far = CandidatePicker.pick(words: words, cursor: CGPoint(x: 10, y: 106), resolver: r, preferredRepo: "harbor")
         #expect(far?.kind == .notAnID)
     }
 

@@ -146,7 +146,7 @@ The lookup key is the same when indexing and when pointing: lowercase, no accent
 tried second, `ciudades` → `ciudad`). Words that end in `s` after `s`, `u`, `i` or `y` keep it (`census`, `glass`). When the
 pointed word is not an ID or a repo reference, windows of 4 to 1 words that contain it are tried, longest first, over the
 Accessibility line and over the OCR row; a word ending in punctuation closes the phrase. The CLI takes the phrase whole:
-`lupita "la Mesa" --repo nib`. A term in the window's repo comes first; one from another repo is flagged. Why: the
+`lupita "golden path" --repo harbor`. A term in the window's repo comes first; one from another repo is flagged. Why: the
 terms agents coin are often two or three words (`Mesa de Trazo`), and pointing at any one of them should find it.
 
 ## D24 — The first run asks for the repo folders

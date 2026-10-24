@@ -50,7 +50,7 @@ public enum RepoRefs {
         var r = Resolution(query: text, kind: .exact, key: first.key, definitions: Array(defs.prefix(5)),
                            mentions: nil, alternatives: [])
         if let preferredRepo, repos.contains(where: { $0.name == first.repo }) {
-            // `nib/CLAUDE.md` says which repo it means: that is not "another repo". Nor is a
+            // `harbor/CLAUDE.md` says which repo it means: that is not "another repo". Nor is a
             // commit or branch: it lives in one repo only, so there is no local meaning to confuse.
             let named = text.lowercased().hasPrefix(first.repo.lowercased() + "/")
             let unique = first.rule == .commit || first.rule == .branch || first.rule == .repo
@@ -177,7 +177,7 @@ public enum RepoRefs {
                 candidates.append((repo, String(real.dropFirst(RepoDiscovery.realPath(repo.path).count + 1))))
             }
         } else {
-            // `nib/CLAUDE.md` names its repo: that one first.
+            // `harbor/CLAUDE.md` names its repo: that one first.
             for repo in repos where path.lowercased().hasPrefix(repo.name.lowercased() + "/") {
                 candidates.append((repo, String(path.dropFirst(repo.name.count + 1))))
             }
