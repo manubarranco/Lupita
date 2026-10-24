@@ -87,6 +87,15 @@ public enum S {
     public static var lens: String { t("Lens while holding", "Lupa al mantener") }
     public static var folders: String { t("Folders", "Carpetas") }
     public static var permissions: String { t("Permissions", "Permisos") }
+    public static func removeFolderTitle(_ folder: String) -> String {
+        t("Remove “\(folder)” from Lupita?", "¿Quitar «\(folder)» de Lupita?")
+    }
+    public static var removeFolderBody: String {
+        t("Nothing is deleted from your Mac: the folder and its files stay where they are. Lupita just stops reading it and looking up IDs in it.",
+          "No se borra nada de tu Mac: la carpeta y sus archivos siguen donde están. Lupita solo dejará de leerla y de buscar IDs en ella.")
+    }
+    public static var removeFromLupita: String { t("Remove from Lupita", "Quitar de Lupita") }
+    public static var cancel: String { t("Cancel", "Cancelar") }
     public static var expand: String { t("Show repos", "Mostrar repos") }
     public static var remove: String { t("Remove", "Quitar") }
     public static var addFolder: String { t("Add folder…", "Añadir carpeta…") }

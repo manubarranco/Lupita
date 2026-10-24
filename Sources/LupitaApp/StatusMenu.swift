@@ -132,16 +132,26 @@ final class StatusMenu: NSObject, NSMenuDelegate {
             row.isExpanded = expanded.contains(root)
             showRepos(of: root, after: item)
         }
-        row.onTrash = { [weak self, weak item] in
-            guard let self, let item else { return }
-            removeRepoItems(of: root)
-            expanded.remove(root)
-            item.menu?.removeItem(item)
-            store.removeRoot(root)
+        row.onTrash = { [weak self] in
+            // Close the menu first: an alert cannot run inside its tracking loop.
+            self?.item.menu?.cancelTracking()
+            DispatchQueue.main.async { self?.confirmRemove(root) }
         }
         folderItems[root] = item
         menu.addItem(item)
         if expanded.contains(root) { showRepos(of: root, after: item) }
+    }
+
+    private func confirmRemove(_ root: String) {
+        let alert = NSAlert()
+        alert.messageText = S.removeFolderTitle((root as NSString).abbreviatingWithTildeInPath)
+        alert.informativeText = S.removeFolderBody
+        alert.addButton(withTitle: S.removeFromLupita).hasDestructiveAction = true
+        alert.addButton(withTitle: S.cancel)
+        NSApp.activate()
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        expanded.remove(root)
+        store.removeRoot(root)
     }
 
     private func removeRepoItems(of root: String) {
