@@ -155,46 +155,53 @@ struct TooltipView: View {
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.separator))
     }
 
-    private func row(_ d: Definition, isFirst: Bool) -> some View {
-        Button { open(d) } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    // A term's title is the term itself: showing the ID too would repeat it.
-                    if d.rule != .term { Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold)) }
-                    if d.rule == .symbol && d.title.isEmpty {
-                        Text(S.noComment).font(.body.italic()).foregroundStyle(.secondary)
-                    } else {
-                        Text(d.title).font(.body.weight(.medium)).lineLimit(2)
-                    }
-                }
-                if let colors = d.colors, !colors.isEmpty {
-                    HStack(spacing: 10) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Swatch(sample: c) } }
-                }
-                if !d.summary.isEmpty {
-                    Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
-                }
-                HStack(spacing: 6) {
-                    if let kind = Self.kind(d.rule) {
-                        Text(kind).font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(.secondary.opacity(0.15), in: Capsule())
-                    }
-                    if !d.repo.isEmpty { Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor) }
-                    if let location = Self.location(d) {
-                        Text(location).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
-                    }
-                    if isFirst && resolution.fromOtherRepo {
-                        Text(S.fromAnotherRepo).font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(.orange.opacity(0.2), in: Capsule())
-                    }
+    /// A row opens its file, unless it has none (a dictionary answer: git, an error, an HTML tag).
+    @ViewBuilder private func row(_ d: Definition, isFirst: Bool) -> some View {
+        if d.absolutePath.isEmpty && d.openURL == nil {
+            rowContent(d, isFirst: isFirst)
+        } else {
+            Button { open(d) } label: { rowContent(d, isFirst: isFirst) }
+                .buttonStyle(.plain)
+                .help(Self.help(d))
+        }
+    }
+
+    private func rowContent(_ d: Definition, isFirst: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                // A term's title is the term itself: showing the ID too would repeat it.
+                if d.rule != .term { Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold)) }
+                if d.rule == .symbol && d.title.isEmpty {
+                    Text(S.noComment).font(.body.italic()).foregroundStyle(.secondary)
+                } else {
+                    Text(d.title).font(.body.weight(.medium)).lineLimit(2)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
+            if let colors = d.colors, !colors.isEmpty {
+                HStack(spacing: 10) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Swatch(sample: c) } }
+            }
+            if !d.summary.isEmpty {
+                Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
+            }
+            HStack(spacing: 6) {
+                if let kind = Self.kind(d.rule) {
+                    Text(kind).font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(.secondary.opacity(0.15), in: Capsule())
+                }
+                if !d.repo.isEmpty { Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor) }
+                if let location = Self.location(d) {
+                    Text(location).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                }
+                if isFirst && resolution.fromOtherRepo {
+                    Text(S.fromAnotherRepo).font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(.orange.opacity(0.2), in: Capsule())
+                }
+            }
         }
-        .buttonStyle(.plain)
-        .help(Self.help(d))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 
     static func kind(_ rule: DefinitionRule) -> String? {
@@ -208,6 +215,7 @@ struct TooltipView: View {
         case .symbol: S.kindSymbol
         case .address: S.kindAddress
         case .token: S.kindToken
+        case .terminal: S.kindTerminal
         case .color: S.kindColor
         default: nil
         }

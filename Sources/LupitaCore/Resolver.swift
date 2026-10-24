@@ -80,7 +80,7 @@ public struct Resolver: Sendable {
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let fromPath = named == nil || named == preferredRepo ? fromPath : nil
         let preferredRepo = named ?? preferredRepo
-        if CodeRefs.looksLikeAddress(raw),
+        if CodeRefs.looksLikeAddress(raw) || CodeRefs.looksLikeCommand(raw),
            let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after) {
             return code
         }
@@ -144,6 +144,12 @@ public struct Resolver: Sendable {
                             fromPath: String? = nil) -> Resolution? {
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         return termResolution(phrase, preferredRepo: named ?? preferredRepo)
+    }
+
+    /// Code made of several words (a command, `PR 123`) for `phrase`, or nil. Public so the picker can try
+    /// windows of words (D29).
+    public func resolveCode(_ phrase: String, preferredRepo: String? = nil, context: String? = nil) -> Resolution? {
+        CodeRefs.resolve(phrase, repos: index.repos, preferredRepo: repoNamed(in: context ?? "") ?? preferredRepo, before: context)
     }
 
     private func termResolution(_ phrase: String, preferredRepo: String?) -> Resolution? {

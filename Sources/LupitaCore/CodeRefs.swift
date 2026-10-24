@@ -30,12 +30,13 @@ public enum CodeRefs {
         defs = defs ?? Symbols.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Addresses.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Tokens.resolve(text, repos: ordered, preferredRepo: preferredRepo)
+        defs = defs ?? Commands.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         guard let found = defs, let first = found.first else { return nil }
         var r = Resolution(query: text.text, kind: .exact, key: first.key, definitions: Array(found.prefix(5)),
                            mentions: nil, alternatives: [])
         if let preferredRepo, repos.contains(where: { $0.name.caseInsensitiveCompare(preferredRepo) == .orderedSame }) {
             let home = first.repo.components(separatedBy: " · ").first ?? first.repo
-            r.fromOtherRepo = (first.rule == .symbol || first.rule == .token) && home.caseInsensitiveCompare(preferredRepo) != .orderedSame
+            r.fromOtherRepo = (first.rule == .symbol || first.rule == .token || (first.rule == .terminal && !first.repo.isEmpty)) && home.caseInsensitiveCompare(preferredRepo) != .orderedSame
         }
         return r
     }
@@ -45,6 +46,14 @@ public enum CodeRefs {
     public static func looksLikeAddress(_ raw: String) -> Bool {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
         return matches(Addresses.shape, text.trimmingCharacters(in: trailing))
+    }
+
+    /// `npm run build`, `git status`: a known tool and at least one argument. Checked before repo references,
+    /// which would take `git checkout a/b` for a branch name and ask git about it in every repo.
+    public static func looksLikeCommand(_ raw: String) -> Bool {
+        let tokens = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers)).split(whereSeparator: \.isWhitespace)
+        guard tokens.count >= 2, let first = tokens.first.map(String.init) else { return false }
+        return CodeDictionaries.managers.contains(first) || first == "git"
     }
 
     static func normalize(_ raw: String, before: String, after: String) -> Text? {

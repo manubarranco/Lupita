@@ -475,3 +475,118 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         #expect(CodeRefs.Tokens.color(of: "10 20 30") == nil)
     }
 }
+
+@Suite(.serialized) struct CommandTests {
+    let repo: Repo
+    let other: Repo
+
+    init() throws {
+        repo = try makeCodeRepo("web", [
+            "package.json": """
+            {
+              "name": "web",
+              "scripts": {
+                "dev": "next dev",
+                "build": "next build",
+                "test:e2e": "playwright test"
+              }
+            }
+            """,
+            "apps/admin/package.json": #"{"scripts": {"lint": "eslint ."}}"#,
+        ])
+        other = try makeCodeRepo("api", ["package.json": #"{"scripts": {"build": "tsc", "serve": "node dist/index.js"}}"#])
+    }
+
+    func first(_ text: String, window: String? = "web") -> Definition? {
+        CodeRefs.resolve(text, repos: [repo, other], preferredRepo: window)?.definitions.first
+    }
+
+    @Test func npmRunReadsThePackageJson() {
+        let d = first("npm run build")
+        #expect(d?.rule == .terminal)
+        #expect(d?.id == "npm run build")
+        #expect(d?.title.contains("next build") == true)
+        #expect(d?.repo == "web")
+        #expect(d?.path == "package.json")
+        #expect(d?.line == 5)
+        #expect(first("`npm run test:e2e`")?.title.contains("playwright test") == true)
+    }
+
+    @Test func shortFormsOfOtherManagers() {
+        #expect(first("pnpm dev")?.title.contains("next dev") == true)
+        #expect(first("yarn build")?.title.contains("next build") == true)
+        #expect(first("pnpm run dev")?.title.contains("next dev") == true)
+        #expect(first("bun run build")?.title.contains("next build") == true)
+    }
+
+    @Test func nestedPackagesAreSearched() {
+        #expect(first("npm run lint")?.path == "apps/admin/package.json")
+    }
+
+    @Test func theWindowsRepoComesFirstAndOthersAreFlagged() {
+        #expect(first("npm run build", window: "api")?.title.contains("tsc") == true)
+        let r = CodeRefs.resolve("npm run serve", repos: [repo, other], preferredRepo: "web")
+        #expect(r?.definitions.first?.repo == "api")
+        #expect(r?.fromOtherRepo == true)
+    }
+
+    @Test func builtInPackageCommandsComeFromTheDictionary() {
+        let d = first("npm ci")
+        #expect(d?.rule == .terminal)
+        #expect(d?.repo == "")
+        #expect(d?.title.isEmpty == false)
+        #expect(first("npm audit") != nil)
+        #expect(first("pnpm install")?.id == "pnpm install")
+        #expect(first("npm run nonexistent")?.repo == "")  // falls back to what `run` means
+    }
+
+    @Test func gitCommandsHaveOneLineAndWarnAboutDangerousFlags() {
+        #expect(first("git status")?.title.isEmpty == false)
+        #expect(first("git checkout main/master/staging")?.id == "git checkout main/master/staging" || first("git checkout main/master/staging")?.id.hasPrefix("git checkout") == true)
+        #expect(first("git add -A")?.summary.contains("-A") == true)
+        #expect(first("git reset --hard")?.summary.contains("--hard") == true)
+        #expect(first("git push --force")?.summary.contains("--force") == true)
+        #expect(first("git merge feature/a-open-bowl")?.rule == .terminal)
+        #expect(first("git") != nil)
+        #expect(first("git frobnicate")?.title.isEmpty == false)  // unknown subcommand: git itself
+    }
+
+    @Test func shellCommands() {
+        #expect(first("cd Lupita")?.title.isEmpty == false)
+        #expect(first("rm -rf build")?.summary.contains("-rf") == true)
+        #expect(first("brew install ffmpeg")?.title.isEmpty == false)
+        #expect(first("$ python3 serve.py")?.id == "python3 serve.py")
+    }
+
+    @Test func commonEnglishWordsAreCommandsOnlyBetweenBackticks() {
+        #expect(first("make sure") == nil)
+        #expect(first("open the file") == nil)
+        #expect(first("find the bug") == nil)
+        #expect(first("`make build`")?.rule == .terminal)
+        #expect(first("`open file.txt`")?.rule == .terminal)
+        #expect(first("node --check") == nil)
+        #expect(first("`node --check`")?.rule == .terminal)
+    }
+
+    @Test func notCommands() {
+        #expect(first("hello world") == nil)
+        #expect(first("scripts/test.sh") == nil)
+        #expect(first("1 2 3 4 5 6 7 8 9") == nil)
+    }
+
+    @Test func spanishTextWhenTheMacIsInSpanish() {
+        let saved = S.language
+        defer { S.language = saved }
+        S.language = "es-ES"
+        #expect(first("git status")?.title.hasPrefix("Muestra") == true)
+        S.language = "en-GB"
+        #expect(first("git status")?.title.hasPrefix("Shows") == true)
+    }
+
+    @Test func resolverSendsMultiWordCommandsToCodeBeforeRepoReferences() {
+        var index = RefIndex()
+        index.repos = [repo]
+        let r = Resolver(index: index).resolve("git checkout feature/search", preferredRepo: "web")
+        #expect(r.definitions.first?.rule == .terminal)
+    }
+}

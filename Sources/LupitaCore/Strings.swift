@@ -87,6 +87,8 @@ public enum S {
     public static func writtenAs(_ value: String) -> String { t("written as \(value)", "escrito como \(value)") }
     public static func definedAs(_ names: String) -> String { t("defined as \(names)", "definido como \(names)") }
     public static var noTokenUsesIt: String { t("no token has this colour", "ningún token tiene este color") }
+    public static var kindTerminal: String { t("terminal command", "comando de terminal") }
+    public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
     public static var notRunning: String { t("not running", "apagado") }
 
     // MARK: Menu
