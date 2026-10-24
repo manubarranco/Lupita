@@ -590,3 +590,57 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         #expect(r.definitions.first?.rule == .terminal)
     }
 }
+
+@Suite struct ErrorTagTests {
+    func first(_ text: String) -> Definition? { CodeRefs.resolve(text, repos: [], preferredRepo: nil)?.definitions.first }
+    func with(_ text: String, before: String) -> Definition? {
+        CodeRefs.resolve(text, repos: [], preferredRepo: nil, before: before)?.definitions.first
+    }
+
+    @Test func errorNamesGetOneLine() {
+        for name in ["ENOENT", "TypeError", "KeyError", "AbortError", "NotAllowedError", "MODULE_NOT_FOUND", "EADDRINUSE"] {
+            let d = first(name)
+            #expect(d?.rule == .error, "\(name)")
+            #expect(d?.title.isEmpty == false, "\(name)")
+            #expect(d?.absolutePath == "")
+        }
+        #expect(first("`ENOENT`,")?.id == "ENOENT")
+        #expect(first("typeerror") == nil)
+        #expect(first("ValidationError") == nil)
+    }
+
+    @Test func htmlTagsNeedTheirAngleBrackets() {
+        let d = first("<dialog>")
+        #expect(d?.rule == .tag)
+        #expect(d?.id == "<dialog>")
+        #expect(first("`<section>`")?.rule == .tag)
+        #expect(first("</div>")?.rule == .tag)
+        #expect(first("<meta charset>")?.rule == .tag)
+        #expect(first("<img src=\"a.png\" />")?.rule == .tag)
+        #expect(first("<br/>")?.rule == .tag)
+        #expect(first("dialog") == nil)
+        #expect(first("<Button>") == nil)
+        #expect(first("<notatag>") == nil)
+    }
+
+    @Test func httpStatusNeedsAHint() {
+        #expect(first("401") == nil)
+        #expect(first("HTTP 401")?.rule == .error)
+        #expect(first("401 Unauthorized")?.rule == .error)
+        #expect(first("`404`")?.id == "404")
+        #expect(first("status 503")?.rule == .error)
+        #expect(with("401", before: "the API returns ")?.rule == .error)
+        #expect(with("401", before: "chapter ") == nil)
+        #expect(first("HTTP 999") == nil)
+        #expect(first("404 Banana") == nil)
+    }
+
+    @Test func spanishDictionary() {
+        let saved = S.language
+        defer { S.language = saved }
+        S.language = "es-ES"
+        #expect(first("ENOENT")?.title.hasPrefix("No existe") == true)
+        S.language = "en-GB"
+        #expect(first("ENOENT")?.title.hasPrefix("No such") == true)
+    }
+}

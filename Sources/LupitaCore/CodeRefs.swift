@@ -27,6 +27,7 @@ public enum CodeRefs {
         var defs: [Definition]?
         // 6 PRs, 5 errors and tags, 4 commands are cheap or exact: they run first when they match exactly,
         // but the priority above decides what gets built and what is cut.
+        defs = defs ?? Errors.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Symbols.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Addresses.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Tokens.resolve(text, repos: ordered, preferredRepo: preferredRepo)

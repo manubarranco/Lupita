@@ -216,6 +216,8 @@ struct TooltipView: View {
         case .address: S.kindAddress
         case .token: S.kindToken
         case .terminal: S.kindTerminal
+        case .error: S.kindError
+        case .tag: S.kindTag
         case .color: S.kindColor
         default: nil
         }

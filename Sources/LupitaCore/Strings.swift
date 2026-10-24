@@ -89,6 +89,8 @@ public enum S {
     public static var noTokenUsesIt: String { t("no token has this colour", "ningún token tiene este color") }
     public static var kindTerminal: String { t("terminal command", "comando de terminal") }
     public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
+    public static var kindError: String { t("error", "error") }
+    public static var kindTag: String { t("HTML tag", "etiqueta HTML") }
     public static var notRunning: String { t("not running", "apagado") }
 
     // MARK: Menu
