@@ -232,7 +232,7 @@ struct TooltipView: View {
         case .pullRequest: nil
         case .command: d.path
         case .file: d.line > 1 ? "\(d.path):\(d.line)" : d.path
-        default: "\(d.path):\(d.line)"
+        default: d.path.isEmpty ? nil : "\(d.path):\(d.line)"
         }
     }
 
@@ -254,7 +254,8 @@ struct Swatch: View {
                 .fill(Color(hex: sample.hex))
                 .frame(width: 28, height: 18)
                 .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(.primary.opacity(0.25)))
-            if !sample.label.isEmpty { Text(sample.label).font(.caption).foregroundStyle(.secondary) }
+            Text(sample.label.isEmpty ? sample.hex : "\(sample.label) \(sample.hex)")
+                .font(.caption.monospaced()).foregroundStyle(.secondary)
         }
     }
 }
