@@ -71,12 +71,24 @@ carpeta más cercana. Si la definición viene de otro repo, el tooltip lo dice.
 ## Que tus agentes sean fáciles de consultar
 
 Lupita funciona con lo que los agentes ya escriben, pero es exacto cuando cada referencia está
-definida así. Añádelo a tu `AGENTS.md` o `CLAUDE.md`:
+definida así. Lupita nunca escribe en tus repos: te da un prompt para tu propio agente, que conoce
+el repo y hace el commit. Pégale esto a tu agente:
+
+> Añade este bloque al final del archivo de instrucciones de agentes de este repo (AGENTS.md si
+> existe; si no, CLAUDE.md), sin cambiar nada más, y haz commit.
 
 ```markdown
-Define every decision, question, lesson or story you create as a heading
-`## ID — Title`, followed by a one-line summary. Cite it by ID elsewhere.
+<!-- lupita -->
+Define every decision, question, lesson or story you create as a heading `## ID — Title`
+followed by a one-line summary. Add each new internal term to `docs/glossary.md` as
+`- **term** — definition`. Cite both by ID or term elsewhere.
+<!-- /lupita -->
 ```
+
+La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista tus repos con
+agentes, cuántas citas no define nada y si la regla está puesta, con un botón para copiar el
+prompt. Un segundo prompt, opcional, convierte las decisiones, lecciones y términos que ya tienes
+(toca varios archivos).
 
 En [`examples/demo-project`](examples/demo-project) hay un proyecto pequeño que usa todos los
 formatos.

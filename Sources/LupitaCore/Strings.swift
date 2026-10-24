@@ -7,7 +7,7 @@ public enum S {
 
     /// The Mac's first preferred language; settable for tests.
     nonisolated(unsafe) public static var language = Locale.preferredLanguages.first ?? "en"
-    static var isSpanish: Bool { language.hasPrefix("es") }
+    public static var isSpanish: Bool { language.hasPrefix("es") }
     private static func t(_ en: String, _ es: String) -> String { isSpanish ? es : en }
 
     // MARK: Lookup
@@ -116,5 +116,28 @@ public enum S {
     }
     public static var openAccessibility: String { t("Open Accessibility", "Abrir Accesibilidad") }
     public static var later: String { t("Later", "Más tarde") }
-}
 
+    // MARK: Onboarding (D21)
+    public static var prepareRepos: String { t("Prepare your repos…", "Prepara tus repos…") }
+    public static var onboardingTitle: String { t("Prepare your repos", "Prepara tus repos") }
+    public static var onboardingIntro: String {
+        t("Lupita is exact when your agents define what they cite. Copy a prompt and paste it to the agent of each repo: it adds the rule and commits. Lupita never writes in your repos.",
+          "Lupita acierta cuando tus agentes definen lo que citan. Copia un prompt y pégaselo al agente de cada repo: añade la regla y hace commit. Lupita nunca escribe en tus repos.")
+    }
+    public static func undefinedCitations(_ n: Int) -> String {
+        t("\(n) undefined \(n == 1 ? "citation" : "citations")", "\(n) \(n == 1 ? "cita sin definir" : "citas sin definir")")
+    }
+    public static var ruleInstalled: String { t("rule in place", "regla puesta") }
+    public static var ruleMissing: String { t("no rule", "sin regla") }
+    public static var copyPrompt: String { t("Copy prompt", "Copiar prompt") }
+    public static var copyConversionPrompt: String { t("Copy conversion prompt", "Copiar prompt de conversión") }
+    public static var conversionWarning: String {
+        t("Converts existing decisions, lessons and terms. Touches several files.",
+          "Convierte decisiones, lecciones y términos que ya existen. Toca varios archivos.")
+    }
+    public static var copied: String { t("Copied", "Copiado") }
+    public static var refresh: String { t("Refresh", "Actualizar") }
+    public static var noAgentRepos: String {
+        t("No repos with agent instructions found in your folders.", "No hay repos con instrucciones de agentes en tus carpetas.")
+    }
+}

@@ -127,3 +127,60 @@ import Testing
         #expect(r.definitions.first?.rule == .file)
     }
 }
+
+@Suite struct OnboardingTests {
+    private func makeRepo(_ files: [String: String]) throws -> Repo {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("onb-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir.appendingPathComponent(".git"), withIntermediateDirectories: true)
+        for (path, text) in files {
+            let url = dir.appendingPathComponent(path)
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try text.write(to: url, atomically: true, encoding: .utf8)
+        }
+        return Repo(name: dir.lastPathComponent, path: RepoDiscovery.realPath(dir.path))
+    }
+
+    @Test func detectsAgentFiles() throws {
+        let repo = try makeRepo(["CLAUDE.md": "x", ".cursor/rules/a.mdc": "x", ".github/copilot-instructions.md": "x", "README.md": "x"])
+        #expect(Onboarding.agentFiles(in: repo) == ["CLAUDE.md", ".github/copilot-instructions.md", ".cursor/rules/a.mdc"])
+        let plain = try makeRepo(["README.md": "x"])
+        #expect(Onboarding.agentFiles(in: plain).isEmpty)
+        #expect(Onboarding.status(of: RefIndex.build(repos: [plain])).isEmpty)
+    }
+
+    @Test func detectsTheMarker() throws {
+        let with = try makeRepo(["AGENTS.md": "intro\n\(Onboarding.ruleBlock)\n"])
+        let without = try makeRepo(["AGENTS.md": "intro"])
+        #expect(Onboarding.hasRule(in: with, files: ["AGENTS.md"]))
+        #expect(!Onboarding.hasRule(in: without, files: ["AGENTS.md"]))
+    }
+
+    @Test func countsUndefinedCitations() throws {
+        let repo = try makeRepo([
+            "AGENTS.md": "x",
+            "docs/decisions.md": "## D1 — Defined\nSummary.\n\nSee D1, D7 and Q3.\n",
+            "docs/notes.md": "D7 again, and D9.\n",
+        ])
+        let rows = Onboarding.status(of: RefIndex.build(repos: [repo]))
+        #expect(rows.count == 1)
+        #expect(rows[0].undefinedCitations == 4)  // D7 ×2, Q3, D9; D1 is defined here
+        #expect(!rows[0].ruleInstalled)
+    }
+
+    @Test func definedElsewhereLabelsAndRangesDoNotCount() throws {
+        let a = try makeRepo(["AGENTS.md": "x", "docs/a.md": "See D1, D7, P1, P2 and L0-L3 and Q3.\n"])
+        let b = try makeRepo(["docs/decisions.md": "## D1 — Defined elsewhere\nSummary.\n\n## Q3\n"])
+        let index = RefIndex.build(repos: [a, b])
+        // D1 is defined in the other repo; Q3 only has a weak section; P1/P2 and L0-L3 are not references.
+        let row = Onboarding.status(of: index).first { $0.repo == a }
+        #expect(row?.undefinedCitations == 2)  // D7 and Q3
+    }
+
+    @Test func promptsFollowTheLanguage() {
+        #expect(Onboarding.rulePrompt(spanish: true).contains("Añade este bloque"))
+        #expect(Onboarding.rulePrompt(spanish: true).contains(Onboarding.marker))
+        #expect(Onboarding.rulePrompt(spanish: false).hasPrefix("Add this block"))
+        #expect(Onboarding.conversionPrompt(spanish: false).contains("single commit"))
+        #expect(Onboarding.conversionPrompt(spanish: true).contains("un solo commit"))
+    }
+}

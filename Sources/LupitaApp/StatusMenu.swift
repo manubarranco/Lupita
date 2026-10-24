@@ -7,6 +7,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let store: IndexStore
     private let onHotkeyChange: (HotkeyChoice) -> Void
+    var onPrepareRepos: (() -> Void)?
 
     init(store: IndexStore, onHotkeyChange: @escaping (HotkeyChoice) -> Void) {
         self.store = store
@@ -75,6 +76,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
             menu.addItem(row)
         }
         menu.addItem(action(S.addFolder, #selector(addRoot)))
+        menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
         menu.addItem(action(S.reindex, #selector(reindex)))
         menu.addItem(.separator())
 
@@ -102,7 +104,9 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         return action(S.grant(name), #selector(openPane(_:)), represented: pane.rawValue)
     }
 
-    @objc private func addRoot() {
+    @objc private func prepareRepos() { onPrepareRepos?() }
+
+    @objc func addRoot() {
         let panel = NSOpenPanel()
         panel.canChooseDirectories = true
         panel.canChooseFiles = false
