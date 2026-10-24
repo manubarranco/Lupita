@@ -150,7 +150,7 @@ struct TooltipView: View {
             }
         }
         .padding(14)
-        .frame(width: 380, alignment: .leading)
+        .frame(width: 440, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.separator))
     }
@@ -168,20 +168,24 @@ struct TooltipView: View {
 
     private func rowContent(_ d: Definition, isFirst: Bool) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
+            // The name on top, what it means below: a long meaning wraps under the name, not beside it.
+            VStack(alignment: .leading, spacing: 2) {
                 // A term's title is the term itself: showing the ID too would repeat it.
-                if d.rule != .term { Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold)) }
+                if d.rule != .term {
+                    Text(d.id).font(.system(.callout, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary)
+                        .lineLimit(2).truncationMode(.middle)
+                }
                 if d.rule == .symbol && d.title.isEmpty {
                     Text(S.noComment).font(.body.italic()).foregroundStyle(.secondary)
                 } else {
-                    Text(d.title).font(.body.weight(.medium)).lineLimit(2)
+                    Text(d.title).font(.body.weight(.medium)).lineLimit(4).fixedSize(horizontal: false, vertical: true)
                 }
             }
             if let colors = d.colors, !colors.isEmpty {
                 HStack(spacing: 10) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Swatch(sample: c) } }
             }
             if !d.summary.isEmpty {
-                Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
+                Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(4).fixedSize(horizontal: false, vertical: true)
             }
             HStack(spacing: 6) {
                 if let kind = Self.kind(d.rule) {
