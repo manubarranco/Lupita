@@ -27,6 +27,7 @@ drawing, never its parts.
 | Ring | Circle of radius 38, stroke 8, round caps |
 | Handle | Straight line from (28, 28) to (52, 52), stroke 8, round caps. Always to the lower right |
 | Eyes | Two rounded rectangles 10 × 22, corner radius 5 (full pill), centres at x = -9 and x = 9, y = 0 |
+| Contour | Ring and handle are first drawn with stroke 14 in the surface colour, then with stroke 8 in ink. Not around the eyes |
 | Lens fill | The disc inside the ring is filled with the surface colour, so text behind it does not show through |
 
 Eyes move together, always. Looking is an offset applied to both: up to 7 units in any
@@ -72,6 +73,11 @@ the system's light or dark mode.
 | Ink (ring, handle, eyes) | `#1f1f1d` | `#f0efe9` |
 | Disc | `#ffffff` | `#31312e` |
 
+Over a background of the other tone (a dark editor while the system is in light mode, or the
+reverse) the ink would vanish, so the ring and handle carry a **contour** in the surface
+colour: 3 units on each side (stroke 14 under the stroke 8; 15 under the icon's 9). It is
+the disc colour, so on a matching background it is invisible.
+
 In the app it uses the system's label and control background colours instead, so it matches
 macOS exactly. There is no brand colour yet; until there is one, do not add one.
 
@@ -85,7 +91,7 @@ macOS exactly. There is no brand colour yet; until there is one, do not add one.
   other.
 - Don't use circles or dots for eyes: they are pills, taller than wide, except when focused
   or blinking.
-- Don't add gradients, shadows inside the drawing, outlines around it or a second colour.
+- Don't add gradients, shadows inside the drawing or a second colour. The only outline is the surface-colour contour above.
   The lens on screen has a soft drop shadow so it reads over any background; that is the
   only one.
 - Don't stretch it or change the stroke on its own: scale the whole drawing.

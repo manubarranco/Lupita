@@ -1,9 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 98" width="98" height="98" role="img"><title>Lupita icon</title><style>
   .ink { fill: none; stroke: #1f1f1d; stroke-width: 9; stroke-linecap: round; }
   .eye { fill: #1f1f1d; }
+  .halo { fill: none; stroke: #ffffff; stroke-width: 15; stroke-linecap: round; }
   .disc { fill: #ffffff; }
   .label { fill: #6b6a65; font: 11px -apple-system, system-ui, sans-serif; }
   @media (prefers-color-scheme: dark) {
-    .ink { stroke: #f0efe9; } .eye { fill: #f0efe9; } .disc { fill: #31312e; } .label { fill: #a3a29b; }
+    .ink { stroke: #f0efe9; } .eye { fill: #f0efe9; } .disc { fill: #31312e; } .halo { stroke: #31312e; } .label { fill: #a3a29b; }
   }
-</style><g transform="translate(42 42)"><circle class="ink" r="38"/><line class="ink" x1="28" y1="28" x2="52" y2="52"/><rect class="eye" x="-21.5" y="-7" width="11" height="24" rx="5.5"/><rect class="eye" x="-1.5" y="-7" width="11" height="24" rx="5.5"/></g></svg>
+</style><g transform="translate(42 42)"><circle class="halo" r="38"/><line class="halo" x1="28" y1="28" x2="52" y2="52"/><circle class="ink" r="38"/><line class="ink" x1="28" y1="28" x2="52" y2="52"/><rect class="eye" x="-21.5" y="-7" width="11" height="24" rx="5.5"/><rect class="eye" x="-1.5" y="-7" width="11" height="24" rx="5.5"/></g></svg>
