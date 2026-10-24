@@ -14,7 +14,7 @@ browser.
 
 ![Lupita demo: pointing at D003 in an agent chat shows its definition](docs/demo.gif)
 
-**[⬇ Download Lupita for macOS](https://github.com/manubarranco/lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 or later)
+**[⬇ Download Lupita for macOS](https://github.com/manubarranco/Lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 or later)
 
 [Leer en español](README.es.md)
 
@@ -107,8 +107,8 @@ Requires macOS 14 or later. The release build is for Apple Silicon; on an Intel 
 **From source.** With Xcode or just the Command Line Tools (`xcode-select --install`):
 
 ```bash
-git clone https://github.com/manubarranco/lupita.git
-cd lupita
+git clone https://github.com/manubarranco/Lupita.git
+cd Lupita
 ./scripts/bundle.sh
 open build/Lupita.app
 ```

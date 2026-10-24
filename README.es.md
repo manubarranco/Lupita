@@ -14,7 +14,7 @@ app: un chat con un agente, un editor, una terminal, el navegador.
 
 ![Demo de Lupita: al apuntar a D003 en un chat con un agente aparece su definición](docs/demo.gif)
 
-**[⬇ Descarga Lupita para macOS](https://github.com/manubarranco/lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 o posterior)
+**[⬇ Descarga Lupita para macOS](https://github.com/manubarranco/Lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 o posterior)
 
 [Read in English](README.md)
 
@@ -107,8 +107,8 @@ abre **Ajustes del Sistema → Privacidad y seguridad**, baja hasta el final y p
 **Desde el código.** Con Xcode o solo con las Command Line Tools (`xcode-select --install`):
 
 ```bash
-git clone https://github.com/manubarranco/lupita.git
-cd lupita
+git clone https://github.com/manubarranco/Lupita.git
+cd Lupita
 ./scripts/bundle.sh
 open build/Lupita.app
 ```
