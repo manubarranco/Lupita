@@ -89,7 +89,7 @@ public enum S {
     public static var permissions: String { t("Permissions", "Permisos") }
     /// The question around the folder path, which the alert draws in its own style.
     public static var removeFolderAround: (before: String, after: String) {
-        isSpanish ? ("¿Quitar ", " de Lupita?") : ("Remove ", " from Lupita?")
+        isSpanish ? ("¿Quitar la carpeta ", " de Lupita?") : ("Remove the folder ", " from Lupita?")
     }
     public static var removeFolderBody: String {
         t("Lupita will stop searching it. You can add it back any time.",
