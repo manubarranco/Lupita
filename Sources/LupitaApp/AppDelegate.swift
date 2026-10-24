@@ -158,7 +158,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func notice(_ text: String, at mouse: NSPoint) {
         tooltip.showNotice(text, at: mouse)
         let reacting = lens.react(found: false, near: tooltip.frame) { [weak self] in self?.tooltip.close() }
-        if !reacting { tooltip.close(after: 3.5) }
+        if !reacting { tooltip.close(after: 2) }
     }
 
     /// Dev aid: resolve a given text without reading the screen (`lupita poke --query D001 --repo atlas`).

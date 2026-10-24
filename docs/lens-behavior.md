@@ -50,7 +50,7 @@ Approved by Manu on 2026-10-24. The lens stays on screen after the shortcut is r
 
 Pressing the shortcut again picks the same lens back up. With Reduce Motion none of this
 happens: the lens goes when the shortcut is released, as before. The "not known" notice
-closes 1 s after the lens gets beside it (D38) (3.5 s when there is no lens), or on a click or Esc.
+closes 1 s after the lens gets beside it (D38) (2 s when there is no lens, D38), or on a click or Esc.
 It used to close after 1.5 s, before it could be read, with the lens covering it for most of
 that time. The prototype's three
 phase 2 buttons are an earlier take on this; the table wins.
