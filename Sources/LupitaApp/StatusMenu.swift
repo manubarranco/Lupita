@@ -163,27 +163,27 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         let label = NSTextField(wrappingLabelWithString: "")
         label.attributedStringValue = text
         label.alignment = .center
-        label.preferredMaxLayoutWidth = 260
-        // The alert's own icon is pinned to the left: swap it for one centred above the text.
-        let icon = NSImageView(image: NSApp.applicationIconImage)
-        icon.imageScaling = .scaleProportionallyUpOrDown
-        icon.widthAnchor.constraint(equalToConstant: 64).isActive = true
-        icon.heightAnchor.constraint(equalToConstant: 64).isActive = true
-        let stack = NSStackView(views: [icon, label])
-        stack.orientation = .vertical
-        stack.alignment = .centerX
-        stack.spacing = 10
-        stack.frame.size = stack.fittingSize
-        stack.frame.size.width = max(stack.frame.width, 260)
+        label.frame = NSRect(x: 0, y: 0, width: 260, height: 0)
+        label.frame.size.height = label.sizeThatFits(NSSize(width: 260, height: CGFloat.greatestFiniteMagnitude)).height
         alert.messageText = ""
-        alert.icon = NSImage(size: NSSize(width: 1, height: 1))
-        alert.accessoryView = stack
+        alert.accessoryView = label
         alert.addButton(withTitle: S.removeFromLupita).hasDestructiveAction = true
         alert.addButton(withTitle: S.cancel)
         NSApp.activate()
+        // The alert pins its icon to the left; once laid out, move it to the middle.
+        alert.layout()
+        if let content = alert.window.contentView,
+           let icon = Self.imageViews(in: content).first(where: { $0.image === alert.icon || $0.frame.width >= 48 }) {
+            icon.translatesAutoresizingMaskIntoConstraints = true
+            icon.frame.origin.x = (content.bounds.width - icon.frame.width) / 2
+        }
         guard alert.runModal() == .alertFirstButtonReturn, !dryRun else { return }
         expanded.remove(root)
         store.removeRoot(root)
+    }
+
+    private static func imageViews(in view: NSView) -> [NSImageView] {
+        view.subviews.flatMap { ($0 as? NSImageView).map { [$0] } ?? imageViews(in: $0) }
     }
 
     private func removeRepoItems(of root: String) {
