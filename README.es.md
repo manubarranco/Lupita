@@ -81,10 +81,9 @@ tu agente (el prompt va siempre en inglés; los agentes lo leen):
 Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
 
 <!-- lupita -->
-Define each new decision, question, lesson or story once as `## ID — Title` plus a
-one-line summary. Add each new internal term to the glossary (`docs/glossary.md` if
-there is none) as `- **term** — definition`. Where this repo already has a format
-for these, keep it.
+Define each new decision, question, lesson or story once as `## ID — Title` plus a one-line summary.
+Add each new internal term to the glossary (`docs/glossary.md` if there is none) as `- **term** — definition`.
+Where this repo already has a format for these, keep it.
 <!-- /lupita -->
 ```
 

@@ -19,16 +19,20 @@ final class IndexStore {
     private var rediscoverQueued = false
     private let defaultsKey = "roots"
 
+    /// An install from before D24 never chose folders: it was indexing ~/Repos. Keep it so.
+    /// Runs once at launch, before the first-run window can mark onboarding as shown.
+    static func migrateLegacyRoots() {
+        let defaults = UserDefaults.standard
+        if defaults.stringArray(forKey: "roots") == nil, defaults.bool(forKey: "onboardingShown") {
+            defaults.set(["~/Repos"], forKey: "roots")
+        }
+    }
+
     var roots: [String] {
         get {
             let defaults = UserDefaults.standard
-            if let saved = defaults.stringArray(forKey: defaultsKey) { return saved }
-            // An install from before D24 never chose folders: it was indexing ~/Repos. Keep it so.
-            if defaults.bool(forKey: "onboardingShown") {
-                defaults.set(["~/Repos"], forKey: defaultsKey)
-                return ["~/Repos"]
-            }
-            return []  // first run: the user picks the folders (D24)
+            // Empty on a first run: the user picks the folders (D24).
+            return defaults.stringArray(forKey: defaultsKey) ?? []
         }
         set { UserDefaults.standard.set(newValue, forKey: defaultsKey); rebuild() }
     }

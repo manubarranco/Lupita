@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var inFlight = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        IndexStore.migrateLegacyRoots()
         menu = StatusMenu(store: store) { [weak self] choice in
             HotkeyChoice.current = choice
             self?.installTrigger()
