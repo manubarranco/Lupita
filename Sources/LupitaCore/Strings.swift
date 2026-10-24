@@ -133,15 +133,27 @@ public enum S {
     public static var copy: String { t("Copy", "Copiar") }
     public static var openWith: String { t("Open with", "Abrir con") }
     public static var finder: String { "Finder" }
-    public static var copyAndOpen: String { t("Copy and open", "Copiar y abrir") }
+    public static var modeManual: String { t("By hand", "A mano") }
+    public static var modeAgent: String { t("With your agent", "Con tu agente") }
+    public static var blockLabel: String {
+        t("Block for your agents' instructions file", "Bloque para el archivo de instrucciones de tus agentes")
+    }
+    public static func copyBlockAndOpen(_ file: String) -> String { t("Copy block and open \(file)", "Copiar bloque y abrir \(file)") }
+    public static var copyPromptAndOpen: String { t("Copy prompt and open repo", "Copiar prompt y abrir repo") }
+    public static var blockCopied: String { t("Block copied", "Bloque copiado") }
+    public static var promptCopied: String { t("Prompt copied", "Prompt copiado") }
+    public static func pasteBlock(_ file: String) -> String {
+        t("Block copied: paste it at the end of \(file) and save.", "Bloque copiado: pégalo al final de \(file) y guarda.")
+    }
+    public static func pastePrompt(_ repo: String) -> String {
+        t("Prompt copied: paste it in your agent's chat in \(repo).", "Prompt copiado: pégalo en el chat de tu agente en \(repo).")
+    }
     public static func undefinedCitations(_ n: Int) -> String {
         n == 0 ? t("everything explained", "todo explicado")
                : t("\(n) \(n == 1 ? "citation" : "citations") unexplained", "\(n) \(n == 1 ? "cita sin explicar" : "citas sin explicar")")
     }
     public static var ruleInstalled: String { t("rule in place", "regla puesta") }
     public static var ruleMissing: String { t("no rule", "sin regla") }
-    public static var promptWord: String { t("prompt", "prompt") }
-    public static var copied: String { t("Copied", "Copiado") }
     public static var noAgentRepos: String {
         t("No repos with an AGENTS.md or CLAUDE.md found in your folders.", "No hay repos con AGENTS.md o CLAUDE.md en tus carpetas.")
     }

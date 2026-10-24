@@ -148,6 +148,10 @@ import Testing
         let plain = try makeRepo([".cursorrules": "x", "README.md": "x"])
         #expect(Onboarding.agentFiles(in: plain).isEmpty)
         #expect(Onboarding.status(of: RefIndex.build(repos: [plain])).isEmpty)
+        // By hand, the block goes where the prompt would put it: AGENTS.md first.
+        let row = { (files: [String]) in RepoOnboarding(repo: repo, agentFiles: files, undefinedCitations: 0, ruleInstalled: false) }
+        #expect(row(["AGENTS.md", "CLAUDE.md"]).instructionsFile == "AGENTS.md")
+        #expect(row(["CLAUDE.md"]).instructionsFile == "CLAUDE.md")
     }
 
     @Test func detectsTheMarker() throws {

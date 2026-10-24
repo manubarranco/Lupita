@@ -12,6 +12,11 @@ public struct RepoOnboarding: Hashable, Sendable {
     /// The `<!-- lupita -->` marker is in one of the agent files.
     public let ruleInstalled: Bool
 
+    /// Where the rule goes, by the prompt's own rule: `AGENTS.md`, or `CLAUDE.md` if there is none.
+    public var instructionsFile: String? {
+        ["AGENTS.md", "CLAUDE.md"].first(where: agentFiles.contains)
+    }
+
     public init(repo: Repo, agentFiles: [String], undefinedCitations: Int, ruleInstalled: Bool) {
         self.repo = repo
         self.agentFiles = agentFiles

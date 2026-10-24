@@ -75,16 +75,19 @@ struct Editor: Identifiable, Hashable {
     let id: String   // bundle id, or "finder"
     let name: String
     let url: URL?
+    /// URL scheme that opens a file at a line (`vscode://file/path:12`).
+    var scheme: String? = nil
 
     static let known = [
-        ("Cursor", "com.todesktop.230313mzl4w4u92"), ("VS Code", "com.microsoft.VSCode"),
-        ("Windsurf", "com.exafunction.windsurf"), ("Zed", "dev.zed.Zed"),
+        ("Cursor", "com.todesktop.230313mzl4w4u92", "cursor"), ("VS Code", "com.microsoft.VSCode", "vscode"),
+        ("Windsurf", "com.exafunction.windsurf", "windsurf"), ("Zed", "dev.zed.Zed", "zed"),
     ]
     static let finder = Editor(id: "finder", name: S.finder, url: nil)
 
     static func installed() -> [Editor] {
-        let found = known.compactMap { name, bundle in
-            NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundle).map { Editor(id: bundle, name: name, url: $0) }
+        let found = known.compactMap { name, bundle, scheme in
+            NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundle)
+                .map { Editor(id: bundle, name: name, url: $0, scheme: scheme) }
         }
         return found.isEmpty ? [finder] : found
     }
@@ -92,7 +95,10 @@ struct Editor: Identifiable, Hashable {
 
 @MainActor
 final class OnboardingModel: ObservableObject {
-    private static let editorKey = "openWith"
+    private static let editorKey = "openWith", modeKey = "ruleMode"
+    /// By hand (the block, pasted in the file) or with the user's agent (the prompt). Only one
+    /// is shown at a time, so what is on screen is always what gets copied.
+    enum Mode: String { case manual, agent }
     @Published var rows: [RepoOnboarding] = []
     @Published var percent: Int?
     @Published var roots: [String]
@@ -100,6 +106,9 @@ final class OnboardingModel: ObservableObject {
     @Published var selected: Set<String> = []
     @Published var editors: [Editor] = [.finder]
     @Published var copied: String?
+    @Published var mode: Mode {
+        didSet { UserDefaults.standard.set(mode.rawValue, forKey: Self.modeKey); copied = nil }
+    }
     @Published var editorID: String {
         didSet { UserDefaults.standard.set(editorID, forKey: Self.editorKey) }
     }
@@ -110,6 +119,7 @@ final class OnboardingModel: ObservableObject {
         self.store = store
         roots = store.roots
         editorID = UserDefaults.standard.string(forKey: Self.editorKey) ?? ""
+        mode = UserDefaults.standard.string(forKey: Self.modeKey).flatMap(Mode.init) ?? .manual
     }
 
     var editor: Editor { editors.first { $0.id == editorID } ?? editors[0] }
@@ -180,19 +190,39 @@ final class OnboardingModel: ObservableObject {
         }
     }
 
-    func copyPrompt() {
+    /// What is shown, and what gets copied, in the current mode.
+    var text: String { mode == .manual ? Onboarding.ruleBlock : Onboarding.prompt }
+
+    func copyText() {
         NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(Onboarding.prompt, forType: .string)
+        NSPasteboard.general.setString(text, forType: .string)
+        copied = mode == .manual ? S.blockCopied : S.promptCopied
     }
 
+    /// By hand: copies the block and opens the instructions file at its last line.
+    /// With an agent: copies the prompt and opens the repo, to paste in the agent's chat.
     func copyAndOpen(_ row: RepoOnboarding) {
-        copyPrompt()
-        copied = row.repo.name
+        copyText()
+        let workspace = NSWorkspace.shared
+        if mode == .manual, let file = row.instructionsFile {
+            copied = S.pasteBlock(file)
+            let path = (row.repo.path as NSString).appendingPathComponent(file)
+            let lines = ((try? String(contentsOfFile: path, encoding: .utf8)) ?? "").components(separatedBy: "\n").count
+            if let scheme = editor.scheme,
+               let encoded = path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+               let url = URL(string: "\(scheme)://file\(encoded):\(max(lines, 1))") {
+                workspace.open(url)
+            } else {
+                workspace.open(URL(fileURLWithPath: path))
+            }
+            return
+        }
+        copied = S.pastePrompt(row.repo.name)
         let folder = URL(fileURLWithPath: row.repo.path)
         if let app = editor.url {
-            NSWorkspace.shared.open([folder], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
+            workspace.open([folder], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
         } else {
-            NSWorkspace.shared.open(folder)
+            workspace.open(folder)
         }
     }
 }
@@ -256,6 +286,13 @@ private struct ReposStep: View {
         VStack(alignment: .leading, spacing: 14) {
             Text(S.onboardingTitle).font(.title2.weight(.semibold))
             Text(S.onboardingIntro(percent: model.percent)).font(.callout).foregroundStyle(.secondary)
+            Picker("", selection: $model.mode) {
+                Text(S.modeManual).tag(OnboardingModel.Mode.manual)
+                Text(S.modeAgent).tag(OnboardingModel.Mode.agent)
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
             promptBox
             if model.editors.count > 1 || model.editors.first?.url != nil {
                 Picker(S.openWith, selection: Binding(get: { model.editor.id }, set: { model.editorID = $0 })) {
@@ -278,7 +315,7 @@ private struct ReposStep: View {
             HStack {
                 Button(S.addFolder, action: addFolder)
                 Spacer()
-                if let copied = model.copied { Text("\(S.copied): \(copied)").font(.caption).foregroundStyle(.secondary) }
+                if let copied = model.copied { Text(copied).font(.callout.weight(.medium)).foregroundStyle(Color.accentColor) }
             }
         }
     }
@@ -286,12 +323,12 @@ private struct ReposStep: View {
     private var promptBox: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text(S.promptLabel).font(.caption).foregroundStyle(.secondary)
+                Text(model.mode == .manual ? S.blockLabel : S.promptLabel).font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button(S.copy) { model.copyPrompt(); model.copied = S.promptWord }
+                Button(S.copy) { model.copyText() }
             }
             ScrollView {
-                Text(Onboarding.prompt)
+                Text(model.text)
                     .font(.system(.caption, design: .monospaced))
                     .textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -313,7 +350,9 @@ private struct ReposStep: View {
                 .font(.caption.weight(.medium))
                 .padding(.horizontal, 8).padding(.vertical, 2)
                 .background(row.ruleInstalled ? Color.green.opacity(0.18) : Color.orange.opacity(0.18), in: Capsule())
-            Button(S.copyAndOpen) { model.copyAndOpen(row) }
+            Button(model.mode == .manual ? S.copyBlockAndOpen(row.instructionsFile ?? "AGENTS.md") : S.copyPromptAndOpen) {
+                model.copyAndOpen(row)
+            }
                 .disabled(row.ruleInstalled)
         }
         .padding(12)
