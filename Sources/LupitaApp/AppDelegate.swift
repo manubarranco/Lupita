@@ -8,6 +8,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let lens = CursorLens()
     var menu: StatusMenu?
     var trigger: Trigger?
+    var onboarding: OnboardingWindow?
     private var inFlight = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -15,6 +16,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             HotkeyChoice.current = choice
             self?.installTrigger()
         }
+        onboarding = OnboardingWindow(store: store) { [weak self] in self?.menu?.addRoot() }
+        menu?.onPrepareRepos = { [weak self] in self?.onboarding?.show() }
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
         // Dev aid: `lupita poke` does what ⌃⌥R does, for automated checks that cannot press keys.
@@ -34,6 +37,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         store.rebuild()
         Permissions.explainIfNeeded()
+        // First run: once the first index exists, offer to prepare the repos (D21).
+        Task { @MainActor [weak self] in
+            while self?.store.index == nil { try? await Task.sleep(for: .milliseconds(300)) }
+            self?.onboarding?.showFirstTimeIfNeeded()
+        }
     }
 
     func installTrigger() {

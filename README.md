@@ -71,12 +71,24 @@ window, the nearest folder. When the definition comes from another repo, the too
 ## Make your agents easy to look up
 
 Lupita works with what agents already write, but it is exact when every reference is defined
-like this. Add it to your `AGENTS.md` or `CLAUDE.md`:
+like this. Lupita never writes in your repos: it gives you a prompt for your own agent, which
+knows the repo and commits the change. Paste this to your agent:
+
+> Add this block at the end of this repo's agent instructions file (AGENTS.md if it exists;
+> otherwise CLAUDE.md), without changing anything else, and commit.
 
 ```markdown
-Define every decision, question, lesson or story you create as a heading
-`## ID — Title`, followed by a one-line summary. Cite it by ID elsewhere.
+<!-- lupita -->
+Define every decision, question, lesson or story you create as a heading `## ID — Title`
+followed by a one-line summary. Add each new internal term to `docs/glossary.md` as
+`- **term** — definition`. Cite both by ID or term elsewhere.
+<!-- /lupita -->
 ```
+
+The **Prepare your repos…** window (menu bar, and on first launch) lists your repos with agents,
+how many citations nothing defines, and whether the rule is in place, with a button to copy the
+prompt. A second, optional prompt converts the decisions, lessons and terms you already have
+(it touches several files).
 
 See [`examples/demo-project`](examples/demo-project) for a small project that uses every
 format.

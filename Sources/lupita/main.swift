@@ -5,6 +5,7 @@ let usage = """
 usage:
   lupita index <dir…> [--out index.json]     build the index and print stats
   lupita <ID> [--repo NAME] [--roots dir…]   resolve an ID (default roots: ~/Repos)
+  lupita onboarding [dir…] [--prompt|--convert]  repos with agents: undefined citations and rule state
   lupita report <dir…> [--out reports]       write the accuracy report (HTML + sample JSON)
 """
 
@@ -52,6 +53,19 @@ case "poke":
     if let at = take("--at", &args) { info["at"] = at }
     DistributedNotificationCenter.default().postNotificationName(
         .init("com.manubarranco.lupita.lookup"), object: nil, userInfo: info.isEmpty ? nil : info, deliverImmediately: true)
+
+case "onboarding":
+    args.removeFirst()
+    let wantsPrompt = args.contains("--prompt"), wantsConvert = args.contains("--convert")
+    args.removeAll { $0 == "--prompt" || $0 == "--convert" }
+    if wantsPrompt { print(Onboarding.rulePrompt()) }
+    else if wantsConvert { print(Onboarding.conversionPrompt()) }
+    else {
+        let index = RefIndex.build(roots: args.isEmpty ? ["~/Repos"] : args)
+        for row in Onboarding.status(of: index) {
+            print("\(row.repo.name)\t\(S.undefinedCitations(row.undefinedCitations))\t\(row.ruleInstalled ? S.ruleInstalled : S.ruleMissing)")
+        }
+    }
 
 case "report":
     args.removeFirst()

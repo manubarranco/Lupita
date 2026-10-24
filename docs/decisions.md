@@ -111,3 +111,12 @@ Commits and branches are read by running `git` (Homebrew's, or the Command Line 
 it `/usr/bin/git` is a stub that opens an install dialog, so it is never called and commits and
 branches are simply not recognised. Reading `.git` by hand (packfiles, zlib) is not worth it:
 people who use coding agents have git. Approved by Manu, 2026-10-24.
+
+## D21 — The rule is offered as a prompt for the user's own agent; Lupita never writes in their repos
+Lupita does not edit a repo's `AGENTS.md`. The "Prepare your repos" window lists the repos with
+agent instructions (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/`, `.windsurfrules`,
+`.github/copilot-instructions.md`), their undefined citations and whether the `<!-- lupita -->`
+marker is present, and copies a prompt the user pastes to their agent. Why: trust (a lookup tool
+that writes in your repos is a different product), and the agent knows the repo, so it can also
+convert the decisions, lessons and terms that already exist, which a blind append cannot. The app
+only checks the marker. Supersedes the "offer to add a rule" of D9. Approved by Manu, 2026-10-24.
