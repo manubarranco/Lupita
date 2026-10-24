@@ -193,6 +193,20 @@ public enum Report {
         return line <= lines.count ? lines[line - 1] : nil
     }
 
+    /// Fixed sample (seed 42) of term hits found by the generic pattern outside glossary files:
+    /// what D22 labels to decide whether the pattern is switched on.
+    public static func looseTermSample(roots: [String], count: Int = 40) -> [Definition] {
+        let previous = Glossary.looseTerms
+        Glossary.looseTerms = true
+        defer { Glossary.looseTerms = previous }
+        let index = RefIndex.build(roots: roots)
+        let hits = index.terms.values.flatMap { $0 }
+            .filter { !Glossary.isGlossaryFile(($0.path as NSString).lastPathComponent) }
+            .sorted { ($0.repo, $0.path, $0.line, $0.id) < ($1.repo, $1.path, $1.line, $1.id) }
+        var rng = SplitMix64(seed: 42)
+        return pick(hits, count, &rng)
+    }
+
     static func pick<T>(_ items: [T], _ n: Int, _ rng: inout SplitMix64) -> [T] {
         var pool = items
         var out: [T] = []

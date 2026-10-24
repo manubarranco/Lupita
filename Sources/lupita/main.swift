@@ -6,6 +6,7 @@ usage:
   lupita index <dir…> [--out index.json]     build the index and print stats
   lupita <ID> [--repo NAME] [--roots dir…]   resolve an ID (default roots: ~/Repos)
   lupita onboarding [dir…] [--prompt|--convert]  repos with agents: undefined citations and rule state
+  lupita terms <dir…> [--sample N]           sample (seed 42) of generic-pattern term hits outside glossaries
   lupita report <dir…> [--out reports]       write the accuracy report (HTML + sample JSON)
 """
 
@@ -65,6 +66,13 @@ case "onboarding":
         for row in Onboarding.status(of: index) {
             print("\(row.repo.name)\t\(S.undefinedCitations(row.undefinedCitations))\t\(row.ruleInstalled ? S.ruleInstalled : S.ruleMissing)")
         }
+    }
+
+case "terms":
+    args.removeFirst()
+    let n = take("--sample", &args).flatMap(Int.init) ?? 40
+    for (i, d) in Report.looseTermSample(roots: args.isEmpty ? ["~/Repos"] : args, count: n).enumerated() {
+        print("\(i + 1)\t[\(d.repo)] \(d.path):\(d.line)\t\(d.id) — \(d.summary.prefix(110))")
     }
 
 case "report":

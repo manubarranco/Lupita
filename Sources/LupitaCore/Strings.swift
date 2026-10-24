@@ -44,6 +44,7 @@ public enum S {
     public static var kindBranch: String { t("branch", "rama") }
     public static var kindFile: String { t("file", "archivo") }
     public static var kindCommand: String { t("command", "comando") }
+    public static var kindTerm: String { t("term", "término") }
     public static func inBranch(_ main: String) -> String { t("in \(main)", "en \(main)") }
     public static func onlyInBranch(_ branch: String) -> String { t("only in \(branch)", "solo en \(branch)") }
     public static var inNoBranch: String { t("in no branch", "en ninguna rama") }

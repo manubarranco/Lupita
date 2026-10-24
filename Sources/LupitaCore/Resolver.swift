@@ -86,6 +86,11 @@ public struct Resolver: Sendable {
         if let id = IDGrammar.parse(query), let defs = index.definitions[id.key] {
             return result(query, .exact, key: id.key, defs, preferredRepo, fromPath)
         }
+        // A glossary term (D22) comes after IDs and repo references. For text that is not shaped
+        // like an ID it also comes before the OCR corrections; ID-shaped text tries the
+        // corrections first and falls back to a term only when nothing defines the ID.
+        let idShaped = IDGrammar.parse(query) != nil
+        if !idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
 
         // Fewest substitutions first; stop at the first distance that yields any match.
         for distance in 1...Self.maxSubstitutions {
@@ -113,11 +118,36 @@ public struct Resolver: Sendable {
             return result(query, .corrected, key: key, index.definitions[key]!, preferredRepo, fromPath)
         }
 
+        if idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
         if let id = IDGrammar.parse(query) {
             return Resolution(query: query, kind: .undefined, key: id.key, definitions: [],
                               mentions: index.mentions[id.key], alternatives: [])
         }
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
+    }
+
+    /// A glossary term for `phrase` (one to four words), or nil. The repo of the window comes first;
+    /// a term from another repo is flagged. Public so the picker can try longer windows (D23).
+    public func resolveTerm(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
+                            fromPath: String? = nil) -> Resolution? {
+        let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
+        return termResolution(phrase, preferredRepo: named ?? preferredRepo)
+    }
+
+    private func termResolution(_ phrase: String, preferredRepo: String?) -> Resolution? {
+        guard !index.terms.isEmpty else { return nil }
+        for key in Glossary.lookupKeys(phrase) {
+            guard let defs = index.terms[key], !defs.isEmpty else { continue }
+            func isPreferred(_ d: Definition) -> Bool { preferredRepo.map { d.repo.caseInsensitiveCompare($0) == .orderedSame } ?? false }
+            let ordered = defs.enumerated().sorted { a, b in
+                (isPreferred(a.element) ? 0 : 1, a.offset) < (isPreferred(b.element) ? 0 : 1, b.offset)
+            }.map(\.element)
+            var r = Resolution(query: phrase.trimmingCharacters(in: .whitespacesAndNewlines), kind: .exact, key: key,
+                               definitions: ordered, mentions: nil, alternatives: [])
+            if preferredRepo != nil, let first = ordered.first { r.fromOtherRepo = !isPreferred(first) }
+            return r
+        }
+        return nil
     }
 
     /// Picks ID candidates out of a line of OCR text and resolves them, nearest to `cursorOffset` first.

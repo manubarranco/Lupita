@@ -59,6 +59,7 @@ en que las señalas, así que nunca están desactualizadas:
 | Una rama (`fix/search`) | Su último commit y cuánto va por delante de `main`, o, si se borró, el merge que la cerró |
 | Un archivo (`docs/decisions.md:12`) | Su título y primera línea (Markdown) o su último cambio. Clic: lo abre en la línea |
 | Un comando (`/retro`) | Su descripción, de `.claude/commands` o `.claude/skills`, en el repo o en `~/.claude` |
+| Un término de glosario (`liquidación`, `el libro mayor`) | Su definición, de un archivo de glosario (`glossary.md`, `glosario.md`…) del repo. Clic: lo abre en la línea. Valen términos de una a cuatro palabras; si viene de otro repo, lo indica |
 
 Commits y ramas necesitan git (las Command Line Tools); sin ellas, simplemente no se reconocen.
 
