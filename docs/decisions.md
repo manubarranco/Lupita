@@ -112,14 +112,19 @@ it `/usr/bin/git` is a stub that opens an install dialog, so it is never called 
 branches are simply not recognised. Reading `.git` by hand (packfiles, zlib) is not worth it:
 people who use coding agents have git. Approved by Manu, 2026-10-24.
 
-## D21 — The rule is offered as a prompt for the user's own agent; Lupita never writes in their repos (refines D9)
-Lupita does not edit a repo's `AGENTS.md`. The "Prepare your repos" window lists the repos with
-agent instructions (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `.cursor/rules/`, `.windsurfrules`,
-`.github/copilot-instructions.md`), their undefined citations and whether the `<!-- lupita -->`
-marker is present, and copies a prompt the user pastes to their agent. Why: trust (a lookup tool
-that writes in your repos is a different product), and the agent knows the repo, so it can also
-convert the decisions, lessons and terms that already exist, which a blind append cannot. The app
-only checks the marker. D9 already said "offer, never a sidecar"; this refines the offer: a prompt for the user's agent, and Lupita does not write. "Undefined citations" counts mentions of keys nothing defines in any repo (weak sections, `P0`-`P9` labels and ranges excluded): what Lupita cannot explain. Approved by Manu, 2026-10-24.
+## D21 — The rule is offered as a minimal English prompt for the user's own agent; Lupita never writes in their repos (refines D9)
+Lupita does not edit a repo's `AGENTS.md`. The "Prepare your repos" window lists only the repos that have an `AGENTS.md` or
+`CLAUDE.md` in the root (Cursor, Windsurf and Copilot rules are not listed; the `<!-- lupita -->` marker is still looked up in
+those two files), shows the prompt once, and per repo a "Copy and open" button that copies it and opens the folder in the user's
+editor (Cursor, VS Code, Windsurf, Zed or Finder). The prompt is always in English (agents read it), three sentences plus the
+marked block, and safe by design: if the agent fails it does nothing, it does not ask for a commit, and it has no judgement steps
+("if the block is already there, do nothing"; "where this repo already has a format, keep it"). There is no conversion prompt:
+it touched several files and asked the agent for criterion. The header is honest: Lupita works without the rule (it already
+explains the share of citations that something defines, shown as a percentage over the listed repos); the rule acts forward, on
+what agents create from now on and on their internal vocabulary. Why: trust (a lookup tool that writes in your repos is a
+different product) and the agent knows the repo. The app only checks the marker, every 3 s while the window is visible.
+"Unexplained citations" counts mentions of keys nothing defines in any repo (weak sections, `P0`-`P9` labels and ranges
+excluded). Approved by Manu, 2026-10-24.
 
 ## D22 — Glossary terms: which files, which formats
 Terms come from glossary files: any `.md` whose name contains `glossary`, `glosario`, `nomenclatura` or `terminolog`.
@@ -139,3 +144,16 @@ pointed word is not an ID or a repo reference, windows of 4 to 1 words that cont
 Accessibility line and over the OCR row; a word ending in punctuation closes the phrase. The CLI takes the phrase whole:
 `lupita "la Mesa" --repo nib`. A term in the window's repo comes first; one from another repo is flagged. Why: the
 terms agents coin are often two or three words (`Mesa de Trazo`), and pointing at any one of them should find it.
+
+## D24 — The first run asks for the repo folders
+Lupita no longer assumes `~/Repos`. With no saved folders nothing is indexed, and the first window offers the usual candidates
+that exist on that Mac (`~/Repos`, `~/repos`, `~/code`, `~/Code`, `~/dev`, `~/Developer`, `~/Projects`, `~/projects`, `~/GitHub`,
+`~/Documents/GitHub`, `~/src`) with how many git repos each holds (two levels deep, to be fast), plus "Add another folder…".
+An install from before this, where "onboardingShown" is already set and no folders were saved, keeps `~/Repos`. Order at launch:
+permissions, then this window. Approved by Manu, 2026-10-24.
+
+## D25 — Updates are checked only when the user asks
+"Check for updates…" in the menu makes one GET to GitHub's latest-release endpoint and compares `tag_name` with the installed
+version (numeric semver). Never in the background, so "nothing leaves your Mac" stays true except when the user asks. When a newer
+release is found the item becomes "Download Lupita X.Y.Z…" until restart. Automatic installation with Sparkle is postponed until the
+app is notarized. Approved by Manu, 2026-10-24.

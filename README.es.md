@@ -71,25 +71,27 @@ carpeta más cercana. Si la definición viene de otro repo, el tooltip lo dice.
 
 ## Que tus agentes sean fáciles de consultar
 
-Lupita funciona con lo que los agentes ya escriben, pero es exacto cuando cada referencia está
-definida así. Lupita nunca escribe en tus repos: te da un prompt para tu propio agente, que conoce
-el repo y hace el commit. Pégale esto a tu agente:
+Lupita funciona sin ninguna regla: ya explica la mayor parte de lo que citan tus agentes. La
+regla lo lleva más lejos: lo que tus agentes creen a partir de ahora y su vocabulario interno.
+Lupita nunca escribe en tus repos: te da un prompt para tu propio agente. Es seguro por diseño:
+si el agente falla, no hace nada; no pide commit; no pide decisiones de criterio. Pégale esto a
+tu agente (el prompt va siempre en inglés; los agentes lo leen):
 
-> Añade este bloque al final del archivo de instrucciones de agentes de este repo (AGENTS.md si
-> existe; si no, CLAUDE.md), sin cambiar nada más, y haz commit.
+```text
+Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
 
-```markdown
 <!-- lupita -->
-Define every decision, question, lesson or story you create as a heading `## ID — Title`
-followed by a one-line summary. Add each new internal term to `docs/glossary.md` as
-`- **term** — definition`. Cite both by ID or term elsewhere.
+Define each new decision, question, lesson or story once as `## ID — Title` plus a
+one-line summary. Add each new internal term to the glossary (`docs/glossary.md` if
+there is none) as `- **term** — definition`. Where this repo already has a format
+for these, keep it.
 <!-- /lupita -->
 ```
 
-La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista tus repos con
-agentes, cuántas citas no define nada y si la regla está puesta, con un botón para copiar el
-prompt. Un segundo prompt, opcional, convierte las decisiones, lecciones y términos que ya tienes
-(toca varios archivos).
+La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista los repos con
+`AGENTS.md` o `CLAUDE.md`, cuántas citas aún no explica nada y si la regla está puesta. **Copiar y
+abrir** copia el prompt y abre el repo en tu editor (Cursor, VS Code, Windsurf, Zed o Finder),
+listo para pegar.
 
 En [`examples/demo-project`](examples/demo-project) hay un proyecto pequeño que usa todos los
 formatos.
@@ -120,7 +122,8 @@ Lupita pide dos permisos de macOS, y solo los usa cuando pulsas el atajo:
   600 × 80 pt alrededor del ratón, en las apps que no exponen su texto.
 
 Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de lo que
-consultas. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
+consultas. La única excepción es **Buscar actualizaciones…** en el menú: pregunta a GitHub por la
+última release, y solo cuando lo pulsas. Lupita nunca comprueba en segundo plano. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
 
 Si compilas desde el código, macOS olvida los permisos en cada compilación salvo que la app
 esté firmada con un certificado estable: crea en Acceso a Llaveros un certificado autofirmado
