@@ -153,7 +153,8 @@ struct TooltipView: View {
         Button { open(d) } label: {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold))
+                    // A term's title is the term itself: showing the ID too would repeat it.
+                    if d.rule != .term { Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold)) }
                     Text(d.title).font(.body.weight(.medium)).lineLimit(2)
                 }
                 if !d.summary.isEmpty {
@@ -190,6 +191,7 @@ struct TooltipView: View {
         case .branch: S.kindBranch
         case .file: S.kindFile
         case .command: S.kindCommand
+        case .term: S.kindTerm
         default: nil
         }
     }

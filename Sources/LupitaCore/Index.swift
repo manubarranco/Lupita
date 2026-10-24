@@ -31,11 +31,25 @@ public struct RefIndex: Codable, Sendable {
     /// Normalized key → definitions, best first.
     public var definitions: [String: [Definition]] = [:]
     public var mentions: [String: Mentions] = [:]
+    /// Normalized term key (`Glossary.normalize`) → glossary definitions, best first (D22).
+    public var terms: [String: [Definition]] = [:]
     /// Repo name → markdown files indexed.
     public var filesPerRepo: [String: Int] = [:]
     public var fileCount: Int { filesPerRepo.values.reduce(0, +) }
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo }
+
+    /// Indexes saved before terms existed still load.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        repos = try c.decode([Repo].self, forKey: .repos)
+        definitions = try c.decode([String: [Definition]].self, forKey: .definitions)
+        mentions = try c.decode([String: Mentions].self, forKey: .mentions)
+        terms = try c.decodeIfPresent([String: [Definition]].self, forKey: .terms) ?? [:]
+        filesPerRepo = try c.decode([String: Int].self, forKey: .filesPerRepo)
+    }
 
     public static func build(roots: [String]) -> RefIndex {
         build(repos: RepoDiscovery.repos(under: roots))
@@ -73,6 +87,10 @@ public struct RefIndex: Codable, Sendable {
             let kept = definitions[key]!.filter { $0.repo != name }
             definitions[key] = kept.isEmpty ? nil : kept
         }
+        for key in Array(terms.keys) {
+            let kept = terms[key]!.filter { $0.repo != name }
+            terms[key] = kept.isEmpty ? nil : kept
+        }
         let prefix = name + "/"
         for key in Array(mentions.keys) {
             var m = mentions[key]!
@@ -105,6 +123,18 @@ public struct RefIndex: Codable, Sendable {
                 rule: hit.rule, title: title, summary: summary, absolutePath: absolutePath))
             if hit.line >= 0 { definedOnLine[hit.line] = hit.id.key }
         }
+        for hit in Glossary.terms(fileName: fileName, lines: lines) {
+            for name in hit.names {
+                let key = Glossary.normalize(name)
+                guard !key.isEmpty else { continue }
+                let d = Definition(id: name, key: key, repo: repo, path: relativePath, line: hit.line + 1,
+                                   rule: .term, title: name, summary: Snippet.truncate(hit.definition),
+                                   absolutePath: absolutePath)
+                if !(terms[key] ?? []).contains(where: { $0.repo == repo && $0.path == relativePath && $0.line == d.line }) {
+                    terms[key, default: []].append(d)
+                }
+            }
+        }
         var inFence = false
         for (i, line) in lines.enumerated() {
             if line.trimmingCharacters(in: .whitespaces).hasPrefix("```") { inFence.toggle(); continue }
@@ -124,6 +154,7 @@ public struct RefIndex: Codable, Sendable {
         for defs in definitions.values {
             for d in defs { density[densityKey(d), default: 0] += 1 }
         }
+        rankTerms()
         for (key, defs) in definitions {
             definitions[key] = defs.sorted {
                 if $0.rule.weight != $1.rule.weight { return $0.rule.weight > $1.rule.weight }
@@ -131,6 +162,12 @@ public struct RefIndex: Codable, Sendable {
                 if a != b { return a > b }
                 return ($0.repo, $0.path, $0.line) < ($1.repo, $1.path, $1.line)
             }
+        }
+    }
+
+    private mutating func rankTerms() {
+        for (key, defs) in terms {
+            terms[key] = defs.sorted { ($0.repo, $0.path, $0.line) < ($1.repo, $1.path, $1.line) }
         }
     }
 

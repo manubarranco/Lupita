@@ -5,6 +5,7 @@ let usage = """
 usage:
   lupita index <dir…> [--out index.json]     build the index and print stats
   lupita <ID> [--repo NAME] [--roots dir…]   resolve an ID (default roots: ~/Repos)
+  lupita terms <dir…> [--sample N]           sample (seed 42) of generic-pattern term hits outside glossaries
   lupita report <dir…> [--out reports]       write the accuracy report (HTML + sample JSON)
 """
 
@@ -52,6 +53,13 @@ case "poke":
     if let at = take("--at", &args) { info["at"] = at }
     DistributedNotificationCenter.default().postNotificationName(
         .init("com.manubarranco.lupita.lookup"), object: nil, userInfo: info.isEmpty ? nil : info, deliverImmediately: true)
+
+case "terms":
+    args.removeFirst()
+    let n = take("--sample", &args).flatMap(Int.init) ?? 40
+    for (i, d) in Report.looseTermSample(roots: args.isEmpty ? ["~/Repos"] : args, count: n).enumerated() {
+        print("\(i + 1)\t[\(d.repo)] \(d.path):\(d.line)\t\(d.id) — \(d.summary.prefix(110))")
+    }
 
 case "report":
     args.removeFirst()
