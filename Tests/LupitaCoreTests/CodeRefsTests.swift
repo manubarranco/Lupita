@@ -716,11 +716,17 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         #expect(first("#34", window: nil)?.title == "Fix the typo in checkout")
     }
 
-    @Test func threeDigitNumbersFallBackToColours() throws {
+    @Test func repeatedDigitGraysFallBackToColours() throws {
         try #require(Git.executable != nil)
         let d = first("#333")
         #expect(d?.rule == .color)
         #expect(d?.id == "#333333")
+        #expect(first("#000")?.rule == .color)
+        #expect(first("#fff")?.rule == .color)
+        // Other all-digit numbers are PRs, in history or not.
+        #expect(first("#123")?.rule == .pullRequest)
+        #expect(first("#123")?.title == S.prNotInHistory)
+        #expect(first("#1234")?.rule == .pullRequest)
         #expect(first("#12")?.rule == .pullRequest)
         // An explicit PR is never a colour.
         #expect(first("PR 333")?.rule == .pullRequest)

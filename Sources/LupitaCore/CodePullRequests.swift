@@ -8,18 +8,21 @@ extension CodeRefs {
         static let shape = try! NSRegularExpression(pattern: #"^(?:(?:PR|pull request)\s*#?\s*|#)(\d{1,6})$"#, options: [.caseInsensitive])
 
         static func resolve(_ text: Text, repos: [Repo], preferredRepo: String?) -> [Definition]? {
-            guard let g = groups(shape, text.text), let number = Int(g[1]), number > 0 else { return nil }
+            guard let g = groups(shape, text.text), let number = Int(g[1]) else { return nil }
+            // The grays `#000`…`#999` are the only all-digit colours worth showing (D35); the rest are PR numbers.
+            let gray = g[1].count == 3 && Set(g[1]).count == 1
+            guard number > 0 || gray else { return nil }
             let explicit = !text.text.hasPrefix("#")
             // The window's repo only: another repo's `#123` is a different pull request.
             let searched = preferredRepo.map { name in repos.filter { $0.name.caseInsensitiveCompare(name) == .orderedSame } } ?? repos
-            if Git.executable != nil {
+            if Git.executable != nil, number > 0 {
                 // One git process per repo, all at once: with no window repo every repo is asked.
                 let box = Results(count: searched.count)
                 DispatchQueue.concurrentPerform(iterations: searched.count) { i in box.set(i, merged(number, in: searched[i])) }
                 if let d = box.first { return [d] }
             }
             // `#333` with no such PR is a colour.
-            if !explicit, [3, 4].contains(g[1].count), let colour = Tokens.color(g[1], repos: repos) { return colour }
+            if !explicit, gray, let colour = Tokens.color(g[1], repos: repos) { return colour }
             guard explicit || g[1].count > 1 else { return nil }
             let id = "#\(number)"
             return [Definition(id: id, key: id, repo: searched.count == 1 ? searched[0].name : "", path: "", line: 0, rule: .pullRequest,
