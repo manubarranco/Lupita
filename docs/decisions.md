@@ -187,3 +187,24 @@ components are left out: almost never cited. Why: in 150 real agent sessions sym
 the user's repos, 30 % with a comment), local addresses 94, CSS tokens and colours ~120, commands ~90, errors and HTML
 ~80, packages, components and PRs ~5 together; PRs are kept because Manu sees them constantly at work. Approved by Manu,
 2026-10-24.
+
+## D30 — Code is looked up on demand with no index; the budget is measured
+Symbols, tokens, addresses, commands and PRs are searched when the user points (like D19), not indexed: a byte search (`memmem`) skips the files that do not contain the name and only those that do are read as lines. Measured on ~/Repos (7 repos, ~1 800 source files, 150 MB): 15-100 ms when the name is defined in the window's repo, 150-300 ms for a name defined nowhere (cold, the whole disk walked once); file lists and CSS token tables are kept 20 s in memory and never saved. Two fixes were needed to stay under 300 ms: no `git` process to list worktrees (read `.git/worktrees/*/gitdir`, a process cost 90 ms each) and no OCR look-alike search for words over 16 characters (`FontBuilder` cost 0.5 s and found nothing). Revisit with an index beside the .md one if a user's repos are 5× bigger.
+
+## D31 — A word is code only if it looks like code
+Symbols: `_` inside, camelCase or PascalCase with two humps, `()` after it or backticks around it; a plain lowercase word (`slider`) is noise otherwise, and a plain capitalised or ALL-CAPS word without `_` too. Names under 4 characters are never looked up. A name that is also a glossary term is a term unless the text has that shape (D22 stays first for plain words); order: ID, repo reference (D19), code, glossary term. Commands whose name is an ordinary English word (`open`, `make`, `find`, `cat`, `node`, `swift`) only count between backticks; `git`, `npm`, `cd`, `rm`… count anywhere. A bare number is an HTTP status only with a hint (`HTTP 401`, `401 Unauthorized`, backticks, or a word like status/error/response just before it). HTML tags need their angle brackets. Why: pointing at ordinary prose must keep doing nothing.
+
+## D32 — Fixed dictionaries live in Swift source, in both languages
+The ~60 commands, ~40 errors, 18 HTTP statuses and ~48 HTML tags are tables in `CodeDictionaries.swift`, English and Spanish like `Strings.swift`, not a SwiftPM resource bundle. Why: a resource bundle must be copied next to the executable by `bundle.sh`, the CLI and the tests, and a missing bundle crashes at launch; a table in code cannot go missing. A row with no file (a dictionary answer) is not clickable.
+
+## D33 — A local address says who serves it from the process, then the launch file; it never makes a request
+`lsof` tells which process listens on the port and its folder; that folder (or a path in the launch command, or else the repo holding the `.claude/launch.json` that declares the port) names the repo or linked worktree (`nib · qa-baseline`), the route of the URL is the page (found in the repo when it exists), and on/off is whether anything listens. A port nobody declares and nothing listens on answers "No repo declares this address · not running": 28 of the 95 corpus citations, all of them dead dev ports. Why: the corpus has several ports served from worktrees by a launch file in another repo; a click does nothing network-wise.
+
+## D34 — CSS tokens show both themes and follow var() chains
+`--name:` is read from .css, .scss, .astro, .tsx, .jsx and .html (comments and strings skipped, braces tracked). A declaration inside `prefers-color-scheme: dark`, `[data-theme=dark]` or `.dark` is the dark value; a token that only points (`--accent: var(--brand)`) shows dark when what it points to has one. Colours: hex, rgb(), hsl() and shadcn bare `H S% L%` get a swatch; the tooltip paints it with its hex. A hex colour lists the tokens that hold it, or says no token does. Why: tokens are the most cited design vocabulary and are always written twice.
+
+## D35 — PRs are read only from the window's repo; `#NNN` of 3-4 digits falls back to a colour
+`#123`, `PR 123`, `PR #123` search `git log --all` for `Merge pull request #123 …` (title from the body, or the branch if empty) or a squash `Title (#123)` at the end of a subject, in the window's repo only (without a window: all repos, in parallel). No match says "Not in the local history". `#333` with no such PR is the colour #333333; a word `PR` right before it wins over the colour. Open PRs need the network (D26) and are not read. Why: another repo's #123 is another PR.
+
+## D36 — The tooltip gallery is a development aid and its sheet stays out of git
+`LupitaApp --render-tooltips <dir> [repo::]text…` draws the real tooltip in light and dark; `scripts/contact-sheet.swift` lays the frames out. The sheet shows paths of private repos, so it lives in `reports/` (ignored), not in the repo.

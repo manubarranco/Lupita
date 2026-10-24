@@ -47,7 +47,7 @@ ID that was written seconds ago is found anyway.
 Everything else is a mention. Sections *about* an ID (`## D34 part 2`) and priority labels
 (`## P1`) are recognised and kept out of the way.
 
-### Beyond IDs: commits, branches, files and commands
+### Beyond IDs: commits, branches, files, commands and code
 
 Agents also cite things that live in git and on disk. Lupita looks them up at the moment you
 point, so they are never stale:
@@ -60,8 +60,14 @@ point, so they are never stale:
 | A file (`docs/decisions.md:12`) | Its title and first line (Markdown) or its last change. Click: opens it at the line |
 | A command (`/retro`) | Its description, from `.claude/commands` or `.claude/skills`, in the repo or in `~/.claude` |
 | A glossary term (`settlement`, `the ledger`) | Its definition, from a glossary file (`glossary.md`, `glosario.md`…) in the repo. Click: opens it at the line. Terms of one to four words work; a term from another repo is flagged |
+| A symbol (`build_glyphs`, `ARM_TENSION`, `test_engine`, `"panza_a"`) | Its own comment (first 3 lines) and where it is defined, or "no comment". Window repo first; another repo is flagged. A plain word needs `()` or backticks |
+| A local address (`localhost:8130`, `http://127.0.0.1:8131/x.html`) | Which repo serves it (from the listening process or `.claude/launch.json`), which page, and whether it is on. No request is made |
+| A CSS token (`--accent`, `var(--accent)`) or a hex colour (`#0E5400`) | Its value in light and dark, a colour swatch, and where it is defined (or which tokens hold that colour) |
+| A terminal command (`npm run build`, `git reset --hard`) | What the script does (from `package.json`) or a one-line explanation of git and common shell commands, with a warning on risky flags |
+| An error (`ENOENT`, `TypeError`, `HTTP 401`) or an HTML tag (`<dialog>`) | One line from a fixed dictionary |
+| A PR (`#123`, `PR 123`) | Title and merge date, read from the local git history of the window's repo; or "Not in the local history" |
 
-Commits and branches need git (the Command Line Tools); without it they are simply not recognised.
+Commits, branches and PRs need git (the Command Line Tools); without it they are simply not recognised.
 
 ### Which repo, when IDs collide
 
