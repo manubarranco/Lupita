@@ -58,7 +58,7 @@ public enum Report {
         for d in r.definitions {
             out.append("[\(d.repo)] \(d.id) — \(d.rule == .symbol && d.title.isEmpty ? S.noComment : d.title)")
             if !d.summary.isEmpty { out.append("    \(d.summary)") }
-            out.append("    \(d.path):\(d.line) · \(d.rule.rawValue)")
+            out.append("    " + (d.path.isEmpty ? "" : "\(d.path):\(d.line) · ") + d.rule.rawValue)
         }
         if let m = r.mentions { out.append("cited \(m.count)× in \(m.files.count) files") }
         return out.joined(separator: "\n")

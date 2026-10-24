@@ -28,6 +28,7 @@ public enum CodeRefs {
         // 6 PRs, 5 errors and tags, 4 commands are cheap or exact: they run first when they match exactly,
         // but the priority above decides what gets built and what is cut.
         defs = defs ?? Symbols.resolve(text, repos: ordered, preferredRepo: preferredRepo)
+        defs = defs ?? Addresses.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         guard let found = defs, let first = found.first else { return nil }
         var r = Resolution(query: text.text, kind: .exact, key: first.key, definitions: Array(found.prefix(5)),
                            mentions: nil, alternatives: [])
@@ -36,6 +37,13 @@ public enum CodeRefs {
             r.fromOtherRepo = first.rule == .symbol && home.caseInsensitiveCompare(preferredRepo) != .orderedSame
         }
         return r
+    }
+
+    /// `localhost:8130`, `http://127.0.0.1:8131/x.html`: checked before repo references, which would
+    /// otherwise treat a URL as a branch name and ask git about it in every repo.
+    public static func looksLikeAddress(_ raw: String) -> Bool {
+        let text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
+        return matches(Addresses.shape, text.trimmingCharacters(in: trailing))
     }
 
     static func normalize(_ raw: String, before: String, after: String) -> Text? {

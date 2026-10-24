@@ -254,3 +254,102 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         #expect(resolver.resolve("main.py", preferredRepo: "p").definitions.first?.rule == .file)
     }
 }
+
+@Suite(.serialized) struct AddressTests {
+    let repo: Repo
+    let parent: URL
+
+    init() throws {
+        parent = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-addr-\(UUID().uuidString)")
+        repo = try makeCodeRepo("atlas", [
+            "index.html": "<html></html>",
+            "viewer/mesa.html": "<html></html>",
+            ".claude/launch.json": "",
+        ], in: parent)
+        let config = """
+        {"version": "0.0.1", "configurations": [
+          {"name": "atlas-ui", "runtimeExecutable": "python3", "runtimeArgs": ["\(repo.path)/serve.py"], "port": 8130},
+          {"name": "docs", "url": "http://localhost:8090", "runtimeExecutable": "npx"}
+        ]}
+        """
+        try config.write(toFile: repo.path + "/.claude/launch.json", atomically: true, encoding: .utf8)
+    }
+
+    func resolve(_ text: String, listener: CodeRefs.Addresses.Listener? = nil, repos: [Repo]? = nil) -> Definition? {
+        CodeRefs.Addresses.listener = { _ in listener }
+        defer { CodeRefs.Addresses.listener = CodeRefs.Addresses.lsofListener }
+        CodeRefs.FileListCache.shared.clear()
+        return CodeRefs.resolve(text, repos: repos ?? [repo], preferredRepo: "atlas")?.definitions.first
+    }
+
+    @Test func offAddressShowsTheRepoThatDeclaresIt() {
+        let d = resolve("localhost:8130")
+        #expect(d?.rule == .address)
+        #expect(d?.repo == "atlas")
+        #expect(d?.title.contains("atlas-ui") == true)
+        #expect(d?.summary.contains("pid") == false)  // not running
+        #expect(d?.path == "index.html")
+    }
+
+    @Test func theRouteIsThePageAndIsFoundInTheRepo() {
+        let d = resolve("http://127.0.0.1:8130/mesa.html?skin=b")
+        #expect(d?.summary.contains("/mesa.html") == true)
+        #expect(d?.summary.contains("pid") == false)
+        #expect(d?.path == "viewer/mesa.html")
+        #expect(resolve("http://localhost:8130/missing.html")?.path == ".claude/launch.json")
+    }
+
+    @Test func aRunningProcessIsReported() {
+        let live = CodeRefs.Addresses.Listener(pid: 4242, command: "python3", cwd: repo.path)
+        let d = resolve("`localhost:8130`.", listener: live)
+        #expect(d?.summary.contains("pid 4242") == true)
+        #expect(d?.repo == "atlas")
+    }
+
+    @Test func theProcessFolderBeatsTheDeclaringRepo() throws {
+        let other = try makeCodeRepo("other", ["app.js": "x"], in: parent)
+        let live = CodeRefs.Addresses.Listener(pid: 7, command: "node", cwd: other.path + "/")
+        let d = resolve("localhost:8130", listener: live, repos: [repo, other])
+        #expect(d?.repo == "other")
+        let none = resolve("localhost:9999", listener: live, repos: [repo, other])
+        #expect(none?.title.contains("node") == true)
+        #expect(none?.repo == "other")
+    }
+
+    @Test func aLaunchCommandNamingAWorktreeNamesTheWorktree() throws {
+        let wt = parent.appendingPathComponent("atlas-worktrees/qa")
+        try FileManager.default.createDirectory(at: wt, withIntermediateDirectories: true)
+        try "gitdir: x".write(to: wt.appendingPathComponent(".git"), atomically: true, encoding: .utf8)
+        let admin = URL(fileURLWithPath: repo.path + "/.git/worktrees/qa")
+        try FileManager.default.createDirectory(at: admin, withIntermediateDirectories: true)
+        try (RepoDiscovery.realPath(wt.path) + "/.git\n").write(to: admin.appendingPathComponent("gitdir"), atomically: true, encoding: .utf8)
+        let json = #"{"configurations": [{"name": "qa-ui", "runtimeArgs": ["\#(RepoDiscovery.realPath(wt.path))/serve.py"], "port": 8140}]}"#
+        try json.write(toFile: repo.path + "/.claude/launch.json", atomically: true, encoding: .utf8)
+        #expect(resolve("localhost:8140")?.repo == "atlas · qa")
+    }
+
+    @Test func unknownAndOffAddressesSaySo() {
+        let d = resolve("localhost:5555")
+        #expect(d?.repo == "")
+        #expect(d?.summary.contains("pid") == false)
+    }
+
+    @Test func urlsInTheDocsConfigAreRead() {
+        #expect(resolve("localhost:8090")?.title.contains("docs") == true)
+    }
+
+    @Test func notAddresses() {
+        #expect(resolve("localhost") == nil)
+        #expect(resolve("example.com:8080") == nil)
+        #expect(resolve("localhost:8130abc") == nil)
+    }
+
+    @Test func theResolverAnswersAddressesBeforeRepoReferences() {
+        CodeRefs.Addresses.listener = { _ in nil }
+        defer { CodeRefs.Addresses.listener = CodeRefs.Addresses.lsofListener }
+        var index = RefIndex()
+        index.repos = [repo]
+        let r = Resolver(index: index).resolve("http://127.0.0.1:8130/mesa.html", preferredRepo: "atlas")
+        #expect(r.definitions.first?.rule == .address)
+    }
+}

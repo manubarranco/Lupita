@@ -176,7 +176,7 @@ struct TooltipView: View {
                             .padding(.horizontal, 5).padding(.vertical, 1)
                             .background(.secondary.opacity(0.15), in: Capsule())
                     }
-                    Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor)
+                    if !d.repo.isEmpty { Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor) }
                     if let location = Self.location(d) {
                         Text(location).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                     }
@@ -203,6 +203,7 @@ struct TooltipView: View {
         case .command: S.kindCommand
         case .term: S.kindTerm
         case .symbol: S.kindSymbol
+        case .address: S.kindAddress
         default: nil
         }
     }
@@ -211,6 +212,7 @@ struct TooltipView: View {
     static func location(_ d: Definition) -> String? {
         switch d.rule {
         case .repo, .commit, .branch: nil
+        case .address: d.path.isEmpty ? nil : d.path
         case .command: d.path
         case .file: d.line > 1 ? "\(d.path):\(d.line)" : d.path
         default: "\(d.path):\(d.line)"

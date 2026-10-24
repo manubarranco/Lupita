@@ -73,6 +73,14 @@ public enum S {
     // MARK: Code (D29)
     public static var kindSymbol: String { t("symbol", "símbolo") }
     public static var noComment: String { t("no comment", "sin comentario") }
+    public static var kindAddress: String { t("local address", "dirección local") }
+    public static func servedByConfig(_ name: String) -> String { t("Started by “\(name)”", "La arranca «\(name)»") }
+    public static func servedByProcess(_ command: String) -> String { t("Served by \(command)", "La sirve \(command)") }
+    public static var addressUnknown: String { t("No repo declares this address", "Ningún repo declara esta dirección") }
+    public static func page(_ route: String) -> String { t("page \(route)", "página \(route)") }
+    public static var homePage: String { t("home page", "página de inicio") }
+    public static func running(pid: Int) -> String { t("running (pid \(pid))", "encendido (pid \(pid))") }
+    public static var notRunning: String { t("not running", "apagado") }
 
     // MARK: Menu
     public static var noIndex: String { t("No index", "Sin índice") }

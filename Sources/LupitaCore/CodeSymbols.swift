@@ -64,16 +64,17 @@ extension CodeRefs {
 
         /// Absolute paths of the source files of a checkout. Walked with `readdir`: FileManager's
         /// enumerator took 100 ms on a checkout of 10 000 files, this takes a few.
-        static func sourceFiles(in root: String) -> [String] {
-            if let cached = FileListCache.shared.get(root) { return cached }
+        static func sourceFiles(in root: String, extensions exts: Set<String> = extensions) -> [String] {
+            let key = root + "|" + exts.sorted().joined(separator: ",")
+            if let cached = FileListCache.shared.get(key) { return cached }
             var out: [String] = []
-            walk(root, isRoot: true, into: &out)
+            walk(root, isRoot: true, extensions: exts, into: &out)
             out.sort()
-            FileListCache.shared.set(root, out)
+            FileListCache.shared.set(key, out)
             return out
         }
 
-        private static func walk(_ dir: String, isRoot: Bool, into out: inout [String]) {
+        private static func walk(_ dir: String, isRoot: Bool, extensions exts: Set<String>, into out: inout [String]) {
             guard let handle = opendir(dir) else { return }
             defer { closedir(handle) }
             var files: [String] = [], folders: [String] = []
@@ -88,14 +89,14 @@ extension CodeRefs {
                 case Int32(DT_DIR):
                     if !skippedDirs.contains(name), !name.hasSuffix("-worktrees") { folders.append(name) }
                 case Int32(DT_REG):
-                    if extensions.contains((name as NSString).pathExtension.lowercased()) { files.append(name) }
+                    if exts.contains((name as NSString).pathExtension.lowercased()) { files.append(name) }
                 default: break
                 }
             }
             // A nested repo or a linked worktree is searched on its own.
             if hasGit && !isRoot { return }
             out += files.map { dir + "/" + $0 }
-            for folder in folders { walk(dir + "/" + folder, isRoot: false, into: &out) }
+            for folder in folders { walk(dir + "/" + folder, isRoot: false, extensions: exts, into: &out) }
         }
 
         /// Linked worktrees of a repo, read from `.git/worktrees/*/gitdir` (no git process: spawning one
