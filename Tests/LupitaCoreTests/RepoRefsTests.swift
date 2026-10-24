@@ -127,3 +127,105 @@ import Testing
         #expect(r.definitions.first?.rule == .file)
     }
 }
+
+@Suite struct OnboardingTests {
+    private func makeRepo(_ files: [String: String]) throws -> Repo {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("onb-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: dir.appendingPathComponent(".git"), withIntermediateDirectories: true)
+        for (path, text) in files {
+            let url = dir.appendingPathComponent(path)
+            try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try text.write(to: url, atomically: true, encoding: .utf8)
+        }
+        return Repo(name: dir.lastPathComponent, path: RepoDiscovery.realPath(dir.path))
+    }
+
+    @Test func detectsAgentFiles() throws {
+        let repo = try makeRepo(["CLAUDE.md": "x", ".cursor/rules/a.mdc": "x", ".github/copilot-instructions.md": "x", "README.md": "x"])
+        #expect(Onboarding.agentFiles(in: repo) == ["CLAUDE.md"])
+        let both = try makeRepo(["AGENTS.md": "x", "CLAUDE.md": "x"])
+        #expect(Onboarding.agentFiles(in: both) == ["AGENTS.md", "CLAUDE.md"])
+        let plain = try makeRepo([".cursorrules": "x", "README.md": "x"])
+        #expect(Onboarding.agentFiles(in: plain).isEmpty)
+        #expect(Onboarding.status(of: RefIndex.build(repos: [plain])).isEmpty)
+        // By hand, the block goes where the prompt would put it: AGENTS.md first.
+        let row = { (files: [String]) in RepoOnboarding(repo: repo, agentFiles: files, undefinedCitations: 0, ruleInstalled: false) }
+        #expect(row(["AGENTS.md", "CLAUDE.md"]).instructionsFile == "AGENTS.md")
+        #expect(row(["CLAUDE.md"]).instructionsFile == "CLAUDE.md")
+    }
+
+    @Test func detectsTheMarker() throws {
+        let with = try makeRepo(["AGENTS.md": "intro\n\(Onboarding.ruleBlock)\n"])
+        let without = try makeRepo(["AGENTS.md": "intro"])
+        #expect(Onboarding.hasRule(in: with, files: ["AGENTS.md"]))
+        #expect(!Onboarding.hasRule(in: without, files: ["AGENTS.md"]))
+    }
+
+    @Test func countsUndefinedCitations() throws {
+        let repo = try makeRepo([
+            "AGENTS.md": "x",
+            "docs/decisions.md": "## D1 — Defined\nSummary.\n\nSee D1, D7 and Q3.\n",
+            "docs/notes.md": "D7 again, and D9.\n",
+        ])
+        let rows = Onboarding.status(of: RefIndex.build(repos: [repo]))
+        #expect(rows.count == 1)
+        #expect(rows[0].undefinedCitations == 4)  // D7 ×2, Q3, D9; D1 is defined here
+        #expect(!rows[0].ruleInstalled)
+    }
+
+    @Test func definedElsewhereLabelsAndRangesDoNotCount() throws {
+        let a = try makeRepo(["AGENTS.md": "x", "docs/a.md": "See D1, D7, P1, P2 and L0-L3 and Q3.\n"])
+        let b = try makeRepo(["docs/decisions.md": "## D1 — Defined elsewhere\nSummary.\n\n## Q3\n"])
+        let index = RefIndex.build(repos: [a, b])
+        // D1 is defined in the other repo; Q3 only has a weak section; P1/P2 and L0-L3 are not references.
+        let row = Onboarding.status(of: index).first { $0.repo == a }
+        #expect(row?.undefinedCitations == 2)  // D7 and Q3
+    }
+
+    @Test func promptIsFixed() {
+        let expected = """
+            Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
+
+            <!-- lupita -->
+            Define each new decision, question, lesson or story once as `## ID — Title` plus a one-line summary.
+            Add each new internal term to the glossary (`docs/glossary.md` if there is none) as `- **term** — definition`.
+            Where this repo already has a format for these, keep it.
+            When you mention one of these IDs or glossary terms to the user, write it as inline code (`D23`, `golden path`) so they can look it up.
+            <!-- /lupita -->
+            """
+        #expect(Onboarding.prompt == expected)
+        #expect(Onboarding.prompt.hasSuffix("<!-- /lupita -->"))
+        #expect(!Onboarding.prompt.contains("```"))
+    }
+
+    @Test func explainedPercent() throws {
+        let a = try makeRepo(["AGENTS.md": "x", "docs/a.md": "See D1, D1, D7, P1 and L0-L3 and Q3.\n"])
+        let b = try makeRepo(["docs/decisions.md": "## D1 — Defined elsewhere\nSummary.\n"])
+        let index = RefIndex.build(repos: [a, b])
+        // In a: D1 ×2 explained (and the heading in b is not in a's listed set), D7 and Q3 not: 2 of 4.
+        #expect(Onboarding.explainedPercent(of: [a], in: index) == 50)
+        #expect(Onboarding.explainedPercent(of: [], in: index) == nil)
+    }
+
+    @Test func versionsCompareNumerically() {
+        #expect(Versions.isNewer("v0.4.0", than: "0.3.0"))
+        #expect(Versions.isNewer("0.10.0", than: "0.9.5"))
+        #expect(!Versions.isNewer("0.3.0", than: "0.3.0"))
+        #expect(!Versions.isNewer("0.3", than: "0.3.0"))
+        #expect(Versions.isNewer("1.0", than: "0.9.9"))
+        #expect(!Versions.isNewer("0.2.9", than: "0.3.0"))
+        #expect(Versions.tag(fromReleaseJSON: Data(#"{"tag_name":"v0.4.0","x":1}"#.utf8)) == "v0.4.0")
+        #expect(Versions.tag(fromReleaseJSON: Data("nope".utf8)) == nil)
+    }
+
+    @Test func candidateFoldersCountRepos() throws {
+        let home = FileManager.default.temporaryDirectory.appendingPathComponent("home-" + UUID().uuidString)
+        let fm = FileManager.default
+        for p in ["code/a/.git", "code/b/.git", "Documents/GitHub/c/.git", "Developer/empty"] {
+            try fm.createDirectory(at: home.appendingPathComponent(p), withIntermediateDirectories: true)
+        }
+        let found = RepoDiscovery.candidateRoots(home: home.path)
+        #expect(found.map(\.path) == [home.path + "/code", home.path + "/Documents/GitHub"])
+        #expect(found.map(\.repos) == [2, 1])
+    }
+}

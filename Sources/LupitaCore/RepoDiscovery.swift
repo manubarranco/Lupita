@@ -28,6 +28,35 @@ public enum RepoDiscovery {
         return found
     }
 
+    /// Folders where people usually keep their repos, relative to the home folder.
+    public static let candidateFolders = [
+        "Repos", "repos", "code", "Code", "dev", "Developer", "Projects", "projects",
+        "GitHub", "Documents/GitHub", "src",
+    ]
+
+    /// Candidate folders that exist under `home`, with how many git repos they hold (looking
+    /// at most two levels down, so it stays fast). Folders with no repos are left out.
+    public static func candidateRoots(home: String = NSHomeDirectory()) -> [(path: String, repos: Int)] {
+        var seen = Set<String>()
+        return candidateFolders.compactMap { name in
+            let path = home + "/" + name
+            var isDir: ObjCBool = false
+            guard FileManager.default.fileExists(atPath: path, isDirectory: &isDir), isDir.boolValue,
+                  seen.insert(realPath(path).lowercased()).inserted else { return nil }
+            let n = repoCount(in: URL(fileURLWithPath: path), depth: 2)
+            return n > 0 ? (path, n) : nil
+        }
+    }
+
+    static func repoCount(in dir: URL, depth: Int) -> Int {
+        var isDir: ObjCBool = false
+        if FileManager.default.fileExists(atPath: dir.appendingPathComponent(".git").path, isDirectory: &isDir) {
+            return isDir.boolValue ? 1 : 0
+        }
+        guard depth > 0 else { return 0 }
+        return subdirectories(of: dir).reduce(0) { $0 + repoCount(in: $1, depth: depth - 1) }
+    }
+
     /// The path with every symlink resolved, as FSEvents reports it (`/tmp/x` → `/private/tmp/x`).
     /// Not `URL.resolvingSymlinksInPath()`: that one strips `/private` and goes the other way.
     public static func realPath(_ path: String) -> String {

@@ -9,6 +9,8 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     case section
     /// Not IDs: looked up on demand in git and on disk, never indexed (D19).
     case repo, commit, branch, file, command
+    /// A glossary term (D22): below every ID definition.
+    case term
 
     public var weight: Int {
         switch self {
@@ -18,6 +20,7 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .listOrColon: 60
         case .tableRow: 40
         case .section: 20
+        case .term: 10
         case .repo, .commit, .branch, .file, .command: 0
         }
     }

@@ -39,6 +39,7 @@ direction, which keeps them inside the ring.
 | Lens on screen | Scale 0.42, about 42 pt with the handle | Lens: filled disc, stroke 8 |
 | Menu bar | 18 pt | Icon: no fill, stroke 9, eyes 11 × 24 at x = ±10, looking down-left |
 | README, docs, avatars | 64 pt and up | Lens or icon, at rest |
+| App icon (Finder, Dock, About) | 16 to 1024 px | Lens at rest on a white macOS plate, 5.6 px per unit at 1024 (`scripts/make-icon.swift`) |
 
 Below 18 pt the eyes stop reading: use the icon variant there, never the lens. Leave clear
 space of at least 10 units (the width of an eye) all around the bounding box.
@@ -97,6 +98,7 @@ macOS exactly. There is no brand colour yet; until there is one, do not add one.
 | [`lupita-icon.svg`](lupita-icon.svg) | Menu bar icon: no fill, heavier stroke, looking down-left |
 | [`lupita-expressions.svg`](lupita-expressions.svg) | All expressions side by side |
 | [`lupita-construction.svg`](lupita-construction.svg) | The grid and the measures |
+| [`../../Resources/AppIcon.icns`](../../Resources/AppIcon.icns) | App icon, drawn by `scripts/make-icon.swift` |
 
 The SVGs are drawn from the same numbers as this guide. Change the numbers here and in the
 app together, then redraw them.

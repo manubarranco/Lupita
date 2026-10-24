@@ -314,3 +314,168 @@ import Testing
         #expect(S.quit == "Quit")
     }
 }
+
+// D22, D23: glossary terms.
+
+@Suite struct GlossaryTests {
+    static let nibGlossary = """
+    # Glosario
+
+    ## Conceptos
+
+    - **Banco / Banco de Pagos** — el banco de pruebas de facturas
+      con todas las cuentas a la vez.
+    - **cuenta** *(canónico)* — la pluma elíptica del motor
+    - **`Ledger`** — el saldo del mes [?]
+    - **nib** — también un término homónimo del repo
+
+    **plan**: lo que se paga
+    **saldo:** lo que queda
+    | **cobro** | cuando se cobra |
+    | Término | Definición |
+    - **D001** — nunca un término
+    """
+
+    static let otherGlossary = """
+    - **Banco** — otra banco, la de otro repo
+    - **pipeline** — una palabra genérica
+    """
+
+    static func makeResolver() -> Resolver {
+        var index = RefIndex()
+        index.repos = [Repo(name: "nib", path: "/x/nib"), Repo(name: "atlas", path: "/x/atlas")]
+        index.add(text: nibGlossary, fileName: "glosario.md", repo: "nib", relativePath: "docs/glosario.md", absolutePath: "/x/nib/docs/glosario.md")
+        index.add(text: otherGlossary, fileName: "glossary.md", repo: "atlas", relativePath: "docs/glossary.md", absolutePath: "/x/atlas/docs/glossary.md")
+        index.add(text: "## D001 — Usar SQLite\nPorque sí.\n", fileName: "decisions.md", repo: "atlas", relativePath: "docs/decisions.md", absolutePath: "/x/atlas/docs/decisions.md")
+        index.add(text: "- **ignorado** — fuera de un glosario\n", fileName: "notes.md", repo: "atlas", relativePath: "notes.md", absolutePath: "/x/atlas/notes.md")
+        index.rank()
+        return Resolver(index: index)
+    }
+
+    @Test func recognisesGlossaryFiles() {
+        for name in ["glossary.md", "glosario.md", "nomenclatura-partes.md", "Terminología.md", "TERMINOLOGY.md"] {
+            #expect(Glossary.isGlossaryFile(name), "\(name)")
+        }
+        #expect(!Glossary.isGlossaryFile("decisions.md"))
+        #expect(!Glossary.isGlossaryFile("glossary.txt"))
+    }
+
+    @Test func parsesTheFourFormatsAndAliases() {
+        let hits = Glossary.terms(fileName: "glosario.md", lines: Self.nibGlossary.components(separatedBy: "\n"))
+        let names = hits.flatMap(\.names)
+        #expect(names == ["Banco", "Banco de Pagos", "cuenta", "Ledger", "nib", "plan", "saldo", "cobro"])
+        let banco = hits.first
+        #expect(banco?.definition == "el banco de pruebas de facturas con todas las cuentas a la vez.")
+        #expect(banco?.line == 4)
+    }
+
+    @Test func headingTermsOnlyWithoutListEntries() {
+        let headings = ["# Glossary", "### Cuenta", "Una cuenta es un usuario.", "### Plan", "Lo que se paga."]
+        let hits = Glossary.terms(fileName: "glossary.md", lines: headings)
+        #expect(hits.map(\.names) == [["Cuenta"], ["Plan"]])
+        #expect(hits.first?.definition == "Una cuenta es un usuario.")
+        let sections = ["### Contabilidad", "- **saldo** — vertical"]
+        #expect(Glossary.terms(fileName: "glosario.md", lines: sections).flatMap(\.names) == ["saldo"])
+    }
+
+    @Test func genericPatternIsOffByDefault() {
+        #expect(Glossary.terms(fileName: "notes.md", lines: ["- **x1** — algo"]).isEmpty)
+        #expect(GlossaryTests.makeResolver().resolve("ignorado").kind == .notAnID)
+    }
+
+    @Test(arguments: ["Banco", "banco", "la Banco", "La  banco", "los bancos", "the Banco", "`banco`", "BANCO."])
+    func normalizesCaseArticlesAndPlurals(text: String) {
+        let r = Self.makeResolver().resolve(text, preferredRepo: "nib")
+        #expect(r.kind == .exact)
+        #expect(r.definitions.first?.repo == "nib")
+        #expect(r.definitions.first?.rule == .term)
+    }
+
+    @Test func foldsAccents() {
+        #expect(Glossary.normalize("Contabilidad") == Glossary.normalize("contabilidad"))
+        #expect(Glossary.normalize("los plans") == "plan")
+        #expect(Glossary.lookupKeys("ciudades").contains("ciudad"))
+        #expect(Glossary.normalize("census") == "census")
+        #expect(Glossary.normalize("glass") == "glass")
+    }
+
+    @Test func aliasesResolveToTheSameDefinition() {
+        let r = Self.makeResolver()
+        #expect(r.resolve("Banco de Pagos", preferredRepo: "nib").definitions.first?.line == 5)
+        #expect(r.resolve("el banco de pagos", preferredRepo: "nib").definitions.first?.title == "Banco de Pagos")
+        #expect(r.resolve("Ledger", preferredRepo: "nib").definitions.first?.summary == "el saldo del mes [?]")
+    }
+
+    @Test func termInTwoReposPutsTheWindowRepoFirst() {
+        let r = Self.makeResolver()
+        let nib = r.resolve("banco", preferredRepo: "nib")
+        #expect(nib.definitions.map(\.repo) == ["atlas", "nib"].sorted { $0 == "nib" ? true : $1 != "nib" })
+        #expect(!nib.fromOtherRepo)
+        let atlas = r.resolve("banco", preferredRepo: "atlas")
+        #expect(atlas.definitions.first?.repo == "atlas")
+        #expect(!atlas.fromOtherRepo)
+        let third = r.resolve("pipeline", preferredRepo: "nib")
+        #expect(third.definitions.first?.repo == "atlas")
+        #expect(third.fromOtherRepo)
+    }
+
+    @Test func idsRepoNamesAndFilesBeatAHomonymousTerm() {
+        var index = GlossaryTests.makeResolver().index
+        index.add(text: "- **d001** — homónimo\n- **atlas** — homónimo\n- **docs/a.md** — homónimo\n- **nib** — otro\n",
+                  fileName: "glossary.md", repo: "nib", relativePath: "glossary.md", absolutePath: "/x/nib/glossary.md")
+        index.rank()
+        let r = Resolver(index: index)
+        #expect(r.resolve("D001", preferredRepo: "atlas").definitions.first?.rule == .heading)
+        #expect(r.resolve("nib", preferredRepo: "atlas").definitions.first?.rule == .repo)
+        #expect(r.resolve("atlas", preferredRepo: "atlas").definitions.first?.rule == .repo)
+    }
+
+    @Test func pickerFindsAMultiWordTermFromAnyWordOfIt() {
+        let r = Self.makeResolver()
+        let line = "Abre el Banco de Pagos para ver la cuenta, luego sigue."
+        // Cursor on "el", "Banco", "de" and "Pagos".
+        for offset in [5, 9, 15, 19] {
+            let hit = CandidatePicker.pick(line: line, cursorOffset: offset, resolver: r, preferredRepo: "nib")
+            #expect(hit?.definitions.first?.title == "Banco de Pagos", "offset \(offset)")
+        }
+        // Cursor on "cuenta": a one-word term.
+        #expect(CandidatePicker.pick(line: line, cursorOffset: 37, resolver: r, preferredRepo: "nib")?.definitions.first?.title == "cuenta")
+        // A word that is no term.
+        #expect(CandidatePicker.pick(line: line, cursorOffset: 29, resolver: r, preferredRepo: "nib")?.kind == .notAnID)
+    }
+
+    @Test func pickerStopsAtPunctuation() {
+        let r = Self.makeResolver()
+        // "Banco, de Pagos" is not the term: the comma closes the phrase, so the single word wins.
+        let hit = CandidatePicker.pick(line: "el Banco, de Pagos", cursorOffset: 5, resolver: r, preferredRepo: "nib")
+        #expect(hit?.definitions.first?.title == "Banco")
+    }
+
+    @Test func pickerKeepsIDsOverLongerWindows() {
+        let r = Self.makeResolver()
+        let hit = CandidatePicker.pick(line: "ver D001 cuenta", cursorOffset: 5, resolver: r, preferredRepo: "atlas")
+        #expect(hit?.key == "D001")
+    }
+
+    @Test func pickerFromOCRRows() {
+        let r = Self.makeResolver()
+        let words = ["abre", "la", "Banco", "de", "Pagos", "ya"].enumerated().map { i, text in
+            OCRWord(text: text, box: CGRect(x: CGFloat(i) * 50, y: 100, width: 44, height: 14))
+        }
+        let hit = CandidatePicker.pick(words: words, cursor: CGPoint(x: 160, y: 106), resolver: r, preferredRepo: "nib")
+        #expect(hit?.definitions.first?.title == "Banco de Pagos")
+        let far = CandidatePicker.pick(words: words, cursor: CGPoint(x: 10, y: 106), resolver: r, preferredRepo: "nib")
+        #expect(far?.kind == .notAnID)
+    }
+
+    @Test func oldSavedIndexesStillLoad() throws {
+        var index = Self.makeResolver().index
+        index.terms = [:]
+        var json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(index)) as! [String: Any]
+        json["terms"] = nil
+        let data = try JSONSerialization.data(withJSONObject: json)
+        let loaded = try JSONDecoder().decode(RefIndex.self, from: data)
+        #expect(loaded.terms.isEmpty)
+        #expect(loaded.definitions.count == index.definitions.count)
+    }
+}

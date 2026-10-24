@@ -59,6 +59,7 @@ en que las señalas, así que nunca están desactualizadas:
 | Una rama (`fix/search`) | Su último commit y cuánto va por delante de `main`, o, si se borró, el merge que la cerró |
 | Un archivo (`docs/decisions.md:12`) | Su título y primera línea (Markdown) o su último cambio. Clic: lo abre en la línea |
 | Un comando (`/retro`) | Su descripción, de `.claude/commands` o `.claude/skills`, en el repo o en `~/.claude` |
+| Un término de glosario (`liquidación`, `el libro mayor`) | Su definición, de un archivo de glosario (`glossary.md`, `glosario.md`…) del repo. Clic: lo abre en la línea. Valen términos de una a cuatro palabras; si viene de otro repo, lo indica |
 
 Commits y ramas necesitan git (las Command Line Tools); sin ellas, simplemente no se reconocen.
 
@@ -70,13 +71,27 @@ carpeta más cercana. Si la definición viene de otro repo, el tooltip lo dice.
 
 ## Que tus agentes sean fáciles de consultar
 
-Lupita funciona con lo que los agentes ya escriben, pero es exacto cuando cada referencia está
-definida así. Añádelo a tu `AGENTS.md` o `CLAUDE.md`:
+Lupita funciona sin ninguna regla: ya explica la mayor parte de lo que citan tus agentes. La
+regla lo lleva más lejos: lo que tus agentes creen a partir de ahora y su vocabulario interno.
+Lupita nunca escribe en tus repos: te da un prompt para tu propio agente. Es seguro por diseño:
+si el agente falla, no hace nada; no pide commit; no pide decisiones de criterio. Pégale esto a
+tu agente (el prompt va siempre en inglés; los agentes lo leen):
 
-```markdown
-Define every decision, question, lesson or story you create as a heading
-`## ID — Title`, followed by a one-line summary. Cite it by ID elsewhere.
+```text
+Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
+
+<!-- lupita -->
+Define each new decision, question, lesson or story once as `## ID — Title` plus a one-line summary.
+Add each new internal term to the glossary (`docs/glossary.md` if there is none) as `- **term** — definition`.
+Where this repo already has a format for these, keep it.
+When you mention one of these IDs or glossary terms to the user, write it as inline code (`D23`, `golden path`) so they can look it up.
+<!-- /lupita -->
 ```
+
+La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista los repos con
+`AGENTS.md` o `CLAUDE.md`, cuántas citas aún no explica nada y si la regla está puesta. **Copiar y
+abrir** copia el prompt y abre el repo en tu editor (Cursor, VS Code, Windsurf, Zed o Finder),
+listo para pegar.
 
 En [`examples/demo-project`](examples/demo-project) hay un proyecto pequeño que usa todos los
 formatos.
@@ -107,7 +122,8 @@ Lupita pide dos permisos de macOS, y solo los usa cuando pulsas el atajo:
   600 × 80 pt alrededor del ratón, en las apps que no exponen su texto.
 
 Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de lo que
-consultas. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
+consultas. La única excepción es **Buscar actualizaciones…** en el menú: pregunta a GitHub por la
+última release, y solo cuando lo pulsas. Lupita nunca comprueba en segundo plano. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
 
 Si compilas desde el código, macOS olvida los permisos en cada compilación salvo que la app
 esté firmada con un certificado estable: crea en Acceso a Llaveros un certificado autofirmado

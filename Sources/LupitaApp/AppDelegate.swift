@@ -8,13 +8,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let lens = CursorLens()
     var menu: StatusMenu?
     var trigger: Trigger?
+    var onboarding: OnboardingWindow?
     private var inFlight = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        IndexStore.migrateLegacyRoots()
         menu = StatusMenu(store: store) { [weak self] choice in
             HotkeyChoice.current = choice
             self?.installTrigger()
         }
+        onboarding = OnboardingWindow(store: store) { [weak self] in self?.menu?.addRoot() }
+        menu?.onPrepareRepos = { [weak self] in self?.onboarding?.show() }
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
         // Dev aid: `lupita poke` does what ⌃⌥R does, for automated checks that cannot press keys.
@@ -22,9 +26,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
+            let openOnboarding = note.userInfo?["onboarding"] != nil
+            let openAbout = note.userInfo?["about"] != nil
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
-                if let lens {
+                if openAbout {
+                    NSApp.activate(ignoringOtherApps: true)
+                    NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
+                } else if openOnboarding {
+                    self?.onboarding?.show()
+                } else if let lens {
                     self?.lens.begin()
                     Task { try? await Task.sleep(for: .seconds(lens)); self?.lens.end() }
                 } else if let query {
@@ -34,6 +45,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         store.rebuild()
         Permissions.explainIfNeeded()
+        // First run: once the first index exists, offer to prepare the repos (D21).
+        Task { @MainActor [weak self] in
+            while self?.store.index == nil { try? await Task.sleep(for: .milliseconds(300)) }
+            self?.onboarding?.showFirstTimeIfNeeded()
+        }
     }
 
     func installTrigger() {

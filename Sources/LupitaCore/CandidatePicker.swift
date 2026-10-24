@@ -27,21 +27,70 @@ public enum CandidatePicker {
     public static func pick(line: String, cursorOffset: Int, resolver: Resolver,
                             preferredRepo: String? = nil, fromPath: String? = nil) -> Resolution? {
         let ns = line as NSString
-        var best: (range: NSRange, distance: Int)?
+        var best: (range: NSRange, distance: Int, index: Int)?
+        var ranges: [NSRange] = []
         var location = 0
-        for word in words(of: line) {
+        for (n, word) in words(of: line).enumerated() {
             let range = ns.range(of: word, range: NSRange(location: location, length: ns.length - location))
             location = range.location + range.length
+            ranges.append(range)
             let distance = cursorOffset < range.location ? range.location - cursorOffset
                 : cursorOffset >= range.location + range.length ? cursorOffset - (range.location + range.length) + 1 : 0
             guard distance <= slack, distance < (best?.distance ?? .max) else { continue }
-            best = (range, distance)
+            best = (range, distance, n)
         }
         guard let best else { return nil }
+        let single = resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
+                                      context: String(ns.substring(with: NSRange(location: max(0, best.range.location - 80), length: min(best.range.location, 80)))),
+                                      fromPath: fromPath)
+        if !isFound(single) {
+            let texts = ranges.map { ns.substring(with: $0) }
+            let closing = CharacterSet(charactersIn: ".,;:!?…")
+            // `words(of:)` drops commas and semicolons, so look at the character right after each word.
+            let closes: (Int) -> Bool = { i in
+                let end = ranges[i].location + ranges[i].length
+                return end < ns.length && ns.substring(with: NSRange(location: end, length: 1)).unicodeScalars.allSatisfy(closing.contains)
+            }
+            if let term = longerTerm(texts, at: best.index, closes: closes, resolver: resolver, preferredRepo: preferredRepo, fromPath: fromPath,
+                                     context: { i in String(ns.substring(with: NSRange(location: max(0, ranges[i].location - 80), length: min(ranges[i].location, 80)))) }) {
+                return term
+            }
+        }
         let start = max(0, best.range.location - 80)
         let context = ns.substring(with: NSRange(location: start, length: best.range.location - start))
         return resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
                                 context: context, fromPath: fromPath)
+    }
+
+    /// Max words in a glossary term (D23).
+    static let maxTermWords = 4
+
+    /// A single word that resolved to an ID or a repo reference: nothing longer should override it.
+    static func isFound(_ r: Resolution) -> Bool {
+        switch r.kind {
+        case .exact, .corrected, .ambiguous: return !r.definitions.isEmpty && r.definitions.first?.rule != .term
+        case .undefined, .notAnID: return false
+        }
+    }
+
+    /// Windows of 4 to 2 words that contain the word at `index`, longest first, as glossary terms.
+    /// A word that ends in punctuation (`.,;:!?`) closes the phrase: the window cannot go past it.
+    static func longerTerm(_ words: [String], at index: Int, closes extra: ((Int) -> Bool)? = nil, resolver: Resolver, preferredRepo: String?,
+                           fromPath: String?, context: (Int) -> String) -> Resolution? {
+        let closing = CharacterSet(charactersIn: ".,;:!?…")
+        func closes(_ i: Int) -> Bool { (words[i].unicodeScalars.last.map(closing.contains) ?? false) || (extra?(i) ?? false) }
+        for length in stride(from: maxTermWords, through: 2, by: -1) {
+            for start in stride(from: index, through: index - length + 1, by: -1) {
+                let end = start + length - 1
+                guard start >= 0, end < words.count else { continue }
+                if (start..<end).contains(where: closes) { continue }
+                let phrase = words[start...end].joined(separator: " ")
+                if let r = resolver.resolveTerm(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
+                    return r
+                }
+            }
+        }
+        return nil
     }
 
     /// Words from OCR: the one under (or nearest to) the cursor on the cursor's row.
@@ -60,9 +109,15 @@ public enum CandidatePicker {
         guard let target = row.min(by: { distance($0) < distance($1) }), distance(target) <= maxDistance,
               let index = row.firstIndex(of: target)
         else { return nil }
-        let context = row[..<index].map(\.text).joined(separator: " ").suffix(80)
+        func context(_ i: Int) -> String { String(row[..<i].map(\.text).joined(separator: " ").suffix(80)) }
+        let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath)
+        if !isFound(single),
+           let term = longerTerm(row.map(\.text), at: index, resolver: resolver, preferredRepo: preferredRepo,
+                                 fromPath: fromPath, context: context) {
+            return term
+        }
         return resolver.resolve(target.text, preferredRepo: preferredRepo,
-                                context: String(context), fromPath: fromPath)
+                                context: context(index), fromPath: fromPath)
     }
 
     /// Splits like the resolver does: whitespace and brackets/quotes, keeping `D001:`-style
