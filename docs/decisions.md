@@ -127,7 +127,7 @@ different product) and the agent knows the repo. The app only checks the marker,
 excluded). Approved by Manu, 2026-10-24.
 
 The block also asks agents to write the IDs and glossary terms they mention to the user as
-inline code (`D23`, `la Mesa`): the style does not help OCR, but it shows the reader what can be
+inline code (`D23`, `golden path`): the style does not help OCR, but it shows the reader what can be
 looked up, and it is the style paths, commits and commands already have. Approved by Manu, 2026-10-24.
 
 ## D22 — Glossary terms: which files, which formats
