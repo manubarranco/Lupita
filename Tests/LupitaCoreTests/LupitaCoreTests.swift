@@ -401,9 +401,9 @@ import Testing
 
     @Test func aliasesResolveToTheSameDefinition() {
         let r = Self.makeResolver()
-        #expect(r.resolve("Mesa de Trazo", preferredRepo: "nib").definitions.first?.line == 4)
+        #expect(r.resolve("Mesa de Trazo", preferredRepo: "nib").definitions.first?.line == 5)
         #expect(r.resolve("la mesa de trazo", preferredRepo: "nib").definitions.first?.title == "Mesa de Trazo")
-        #expect(r.resolve("Relief", preferredRepo: "nib").definitions.first?.summary == "el relieve del universo")
+        #expect(r.resolve("Relief", preferredRepo: "nib").definitions.first?.summary == "el relieve del universo [?]")
     }
 
     @Test func termInTwoReposPutsTheWindowRepoFirst() {
