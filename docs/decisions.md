@@ -126,6 +126,10 @@ different product) and the agent knows the repo. The app only checks the marker,
 "Unexplained citations" counts mentions of keys nothing defines in any repo (weak sections, `P0`-`P9` labels and ranges
 excluded). Approved by Manu, 2026-10-24.
 
+The block also asks agents to write the IDs and glossary terms they mention to the user as
+inline code (`D23`, `la Mesa`): the style does not help OCR, but it shows the reader what can be
+looked up, and it is the style paths, commits and commands already have. Approved by Manu, 2026-10-24.
+
 ## D22 — Glossary terms: which files, which formats
 Terms come from glossary files: any `.md` whose name contains `glossary`, `glosario`, `nomenclatura` or `terminolog`.
 Four formats: `- **term** — definition`, `**term**: definition`, `| **term** | definition |` and `### term` (a heading
