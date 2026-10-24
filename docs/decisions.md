@@ -211,3 +211,6 @@ The ~60 commands, ~40 errors, 18 HTTP statuses and ~48 HTML tags are tables in `
 
 ## D37 — Frozen copies of a file are shown only when nothing else defines the symbol
 Files named `reference_*`, `*_pre_*`, `*_old`, `*_bak`, `*backup*`, `*copy*` or `*.orig` look like snapshots: their definitions of a symbol are dropped when a live file defines it, so one answer is shown, not three versions. If only snapshots define it, they are shown. Decided by Manu, 2026-10-25, with two more: the command dictionary stays at ~60 entries (D32) and code lookups stay on the main thread (D30) until someone's repos make them slow.
+
+## D38 — The "not known" notice closes 1 s after the lens arrives (refines D18)
+Was 2 s. Input that changed: Manu tried it and found the wait long for a five-word notice; the lens reaction already says "not found". Without the lens the notice still closes after 3.5 s. Try 1.5 s if 1 s proves too short when reading. Decided by Manu, 2026-10-25.

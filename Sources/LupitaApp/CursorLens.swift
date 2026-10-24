@@ -63,7 +63,7 @@ final class CursorLens: NSObject {
     private var timeoutTask: Task<Void, Never>?
     /// For a "not known" notice: closes it once the lens has waited beside it.
     private var doneWaiting: (() -> Void)?
-    private static let noticeWait: CFTimeInterval = 2
+    private static let noticeWait: CFTimeInterval = 1
 
     func begin() {
         guard Self.isOn else { return }
