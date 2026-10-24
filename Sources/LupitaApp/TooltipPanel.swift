@@ -256,7 +256,7 @@ struct Swatch: View {
         HStack(spacing: 5) {
             RoundedRectangle(cornerRadius: 4)
                 .fill(Color(hex: sample.hex))
-                .frame(width: 28, height: 18)
+                .frame(width: 20, height: 20)
                 .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(.primary.opacity(0.25)))
             Text(sample.label.isEmpty ? sample.hex : "\(sample.label) \(sample.hex)")
                 .font(.caption.monospaced()).foregroundStyle(.secondary)
