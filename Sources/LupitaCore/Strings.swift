@@ -87,12 +87,13 @@ public enum S {
     public static var lens: String { t("Lens while holding", "Lupa al mantener") }
     public static var folders: String { t("Folders", "Carpetas") }
     public static var permissions: String { t("Permissions", "Permisos") }
-    public static func removeFolderTitle(_ folder: String) -> String {
-        t("Remove “\(folder)” from Lupita?", "¿Quitar «\(folder)» de Lupita?")
+    /// The question around the folder path, which the alert draws in its own style.
+    public static var removeFolderAround: (before: String, after: String) {
+        isSpanish ? ("¿Quitar ", " de Lupita?") : ("Remove ", " from Lupita?")
     }
     public static var removeFolderBody: String {
-        t("Nothing is deleted from your Mac: the folder and its files stay where they are. Lupita just stops reading it and looking up IDs in it.",
-          "No se borra nada de tu Mac: la carpeta y sus archivos siguen donde están. Lupita solo dejará de leerla y de buscar IDs en ella.")
+        t("Lupita will stop searching it. You can add it back any time.",
+          "Lupita dejará de buscar en ella. Puedes añadirla de nuevo cuando quieras.")
     }
     public static var removeFromLupita: String { t("Remove from Lupita", "Quitar de Lupita") }
     public static var cancel: String { t("Cancel", "Cancelar") }

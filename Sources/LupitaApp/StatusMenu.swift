@@ -142,14 +142,30 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         if expanded.contains(root) { showRepos(of: root, after: item) }
     }
 
-    private func confirmRemove(_ root: String) {
+    func confirmRemove(_ root: String, dryRun: Bool = false) {
         let alert = NSAlert()
-        alert.messageText = S.removeFolderTitle((root as NSString).abbreviatingWithTildeInPath)
-        alert.informativeText = S.removeFolderBody
+        // NSAlert titles are plain text: the question goes in an accessory view so the path can
+        // have its own style (monospaced, on a soft background) instead of quotes.
+        let around = S.removeFolderAround
+        let text = NSMutableAttributedString(string: around.before, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)])
+        text.append(NSAttributedString(string: (root as NSString).abbreviatingWithTildeInPath, attributes: [
+            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .semibold),
+            .backgroundColor: NSColor.labelColor.withAlphaComponent(0.1),
+        ]))
+        text.append(NSAttributedString(string: around.after, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)]))
+        text.append(NSAttributedString(string: "\n" + S.removeFolderBody, attributes: [
+            .font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor,
+        ]))
+        let label = NSTextField(wrappingLabelWithString: "")
+        label.attributedStringValue = text
+        label.frame = NSRect(x: 0, y: 0, width: 260, height: 0)
+        label.frame.size.height = label.sizeThatFits(NSSize(width: 260, height: CGFloat.greatestFiniteMagnitude)).height
+        alert.messageText = ""
+        alert.accessoryView = label
         alert.addButton(withTitle: S.removeFromLupita).hasDestructiveAction = true
         alert.addButton(withTitle: S.cancel)
         NSApp.activate()
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        guard alert.runModal() == .alertFirstButtonReturn, !dryRun else { return }
         expanded.remove(root)
         store.removeRoot(root)
     }

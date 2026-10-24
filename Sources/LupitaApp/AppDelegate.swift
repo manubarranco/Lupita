@@ -31,7 +31,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let menuMode = note.userInfo?["menu"] as? String
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
-                if let menuMode {
+                if menuMode == "confirm" {
+                    self?.menu?.confirmRemove(self?.store.roots.first ?? "~/Repos", dryRun: true)
+                } else if let menuMode {
                     self?.menu?.open(expanding: menuMode == "expand")
                 } else if openAbout {
                     NSApp.activate(ignoringOtherApps: true)
