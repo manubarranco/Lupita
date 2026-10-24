@@ -341,6 +341,8 @@ final class CursorLens: NSObject {
 private final class LensFace: NSView {
     static let eyeHeight: CGFloat = 22
     private static let scale: CGFloat = 0.42
+    /// Width in units of the contour around the ring and handle.
+    private static let contour: CGFloat = 3
 
     /// Eye offset and height in lens units; `open` and `blink` multiply the height (0...1).
     var look = CGVector.zero
@@ -376,6 +378,15 @@ private final class LensFace: NSView {
             NSColor.controlBackgroundColor.setFill()
             ring.fill()
             NSGraphicsContext.restoreGraphicsState()
+
+            // A contour in the surface colour (opposite of the ink) keeps the ring and handle
+            // readable over a background of the other tone, e.g. a dark editor in light mode.
+            NSColor.controlBackgroundColor.set()
+            for path in [ring, handle] {
+                path.lineWidth = 8 + 2 * Self.contour
+                path.stroke()
+                path.lineWidth = 8
+            }
 
             NSColor.labelColor.set()
             ring.stroke()
