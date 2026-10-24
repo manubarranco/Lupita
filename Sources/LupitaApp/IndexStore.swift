@@ -20,7 +20,16 @@ final class IndexStore {
     private let defaultsKey = "roots"
 
     var roots: [String] {
-        get { UserDefaults.standard.stringArray(forKey: defaultsKey) ?? ["~/Repos"] }
+        get {
+            let defaults = UserDefaults.standard
+            if let saved = defaults.stringArray(forKey: defaultsKey) { return saved }
+            // An install from before D24 never chose folders: it was indexing ~/Repos. Keep it so.
+            if defaults.bool(forKey: "onboardingShown") {
+                defaults.set(["~/Repos"], forKey: defaultsKey)
+                return ["~/Repos"]
+            }
+            return []  // first run: the user picks the folders (D24)
+        }
         set { UserDefaults.standard.set(newValue, forKey: defaultsKey); rebuild() }
     }
 

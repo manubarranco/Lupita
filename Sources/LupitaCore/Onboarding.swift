@@ -11,28 +11,31 @@ public struct RepoOnboarding: Hashable, Sendable {
     public let undefinedCitations: Int
     /// The `<!-- lupita -->` marker is in one of the agent files.
     public let ruleInstalled: Bool
+
+    public init(repo: Repo, agentFiles: [String], undefinedCitations: Int, ruleInstalled: Bool) {
+        self.repo = repo
+        self.agentFiles = agentFiles
+        self.undefinedCitations = undefinedCitations
+        self.ruleInstalled = ruleInstalled
+    }
+
+    /// The same row with the rule state read again from disk (cheap: only the agent files).
+    public func refreshingRule() -> RepoOnboarding {
+        RepoOnboarding(repo: repo, agentFiles: agentFiles, undefinedCitations: undefinedCitations,
+                       ruleInstalled: Onboarding.hasRule(in: repo, files: agentFiles))
+    }
 }
 
 public enum Onboarding {
     public static let marker = "<!-- lupita -->"
 
-    /// Files and folders that tell a coding agent how to work in a repo.
-    public static let agentFileNames = [
-        "AGENTS.md", "CLAUDE.md", ".cursorrules", ".windsurfrules", ".github/copilot-instructions.md",
-    ]
-    public static let agentFolders = [".cursor/rules"]
+    /// Only repos with one of these in their root are listed (D21).
+    public static let agentFileNames = ["AGENTS.md", "CLAUDE.md"]
 
     /// The agent instruction files of a repo, relative to its root.
     public static func agentFiles(in repo: Repo) -> [String] {
-        let fm = FileManager.default
         let root = URL(fileURLWithPath: repo.path)
-        var found = agentFileNames.filter { fm.fileExists(atPath: root.appendingPathComponent($0).path) }
-        for folder in agentFolders {
-            let url = root.appendingPathComponent(folder)
-            let items = (try? fm.contentsOfDirectory(atPath: url.path)) ?? []
-            found += items.sorted().filter { !$0.hasPrefix(".") }.map { folder + "/" + $0 }
-        }
-        return found
+        return agentFileNames.filter { FileManager.default.fileExists(atPath: root.appendingPathComponent($0).path) }
     }
 
     /// Whether any of the files carries the marker.
@@ -77,29 +80,55 @@ public enum Onboarding {
 
     /// The block the agent appends to the repo's instructions.
     public static let ruleBlock = """
-        \(marker)
-        Define every decision, question, lesson or story you create as a heading `## ID — Title`
-        followed by a one-line summary. Add each new internal term to `docs/glossary.md` as
-        `- **term** — definition`. Cite both by ID or term elsewhere.
+        <!-- lupita -->
+        Define each new decision, question, lesson or story once as `## ID — Title` plus a
+        one-line summary. Add each new internal term to the glossary (`docs/glossary.md` if
+        there is none) as `- **term** — definition`. Where this repo already has a format
+        for these, keep it.
         <!-- /lupita -->
         """
 
-    /// Short prompt: add the rule block. In the Mac's language.
-    public static func rulePrompt(spanish: Bool = S.isSpanish) -> String {
-        let intro = spanish
-            ? "Añade este bloque al final del archivo de instrucciones de agentes de este repo (AGENTS.md si existe; si no, CLAUDE.md), sin cambiar nada más, y haz commit."
-            : "Add this block at the end of this repo's agent instructions file (AGENTS.md if it exists; otherwise CLAUDE.md), without changing anything else, and commit."
-        return intro + "\n\n```markdown\n" + ruleBlock + "\n```"
+    /// The prompt the user pastes to their own agent. Always English: agents read it, not the user.
+    public static let prompt = """
+        Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
+
+        \(ruleBlock)
+        """
+
+    /// Share of the citations in `repos` that some repo defines for real, as a whole percent.
+    /// Same rules as `undefinedCitations`: weak sections do not count, labels and ranges are
+    /// not references. `nil` when there is nothing cited.
+    public static func explainedPercent(of repos: [Repo], in index: RefIndex) -> Int? {
+        let prefixes = Set(repos.map { $0.name + "/" })
+        var total = 0, explained = 0
+        for (key, mentions) in index.mentions where !isLabelOrRange(key) {
+            let n = mentions.byFile.filter { file in prefixes.contains { file.key.hasPrefix($0) } }.values.reduce(0, +)
+            total += n
+            if index.definitions[key]?.contains(where: { !$0.rule.isWeak }) == true { explained += n }
+        }
+        guard total > 0 else { return nil }
+        return Int((Double(explained) / Double(total) * 100).rounded())
+    }
+}
+
+/// Dotted-number version comparison (`0.4.0` against `0.3.0`), for "Check for updates".
+public enum Versions {
+    public static func parse(_ tag: String) -> [Int] {
+        let trimmed = tag.hasPrefix("v") || tag.hasPrefix("V") ? String(tag.dropFirst()) : tag
+        return trimmed.split(separator: ".").map { Int($0.prefix { $0.isNumber }) ?? 0 }
     }
 
-    /// Optional prompt: convert what already exists. Touches several files.
-    public static func conversionPrompt(spanish: Bool = S.isSpanish) -> String {
-        spanish
-            ? """
-              Pasa las decisiones, lecciones, preguntas, stories y términos internos que ya existen en este repo al formato de esta regla, sin cambiar su contenido: cada una como un encabezado `## ID — Título` seguido de un resumen de una línea, y cada término en `docs/glossary.md` como `- **término** — definición`. Esto toca varios archivos; hazlo en un solo commit.
-              """
-            : """
-              Convert the decisions, lessons, questions, stories and internal terms that already exist in this repo to the format of this rule, without changing their content: each one as a heading `## ID — Title` followed by a one-line summary, and each term in `docs/glossary.md` as `- **term** — definition`. This touches several files; do it in a single commit.
-              """
+    public static func isNewer(_ remote: String, than installed: String) -> Bool {
+        let r = parse(remote), i = parse(installed)
+        for k in 0..<max(r.count, i.count) {
+            let a = k < r.count ? r[k] : 0, b = k < i.count ? i[k] : 0
+            if a != b { return a > b }
+        }
+        return false
+    }
+
+    /// The `tag_name` of a GitHub "latest release" response.
+    public static func tag(fromReleaseJSON data: Data) -> String? {
+        (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["tag_name"] as? String
     }
 }

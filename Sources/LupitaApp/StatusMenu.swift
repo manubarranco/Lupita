@@ -51,6 +51,14 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
+        let title = NSMenuItem(title: S.appName, action: nil, keyEquivalent: "")
+        title.isEnabled = false
+        title.attributedTitle = NSAttributedString(string: S.appName, attributes: [
+            .font: NSFont.boldSystemFont(ofSize: NSFont.menuFont(ofSize: 0).pointSize),
+            .foregroundColor: NSColor.labelColor,
+        ])
+        menu.addItem(title)
+        menu.addItem(.separator())
         menu.addItem(disabled(store.summary))
         if !store.freshness.isEmpty { menu.addItem(disabled(store.freshness)) }
         let shortcut = NSMenuItem(title: S.shortcut(HotkeyChoice.current.short), action: nil, keyEquivalent: "")
@@ -83,6 +91,10 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(permissionItem(S.accessibility, granted: Permissions.accessibility, pane: .accessibility))
         menu.addItem(permissionItem(S.screenRecording, granted: Permissions.screenRecording, pane: .screenRecording))
         menu.addItem(.separator())
+        menu.addItem(action(S.about, #selector(showAbout)))
+        menu.addItem(action(S.help, #selector(openHelp)))
+        menu.addItem(action(Updater.availableVersion.map(S.downloadUpdate) ?? S.checkForUpdates, #selector(checkForUpdates)))
+        menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: S.quit, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
     }
 
@@ -102,6 +114,21 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private func permissionItem(_ name: String, granted: Bool, pane: Permissions.Pane) -> NSMenuItem {
         if granted { return disabled("✓ \(name)") }
         return action(S.grant(name), #selector(openPane(_:)), represented: pane.rawValue)
+    }
+
+    @objc private func showAbout() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
+    }
+
+    @objc private func openHelp() { NSWorkspace.shared.open(Updater.helpPage) }
+
+    @objc private func checkForUpdates() {
+        if Updater.availableVersion != nil {
+            NSWorkspace.shared.open(Updater.releasesPage)
+        } else {
+            Task { await Updater.checkAndReport() }
+        }
     }
 
     @objc private func prepareRepos() { onPrepareRepos?() }

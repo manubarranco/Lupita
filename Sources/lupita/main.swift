@@ -59,15 +59,16 @@ case "poke":
 
 case "onboarding":
     args.removeFirst()
-    let wantsPrompt = args.contains("--prompt"), wantsConvert = args.contains("--convert")
-    args.removeAll { $0 == "--prompt" || $0 == "--convert" }
-    if wantsPrompt { print(Onboarding.rulePrompt()) }
-    else if wantsConvert { print(Onboarding.conversionPrompt()) }
+    let wantsPrompt = args.contains("--prompt")
+    args.removeAll { $0 == "--prompt" }
+    if wantsPrompt { print(Onboarding.prompt) }
     else {
         let index = RefIndex.build(roots: args.isEmpty ? ["~/Repos"] : args)
-        for row in Onboarding.status(of: index) {
+        let rows = Onboarding.status(of: index)
+        for row in rows {
             print("\(row.repo.name)\t\(S.undefinedCitations(row.undefinedCitations))\t\(row.ruleInstalled ? S.ruleInstalled : S.ruleMissing)")
         }
+        if let percent = Onboarding.explainedPercent(of: rows.map(\.repo), in: index) { print("explained: \(percent) %") }
     }
 
 case "terms":

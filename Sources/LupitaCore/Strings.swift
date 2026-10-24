@@ -118,27 +118,56 @@ public enum S {
     public static var openAccessibility: String { t("Open Accessibility", "Abrir Accesibilidad") }
     public static var later: String { t("Later", "Más tarde") }
 
-    // MARK: Onboarding (D21)
+    // MARK: Onboarding (D21, D24)
     public static var prepareRepos: String { t("Prepare your repos…", "Prepara tus repos…") }
     public static var onboardingTitle: String { t("Prepare your repos", "Prepara tus repos") }
-    public static var onboardingIntro: String {
-        t("Lupita is exact when your agents define what they cite. Copy a prompt and paste it to the agent of each repo: it adds the rule and commits. Lupita never writes in your repos.",
-          "Lupita acierta cuando tus agentes definen lo que citan. Copia un prompt y pégaselo al agente de cada repo: añade la regla y hace commit. Lupita nunca escribe en tus repos.")
+    public static func onboardingIntro(percent: Int?) -> String {
+        let p = percent.map { "\($0) %" }
+        let en = p.map { "Lupita already explains \($0) of what your agents cite. With this rule, also what they create from now on, and their internal vocabulary." }
+            ?? "With this rule, Lupita also explains what your agents create from now on, and their internal vocabulary."
+        let es = p.map { "Lupita ya explica el \($0) de lo que citan tus agentes. Con esta regla, también lo que creen a partir de ahora, y su vocabulario interno." }
+            ?? "Con esta regla, Lupita también explica lo que tus agentes creen a partir de ahora, y su vocabulario interno."
+        return t(en, es)
     }
+    public static var promptLabel: String { t("Prompt for your agent (it reads it in English)", "Prompt para tu agente (lo lee en inglés)") }
+    public static var copy: String { t("Copy", "Copiar") }
+    public static var openWith: String { t("Open with", "Abrir con") }
+    public static var finder: String { "Finder" }
+    public static var copyAndOpen: String { t("Copy and open", "Copiar y abrir") }
     public static func undefinedCitations(_ n: Int) -> String {
-        t("\(n) undefined \(n == 1 ? "citation" : "citations")", "\(n) \(n == 1 ? "cita sin definir" : "citas sin definir")")
+        n == 0 ? t("everything explained", "todo explicado")
+               : t("\(n) \(n == 1 ? "citation" : "citations") unexplained", "\(n) \(n == 1 ? "cita sin explicar" : "citas sin explicar")")
     }
     public static var ruleInstalled: String { t("rule in place", "regla puesta") }
     public static var ruleMissing: String { t("no rule", "sin regla") }
-    public static var copyPrompt: String { t("Copy prompt", "Copiar prompt") }
-    public static var copyConversionPrompt: String { t("Copy conversion prompt", "Copiar prompt de conversión") }
-    public static var conversionWarning: String {
-        t("Converts existing decisions, lessons and terms. Touches several files.",
-          "Convierte decisiones, lecciones y términos que ya existen. Toca varios archivos.")
-    }
+    public static var promptWord: String { t("prompt", "prompt") }
     public static var copied: String { t("Copied", "Copiado") }
-    public static var refresh: String { t("Refresh", "Actualizar") }
     public static var noAgentRepos: String {
-        t("No repos with agent instructions found in your folders.", "No hay repos con instrucciones de agentes en tus carpetas.")
+        t("No repos with an AGENTS.md or CLAUDE.md found in your folders.", "No hay repos con AGENTS.md o CLAUDE.md en tus carpetas.")
+    }
+
+    // MARK: First run: folders (D24)
+    public static var foldersTitle: String { t("Add your repo folders", "Añade tus carpetas de repos") }
+    public static var foldersIntro: String {
+        t("Pick the folders where you keep your repos. Lupita reads them on your Mac and nothing leaves it.",
+          "Elige las carpetas donde guardas tus repos. Lupita las lee en tu Mac y nada sale de él.")
+    }
+    public static func repoCount(_ n: Int) -> String { t("\(n) \(n == 1 ? "repo" : "repos")", "\(n) \(n == 1 ? "repo" : "repos")") }
+    public static var addOtherFolder: String { t("Add another folder…", "Añadir otra carpeta…") }
+    public static var continueLabel: String { t("Continue", "Continuar") }
+    public static var noCandidates: String {
+        t("No usual repo folders found on this Mac.", "No he encontrado carpetas habituales de repos en este Mac.")
+    }
+
+    // MARK: About, help, updates (D25)
+    public static var about: String { t("About \(appName)", "Acerca de \(appName)") }
+    public static var help: String { t("Help", "Ayuda") }
+    public static var checkForUpdates: String { t("Check for updates…", "Buscar actualizaciones…") }
+    public static func downloadUpdate(_ version: String) -> String { t("Download \(appName) \(version)…", "Descargar \(appName) \(version)…") }
+    public static func upToDate(_ version: String) -> String { t("You're up to date (\(version))", "Estás al día (\(version))") }
+    public static func newVersion(_ version: String) -> String { t("There is a new version: \(version)", "Hay una versión nueva: \(version)") }
+    public static var download: String { t("Download", "Descargar") }
+    public static var updateCheckFailed: String {
+        t("Couldn't check for updates. Check your connection and try again.", "No se pudo buscar actualizaciones. Revisa tu conexión y vuelve a intentarlo.")
     }
 }
