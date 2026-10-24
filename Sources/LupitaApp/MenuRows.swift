@@ -9,7 +9,7 @@ final class MenuHeader: NSView {
     private let stats = NSTextField(labelWithString: "")
 
     init(title: String) {
-        super.init(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 58))
+        super.init(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 68))
         self.title.stringValue = title
         self.title.font = .boldSystemFont(ofSize: 15)
         self.title.textColor = .labelColor
@@ -30,8 +30,8 @@ final class MenuHeader: NSView {
     override func layout() {
         super.layout()
         let inset = MenuRow.inset
-        title.frame = NSRect(x: inset, y: bounds.height - 28, width: bounds.width - inset * 2, height: 20)
-        stats.frame = NSRect(x: inset, y: 6, width: bounds.width - inset * 2, height: 30)
+        title.frame = NSRect(x: inset, y: bounds.height - 30, width: bounds.width - inset * 2, height: 20)
+        stats.frame = NSRect(x: inset, y: 8, width: bounds.width - inset * 2, height: 32)
     }
 }
 
@@ -45,7 +45,7 @@ final class MenuRow: NSView {
     private static let slot: CGFloat = 16
 
     private let label = NSTextField(labelWithString: "")
-    private let toggle = NSSwitch()
+    private let toggle = PillSwitch()
     private var chevron: NSButton?
     private var trash: NSButton?
     private let indent: CGFloat
@@ -61,8 +61,7 @@ final class MenuRow: NSView {
         label.lineBreakMode = .byTruncatingMiddle
         label.toolTip = tooltip
         addSubview(label)
-        toggle.controlSize = .small
-        toggle.state = on ? .on : .off
+        toggle.isOn = on
         toggle.target = self
         toggle.action = #selector(toggled)
         toggle.setAccessibilityLabel(title)
@@ -107,7 +106,7 @@ final class MenuRow: NSView {
     /// The row's switch can be locked (a repo whose folder is off); its own state is kept.
     func setLocked(_ locked: Bool) {
         toggle.isEnabled = !locked
-        dim(locked || toggle.state == .off)
+        dim(locked || !toggle.isOn)
     }
 
     private func dim(_ off: Bool) {
@@ -115,7 +114,7 @@ final class MenuRow: NSView {
     }
 
     @objc private func toggled() {
-        let on = toggle.state == .on
+        let on = toggle.isOn
         dim(!on)
         onToggle?(on)
     }
@@ -130,7 +129,7 @@ final class MenuRow: NSView {
         let trashFrame = NSRect(x: right - Self.slot, y: (h - Self.slot) / 2, width: Self.slot, height: Self.slot)
         trash?.frame = trashFrame
         right = trashFrame.minX - 6
-        let size = toggle.fittingSize
+        let size = PillSwitch.size
         toggle.frame = NSRect(x: right - size.width, y: (h - size.height) / 2, width: size.width, height: size.height)
         var left = inset + indent
         if let chevron {
@@ -139,5 +138,44 @@ final class MenuRow: NSView {
         }
         let labelHeight: CGFloat = 17
         label.frame = NSRect(x: left, y: (h - labelHeight) / 2, width: toggle.frame.minX - left - 8, height: labelHeight)
+    }
+}
+
+/// A switch drawn by hand: `NSSwitch` paints itself grey inside a menu (its window is never key),
+/// which reads as disabled. This one keeps the accent colour when on.
+@MainActor
+final class PillSwitch: NSControl {
+    static let size = NSSize(width: 30, height: 18)
+    var isOn = false { didSet { needsDisplay = true } }
+    override var isEnabled: Bool { didSet { needsDisplay = true } }
+
+    override init(frame: NSRect) {
+        super.init(frame: NSRect(origin: .zero, size: Self.size))
+        setAccessibilityRole(.checkBox)
+    }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override var intrinsicContentSize: NSSize { Self.size }
+    override func accessibilityValue() -> Any? { isOn ? 1 : 0 }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let track = NSBezierPath(roundedRect: bounds, xRadius: bounds.height / 2, yRadius: bounds.height / 2)
+        (isOn ? NSColor.controlAccentColor : NSColor.labelColor.withAlphaComponent(0.18)).setFill()
+        track.fill()
+        let d = bounds.height - 4
+        let x = isOn ? bounds.width - d - 2 : 2
+        NSColor.white.setFill()
+        NSBezierPath(ovalIn: NSRect(x: x, y: 2, width: d, height: d)).fill()
+        if !isEnabled {
+            NSColor.windowBackgroundColor.withAlphaComponent(0.5).setFill()
+            track.fill()
+        }
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        guard isEnabled else { return }
+        isOn.toggle()
+        sendAction(action, to: target)
     }
 }

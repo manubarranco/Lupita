@@ -56,6 +56,7 @@ case "poke":
     if args.contains("--onboarding") { info["onboarding"] = "1" }
     // With --about, the About panel.
     if args.contains("--about") { info["about"] = "1" }
+    if args.contains("--menu") { info["menu"] = args.contains("--expand") ? "expand" : "1" }
     DistributedNotificationCenter.default().postNotificationName(
         .init("com.manubarranco.lupita.lookup"), object: nil, userInfo: info.isEmpty ? nil : info, deliverImmediately: true)
 

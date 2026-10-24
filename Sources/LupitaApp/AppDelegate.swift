@@ -28,9 +28,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
             let openOnboarding = note.userInfo?["onboarding"] != nil
             let openAbout = note.userInfo?["about"] != nil
+            let menuMode = note.userInfo?["menu"] as? String
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
-                if openAbout {
+                if let menuMode {
+                    self?.menu?.open(expanding: menuMode == "expand")
+                } else if openAbout {
                     NSApp.activate(ignoringOtherApps: true)
                     NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
                 } else if openOnboarding {

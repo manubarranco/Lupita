@@ -52,6 +52,12 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         return image
     }
 
+    /// Dev aid (`lupita poke --menu`): opens the menu as a click on the icon would.
+    func open(expanding: Bool = false) {
+        if expanding { expanded = Set(store.roots) }
+        item.button?.performClick(nil)
+    }
+
     private lazy var header = MenuHeader(title: S.appName)
     /// Folders whose repos are showing, the repos found in each, and the items now in the menu.
     private var expanded: Set<String> = []
