@@ -111,3 +111,22 @@ Commits and branches are read by running `git` (Homebrew's, or the Command Line 
 it `/usr/bin/git` is a stub that opens an install dialog, so it is never called and commits and
 branches are simply not recognised. Reading `.git` by hand (packfiles, zlib) is not worth it:
 people who use coding agents have git. Approved by Manu, 2026-10-24.
+
+## D22 — Glossary terms: which files, which formats
+Terms come from glossary files: any `.md` whose name contains `glossary`, `glosario`, `nomenclatura` or `terminolog`.
+Four formats: `- **term** — definition`, `**term**: definition`, `| **term** | definition |` and `### term` (a heading
+counts only when the file has no list or table entries, otherwise headings are its sections). Aliases are separated by
+` / `; `(…)`, `*(canónico)*`, backticks and `[?]` are dropped from the name. A term ranks below every ID definition, and
+the order is ID, then repo reference, then term. The generic pattern (`- **term** — definition` in any `.md`) stays
+**off**: in a fixed sample of 40 hits outside glossaries (seed 42) only 23 (58 %) were real term definitions against the
+95 % bar; the rest were rules, principles, log entries and sentences that happen to start with bold text. A glossary file
+is the signal; the line shape alone is not. Switch: `Glossary.looseTerms`; `lupita terms <dir>` prints the sample.
+
+## D23 — Multi-word terms and normalization
+The lookup key is the same when indexing and when pointing: lowercase, no accents, no backticks, no leading article
+(`el/la/los/las/the`), and a simple plural removed from the last word (`remates` → `remate`; a plural in `-es` is
+tried second, `ciudades` → `ciudad`). Words that end in `s` after `s`, `u`, `i` or `y` keep it (`census`, `glass`). When the
+pointed word is not an ID or a repo reference, windows of 4 to 1 words that contain it are tried, longest first, over the
+Accessibility line and over the OCR row; a word ending in punctuation closes the phrase. The CLI takes the phrase whole:
+`lupita "la Mesa" --repo nib`. A term in the window's repo comes first; one from another repo is flagged. Why: the
+terms agents coin are often two or three words (`Mesa de Trazo`), and pointing at any one of them should find it.

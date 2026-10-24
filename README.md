@@ -59,6 +59,7 @@ point, so they are never stale:
 | A branch (`fix/search`) | Its last commit and how far ahead of `main` it is, or, if deleted, the merge that closed it |
 | A file (`docs/decisions.md:12`) | Its title and first line (Markdown) or its last change. Click: opens it at the line |
 | A command (`/retro`) | Its description, from `.claude/commands` or `.claude/skills`, in the repo or in `~/.claude` |
+| A glossary term (`render pass`, `the Mesa`) | Its definition, from a glossary file (`glossary.md`, `glosario.md`…) in the repo. Click: opens it at the line. Terms of one to four words work; a term from another repo is flagged |
 
 Commits and branches need git (the Command Line Tools); without it they are simply not recognised.
 
