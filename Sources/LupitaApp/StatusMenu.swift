@@ -147,12 +147,15 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         // NSAlert titles are plain text: the question goes in an accessory view so the path can
         // have its own style (monospaced, on a soft background) instead of quotes.
         let around = S.removeFolderAround
+        let spacing = NSMutableParagraphStyle()
+        spacing.paragraphSpacing = 8  // air between the question and the explanation
         let text = NSMutableAttributedString(string: around.before, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)])
         text.append(NSAttributedString(string: (root as NSString).abbreviatingWithTildeInPath, attributes: [
             .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .semibold),
             .backgroundColor: NSColor.labelColor.withAlphaComponent(0.1),
         ]))
         text.append(NSAttributedString(string: around.after, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)]))
+        text.addAttribute(.paragraphStyle, value: spacing, range: NSRange(location: 0, length: text.length))
         text.append(NSAttributedString(string: "\n" + S.removeFolderBody, attributes: [
             .font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor,
         ]))

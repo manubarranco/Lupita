@@ -9,7 +9,7 @@ final class MenuHeader: NSView {
     private let stats = NSTextField(labelWithString: "")
 
     init(title: String) {
-        super.init(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 68))
+        super.init(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 76))
         self.title.stringValue = title
         self.title.font = .boldSystemFont(ofSize: 15)
         self.title.textColor = .labelColor
@@ -31,7 +31,7 @@ final class MenuHeader: NSView {
         super.layout()
         let inset = MenuRow.inset
         title.frame = NSRect(x: inset, y: bounds.height - 30, width: bounds.width - inset * 2, height: 20)
-        stats.frame = NSRect(x: inset, y: 8, width: bounds.width - inset * 2, height: 32)
+        stats.frame = NSRect(x: inset, y: 8, width: bounds.width - inset * 2, height: 30)
     }
 }
 
