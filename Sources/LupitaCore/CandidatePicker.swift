@@ -40,9 +40,11 @@ public enum CandidatePicker {
             best = (range, distance, n)
         }
         guard let best else { return nil }
+        let tail = ns.substring(with: NSRange(location: best.range.location + best.range.length,
+                                              length: min(3, ns.length - best.range.location - best.range.length)))
         let single = resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
                                       context: String(ns.substring(with: NSRange(location: max(0, best.range.location - 80), length: min(best.range.location, 80)))),
-                                      fromPath: fromPath)
+                                      fromPath: fromPath, after: tail)
         if !isFound(single) {
             let texts = ranges.map { ns.substring(with: $0) }
             let closing = CharacterSet(charactersIn: ".,;:!?…")
@@ -59,7 +61,7 @@ public enum CandidatePicker {
         let start = max(0, best.range.location - 80)
         let context = ns.substring(with: NSRange(location: start, length: best.range.location - start))
         return resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
-                                context: context, fromPath: fromPath)
+                                context: context, fromPath: fromPath, after: tail)
     }
 
     /// Max words in a glossary term (D23).

@@ -70,6 +70,10 @@ public enum S {
     public static var openFolder: String { t("Open the repo folder", "Abrir la carpeta del repo") }
     public static var showFolder: String { t("Show the repo folder", "Mostrar la carpeta del repo") }
 
+    // MARK: Code (D29)
+    public static var kindSymbol: String { t("symbol", "símbolo") }
+    public static var noComment: String { t("no comment", "sin comentario") }
+
     // MARK: Menu
     public static var noIndex: String { t("No index", "Sin índice") }
     public static func summary(ids: Int, repos: Int, files: Int) -> String {

@@ -24,7 +24,8 @@ public enum Snippet {
         case .tableRow:
             let cells = lines[hit.line].split(separator: "|").map { clean(String($0)) }.filter { !$0.isEmpty }
             return (hit.title, truncate(cells.dropFirst(2).joined(separator: " · ")))
-        case .repo, .commit, .branch, .file, .command, .term:
+        case .repo, .commit, .branch, .file, .command, .term,
+             .symbol, .address, .token, .color, .terminal, .error, .tag, .pullRequest:
             return (hit.title, "")  // built by RepoRefs or Glossary, never from an ID line
         case .fileName, .frontmatter:
             let headingLine = lines.firstIndex { $0.hasPrefix("# ") }

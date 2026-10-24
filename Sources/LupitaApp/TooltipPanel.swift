@@ -161,7 +161,11 @@ struct TooltipView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     // A term's title is the term itself: showing the ID too would repeat it.
                     if d.rule != .term { Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold)) }
-                    Text(d.title).font(.body.weight(.medium)).lineLimit(2)
+                    if d.rule == .symbol && d.title.isEmpty {
+                        Text(S.noComment).font(.body.italic()).foregroundStyle(.secondary)
+                    } else {
+                        Text(d.title).font(.body.weight(.medium)).lineLimit(2)
+                    }
                 }
                 if !d.summary.isEmpty {
                     Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
@@ -198,6 +202,7 @@ struct TooltipView: View {
         case .file: S.kindFile
         case .command: S.kindCommand
         case .term: S.kindTerm
+        case .symbol: S.kindSymbol
         default: nil
         }
     }
