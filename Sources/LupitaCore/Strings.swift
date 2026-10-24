@@ -91,6 +91,9 @@ public enum S {
     public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
     public static var kindError: String { t("error", "error") }
     public static var kindTag: String { t("HTML tag", "etiqueta HTML") }
+    public static var kindPullRequest: String { t("pull request", "pull request") }
+    public static var prNotInHistory: String { t("Not in the local history", "No está en el historial local") }
+    public static func mergedOn(_ date: String) -> String { t("Merged \(date)", "Fusionada el \(date)") }
     public static var notRunning: String { t("not running", "apagado") }
 
     // MARK: Menu

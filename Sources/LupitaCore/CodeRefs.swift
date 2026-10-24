@@ -16,13 +16,19 @@ public enum CodeRefs {
         let before: String
     }
 
+    static let numberOnly = try! NSRegularExpression(pattern: #"^#\d{1,6}$"#)
+    static let prWord = try! NSRegularExpression(pattern: #"(?:^|[^A-Za-z])(?:PR|pull request)\s*$"#, options: [.caseInsensitive])
     static let wrappers = CharacterSet(charactersIn: "`\"'“”‘’«»[]{}*")
     static let trailing = CharacterSet(charactersIn: ".,;:!?…")
 
     /// The code reference `raw` names, or nil. `before` / `after` are the text around it on its line.
     public static func resolve(_ raw: String, repos: [Repo], preferredRepo: String?,
                                before: String? = nil, after: String? = nil) -> Resolution? {
-        guard let text = normalize(raw, before: before ?? "", after: after ?? "") else { return nil }
+        guard var text = normalize(raw, before: before ?? "", after: after ?? "") else { return nil }
+        // `PR #999` with the pointer on `#999`: the word before says it is a PR, not the colour #999999.
+        if matches(numberOnly, text.text), matches(prWord, text.before) {
+            text = Text(text: "PR " + text.text, codeMarked: text.codeMarked, before: text.before)
+        }
         let ordered = order(repos, preferredRepo)
         var defs: [Definition]?
         // 6 PRs, 5 errors and tags, 4 commands are cheap or exact: they run first when they match exactly,
@@ -32,6 +38,7 @@ public enum CodeRefs {
         defs = defs ?? Addresses.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Tokens.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         defs = defs ?? Commands.resolve(text, repos: ordered, preferredRepo: preferredRepo)
+        defs = defs ?? PullRequests.resolve(text, repos: ordered, preferredRepo: preferredRepo)
         guard let found = defs, let first = found.first else { return nil }
         var r = Resolution(query: text.text, kind: .exact, key: first.key, definitions: Array(found.prefix(5)),
                            mentions: nil, alternatives: [])
@@ -63,6 +70,8 @@ public enum CodeRefs {
         text = text.trimmingCharacters(in: wrappers)
         while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
         text = text.trimmingCharacters(in: wrappers)
+        // `(#12)`, `(--accent)`: parentheses around the whole text, as opposed to `var(--accent)` or `f(x)`.
+        if text.hasPrefix("("), text.hasSuffix(")") { text = String(text.dropFirst().dropLast()) }
         guard !text.isEmpty, text.count <= 300 else { return nil }
         // `simplify` followed by `(` in the line (the picker splits words at parentheses).
         if after.hasPrefix("(") { marked = true }

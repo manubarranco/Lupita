@@ -448,7 +448,7 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         let d = first("#abc")
         #expect(d?.id == "#AABBCC")
         #expect(d?.path == "")
-        #expect(first("#12") == nil)
+        #expect(first("#12")?.rule != .color)  // two digits are a PR number at most
         #expect(first("#GGGGGG") == nil)
         // A short hex is expanded before comparing: `--only-dark: #111` is #111111.
         #expect(first("#111111")?.summary.contains("--only-dark") == true)
@@ -642,5 +642,140 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
         #expect(first("ENOENT")?.title.hasPrefix("No existe") == true)
         S.language = "en-GB"
         #expect(first("ENOENT")?.title.hasPrefix("No such") == true)
+    }
+}
+
+@Suite(.serialized) struct PullRequestTests {
+    let repo: Repo
+    let bare: Repo
+
+    init() throws {
+        let base = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-pr-\(UUID().uuidString)")
+        repo = try makeCodeRepo("shop", ["a.txt": "a\n"], in: base)
+        bare = try makeCodeRepo("empty", ["a.txt": "a\n"], in: base)
+        guard Git.executable != nil else { return }
+        try FileManager.default.removeItem(atPath: repo.path + "/.git")
+        try FileManager.default.removeItem(atPath: bare.path + "/.git")
+        func git(_ repo: Repo, _ args: String...) { _ = Git.output(repo.path, ["-c", "user.name=T", "-c", "user.email=t@example.com"] + args) }
+        git(repo, "init", "-q", "-b", "main")
+        git(repo, "add", "."); git(repo, "commit", "-q", "-m", "first")
+        git(repo, "checkout", "-q", "-b", "feature/search")
+        try "b\n".write(toFile: repo.path + "/b.txt", atomically: true, encoding: .utf8)
+        git(repo, "add", "."); git(repo, "commit", "-q", "-m", "wip search")
+        git(repo, "checkout", "-q", "main")
+        git(repo, "merge", "-q", "--no-ff", "feature/search", "-m", "Merge pull request #12 from owner/feature/search", "-m", "Add the search box")
+        try "c\n".write(toFile: repo.path + "/c.txt", atomically: true, encoding: .utf8)
+        git(repo, "add", "."); git(repo, "commit", "-q", "-m", "Fix the typo in checkout (#34)")
+        try "d\n".write(toFile: repo.path + "/d.txt", atomically: true, encoding: .utf8)
+        git(repo, "add", "."); git(repo, "commit", "-q", "-m", "Mentions (#56) in the middle of a line")
+        git(bare, "init", "-q", "-b", "main")
+    }
+
+    func first(_ text: String, window: String? = "shop") -> Definition? {
+        CodeRefs.resolve(text, repos: [repo, bare], preferredRepo: window)?.definitions.first
+    }
+
+    @Test func aMergeCommitGivesTheTitleFromItsBody() throws {
+        try #require(Git.executable != nil)
+        let d = first("#12")
+        #expect(d?.rule == .pullRequest)
+        #expect(d?.title == "Add the search box")
+        #expect(d?.summary.contains("owner/feature/search") == true)
+        #expect(d?.summary.isEmpty == false)
+        #expect(d?.repo == "shop")
+    }
+
+    @Test func aSquashCommitGivesItsSubject() throws {
+        try #require(Git.executable != nil)
+        #expect(first("#34")?.title == "Fix the typo in checkout")
+    }
+
+    @Test func allThreeSpellings() throws {
+        try #require(Git.executable != nil)
+        for form in ["#12", "PR 12", "PR #12", "pr #12", "`#12`", "(#12)."] {
+            #expect(first(form)?.title == "Add the search box", "\(form)")
+        }
+    }
+
+    @Test func aMentionInTheMiddleOfAMessageIsNotTheMerge() throws {
+        try #require(Git.executable != nil)
+        #expect(first("PR 56")?.title == S.prNotInHistory)
+    }
+
+    @Test func missingPRsSayTheyAreNotInTheLocalHistory() throws {
+        try #require(Git.executable != nil)
+        let d = first("PR 999")
+        #expect(d?.title == S.prNotInHistory)
+        #expect(d?.rule == .pullRequest)
+        #expect(d?.absolutePath == "")
+        #expect(first("#34", window: "empty")?.title == S.prNotInHistory)
+    }
+
+    @Test func withoutAWindowAllRepsAreSearched() throws {
+        try #require(Git.executable != nil)
+        #expect(first("#34", window: nil)?.title == "Fix the typo in checkout")
+    }
+
+    @Test func threeDigitNumbersFallBackToColours() throws {
+        try #require(Git.executable != nil)
+        let d = first("#333")
+        #expect(d?.rule == .color)
+        #expect(d?.id == "#333333")
+        #expect(first("#12")?.rule == .pullRequest)
+        // An explicit PR is never a colour.
+        #expect(first("PR 333")?.rule == .pullRequest)
+    }
+
+    @Test func notPullRequests() {
+        #expect(first("12") == nil)
+        #expect(first("#") == nil)
+        #expect(first("PR") == nil)
+        #expect(first("#1234567") == nil)
+    }
+}
+
+@Suite(.serialized) struct CodePickerTests {
+    let repo: Repo
+    let resolver: Resolver
+
+    init() throws {
+        repo = try makeCodeRepo("atlas", [
+            "a.py": "def slider(x):\n    \"\"\"Moves it.\"\"\"\n\ndef plain_thing():\n    pass\n",
+            "package.json": "{\"scripts\": {\"build\": \"tsc\"}}",
+        ])
+        var index = RefIndex()
+        index.repos = [repo]
+        resolver = Resolver(index: index)
+    }
+
+    func pick(_ line: String, at word: String) -> Resolution? {
+        CodeRefs.FileListCache.shared.clear()
+        let offset = (line as NSString).range(of: word).location + 1
+        return CandidatePicker.pick(line: line, cursorOffset: offset, resolver: resolver, preferredRepo: "atlas")
+    }
+
+    @Test func aCalledWordIsASymbolEvenThoughTheParenthesesAreSplitOff() {
+        #expect(pick("then call slider() once", at: "slider")?.definitions.first?.rule == .symbol)
+        #expect(pick("then pick the slider once", at: "slider")?.definitions.isEmpty == true)
+        #expect(pick("then pick `slider` once", at: "slider")?.definitions.first?.rule == .symbol)
+    }
+
+    @Test func snakeCaseNeedsNoMarks() {
+        #expect(pick("the plain_thing helper", at: "plain_thing")?.definitions.first?.title == "")
+    }
+
+    @Test func pointingAtAnyWordOfACommandFindsIt() {
+        let line = "first run npm run build and then"
+        for word in ["npm", "build"] {
+            let r = pick(line, at: word)
+            #expect(r?.definitions.first?.rule == .terminal, "\(word)")
+        }
+        #expect(pick(line, at: "first")?.definitions.isEmpty == true)
+    }
+
+    @Test func prNumbersWithAndWithoutTheWord() {
+        #expect(pick("merged in PR 999 yesterday", at: "PR")?.definitions.first?.rule == .pullRequest)
+        #expect(pick("merged in PR 999 yesterday", at: "999")?.definitions.first?.rule == .pullRequest)
+        #expect(pick("merged in PR #999 yesterday", at: "#999")?.definitions.first?.rule == .pullRequest)
     }
 }

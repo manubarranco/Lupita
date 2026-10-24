@@ -217,6 +217,7 @@ struct TooltipView: View {
         case .token: S.kindToken
         case .terminal: S.kindTerminal
         case .error: S.kindError
+        case .pullRequest: S.kindPullRequest
         case .tag: S.kindTag
         case .color: S.kindColor
         default: nil
@@ -228,6 +229,7 @@ struct TooltipView: View {
         switch d.rule {
         case .repo, .commit, .branch: nil
         case .address: d.path.isEmpty ? nil : d.path
+        case .pullRequest: nil
         case .command: d.path
         case .file: d.line > 1 ? "\(d.path):\(d.line)" : d.path
         default: "\(d.path):\(d.line)"
