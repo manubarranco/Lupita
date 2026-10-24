@@ -21,16 +21,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu?.onPrepareRepos = { [weak self] in self?.onboarding?.show() }
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
-        // Dev aid: `lupita poke` does what ⌃⌥R does, for automated checks that cannot press keys.
+        // Dev aid: `lupita poke` does what the shortcut does, for automated checks that cannot press keys.
         DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
             let openOnboarding = note.userInfo?["onboarding"] != nil
             let openAbout = note.userInfo?["about"] != nil
+            let menuMode = note.userInfo?["menu"] as? String
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
-                if openAbout {
+                if menuMode == "confirm" {
+                    self?.menu?.confirmRemove(self?.store.roots.first ?? "~/Repos", dryRun: true)
+                } else if let menuMode {
+                    self?.menu?.open(expanding: menuMode == "expand")
+                } else if openAbout {
                     NSApp.activate(ignoringOtherApps: true)
                     NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
                 } else if openOnboarding {

@@ -84,8 +84,20 @@ public enum S {
         t("Shortcut: \(keys) with the pointer on an ID", "Atajo: \(keys) con el ratón sobre un ID")
     }
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
-    public static var lens: String { t("Lens while holding", "Lupa al mantener") }
-    public static var folders: String { t("Folders", "Carpetas") }
+    public static var lens: String { t("Show Lupita", "Mostrar a Lupita") }
+    public static var folders: String { t("Folders to search", "Carpetas de búsqueda") }
+    public static var permissions: String { t("Permissions", "Permisos") }
+    /// The question around the folder path, which the alert draws in its own style.
+    public static var removeFolderAround: (before: String, after: String) {
+        isSpanish ? ("¿Quitar la carpeta ", " de Lupita?") : ("Remove the folder ", " from Lupita?")
+    }
+    public static var removeFolderBody: String {
+        t("Lupita will stop searching it. You can add it back any time.",
+          "Lupita dejará de buscar en ella. Puedes añadirla de nuevo cuando quieras.")
+    }
+    public static var removeFromLupita: String { t("Remove from Lupita", "Quitar de Lupita") }
+    public static var cancel: String { t("Cancel", "Cancelar") }
+    public static var expand: String { t("Show repos", "Mostrar repos") }
     public static var remove: String { t("Remove", "Quitar") }
     public static var addFolder: String { t("Add folder…", "Añadir carpeta…") }
     public static var add: String { t("Add", "Añadir") }

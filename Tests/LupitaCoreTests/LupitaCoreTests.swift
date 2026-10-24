@@ -246,6 +246,21 @@ import Testing
         return Repo(name: name, path: root.path)
     }
 
+    @Test func switchedOffReposAreLeftOutOfTheIndex() throws {
+        let a = try Self.makeRepo("alpha", files: ["decisions.md": "## D001 — Alfa"])
+        let parent = URL(fileURLWithPath: a.path).deletingLastPathComponent().path
+        let b = Repo(name: "beta", path: RepoDiscovery.realPath(parent) + "/beta")
+        try FileManager.default.createDirectory(atPath: b.path + "/.git", withIntermediateDirectories: true)
+        try "## D002 — Beta".write(toFile: b.path + "/decisions.md", atomically: true, encoding: .utf8)
+        let all = RepoDiscovery.repos(under: [parent])
+        #expect(Set(all.map(\.name)) == ["alpha", "beta"])
+        let some = RepoDiscovery.repos(under: [parent], excluding: [b.path])
+        #expect(some.map(\.name) == ["alpha"])
+        let index = RefIndex.build(roots: [parent], excluding: [b.path])
+        #expect(index.definitions["D001"] != nil && index.definitions["D002"] == nil)
+        #expect(RepoDiscovery.repos(under: [parent], excluding: Set(all.map(\.path))).isEmpty)
+    }
+
     @Test func rebuildingOneRepoLeavesTheOthersAlone() throws {
         let a = try Self.makeRepo("alpha", files: ["decisions.md": "## D001 — Alfa\nVer Q01."])
         let b = try Self.makeRepo("beta", files: ["decisions.md": "## D001 — Beta\nVer Q01."])

@@ -51,8 +51,8 @@ public struct RefIndex: Codable, Sendable {
         filesPerRepo = try c.decode([String: Int].self, forKey: .filesPerRepo)
     }
 
-    public static func build(roots: [String]) -> RefIndex {
-        build(repos: RepoDiscovery.repos(under: roots))
+    public static func build(roots: [String], excluding: Set<String> = []) -> RefIndex {
+        build(repos: RepoDiscovery.repos(under: roots, excluding: excluding))
     }
 
     public static func build(repos: [Repo]) -> RefIndex {

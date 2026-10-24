@@ -171,3 +171,6 @@ text never goes to a cloud service, and the on-device model covers the uses we f
 
 ## D27 — The tooltip can be looked up: pointing at it reads it by OCR
 With the cursor over the tooltip, the shortcut skips Accessibility, lets the OCR capture include the tooltip window (the lens stays excluded) and prefers the repo and file of the definition shown, so `answered by D006` in a `Q01` tooltip resolves in the same repo. Why: the tooltip's text is not reachable through Accessibility and OCR used to exclude every own window. Validated on a real screen by Manu, 2026-10-24.
+
+## D28 — The menu has switches: lens, folders and each repo inside them
+The menu header is a view (name, stats), not disabled rows, so it keeps the full text colour. "Show Lupita" (was "Lens while holding") is a switch. Each folder has a switch (search in it or not), a trash button instead of "Remove", and a chevron that opens its repos, each with its own switch. Off means left out of the index but kept in the list, so it can be turned back on; a folder that is off locks its repos' switches without losing their state. The switches are drawn by hand because `NSSwitch` paints grey in a menu. The ⌃⌥R shortcut is gone: only ⌃⌥⌘ and fn⌃⌥ remain, and a saved ⌃⌥R falls back to ⌃⌥⌘ (a custom shortcut comes later). Validated on a real screen by Manu, 2026-10-24.

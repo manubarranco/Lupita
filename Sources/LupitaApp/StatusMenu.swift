@@ -17,6 +17,9 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         let menu = NSMenu()
         menu.delegate = self
         item.menu = menu
+        NotificationCenter.default.addObserver(forName: IndexStore.changed, object: store, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.refreshHeader() }
+        }
     }
 
     /// Lupita looking slightly down-left, at the screen below (D17): the lens drawing of
@@ -49,18 +52,30 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         return image
     }
 
+    /// Dev aid (`lupita poke --menu`): opens the menu as a click on the icon would.
+    func open(expanding: Bool = false) {
+        if expanding { expanded = Set(store.roots) }
+        item.button?.performClick(nil)
+    }
+
+    private lazy var header = MenuHeader(title: S.appName)
+    /// Folders whose repos are showing, the repos found in each, and the items now in the menu.
+    private var expanded: Set<String> = []
+    private var repoCache: [String: [Repo]] = [:]
+    private var repoItems: [String: [NSMenuItem]] = [:]
+    private var folderItems: [String: NSMenuItem] = [:]
+
+    private func refreshHeader() { header.update([store.summary, store.freshness]) }
+
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        let title = NSMenuItem(title: S.appName, action: nil, keyEquivalent: "")
-        title.isEnabled = false
-        title.attributedTitle = NSAttributedString(string: S.appName, attributes: [
-            .font: NSFont.boldSystemFont(ofSize: NSFont.menuFont(ofSize: 0).pointSize),
-            .foregroundColor: NSColor.labelColor,
-        ])
-        menu.addItem(title)
+        menu.autoenablesItems = false
+        repoItems = [:]
+        folderItems = [:]
+        refreshHeader()
+        menu.addItem(viewItem(header))
         menu.addItem(.separator())
-        menu.addItem(disabled(store.summary))
-        if !store.freshness.isEmpty { menu.addItem(disabled(store.freshness)) }
+
         let shortcut = NSMenuItem(title: S.shortcut(HotkeyChoice.current.short), action: nil, keyEquivalent: "")
         let choices = NSMenu()
         for choice in HotkeyChoice.allCases {
@@ -70,24 +85,19 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         shortcut.submenu = choices
         menu.addItem(shortcut)
-        let lens = action(S.lens, #selector(toggleLens))
-        lens.state = CursorLens.isOn ? .on : .off
-        menu.addItem(lens)
+        let lens = MenuRow(title: S.lens, on: CursorLens.isOn)
+        lens.onToggle = { CursorLens.isOn = $0 }
+        menu.addItem(viewItem(lens))
         menu.addItem(.separator())
 
-        menu.addItem(disabled(S.folders))
-        for root in store.roots {
-            let row = NSMenuItem(title: "  " + root, action: nil, keyEquivalent: "")
-            let sub = NSMenu()
-            sub.addItem(action(S.remove, #selector(removeRoot(_:)), represented: root))
-            row.submenu = sub
-            menu.addItem(row)
-        }
+        menu.addItem(.sectionHeader(title: S.folders))
+        for root in store.roots { addFolder(root, to: menu) }
         menu.addItem(action(S.addFolder, #selector(addRoot)))
         menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
         menu.addItem(action(S.reindex, #selector(reindex)))
         menu.addItem(.separator())
 
+        menu.addItem(.sectionHeader(title: S.permissions))
         menu.addItem(permissionItem(S.accessibility, granted: Permissions.accessibility, pane: .accessibility))
         menu.addItem(permissionItem(S.screenRecording, granted: Permissions.screenRecording, pane: .screenRecording))
         menu.addItem(.separator())
@@ -96,6 +106,122 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(action(Updater.availableVersion.map(S.downloadUpdate) ?? S.checkForUpdates, #selector(checkForUpdates)))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: S.quit, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+    }
+
+    private func viewItem(_ view: NSView) -> NSMenuItem {
+        let item = NSMenuItem()
+        item.view = view
+        return item
+    }
+
+    // MARK: Folders and their repos
+
+    private func addFolder(_ root: String, to menu: NSMenu) {
+        let on = !store.disabledRoots.contains(root)
+        let row = MenuRow(title: (root as NSString).abbreviatingWithTildeInPath, on: on, chevron: true, trash: true, tooltip: root)
+        row.isExpanded = expanded.contains(root)
+        let item = viewItem(row)
+        row.onToggle = { [weak self] on in
+            guard let self else { return }
+            store.setRoot(root, enabled: on)
+            repoItems[root]?.forEach { ($0.view as? MenuRow)?.setLocked(!on) }
+        }
+        row.onChevron = { [weak self, weak row, weak item] in
+            guard let self, let row, let item else { return }
+            if expanded.remove(root) == nil { expanded.insert(root) }
+            row.isExpanded = expanded.contains(root)
+            showRepos(of: root, after: item)
+        }
+        row.onTrash = { [weak self] in
+            // Close the menu first: an alert cannot run inside its tracking loop.
+            self?.item.menu?.cancelTracking()
+            DispatchQueue.main.async { self?.confirmRemove(root) }
+        }
+        folderItems[root] = item
+        menu.addItem(item)
+        if expanded.contains(root) { showRepos(of: root, after: item) }
+    }
+
+    func confirmRemove(_ root: String, dryRun: Bool = false) {
+        let alert = NSAlert()
+        // NSAlert titles are plain text: the question goes in an accessory view so the path can
+        // have its own style (monospaced, on a soft background) instead of quotes.
+        let around = S.removeFolderAround
+        let spacing = NSMutableParagraphStyle()
+        spacing.paragraphSpacing = 8
+        spacing.alignment = .center  // air between the question and the explanation
+        let text = NSMutableAttributedString(string: around.before, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)])
+        text.append(NSAttributedString(string: (root as NSString).abbreviatingWithTildeInPath, attributes: [
+            .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .semibold),
+            .backgroundColor: NSColor.labelColor.withAlphaComponent(0.1),
+        ]))
+        text.append(NSAttributedString(string: around.after, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)]))
+        text.addAttribute(.paragraphStyle, value: spacing, range: NSRange(location: 0, length: text.length))
+        text.append(NSAttributedString(string: "\n" + S.removeFolderBody, attributes: [
+            .font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor,
+        ]))
+        let label = NSTextField(wrappingLabelWithString: "")
+        label.attributedStringValue = text
+        label.alignment = .center
+        label.frame = NSRect(x: 0, y: 0, width: 260, height: 0)
+        label.frame.size.height = label.sizeThatFits(NSSize(width: 260, height: CGFloat.greatestFiniteMagnitude)).height
+        alert.messageText = ""
+        alert.accessoryView = label
+        alert.addButton(withTitle: S.removeFromLupita).hasDestructiveAction = true
+        alert.addButton(withTitle: S.cancel)
+        NSApp.activate()
+        // The alert pins its icon to the left; once laid out, move it to the middle.
+        alert.layout()
+        if let content = alert.window.contentView,
+           let icon = Self.imageViews(in: content).first(where: { $0.image === alert.icon || $0.frame.width >= 48 }) {
+            icon.translatesAutoresizingMaskIntoConstraints = true
+            icon.frame.origin.x = (content.bounds.width - icon.frame.width) / 2
+        }
+        guard alert.runModal() == .alertFirstButtonReturn, !dryRun else { return }
+        expanded.remove(root)
+        store.removeRoot(root)
+    }
+
+    private static func imageViews(in view: NSView) -> [NSImageView] {
+        view.subviews.flatMap { ($0 as? NSImageView).map { [$0] } ?? imageViews(in: $0) }
+    }
+
+    private func removeRepoItems(of root: String) {
+        for item in repoItems.removeValue(forKey: root) ?? [] { item.menu?.removeItem(item) }
+    }
+
+    /// Shows (or hides) the repos of a folder right under its row. The list comes from the cache at
+    /// once and is refreshed in the background, so a repo cloned meanwhile appears.
+    private func showRepos(of root: String, after folder: NSMenuItem) {
+        removeRepoItems(of: root)
+        guard expanded.contains(root) else { return }
+        if let cached = repoCache[root] { insertRepos(cached, of: root, after: folder) }
+        Task { [weak self] in
+            let found = await Task.detached(priority: .userInitiated) {
+                RepoDiscovery.repos(under: [root])
+            }.value
+            guard let self, expanded.contains(root), found != repoCache[root] || repoItems[root] == nil else { return }
+            repoCache[root] = found
+            removeRepoItems(of: root)
+            if let folder = folderItems[root] { insertRepos(found, of: root, after: folder) }
+        }
+    }
+
+    private func insertRepos(_ repos: [Repo], of root: String, after folder: NSMenuItem) {
+        guard let menu = folder.menu, var index = Optional(menu.index(of: folder)), index >= 0 else { return }
+        let rootOn = !store.disabledRoots.contains(root)
+        let off = store.disabledRepos
+        var items: [NSMenuItem] = []
+        for repo in repos {
+            let row = MenuRow(title: repo.name, on: !off.contains(repo.path), indent: 22, tooltip: repo.path)
+            row.setLocked(!rootOn)
+            row.onToggle = { [weak self] on in self?.store.setRepo(repo.path, enabled: on) }
+            let item = viewItem(row)
+            index += 1
+            menu.insertItem(item, at: index)
+            items.append(item)
+        }
+        repoItems[root] = items
     }
 
     private func disabled(_ title: String) -> NSMenuItem {
@@ -141,11 +267,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         NSApp.activate()
         guard panel.runModal() == .OK, let url = panel.url else { return }
         store.roots = Array(Set(store.roots + [url.path])).sorted()
-    }
-
-    @objc private func removeRoot(_ sender: NSMenuItem) {
-        guard let root = sender.representedObject as? String else { return }
-        store.roots = store.roots.filter { $0 != root }
     }
 
     @objc private func reindex() { store.rebuild() }
