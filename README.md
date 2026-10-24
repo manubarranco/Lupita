@@ -125,6 +125,10 @@ Everything happens on your Mac. Nothing is sent anywhere, and nothing you look u
 stored. The one exception is **Check for updates…** in the menu: it asks GitHub for the latest
 release, and only when you click it. Lupita never checks in the background. Lupita only keeps its settings and the index of your Markdown files, in memory.
 
+This is a commitment for future versions too. If Lupita ever uses a language model, it will be
+Apple's on-device model, which runs on your Mac. If a feature ever needed the network, it would
+come switched off, clearly labelled, and would only work if you turn it on.
+
 If you build from source, macOS forgets the permissions on every build unless the app is
 signed with a stable certificate: create a self-signed **Code Signing** certificate named
 `Lupita Dev` in Keychain Access, and `scripts/bundle.sh` will use it.

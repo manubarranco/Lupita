@@ -125,6 +125,10 @@ Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de 
 consultas. La única excepción es **Buscar actualizaciones…** en el menú: pregunta a GitHub por la
 última release, y solo cuando lo pulsas. Lupita nunca comprueba en segundo plano. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
 
+Es un compromiso también para las versiones futuras. Si Lupita llega a usar un modelo de lenguaje,
+será el modelo de Apple que funciona en tu Mac. Si alguna función necesitara la red, vendría
+apagada, claramente señalada, y solo funcionaría si tú la activas.
+
 Si compilas desde el código, macOS olvida los permisos en cada compilación salvo que la app
 esté firmada con un certificado estable: crea en Acceso a Llaveros un certificado autofirmado
 de **Firma de código** llamado `Lupita Dev` y `scripts/bundle.sh` lo usará.

@@ -15,7 +15,7 @@ Later improvement: selected text or the Accessibility API.
 
 ## D4 — Deterministic resolution by default
 Haiku (Anthropic API) only when there is no clear definition or a long text needs
-summarizing. Premium candidate, out of the MVP.
+summarizing. Premium candidate, out of the MVP. (The Haiku part is replaced by D26.)
 
 ## D5 — Pre-built index of defined IDs, not blind grep
 A background scan builds a dictionary of **defined** IDs. This gives us:
@@ -161,3 +161,10 @@ permissions, then this window. Approved by Manu, 2026-10-24.
 version (numeric semver). Never in the background, so "nothing leaves your Mac" stays true except when the user asks. When a newer
 release is found the item becomes "Download Lupita X.Y.Z…" until restart. Automatic installation with Sparkle is postponed until the
 app is notarized. Approved by Manu, 2026-10-24.
+
+## D26 — Local only, now and in future versions; any language model runs on the Mac
+Replaces the Haiku part of D4. Nothing the user looks up leaves the Mac. If Lupita uses a language model, it is Apple's on-device
+model (Foundation Models), working only on what Lupita already found: the literal source stays visible and generated text is
+marked as such. A feature that needs the network ships switched off, clearly labelled, and works only after the user turns it on;
+the update check (D25) is the only network call today. The promise is in both READMEs. Why: users must be able to trust that their
+text never goes to a cloud service, and the on-device model covers the uses we foresee without one. Approved by Manu, 2026-10-24.
