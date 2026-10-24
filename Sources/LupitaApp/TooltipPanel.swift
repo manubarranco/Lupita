@@ -150,44 +150,62 @@ struct TooltipView: View {
             }
         }
         .padding(14)
-        .frame(width: 380, alignment: .leading)
+        .frame(width: 440, alignment: .leading)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.separator))
     }
 
-    private func row(_ d: Definition, isFirst: Bool) -> some View {
-        Button { open(d) } label: {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    // A term's title is the term itself: showing the ID too would repeat it.
-                    if d.rule != .term { Text(d.id).font(.system(.body, design: .monospaced).weight(.semibold)) }
-                    Text(d.title).font(.body.weight(.medium)).lineLimit(2)
+    /// A row opens its file, unless it has none (a dictionary answer: git, an error, an HTML tag).
+    @ViewBuilder private func row(_ d: Definition, isFirst: Bool) -> some View {
+        if d.absolutePath.isEmpty && d.openURL == nil {
+            rowContent(d, isFirst: isFirst)
+        } else {
+            Button { open(d) } label: { rowContent(d, isFirst: isFirst) }
+                .buttonStyle(.plain)
+                .help(Self.help(d))
+        }
+    }
+
+    private func rowContent(_ d: Definition, isFirst: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            // The name on top, what it means below: a long meaning wraps under the name, not beside it.
+            VStack(alignment: .leading, spacing: 2) {
+                // A term's title is the term itself: showing the ID too would repeat it.
+                if d.rule != .term {
+                    Text(d.id).font(.system(.callout, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary)
+                        .lineLimit(2).truncationMode(.middle)
                 }
-                if !d.summary.isEmpty {
-                    Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(3)
-                }
-                HStack(spacing: 6) {
-                    if let kind = Self.kind(d.rule) {
-                        Text(kind).font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(.secondary.opacity(0.15), in: Capsule())
-                    }
-                    Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor)
-                    if let location = Self.location(d) {
-                        Text(location).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
-                    }
-                    if isFirst && resolution.fromOtherRepo {
-                        Text(S.fromAnotherRepo).font(.caption2.weight(.semibold))
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(.orange.opacity(0.2), in: Capsule())
-                    }
+                if d.rule == .symbol && d.title.isEmpty {
+                    Text(S.noComment).font(.body.italic()).foregroundStyle(.secondary)
+                } else {
+                    Text(d.title).font(.body.weight(.medium)).lineLimit(4).fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .contentShape(Rectangle())
+            if let colors = d.colors, !colors.isEmpty {
+                HStack(spacing: 10) { ForEach(Array(colors.enumerated()), id: \.offset) { _, c in Swatch(sample: c) } }
+            }
+            if !d.summary.isEmpty {
+                Text(d.summary).font(.callout).foregroundStyle(.secondary).lineLimit(4).fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: 6) {
+                if let kind = Self.kind(d.rule) {
+                    Text(kind).font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(.secondary.opacity(0.15), in: Capsule())
+                }
+                if !d.repo.isEmpty { Text(d.repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor) }
+                if let location = Self.location(d) {
+                    Text(location).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+                }
+                if isFirst && resolution.fromOtherRepo {
+                    Text(S.fromAnotherRepo).font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(.orange.opacity(0.2), in: Capsule())
+                }
+            }
         }
-        .buttonStyle(.plain)
-        .help(Self.help(d))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
     }
 
     static func kind(_ rule: DefinitionRule) -> String? {
@@ -198,6 +216,14 @@ struct TooltipView: View {
         case .file: S.kindFile
         case .command: S.kindCommand
         case .term: S.kindTerm
+        case .symbol: S.kindSymbol
+        case .address: S.kindAddress
+        case .token: S.kindToken
+        case .terminal: S.kindTerminal
+        case .error: S.kindError
+        case .pullRequest: S.kindPullRequest
+        case .tag: S.kindTag
+        case .color: S.kindColor
         default: nil
         }
     }
@@ -206,9 +232,11 @@ struct TooltipView: View {
     static func location(_ d: Definition) -> String? {
         switch d.rule {
         case .repo, .commit, .branch: nil
+        case .address: d.path.isEmpty ? nil : d.path
+        case .pullRequest: nil
         case .command: d.path
         case .file: d.line > 1 ? "\(d.path):\(d.line)" : d.path
-        default: "\(d.path):\(d.line)"
+        default: d.path.isEmpty ? nil : "\(d.path):\(d.line)"
         }
     }
 
@@ -217,6 +245,36 @@ struct TooltipView: View {
         if d.rule == .repo { return S.openFolder }
         if d.rule == .commit || d.rule == .branch { return S.showFolder }
         return S.openAt(d.path, line: max(d.line, 1))
+    }
+}
+
+/// A colour sample (D29): a rounded square with a hairline so white and black stay visible on any tooltip background.
+struct Swatch: View {
+    let sample: ColorSample
+
+    var body: some View {
+        HStack(spacing: 5) {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(Color(hex: sample.hex))
+                .frame(width: 20, height: 20)
+                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(.primary.opacity(0.25)))
+            Text(sample.label.isEmpty ? sample.hex : "\(sample.label) \(sample.hex)")
+                .font(.caption.monospaced()).foregroundStyle(.secondary)
+        }
+    }
+}
+
+extension Color {
+    /// `#RRGGBB` or `#RRGGBBAA`.
+    init(hex: String) {
+        let digits = hex.dropFirst()
+        let v = UInt64(digits, radix: 16) ?? 0
+        let hasAlpha = digits.count == 8
+        let r = Double((v >> (hasAlpha ? 24 : 16)) & 255) / 255
+        let g = Double((v >> (hasAlpha ? 16 : 8)) & 255) / 255
+        let b = Double((v >> (hasAlpha ? 8 : 0)) & 255) / 255
+        let a = hasAlpha ? Double(v & 255) / 255 : 1
+        self.init(.sRGB, red: r, green: g, blue: b, opacity: a)
     }
 }
 

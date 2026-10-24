@@ -70,6 +70,32 @@ public enum S {
     public static var openFolder: String { t("Open the repo folder", "Abrir la carpeta del repo") }
     public static var showFolder: String { t("Show the repo folder", "Mostrar la carpeta del repo") }
 
+    // MARK: Code (D29)
+    public static var kindSymbol: String { t("symbol", "símbolo") }
+    public static var noComment: String { t("no comment", "sin comentario") }
+    public static var kindAddress: String { t("local address", "dirección local") }
+    public static func servedByConfig(_ name: String) -> String { t("Started by “\(name)”", "La arranca «\(name)»") }
+    public static func servedByProcess(_ command: String) -> String { t("Served by \(command)", "La sirve \(command)") }
+    public static var addressUnknown: String { t("No repo declares this address", "Ningún repo declara esta dirección") }
+    public static func page(_ route: String) -> String { t("page \(route)", "página \(route)") }
+    public static var homePage: String { t("home page", "página de inicio") }
+    public static func running(pid: Int) -> String { t("running (pid \(pid))", "encendido (pid \(pid))") }
+    public static var kindToken: String { t("CSS token", "token CSS") }
+    public static var kindColor: String { t("colour", "color") }
+    public static var light: String { t("light", "claro") }
+    public static var dark: String { t("dark", "oscuro") }
+    public static func writtenAs(_ value: String) -> String { t("written as \(value)", "escrito como \(value)") }
+    public static func definedAs(_ names: String) -> String { t("defined as \(names)", "definido como \(names)") }
+    public static var noTokenUsesIt: String { t("no token has this colour", "ningún token tiene este color") }
+    public static var kindTerminal: String { t("terminal command", "comando de terminal") }
+    public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
+    public static var kindError: String { t("error", "error") }
+    public static var kindTag: String { t("HTML tag", "etiqueta HTML") }
+    public static var kindPullRequest: String { t("pull request", "pull request") }
+    public static var prNotInHistory: String { t("Not in the local history", "No está en el historial local") }
+    public static func mergedOn(_ date: String) -> String { t("Merged \(date)", "Fusionada el \(date)") }
+    public static var notRunning: String { t("not running", "apagado") }
+
     // MARK: Menu
     public static var noIndex: String { t("No index", "Sin índice") }
     public static func summary(ids: Int, repos: Int, files: Int) -> String {

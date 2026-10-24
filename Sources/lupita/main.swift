@@ -4,9 +4,10 @@ import LupitaCore
 let usage = """
 usage:
   lupita index <dir…> [--out index.json]     build the index and print stats
-  lupita <ID> [--repo NAME] [--roots dir…]   resolve an ID (default roots: ~/Repos)
+  lupita <ID|text> [--repo NAME] [--roots dir…] [--time]  resolve an ID or anything else Lupita knows (default roots: ~/Repos)
   lupita onboarding [dir…] [--prompt|--convert]  repos with agents: undefined citations and rule state
   lupita terms <dir…> [--sample N]           sample (seed 42) of generic-pattern term hits outside glossaries
+  lupita batch [--repo NAME] [--roots dir…]  resolve each line of stdin; tab-separated result per line (measuring)
   lupita report <dir…> [--out reports]       write the accuracy report (HTML + sample JSON)
 """
 
@@ -81,6 +82,21 @@ case "terms":
         print("\(i + 1)\t[\(d.repo)] \(d.path):\(d.line)\t\(d.id) — \(d.summary.prefix(110))")
     }
 
+case "batch":
+    // Development aid: one text per line on stdin, resolved with one index. Prints
+    // `text<TAB>kind<TAB>rule<TAB>has-comment<TAB>ms` for measuring coverage over a corpus.
+    args.removeFirst()
+    let repo = take("--repo", &args)
+    let roots = takeList("--roots", &args) ?? ["~/Repos"]
+    let resolver = Resolver(index: RefIndex.build(roots: roots))
+    while let line = readLine() {
+        let start = Date()
+        let r = resolver.resolve(line, preferredRepo: repo)
+        let d = r.definitions.first
+        let ms = Int(Date().timeIntervalSince(start) * 1000)
+        print("\(line)\t\(r.kind.rawValue)\t\(d?.rule.rawValue ?? "-")\t\(d.map { $0.rule == .symbol ? ($0.title.isEmpty ? "no" : "yes") : "-" } ?? "-")\t\(ms)")
+    }
+
 case "report":
     args.removeFirst()
     let out = take("--out", &args) ?? "reports"
@@ -92,6 +108,11 @@ default:
     let query = args.removeFirst()
     let repo = take("--repo", &args)
     let roots = takeList("--roots", &args) ?? ["~/Repos"]
-    let resolution = Resolver(index: RefIndex.build(roots: roots)).resolve(query, preferredRepo: repo)
+    let timed = args.contains("--time")
+    let resolver = Resolver(index: RefIndex.build(roots: roots))
+    let start = Date()
+    let resolution = resolver.resolve(query, preferredRepo: repo)
     print(Report.describe(resolution))
+    // The lookup alone, without building the index: D29 gives code lookups 300 ms.
+    if timed { print("lookup: \(Int(Date().timeIntervalSince(start) * 1000)) ms") }
 }

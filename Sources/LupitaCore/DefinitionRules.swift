@@ -11,6 +11,8 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     case repo, commit, branch, file, command
     /// A glossary term (D22): below every ID definition.
     case term
+    /// What agents cite from code (D29): looked up on demand, never indexed.
+    case symbol, address, token, color, terminal, error, tag, pullRequest
 
     public var weight: Int {
         switch self {
@@ -22,6 +24,7 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .section: 20
         case .term: 10
         case .repo, .commit, .branch, .file, .command: 0
+        case .symbol, .address, .token, .color, .terminal, .error, .tag, .pullRequest: 0
         }
     }
 
@@ -30,6 +33,9 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
 
     /// A repo reference (repo, commit, branch, file, command) rather than an ID definition.
     public var isRepoRef: Bool { [.repo, .commit, .branch, .file, .command].contains(self) }
+
+    /// A code reference (symbol, local address, CSS token, colour, terminal command, error, tag or PR; D29).
+    public var isCode: Bool { [.symbol, .address, .token, .color, .terminal, .error, .tag, .pullRequest].contains(self) }
 }
 
 /// A definition found on one line (or in a file name), before snippet extraction.

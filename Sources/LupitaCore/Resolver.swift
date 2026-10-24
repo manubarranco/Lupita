@@ -49,6 +49,7 @@ public struct Resolver: Sendable {
         "G": ["6"], "6": ["G"], "7": ["1"], "T": ["7"],
     ]
     static let maxSubstitutions = 2
+    static let maxCorrectableLength = 16
 
     /// OCR returns look-alike glyphs that are never part of an ID: the slashed zero of
     /// monospaced fonts (`LØ15`) and Cyrillic/Greek capitals identical to Latin ones (`Е9`).
@@ -71,13 +72,18 @@ public struct Resolver: Sendable {
     ///     ("…`harbor-web` docs/decisions.md D008").
     ///   - fromPath: path of the file being read, relative to `preferredRepo`. Definitions in
     ///     nearby folders win (`domains/billing/…` cites `domains/billing/decisions.md`).
+    ///   - after: the text right after `raw` on its line (the picker splits at `(`: `simplify()` is a call).
     public func resolve(_ raw: String, preferredRepo: String? = nil, context: String? = nil,
-                        fromPath: String? = nil) -> Resolution {
+                        fromPath: String? = nil, after: String? = nil) -> Resolution {
         // A repo named in the text beats one named in the file path (`domains/harbor-log.md`),
         // which beats the window's repo.
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let fromPath = named == nil || named == preferredRepo ? fromPath : nil
         let preferredRepo = named ?? preferredRepo
+        if CodeRefs.looksLikeAddress(raw) || CodeRefs.looksLikeCommand(raw),
+           let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after) {
+            return code
+        }
         // Commits, branches, files and commands never look like IDs: no OCR correction for them.
         if let ref = RepoRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo) { return ref }
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
@@ -86,14 +92,20 @@ public struct Resolver: Sendable {
         if let id = IDGrammar.parse(query), let defs = index.definitions[id.key] {
             return result(query, .exact, key: id.key, defs, preferredRepo, fromPath)
         }
-        // A glossary term (D22) comes after IDs and repo references. For text that is not shaped
+        // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
+        // term and a symbol is a term unless the text is shaped like code.
+        if let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after) {
+            return code
+        }
+        // A glossary term (D22) comes after IDs, repo references and code. For text that is not shaped
         // like an ID it also comes before the OCR corrections; ID-shaped text tries the
         // corrections first and falls back to a term only when nothing defines the ID.
         let idShaped = IDGrammar.parse(query) != nil
         if !idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
 
         // Fewest substitutions first; stop at the first distance that yields any match.
-        for distance in 1...Self.maxSubstitutions {
+        // An ID is short: trying every look-alike swap of a long word (`FontBuilder`) found nothing and cost ~0.5 s.
+        for distance in 1...Self.maxSubstitutions where query.count <= Self.maxCorrectableLength {
             let keys = Set(variants(of: query, substitutions: distance).compactMap { variant -> String? in
                 guard let key = IDGrammar.parse(variant)?.key, index.definitions[key] != nil else { return nil }
                 return key
@@ -132,6 +144,12 @@ public struct Resolver: Sendable {
                             fromPath: String? = nil) -> Resolution? {
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         return termResolution(phrase, preferredRepo: named ?? preferredRepo)
+    }
+
+    /// Code made of several words (a command, `PR 123`) for `phrase`, or nil. Public so the picker can try
+    /// windows of words (D29).
+    public func resolveCode(_ phrase: String, preferredRepo: String? = nil, context: String? = nil) -> Resolution? {
+        CodeRefs.resolve(phrase, repos: index.repos, preferredRepo: repoNamed(in: context ?? "") ?? preferredRepo, before: context)
     }
 
     private func termResolution(_ phrase: String, preferredRepo: String?) -> Resolution? {

@@ -47,7 +47,7 @@ ID escrito hace unos segundos se encuentra igualmente.
 Todo lo demás es una mención. Las secciones *sobre* un ID (`## D34 parte 2`) y las etiquetas
 de prioridad (`## P1`) se reconocen y no estorban.
 
-### Más allá de los IDs: commits, ramas, archivos y comandos
+### Más allá de los IDs: commits, ramas, archivos, comandos y código
 
 Los agentes también citan cosas que viven en git y en el disco. Lupita las busca en el momento
 en que las señalas, así que nunca están desactualizadas:
@@ -60,8 +60,14 @@ en que las señalas, así que nunca están desactualizadas:
 | Un archivo (`docs/decisions.md:12`) | Su título y primera línea (Markdown) o su último cambio. Clic: lo abre en la línea |
 | Un comando (`/retro`) | Su descripción, de `.claude/commands` o `.claude/skills`, en el repo o en `~/.claude` |
 | Un término de glosario (`liquidación`, `el libro mayor`) | Su definición, de un archivo de glosario (`glossary.md`, `glosario.md`…) del repo. Clic: lo abre en la línea. Valen términos de una a cuatro palabras; si viene de otro repo, lo indica |
+| Un símbolo (`build_glyphs`, `ARM_TENSION`, `test_engine`, `"panza_a"`) | Su propio comentario (3 primeras líneas) y dónde se define, o «sin comentario». Primero el repo de la ventana; si es de otro repo, lo indica. Una palabra suelta necesita `()` o comillas invertidas |
+| Una dirección local (`localhost:8130`, `http://127.0.0.1:8131/x.html`) | Qué repo la sirve (por el proceso que escucha o `.claude/launch.json`), qué página y si está encendida. No hace ninguna petición |
+| Un token CSS (`--accent`, `var(--accent)`) o un color hex (`#0E5400`) | Su valor en claro y oscuro, una muestra de color y dónde se define (o qué tokens tienen ese color) |
+| Un comando de terminal (`npm run build`, `git reset --hard`) | Qué hace el script (de `package.json`) o una línea sobre git y los comandos comunes, con aviso en las opciones peligrosas |
+| Un error (`ENOENT`, `TypeError`, `HTTP 401`) o una etiqueta HTML (`<dialog>`) | Una línea de un diccionario fijo |
+| Una PR (`#123`, `PR 123`) | Título y fecha del merge, leídos del historial git local del repo de la ventana; o «No está en el historial local» |
 
-Commits y ramas necesitan git (las Command Line Tools); sin ellas, simplemente no se reconocen.
+Commits, ramas y PRs necesitan git (las Command Line Tools); sin ellas, simplemente no se reconocen.
 
 ### Qué repo, cuando los IDs coinciden
 

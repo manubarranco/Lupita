@@ -15,6 +15,18 @@ public struct Definition: Codable, Hashable, Sendable {
     public let absolutePath: String
     /// Where a click goes instead of `absolutePath`: a commit or branch on GitHub (D19).
     public var openURL: String? = nil
+    /// Colour samples to paint next to a CSS token or hex colour (D29), one per theme.
+    public var colors: [ColorSample]? = nil
+}
+
+/// A colour to draw: `hex` is `#RRGGBB` (or `#RRGGBBAA`); `label` says which theme it is for (`light`, `dark`) or is empty.
+public struct ColorSample: Codable, Hashable, Sendable {
+    public let label: String
+    public let hex: String
+    public init(label: String, hex: String) {
+        self.label = label
+        self.hex = hex
+    }
 }
 
 public struct Mentions: Codable, Sendable {

@@ -56,9 +56,12 @@ public enum Report {
         }
         if r.fromOtherRepo { out.append("(not defined in the preferred repo; showing other repos)") }
         for d in r.definitions {
-            out.append("[\(d.repo)] \(d.id) — \(d.title)")
+            out.append("[\(d.repo)] \(d.id) — \(d.rule == .symbol && d.title.isEmpty ? S.noComment : d.title)")
+            if let colors = d.colors, !colors.isEmpty {
+                out.append("    " + colors.map { $0.label.isEmpty ? $0.hex : "\($0.label) \($0.hex)" }.joined(separator: "  "))
+            }
             if !d.summary.isEmpty { out.append("    \(d.summary)") }
-            out.append("    \(d.path):\(d.line) · \(d.rule.rawValue)")
+            out.append("    " + (d.path.isEmpty ? "" : "\(d.path):\(d.line) · ") + d.rule.rawValue)
         }
         if let m = r.mentions { out.append("cited \(m.count)× in \(m.files.count) files") }
         return out.joined(separator: "\n")
