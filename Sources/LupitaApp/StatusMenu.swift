@@ -148,7 +148,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         // have its own style (monospaced, on a soft background) instead of quotes.
         let around = S.removeFolderAround
         let spacing = NSMutableParagraphStyle()
-        spacing.paragraphSpacing = 8  // air between the question and the explanation
+        spacing.paragraphSpacing = 8
+        spacing.alignment = .center  // air between the question and the explanation
         let text = NSMutableAttributedString(string: around.before, attributes: [.font: NSFont.boldSystemFont(ofSize: 13)])
         text.append(NSAttributedString(string: (root as NSString).abbreviatingWithTildeInPath, attributes: [
             .font: NSFont.monospacedSystemFont(ofSize: 12, weight: .semibold),
@@ -161,10 +162,22 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         ]))
         let label = NSTextField(wrappingLabelWithString: "")
         label.attributedStringValue = text
-        label.frame = NSRect(x: 0, y: 0, width: 260, height: 0)
-        label.frame.size.height = label.sizeThatFits(NSSize(width: 260, height: CGFloat.greatestFiniteMagnitude)).height
+        label.alignment = .center
+        label.preferredMaxLayoutWidth = 260
+        // The alert's own icon is pinned to the left: swap it for one centred above the text.
+        let icon = NSImageView(image: NSApp.applicationIconImage)
+        icon.imageScaling = .scaleProportionallyUpOrDown
+        icon.widthAnchor.constraint(equalToConstant: 64).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 64).isActive = true
+        let stack = NSStackView(views: [icon, label])
+        stack.orientation = .vertical
+        stack.alignment = .centerX
+        stack.spacing = 10
+        stack.frame.size = stack.fittingSize
+        stack.frame.size.width = max(stack.frame.width, 260)
         alert.messageText = ""
-        alert.accessoryView = label
+        alert.icon = NSImage(size: NSSize(width: 1, height: 1))
+        alert.accessoryView = stack
         alert.addButton(withTitle: S.removeFromLupita).hasDestructiveAction = true
         alert.addButton(withTitle: S.cancel)
         NSApp.activate()
