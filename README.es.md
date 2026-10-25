@@ -138,6 +138,17 @@ Es un compromiso también para las versiones futuras. Si Lupita llega a usar un 
 será el modelo de Apple que funciona en tu Mac. Si alguna función necesitara la red, vendría
 apagada, claramente señalada, y solo funcionaría si tú la activas.
 
+### Informe de IDs (opcional, lo envías tú)
+
+Para ayudar a descubrir formatos de ID que Lupita aún no conoce, mantén **⌥** al abrir el menú
+de Lupita y elige **Crear informe de IDs…**. Lupita te enseña todas las filas antes de guardar
+nada y puedes quitar cualquiera. Una fila solo lleva la forma de un ID (letras como `A`, dígitos
+como `9`: `E2-S3` pasa a `A9-A9`), su prefijo, dónde está escrito (encabezado, tabla, lista,
+nombre de archivo, frontmatter), el nombre del archivo, recuentos y si Lupita lo encuentra.
+Nunca lleva títulos, definiciones, líneas de texto, rutas de carpetas ni nombres de repos
+(los repos son «repo 1», «repo 2»). Guardas el archivo o abres un correo nuevo con él adjunto,
+y **tú** pulsas enviar: Lupita no hace ninguna llamada de red.
+
 Si compilas desde el código, macOS olvida los permisos en cada compilación salvo que la app
 esté firmada con un certificado estable: crea en Acceso a Llaveros un certificado autofirmado
 de **Firma de código** llamado `Lupita Dev` y `scripts/bundle.sh` lo usará. Sin él el script

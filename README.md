@@ -138,6 +138,17 @@ This is a commitment for future versions too. If Lupita ever uses a language mod
 Apple's on-device model, which runs on your Mac. If a feature ever needed the network, it would
 come switched off, clearly labelled, and would only work if you turn it on.
 
+### ID report (optional, sent only by you)
+
+To help find ID formats Lupita does not know yet, hold **⌥** while you open Lupita's menu and
+choose **Create ID report…**. Lupita shows every row before anything is saved, and you can
+remove any of them. A row holds only the shape of an ID (letters as `A`, digits as `9`:
+`E2-S3` becomes `A9-A9`), its prefix, where it is written (heading, table, list, file name,
+frontmatter), the name of the file, counts, and whether Lupita finds it. It never holds titles,
+definitions, lines of text, folder paths or repo names (repos are «repo 1», «repo 2»).
+You save the file or open a new email with it attached, and **you** press send: Lupita
+makes no network call.
+
 If you build from source, macOS forgets the permissions on every build unless the app is
 signed with a stable certificate: create a self-signed **Code Signing** certificate named
 `Lupita Dev` in Keychain Access, and `scripts/bundle.sh` will use it. Without it the script
