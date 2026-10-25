@@ -15,12 +15,12 @@ extension CodeRefs {
         static func resolve(_ text: Text, repos: [Repo], preferredRepo: String?) -> [Definition]? {
             let t = text.text
             if let g = groups(tag, t), t.hasPrefix("<"), t.hasSuffix(">") || g[0] == "<" + g[2] {
-                guard let entry = CodeDictionaries.tags[g[2]] else { return nil }
+                guard let entry = CodeDictionaries.tag(g[2]) else { return nil }
                 let shown = t.count > 40 ? "<" + g[1] + g[2] + ">" : t
                 return [definition(shown, entry.text, rule: .tag)]
             }
-            if let entry = CodeDictionaries.errors[t] { return [definition(t, entry.text, rule: .error)] }
-            if let g = groups(status, t), let code = Int(g[1]), let entry = CodeDictionaries.httpStatus[code] {
+            if let entry = CodeDictionaries.error(t) { return [definition(t, entry.text, rule: .error)] }
+            if let g = groups(status, t), let code = Int(g[1]), let entry = CodeDictionaries.status(code) {
                 let prefixed = t.lowercased().hasPrefix("http") || t.lowercased().hasPrefix("status") || t.lowercased().hasPrefix("error") || t.lowercased().hasPrefix("code")
                 let hasName = !g[2].isEmpty && entry.en.lowercased().contains(g[2].lowercased().trimmingCharacters(in: .whitespaces))
                 if prefixed || hasName || text.codeMarked || matches(statusHint, text.before) {

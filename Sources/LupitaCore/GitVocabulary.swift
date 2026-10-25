@@ -6,7 +6,10 @@ import Foundation
 /// glossaries the user has.
 public enum GitVocabulary {
     /// The menu switch «Git». The app sets it at launch and when the switch moves.
-    nonisolated(unsafe) public static var isEnabled = true
+    public static var isEnabled: Bool {
+        get { TermPackages.isOn(.git) }
+        set { TermPackages.set(.git, on: newValue) }
+    }
 
     struct Alias {
         let text: String

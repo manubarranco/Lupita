@@ -22,7 +22,7 @@ extension CodeRefs {
                     if let script, let defs = scripts(named: script, command: tokens.prefix(through: tokens.firstIndex(of: script) ?? 0).joined(separator: " "), repos: repos) {
                         return defs
                     }
-                    if let d = CodeDictionaries.packageCommands[sub] {
+                    if TermPackages.isOn(.terminal), let d = CodeDictionaries.packageCommands[sub] {
                         return [builtin(tokens.prefix(2).joined(separator: " "), S.isSpanish ? d.es : d.en, notes: notes(args))]
                     }
                 }
@@ -30,7 +30,7 @@ extension CodeRefs {
             }
 
             let subKey = args.first.flatMap { $0.hasPrefix("-") ? nil : first + " " + $0 }
-            guard let entry = subKey.flatMap({ CodeDictionaries.commands[$0] }) ?? CodeDictionaries.commands[first],
+            guard let entry = subKey.flatMap({ CodeDictionaries.command($0) }) ?? CodeDictionaries.command(first),
                   entry.safe || text.codeMarked else { return nil }
             // A bare word of a few letters is a command only when it stands alone or is followed by arguments that look like one.
             if tokens.count == 1, entry.key.contains(" ") { return nil }

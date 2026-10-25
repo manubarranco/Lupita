@@ -59,7 +59,7 @@ public enum HighlightPicker {
             if zip(slice, slice.dropFirst()).contains(where: { $1.box.minX - $0.box.maxX > gapLimit }) { continue }
             let phrase = slice.map { clean($0.text) }.joined(separator: " ")
             if resolver.resolveTerm(phrase) != nil { return length }
-            if let command = CodeDictionaries.commands[phrase.lowercased()], command.safe { return length }
+            if let command = CodeDictionaries.command(phrase.lowercased()), command.safe { return length }
             if GitVocabulary.knows(phrase, block: block) { return length }
         }
         return nil
@@ -78,8 +78,8 @@ public enum HighlightPicker {
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return true }
         if resolver.rangeList(word) != nil { return true }
         if resolver.resolveTerm(word) != nil { return true }
-        if CodeDictionaries.errors[word] != nil { return true }
-        if let command = CodeDictionaries.commands[word.lowercased()], command.safe { return true }
+        if CodeDictionaries.error(word) != nil { return true }
+        if let command = CodeDictionaries.command(word.lowercased()), command.safe { return true }
         return GitVocabulary.knows(word, block: block, marked: marked)
     }
 

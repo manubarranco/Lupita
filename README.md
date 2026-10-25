@@ -67,9 +67,16 @@ point, so they are never stale:
 | A CSS token (`--accent`, `var(--accent)`) or a hex colour (`#0E5400`) | Its value in light and dark, a colour swatch, and where it is defined (or which tokens hold that colour) |
 | A terminal command (`npm run build`, `git reset --hard`) | What the script does (from `package.json`) or a one-line explanation of git and common shell commands, with a warning on risky flags |
 | An error (`ENOENT`, `TypeError`, `HTTP 401`) or an HTML tag (`<dialog>`) | One line from a fixed dictionary |
+| A git word in prose (`rebase`, `fast-forward`, `detached HEAD`, `pushear`) | A plain-language line and an example. A word that is also everyday English (`main`, `push`, `branch`) counts only next to another git word, in inline code, or next to a file or branch name |
 | A PR (`#123`, `PR 123`) | Title and merge date, read from the local git history of the window's repo; or "Not in the local history" |
 
 Commits, branches and PRs need git (the Command Line Tools); without it they are simply not recognised.
+
+The fixed dictionaries can be switched off under **Explain terms of:** in the menu, each on by default: **Git**
+(git words in prose and `git …` commands), **Terminal** (shell commands such as `rm` or `chmod`) and **Development**
+(errors, HTTP statuses and HTML tags). They only cover general knowledge of a trade you may already have: whatever
+comes from your repos (IDs, glossaries, commits, branches, files, PRs, symbols, tokens, local addresses and
+`package.json` scripts) is always on.
 
 ### Which repo, when IDs collide
 

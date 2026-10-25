@@ -74,7 +74,7 @@ enum TooltipGallery {
             }
             cards.append((term, resolution))
         }
-        let menus = [menuImage(gitOn: true), menuImage(gitOn: false)]
+        let menus = [menuImage(off: []), menuImage(off: [.terminal])]
         var inline: [(String, NSImage)] = []
         for dark in [false, true] {
             guard let image = inlineCodeImage(dark: dark, resolver: resolver) else { return 4 }
@@ -140,7 +140,7 @@ enum TooltipGallery {
     }
 
     /// The real menu rows (header, lens, «Explicar términos de:», Git) drawn into an image.
-    private static func menuImage(gitOn: Bool) -> NSImage {
+    private static func menuImage(off: Set<TermPackage>) -> NSImage {
         let rows: [NSView] = {
             let header = MenuHeader(title: S.appName)
             header.update([S.summary(ids: 1240, repos: 14, files: 380), S.updated(seconds: 42)])
@@ -152,8 +152,8 @@ enum TooltipGallery {
             let section = NSView(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 26))
             title.frame.origin.y = 2
             section.addSubview(title)
-            let git = MenuRow(title: S.gitPackage, on: gitOn)
-            return [header, lens, section, git]
+            let packages = TermPackage.allCases.map { MenuRow(title: VocabularyPackages.title($0), on: !off.contains($0)) }
+            return [header, lens, section] + packages
         }()
         let height = rows.reduce(0) { $0 + $1.frame.height } + 16
         let card = NSView(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: height))
@@ -200,7 +200,7 @@ private struct VocabularySheet: View {
             HStack(alignment: .top, spacing: 24) {
                 ForEach(Array(menus.enumerated()), id: \.offset) { n, image in
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(n == 0 ? "Menú · Git encendido" : "Menú · Git apagado").font(.caption.monospaced()).foregroundStyle(.secondary)
+                        Text(n == 0 ? "Menú · los tres encendidos" : "Menú · Terminal apagado").font(.caption.monospaced()).foregroundStyle(.secondary)
                         Image(nsImage: image).overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.separator))
                     }
                 }

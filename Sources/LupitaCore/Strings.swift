@@ -129,6 +129,8 @@ public enum S {
     public static var lens: String { t("Show Lupita", "Mostrar a Lupita") }
     public static var explainTermsOf: String { t("Explain terms of:", "Explicar términos de:") }
     public static var gitPackage: String { "Git" }
+    public static var terminalPackage: String { "Terminal" }
+    public static var developmentPackage: String { t("Development", "Desarrollo") }
     public static var folders: String { t("Folders to search", "Carpetas de búsqueda") }
     public static var permissions: String { t("Permissions", "Permisos") }
     /// The question around the folder path, which the alert draws in its own style.
