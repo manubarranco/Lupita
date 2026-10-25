@@ -30,6 +30,8 @@ browser.
    Claude, browsers).
 3. **A tooltip shows** the ID, its title, two or three lines of its definition, the repo and
    file, and how many times it is cited. Click to open the file at that line; Esc closes it.
+4. **Hold the shortcut** to see what Lupita knows: the words it can explain in the window
+   get underlined. Let go over one to read it.
 
 The index stays fresh on its own: a file watcher reindexes the repo that changed, and an
 ID that was written seconds ago is found anyway.
@@ -125,7 +127,8 @@ Lupita asks for two macOS permissions, and uses them only when you press the sho
 
 - **Accessibility**: for the shortcut and to read the exact text under the pointer.
 - **Screen Recording**: to read a 600 × 80 pt strip around the pointer with Apple's Vision
-  OCR, in apps that don't expose their text.
+  OCR, in apps that don't expose their text, and, while you hold the shortcut, the window
+  under the pointer, to underline what Lupita can explain.
 
 Everything happens on your Mac. Nothing is sent anywhere, and nothing you look up is
 stored. The one exception is **Check for updates…** in the menu: it asks GitHub for the latest
