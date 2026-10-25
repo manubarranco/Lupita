@@ -92,9 +92,11 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
 
         menu.addItem(.sectionHeader(title: S.explainTermsOf))
-        let git = MenuRow(title: S.gitPackage, on: VocabularyPackages.gitOn)
-        git.onToggle = { VocabularyPackages.gitOn = $0 }
-        menu.addItem(viewItem(git))
+        for package in TermPackage.allCases {
+            let row = MenuRow(title: VocabularyPackages.title(package), on: VocabularyPackages.isOn(package))
+            row.onToggle = { VocabularyPackages.set(package, on: $0) }
+            menu.addItem(viewItem(row))
+        }
         menu.addItem(.separator())
 
         menu.addItem(.sectionHeader(title: S.folders))

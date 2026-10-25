@@ -61,7 +61,7 @@ public enum CodeRefs {
     public static func looksLikeCommand(_ raw: String) -> Bool {
         let tokens = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers)).split(whereSeparator: \.isWhitespace)
         guard tokens.count >= 2, let first = tokens.first.map(String.init) else { return false }
-        return CodeDictionaries.managers.contains(first) || first == "git"
+        return CodeDictionaries.managers.contains(first) || (first == "git" && TermPackages.isOn(.git))
     }
 
     static func normalize(_ raw: String, before: String, after: String) -> Text? {

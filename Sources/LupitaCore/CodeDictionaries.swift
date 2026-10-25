@@ -14,6 +14,20 @@ enum CodeDictionaries {
         var text: String { S.isSpanish ? es : en }
     }
 
+    // MARK: Packages (D43)
+
+    /// `git …` is the Git package; every other command is Terminal.
+    static func package(ofCommand key: String) -> TermPackage { key == "git" || key.hasPrefix("git ") ? .git : .terminal }
+
+    /// The command `key`, unless its package is switched off.
+    static func command(_ key: String) -> Entry? {
+        guard let entry = commands[key], TermPackages.isOn(package(ofCommand: entry.key)) else { return nil }
+        return entry
+    }
+    static func error(_ key: String) -> Entry? { TermPackages.isOn(.development) ? errors[key] : nil }
+    static func tag(_ key: String) -> Entry? { TermPackages.isOn(.development) ? tags[key] : nil }
+    static func status(_ code: Int) -> Entry? { TermPackages.isOn(.development) ? httpStatus[code] : nil }
+
     // MARK: Terminal commands
 
     static let commands: [String: Entry] = Dictionary(uniqueKeysWithValues: commandList.map { ($0.key, $0) })
