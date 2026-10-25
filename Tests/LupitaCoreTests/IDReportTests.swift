@@ -72,7 +72,7 @@ import Testing
 
     @Test func reposAreNumberedAlphabetically() throws {
         let b = try makeRepo(named: "bbb", ["x.md": "## D1 — t"])
-        let a = try makeRepo(named: "aaa", ["y.md": "## D1 — t"])
+        let a = try makeRepo(named: "aaa", ["y.md": "## D2 — t"])
         let rows = IDReport.build(index: RefIndex.build(repos: [b, a]))
         #expect(rows.first { $0.fileName == "y.md" }?.repo == 1)
         #expect(rows.first { $0.fileName == "x.md" }?.repo == 2)
