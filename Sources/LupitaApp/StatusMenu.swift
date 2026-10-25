@@ -91,6 +91,12 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(viewItem(lens))
         menu.addItem(.separator())
 
+        menu.addItem(.sectionHeader(title: S.explainTermsOf))
+        let git = MenuRow(title: S.gitPackage, on: VocabularyPackages.gitOn)
+        git.onToggle = { VocabularyPackages.gitOn = $0 }
+        menu.addItem(viewItem(git))
+        menu.addItem(.separator())
+
         menu.addItem(.sectionHeader(title: S.folders))
         for root in store.roots { addFolder(root, to: menu) }
         menu.addItem(action(S.addFolder, #selector(addRoot)))

@@ -23,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         IndexStore.migrateLegacyRoots()
+        VocabularyPackages.apply()
         menu = StatusMenu(store: store) { [weak self] choice in
             HotkeyChoice.current = choice
             self?.installTrigger()
@@ -163,11 +164,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let context = ActiveContext.at(point, resolver: resolver)
 
         var ax = TextUnderCursor.viaAccessibility(at: point)
+        var axMiss: Resolution?
         if let text = ax.hit {
             let result = CandidatePicker.pick(line: text.line, cursorOffset: text.offset, resolver: resolver,
-                                              preferredRepo: context.repo, fromPath: context.path)
+                                              preferredRepo: context.repo, fromPath: context.path, codeRanges: text.codeRanges)
+            // Accessibility answered but nothing was explained: ask OCR too before saying «not known» (D42). AX can
+            // give the text without the code box (`main` in inline code has no context), or the text of the
+            // wrong word (a static text whose offset is only estimated); OCR sees the screen as it is.
+            let word = CandidatePicker.word(in: text.line, cursorOffset: text.offset)
+            let ambiguousMiss = result == nil || result?.kind == .notAnID
+            axMiss = result
+            if Debug.isOn {
+                let word = word ?? "?"
+                VocabularyLog.append(["ax:\(text.via)", "word=\(word)", "line=“\(text.line.prefix(160))”", "fonts=\(text.fontNote)",
+                                      "codeRanges=\(text.codeRanges.count)", GitVocabulary.diagnose(word, block: text.line, marked: !text.codeRanges.isEmpty),
+                                      "shown=\(result?.isShown ?? false)", ambiguousMiss ? "→ asking OCR" : "→ answered by AX"])
+            }
             // AX gave text but no word at the cursor (e.g. offset unknown): let OCR try.
-            if let result {
+            if let result, !ambiguousMiss {
                 show(result, at: mouse, method: "ax:\(text.via)", start: start, context: context)
                 return
             }
@@ -182,8 +196,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let words = if let reused { reused } else { (try? await OCR.words(around: point)) ?? [] }
             let result = CandidatePicker.pick(words: words, cursor: point, resolver: resolver,
                                               preferredRepo: context.repo, fromPath: context.path)
-            show(result, at: mouse, method: (words.isEmpty ? "none" : "ocr") + "<\(ax.diagnostic)>",
-                 start: start, context: context)
+            if Debug.isOn, let target = CandidatePicker.word(under: point, in: words) {
+                let block = HighlightPicker.nearbyText(of: target, in: words)
+                VocabularyLog.append(["ocr\(reused == nil ? "" : "+reused")", "word=\(target.text)", "codeStyled=\(target.codeStyled)",
+                                      "block=“\(block.prefix(160))”", GitVocabulary.diagnose(target.text, block: block, marked: target.codeStyled),
+                                      "shown=\(result?.isShown ?? false)"])
+            }
+            // OCR found nothing either: say what AX said (the same «not known», as before).
+            show(result?.isShown == true ? result : (axMiss ?? result), at: mouse,
+                 method: (words.isEmpty ? "none" : "ocr") + "<\(ax.diagnostic)>", start: start, context: context)
         }
     }
 

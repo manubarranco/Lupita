@@ -103,6 +103,8 @@ public enum S {
     public static var noTokenUsesIt: String { t("no token has this colour", "ningún token tiene este color") }
     public static var kindTerminal: String { t("terminal command", "comando de terminal") }
     public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
+    public static var kindGit: String { "git" }
+    public static func seenIn(_ example: String) -> String { t("Example: \(example)", "Ejemplo: \(example)") }
     public static var kindError: String { t("error", "error") }
     public static var kindTag: String { t("HTML tag", "etiqueta HTML") }
     public static var kindPullRequest: String { t("pull request", "pull request") }
@@ -125,6 +127,8 @@ public enum S {
     }
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
     public static var lens: String { t("Show Lupita", "Mostrar a Lupita") }
+    public static var explainTermsOf: String { t("Explain terms of:", "Explicar términos de:") }
+    public static var gitPackage: String { "Git" }
     public static var folders: String { t("Folders to search", "Carpetas de búsqueda") }
     public static var permissions: String { t("Permissions", "Permisos") }
     /// The question around the folder path, which the alert draws in its own style.

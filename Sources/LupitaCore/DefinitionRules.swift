@@ -13,6 +13,8 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     case term
     /// What agents cite from code (D29): looked up on demand, never indexed.
     case symbol, address, token, color, terminal, error, tag, pullRequest
+    /// A term of a vocabulary package (D42): looked up in a fixed table, below the glossary.
+    case vocabulary
 
     public var weight: Int {
         switch self {
@@ -24,7 +26,7 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .section: 20
         case .term: 10
         case .repo, .commit, .branch, .file, .command: 0
-        case .symbol, .address, .token, .color, .terminal, .error, .tag, .pullRequest: 0
+        case .symbol, .address, .token, .color, .terminal, .error, .tag, .pullRequest, .vocabulary: 0
         }
     }
 

@@ -276,6 +276,7 @@ struct TooltipView: View {
         case .error: S.kindError
         case .pullRequest: S.kindPullRequest
         case .tag: S.kindTag
+        case .vocabulary: S.kindGit
         case .color: S.kindColor
         default: nil
         }
