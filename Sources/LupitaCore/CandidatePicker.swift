@@ -69,6 +69,32 @@ public enum CandidatePicker {
                                 context: context, fromPath: fromPath, after: tail, block: line, codeStyled: styled)
     }
 
+    /// The word at `cursorOffset` of `line` (as `pick(line:)` chooses it), or nil.
+    public static func word(in line: String, cursorOffset: Int) -> String? {
+        let ns = line as NSString
+        var location = 0
+        for word in words(of: line) {
+            let range = ns.range(of: word, range: NSRange(location: location, length: ns.length - location))
+            location = range.location + range.length
+            let distance = cursorOffset < range.location ? range.location - cursorOffset
+                : cursorOffset >= range.location + range.length ? cursorOffset - (range.location + range.length) + 1 : 0
+            if distance <= slack { return word }
+        }
+        return nil
+    }
+
+    /// The OCR word `pick(words:)` would choose for `cursor`, or nil.
+    public static func word(under cursor: CGPoint, in words: [OCRWord]) -> OCRWord? {
+        func rowGap(_ w: OCRWord) -> CGFloat {
+            cursor.y < w.box.minY ? w.box.minY - cursor.y : cursor.y > w.box.maxY ? cursor.y - w.box.maxY : 0
+        }
+        guard let nearest = words.min(by: { rowGap($0) < rowGap($1) }), rowGap(nearest) <= maxRowGap else { return nil }
+        func distance(_ w: OCRWord) -> CGFloat {
+            cursor.x < w.box.minX ? w.box.minX - cursor.x : cursor.x > w.box.maxX ? cursor.x - w.box.maxX : 0
+        }
+        return words.filter { abs($0.box.midY - nearest.box.midY) <= nearest.box.height / 2 }.min { distance($0) < distance($1) }
+    }
+
     /// Max words in a glossary term (D23).
     static let maxTermWords = 4
 

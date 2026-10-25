@@ -313,6 +313,24 @@ public enum GitVocabulary {
         definition(phrase, block: block, marked: marked) != nil
     }
 
+    /// The word is a git word that is also ordinary language (`main`, `rama`): it needs context to be explained.
+    public static func isAmbiguous(_ word: String) -> Bool {
+        guard isEnabled else { return false }
+        let words = tokens(word)
+        guard words.count == 1, let hit = lookup(words[...]) else { return false }
+        return !hit.strong
+    }
+
+    /// Why `phrase` was or was not explained, for the debug log (`Debug.isOn` only: it holds the user's text).
+    public static func diagnose(_ phrase: String, block: String, marked: Bool) -> String {
+        guard isEnabled else { return "package off" }
+        let words = tokens(phrase)
+        guard !words.isEmpty, words.count <= tables.longest, let hit = lookup(words[...]) else { return "not a git word" }
+        if hit.strong { return "strong term \(terms[hit.term].names)" }
+        let spans = found(in: block).count
+        return "weak term \(terms[hit.term].names): backticks/code-style=\(marked), git words in block=\(spans), file-or-branch token=\(hasCodeToken(in: block))"
+    }
+
     // MARK: Code in the block
 
     static let branchPrefixes: Set<String> = ["feature", "feat", "fix", "hotfix", "bugfix", "chore", "release", "claude", "codex",

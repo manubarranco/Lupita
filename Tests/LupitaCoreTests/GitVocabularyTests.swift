@@ -302,4 +302,45 @@ import Testing
         #expect(!GitVocabulary.isFileOrBranch("https://x.com/a/b"))
         #expect(!GitVocabulary.isFileOrBranch("e.g"))
     }
+
+    // Round 4: Accessibility answers on release, without the code box; the app asks OCR for ambiguous words.
+
+    @Test func theAppCanTellAnAmbiguousMissFromAnOrdinaryOne() {
+        S.language = "es"; GitVocabulary.isEnabled = true
+        #expect(GitVocabulary.isAmbiguous("main"))
+        #expect(GitVocabulary.isAmbiguous("`rama`,"))
+        #expect(!GitVocabulary.isAmbiguous("rebasear"))
+        #expect(!GitVocabulary.isAmbiguous("casa"))
+        #expect(CandidatePicker.word(in: "Ya está en main", cursorOffset: 12) == "main")
+        let miss = CandidatePicker.pick(line: "Ya está en main", cursorOffset: 12, resolver: Self.resolver())
+        #expect(miss != nil && !miss!.isShown)
+        let hit = CandidatePicker.pick(line: "Ya está en main", cursorOffset: 12, resolver: Self.resolver(), codeRanges: [NSRange(location: 11, length: 4)])
+        #expect(hit?.isShown == true)
+    }
+
+    @Test func theDiagnosisSaysWhy() {
+        S.language = "es"; GitVocabulary.isEnabled = true
+        #expect(GitVocabulary.diagnose("main", block: "Ya está en main", marked: false).contains("git words in block=1"))
+        #expect(GitVocabulary.diagnose("main", block: "Ya está en main", marked: true).contains("marked") == false)
+        #expect(GitVocabulary.diagnose("main", block: "Ya está en main", marked: true).contains("backticks/code-style=true"))
+        #expect(GitVocabulary.diagnose("rebasear", block: "rebasear", marked: false).hasPrefix("strong"))
+        #expect(GitVocabulary.diagnose("casa", block: "casa", marked: false) == "not a git word")
+    }
+
+    @Test func aFaintCodeBoxIsSeenAndAPlainTintedSurfaceIsNot() {
+        // Claude's light theme: the box is only about 4 % darker than the page. A tinted page with no box has no step.
+        func check(page: UInt8, box: UInt8?) -> Bool {
+            let width = 160, height = 48
+            var px = [UInt8](repeating: page, count: width * height * 4)
+            func fill(_ x0: Int, _ x1: Int, _ y0: Int, _ y1: Int, _ v: UInt8) {
+                for y in y0..<y1 { for x in x0..<x1 { let i = (y * width + x) * 4; px[i] = v; px[i + 1] = v; px[i + 2] = v; px[i + 3] = 255 } }
+            }
+            if let box { fill(40, 120, 8, 40, box) }
+            for k in 0..<8 { fill(52 + k * 7, 54 + k * 7, 14, 34, 30) }
+            return px.withUnsafeBufferPointer { CodeBox.isCodeStyled(pixels: $0, width: width, height: height, box: CGRect(x: 48, y: 12, width: 64, height: 24)) }
+        }
+        #expect(check(page: 255, box: 242))
+        #expect(!check(page: 243, box: nil))
+        #expect(!check(page: 255, box: nil))
+    }
 }

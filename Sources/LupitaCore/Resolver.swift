@@ -28,6 +28,9 @@ public struct Resolution: Sendable {
     /// A range of IDs (D41): the tooltip lists what it spans instead of showing definitions.
     public var range: RangeList?
 
+    /// The tooltip shows it (anything else says «not a known reference»).
+    public var isShown: Bool { [.exact, .corrected, .ambiguous].contains(kind) && !definitions.isEmpty }
+
     /// D13: a short ID reached only through OCR correction is shown as "did you mean…?".
     public var isSuggestion: Bool { kind == .corrected && (key?.count ?? 0) < 4 }
 }

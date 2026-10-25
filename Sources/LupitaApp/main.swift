@@ -12,6 +12,11 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-vocabulary") {
     exit(code)
 }
 
+// Development aid: measure the code-box detector on a real window (see WindowDiagnostic).
+if let i = CommandLine.arguments.firstIndex(of: "--diagnose-window") {
+    exit(WindowDiagnostic.run(Array(CommandLine.arguments.dropFirst(i + 1))))
+}
+
 MainActor.assumeIsolated {
     let app = NSApplication.shared
     let delegate = AppDelegate()

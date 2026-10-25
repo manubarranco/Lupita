@@ -14,6 +14,8 @@ enum TextUnderCursor {
         var via = ""
         /// UTF-16 ranges of `line` in a monospaced font: inline code, which counts as backticks (D42).
         var codeRanges: [NSRange] = []
+        /// What Accessibility said about the font of the line, for the debug log.
+        var fontNote = ""
     }
 
     struct Outcome {
@@ -122,6 +124,7 @@ enum TextUnderCursor {
                     let attributed: NSAttributedString? = parameterized(node, "AXAttributedStringForTextMarkerRange", lineRange)
                     if let attributed {
                         let skipped = (line as NSString).length - (line.drop { $0.isNewline } as Substring).utf16.count
+                        hit.fontNote = fontNote(of: attributed)
                         hit.codeRanges = monospacedRanges(in: attributed).map { NSRange(location: max(0, $0.location - skipped), length: $0.length) }
                     }
                     return hit
@@ -135,6 +138,23 @@ enum TextUnderCursor {
             current = attribute(node, kAXParentAttribute)
         }
         return nil
+    }
+
+    /// Attribute names and font names of the line, distinct, for the debug log.
+    static func fontNote(of text: NSAttributedString) -> String {
+        guard text.length > 0 else { return "empty" }
+        var keys = Set<String>(), fonts = Set<String>(), runs = 0
+        text.enumerateAttributes(in: NSRange(location: 0, length: text.length)) { attributes, _, _ in
+            runs += 1
+            for (key, value) in attributes {
+                keys.insert(key.rawValue)
+                if let font = value as? NSFont { fonts.insert("NSFont:" + font.fontName) }
+                else if let dict = value as? [String: Any] {
+                    fonts.insert(["AXFontName", "AXFontFamily"].compactMap { dict[$0] as? String }.joined(separator: "/") + "{" + dict.keys.sorted().joined(separator: ",") + "}")
+                }
+            }
+        }
+        return "runs=\(runs) keys=\(keys.sorted().joined(separator: ",")) fonts=\(fonts.sorted().joined(separator: "|"))"
     }
 
     /// Runs of `text` in a monospaced font. Chromium reports the font as an `AXFont` dictionary, other apps as
