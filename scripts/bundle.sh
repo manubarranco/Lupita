@@ -2,10 +2,20 @@
 # Builds build/Lupita.app (menu bar app). No Xcode needed.
 # Signing: a self-signed "Lupita Dev" code-signing certificate in the login keychain (any case)
 # keeps macOS permissions across rebuilds. Without it, the app is signed ad-hoc and macOS
-# forgets the permissions on every build. Override with LUPITA_SIGN_IDENTITY.
+# forgets the permissions on every build, so the script stops instead. Override with
+# LUPITA_SIGN_IDENTITY; LUPITA_SIGN_IDENTITY=- signs ad-hoc on purpose (the release zip).
 # "Refs Dev" is still accepted: it was the certificate name before the rename.
 set -e
 cd "$(dirname "$0")/.."
+# Check the signature first, so a failed check leaves the current build/Lupita.app untouched.
+IDENTITY="${LUPITA_SIGN_IDENTITY:-$(security find-identity -p codesigning | grep -iE '"(Lupita|Refs) Dev"' | head -1 | awk '{print $2}')}"
+if [ -z "$IDENTITY" ]; then
+  echo "error: no \"Lupita Dev\" code-signing certificate found, so this build would be signed ad-hoc" >&2
+  echo "and macOS would ask for the permissions again. Create the certificate (see README)," >&2
+  echo "or, if the keychain is hidden (a sandbox), run outside it." >&2
+  echo "To sign ad-hoc on purpose (the release zip): LUPITA_SIGN_IDENTITY=- $0" >&2
+  exit 1
+fi
 swift build -c release --product LupitaApp
 APP=build/Lupita.app
 rm -rf "$APP"
@@ -30,7 +40,6 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>NSHighResolutionCapable</key><true/>
 </dict></plist>
 PLIST
-IDENTITY="${LUPITA_SIGN_IDENTITY:-$(security find-identity -p codesigning | grep -iE '"(Lupita|Refs) Dev"' | head -1 | awk '{print $2}')}"
-codesign --force --sign "${IDENTITY:--}" "$APP"
-[ -n "$IDENTITY" ] && echo "signed with certificate $IDENTITY" || echo "signed ad-hoc: permissions reset on every build"
+codesign --force --sign "$IDENTITY" "$APP"
+[ "$IDENTITY" = "-" ] && echo "signed ad-hoc on purpose: permissions reset on every build" || echo "signed with certificate $IDENTITY"
 echo "$APP"

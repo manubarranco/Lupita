@@ -137,7 +137,8 @@ apagada, claramente señalada, y solo funcionaría si tú la activas.
 
 Si compilas desde el código, macOS olvida los permisos en cada compilación salvo que la app
 esté firmada con un certificado estable: crea en Acceso a Llaveros un certificado autofirmado
-de **Firma de código** llamado `Lupita Dev` y `scripts/bundle.sh` lo usará.
+de **Firma de código** llamado `Lupita Dev` y `scripts/bundle.sh` lo usará. Sin él el script
+se para; para compilar igualmente con firma ad-hoc, ejecuta `LUPITA_SIGN_IDENTITY=- ./scripts/bundle.sh`.
 
 ## Límites conocidos
 

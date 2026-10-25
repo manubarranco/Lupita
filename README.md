@@ -137,7 +137,8 @@ come switched off, clearly labelled, and would only work if you turn it on.
 
 If you build from source, macOS forgets the permissions on every build unless the app is
 signed with a stable certificate: create a self-signed **Code Signing** certificate named
-`Lupita Dev` in Keychain Access, and `scripts/bundle.sh` will use it.
+`Lupita Dev` in Keychain Access, and `scripts/bundle.sh` will use it. Without it the script
+stops; to build anyway with an ad-hoc signature, run `LUPITA_SIGN_IDENTITY=- ./scripts/bundle.sh`.
 
 ## Known limits
 
