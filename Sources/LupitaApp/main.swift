@@ -6,6 +6,12 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-tooltips") {
     exit(code)
 }
 
+// Development aid: the contact sheet of the git vocabulary cards and the menu switch (D42).
+if let i = CommandLine.arguments.firstIndex(of: "--render-vocabulary") {
+    let code = MainActor.assumeIsolated { TooltipGallery.runVocabulary(CommandLine.arguments.dropFirst(i + 1).first) }
+    exit(code)
+}
+
 MainActor.assumeIsolated {
     let app = NSApplication.shared
     let delegate = AppDelegate()

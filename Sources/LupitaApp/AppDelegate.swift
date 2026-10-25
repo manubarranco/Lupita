@@ -23,6 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         IndexStore.migrateLegacyRoots()
+        VocabularyPackages.apply()
         menu = StatusMenu(store: store) { [weak self] choice in
             HotkeyChoice.current = choice
             self?.installTrigger()
