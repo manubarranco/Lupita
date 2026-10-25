@@ -75,8 +75,10 @@ public struct Resolver: Sendable {
     ///   - fromPath: path of the file being read, relative to `preferredRepo`. Definitions in
     ///     nearby folders win (`domains/billing/…` cites `domains/billing/decisions.md`).
     ///   - after: the text right after `raw` on its line (the picker splits at `(`: `simplify()` is a call).
+    ///   - block: the text around `raw` (its line, or the lines near it): the git package (D42) needs it to tell
+    ///     `push` the git word from `push` the English one.
     public func resolve(_ raw: String, preferredRepo: String? = nil, context: String? = nil,
-                        fromPath: String? = nil, after: String? = nil) -> Resolution {
+                        fromPath: String? = nil, after: String? = nil, block: String? = nil) -> Resolution {
         // A repo named in the text beats one named in the file path (`domains/harbor-log.md`),
         // which beats the window's repo.
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
@@ -140,6 +142,9 @@ public struct Resolver: Sendable {
         }
 
         if idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
+        // The git package (D42) is last: it only speaks when nothing else knows the word.
+        let marked = raw.contains("`") || (context?.hasSuffix("`") ?? false) || (after?.hasPrefix("`") ?? false)
+        if let git = resolveGit(raw, block: block ?? [context, raw, after].compactMap { $0 }.joined(separator: " "), marked: marked) { return git }
         if let id = IDGrammar.parse(query) {
             return Resolution(query: query, kind: .undefined, key: id.key, definitions: [],
                               mentions: index.mentions[id.key], alternatives: [])

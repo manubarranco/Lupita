@@ -44,7 +44,7 @@ public enum CandidatePicker {
                                               length: min(3, ns.length - best.range.location - best.range.length)))
         let single = resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
                                       context: String(ns.substring(with: NSRange(location: max(0, best.range.location - 80), length: min(best.range.location, 80)))),
-                                      fromPath: fromPath, after: tail)
+                                      fromPath: fromPath, after: tail, block: line)
         if !isFound(single) {
             let texts = ranges.map { ns.substring(with: $0) }
             let closing = CharacterSet(charactersIn: ".,;:!?…")
@@ -53,7 +53,7 @@ public enum CandidatePicker {
                 let end = ranges[i].location + ranges[i].length
                 return end < ns.length && ns.substring(with: NSRange(location: end, length: 1)).unicodeScalars.allSatisfy(closing.contains)
             }
-            if let term = longerTerm(texts, at: best.index, closes: closes, resolver: resolver, preferredRepo: preferredRepo, fromPath: fromPath,
+            if let term = longerTerm(texts, at: best.index, closes: closes, resolver: resolver, preferredRepo: preferredRepo, fromPath: fromPath, block: line,
                                      context: { i in String(ns.substring(with: NSRange(location: max(0, ranges[i].location - 80), length: min(ranges[i].location, 80)))) }) {
                 return term
             }
@@ -61,16 +61,18 @@ public enum CandidatePicker {
         let start = max(0, best.range.location - 80)
         let context = ns.substring(with: NSRange(location: start, length: best.range.location - start))
         return resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
-                                context: context, fromPath: fromPath, after: tail)
+                                context: context, fromPath: fromPath, after: tail, block: line)
     }
 
     /// Max words in a glossary term (D23).
     static let maxTermWords = 4
 
-    /// A single word that resolved to an ID or a repo reference: nothing longer should override it.
+    /// A single word that resolved to an ID, a repo reference or code: nothing longer should override it.
+    /// A glossary term and a word of the git package (D42) can be the start of a longer phrase.
     static func isFound(_ r: Resolution) -> Bool {
         switch r.kind {
-        case .exact, .corrected, .ambiguous: return !r.definitions.isEmpty && r.definitions.first?.rule != .term
+        case .exact, .corrected, .ambiguous:
+            return !r.definitions.isEmpty && r.definitions.first?.rule != .term && r.definitions.first?.rule != .vocabulary
         case .undefined, .notAnID: return false
         }
     }
@@ -78,7 +80,7 @@ public enum CandidatePicker {
     /// Windows of 4 to 2 words that contain the word at `index`, longest first, as glossary terms.
     /// A word that ends in punctuation (`.,;:!?`) closes the phrase: the window cannot go past it.
     static func longerTerm(_ words: [String], at index: Int, closes extra: ((Int) -> Bool)? = nil, resolver: Resolver, preferredRepo: String?,
-                           fromPath: String?, context: (Int) -> String) -> Resolution? {
+                           fromPath: String?, block: String, context: (Int) -> String) -> Resolution? {
         let closing = CharacterSet(charactersIn: ".,;:!?…")
         func closes(_ i: Int) -> Bool { (words[i].unicodeScalars.last.map(closing.contains) ?? false) || (extra?(i) ?? false) }
         for length in stride(from: maxTermWords, through: 2, by: -1) {
@@ -94,6 +96,8 @@ public enum CandidatePicker {
                 if let r = resolver.resolveCode(phrase, preferredRepo: preferredRepo, context: context(start)) {
                     return r
                 }
+                // Last: a phrase of the git package (D42), `fast-forward merge`, `detached HEAD`.
+                if let r = resolver.resolveGit(phrase, block: block) { return r }
             }
         }
         return nil
@@ -116,14 +120,15 @@ public enum CandidatePicker {
               let index = row.firstIndex(of: target)
         else { return nil }
         func context(_ i: Int) -> String { String(row[..<i].map(\.text).joined(separator: " ").suffix(80)) }
-        let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath)
+        let block = HighlightPicker.nearbyText(of: nearest, in: words)
+        let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath, block: block)
         if !isFound(single),
            let term = longerTerm(row.map(\.text), at: index, resolver: resolver, preferredRepo: preferredRepo,
-                                 fromPath: fromPath, context: context) {
+                                 fromPath: fromPath, block: block, context: context) {
             return term
         }
         return resolver.resolve(target.text, preferredRepo: preferredRepo,
-                                context: context(index), fromPath: fromPath)
+                                context: context(index), fromPath: fromPath, block: block)
     }
 
     /// Splits like the resolver does: whitespace and brackets/quotes, keeping `D001:`-style

@@ -10,13 +10,14 @@ public enum HighlightPicker {
     public static func marks(words: [OCRWord], resolver: Resolver) -> [CGRect] {
         var marks: [CGRect] = []
         for row in rows(of: words) {
+            let block = nearbyText(of: row[0], in: words)
             var i = 0
             while i < row.count {
-                if let length = phraseLength(row, at: i, resolver: resolver) {
+                if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
                     marks.append(trimmed(row[i..<i + length]))
                     i += length
                 } else {
-                    if knows(row[i].text, resolver: resolver) { marks.append(trimmed(row[i...i])) }
+                    if knows(row[i].text, resolver: resolver, block: block) { marks.append(trimmed(row[i...i])) }
                     i += 1
                 }
             }
@@ -49,7 +50,7 @@ public enum HighlightPicker {
     }
 
     /// 4 to 2 words from `i` that name a glossary term or a dictionary command, longest first.
-    static func phraseLength(_ row: [OCRWord], at i: Int, resolver: Resolver) -> Int? {
+    static func phraseLength(_ row: [OCRWord], at i: Int, resolver: Resolver, block: String) -> Int? {
         for length in stride(from: 4, through: 2, by: -1) where i + length <= row.count {
             let slice = row[i..<i + length]
             // A phrase does not close early and does not jump a column gap.
@@ -59,11 +60,19 @@ public enum HighlightPicker {
             let phrase = slice.map { clean($0.text) }.joined(separator: " ")
             if resolver.resolveTerm(phrase) != nil { return length }
             if let command = CodeDictionaries.commands[phrase.lowercased()], command.safe { return length }
+            if GitVocabulary.knows(phrase, block: block) { return length }
         }
         return nil
     }
 
-    static func knows(_ text: String, resolver: Resolver) -> Bool {
+    /// The words of the text block around `word` (its row and the rows just above and below), left to
+    /// right and top to bottom: the context the git package (D42) needs to tell `push` from `push`.
+    public static func nearbyText(of word: OCRWord, in words: [OCRWord]) -> String {
+        let near = words.filter { abs($0.box.midY - word.box.midY) <= word.box.height * 2.2 }
+        return rows(of: near).map { $0.map(\.text).joined(separator: " ") }.joined(separator: " ")
+    }
+
+    static func knows(_ text: String, resolver: Resolver, block: String) -> Bool {
         let word = clean(text)
         guard word.count >= 2 else { return false }
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return true }
@@ -71,7 +80,7 @@ public enum HighlightPicker {
         if resolver.resolveTerm(word) != nil { return true }
         if CodeDictionaries.errors[word] != nil { return true }
         if let command = CodeDictionaries.commands[word.lowercased()], command.safe { return true }
-        return false
+        return GitVocabulary.knows(word, block: block)
     }
 
     /// The box of the words without the punctuation OCR glued to the first and last one.
