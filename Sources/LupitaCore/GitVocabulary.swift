@@ -298,7 +298,8 @@ public enum GitVocabulary {
         guard !words.isEmpty, words.count <= tables.longest, !words.dropLast().contains(where: \.closes),
               let hit = lookup(words[...]) else { return nil }
         if !hit.strong, !marked, !phrase.contains("`") {
-            guard found(in: block.isEmpty ? phrase : block).count >= 2 else { return nil }
+            let around = block.isEmpty ? phrase : block
+            guard found(in: around).count >= 2 || hasCodeToken(in: around) else { return nil }
         }
         let term = terms[hit.term]
         return Definition(id: term.names, key: "git:\(hit.term)", repo: "", path: "", line: 0, rule: .vocabulary,
@@ -308,8 +309,43 @@ public enum GitVocabulary {
     }
 
     /// Whether `phrase` would be explained, for the highlight (D39).
-    static func knows(_ phrase: String, block: String) -> Bool {
-        definition(phrase, block: block, marked: false) != nil
+    static func knows(_ phrase: String, block: String, marked: Bool = false) -> Bool {
+        definition(phrase, block: block, marked: marked) != nil
+    }
+
+    // MARK: Code in the block
+
+    static let branchPrefixes: Set<String> = ["feature", "feat", "fix", "hotfix", "bugfix", "chore", "release", "claude", "codex",
+                                              "docs", "src", "sources", "tests", "scripts", "origin", "refs", "backup", "users"]
+    static let domain = try! NSRegularExpression(pattern: #"^[\w-]+(\.[\w-]+)*\.(com|org|net|io|dev|app|es|co|ai|me|edu|gov)(/|:|$)"#, options: [.caseInsensitive])
+    static let segment = try! NSRegularExpression(pattern: #"^[\w.~-]+$"#)
+    static let fileName = try! NSRegularExpression(pattern: #"^[\w-]+\.([A-Za-z0-9]+)$"#)
+
+    /// A file or branch written in the block (`src/app.js`, `feature/login`, `README.md`) says the text is
+    /// about code: it counts as git context. A URL, `and/or`, `input/output` or a date does not.
+    static func hasCodeToken(in block: String) -> Bool {
+        tokens(block).contains { isFileOrBranch($0.text) }
+    }
+
+    static func isFileOrBranch(_ token: String) -> Bool {
+        func matches(_ r: NSRegularExpression, _ s: String) -> Bool { r.firstMatch(in: s, range: NSRange(location: 0, length: (s as NSString).length)) != nil }
+        guard !token.contains("://"), !token.contains("@"), !token.lowercased().hasPrefix("www."), !matches(domain, token) else { return false }
+        if token.contains("/") {
+            let parts = token.split(separator: "/", omittingEmptySubsequences: false).map(String.init)
+            guard parts.count >= 2, parts.allSatisfy({ !$0.isEmpty && matches(segment, $0) }) else { return false }
+            // Dates and fractions: `10/12`, `24/7`.
+            guard !parts.allSatisfy({ $0.allSatisfy(\.isNumber) }) else { return false }
+            return parts.count >= 3 || branchPrefixes.contains(parts[0].lowercased())
+                || parts.contains { $0.contains { "-_.".contains($0) || $0.isNumber } }
+        }
+        guard matches(fileName, token), let ext = token.split(separator: ".").last else { return false }
+        return RepoRefs.fileExtensions.contains(ext.lowercased())
+    }
+
+    /// A font name that is monospaced (`SF Mono`, `Menlo`, `JetBrains Mono`): code, not prose.
+    public static func isMonospacedFont(_ name: String) -> Bool {
+        let n = name.lowercased()
+        return ["mono", "menlo", "courier", "consolas", "monaco", "code", "terminal", "typewriter"].contains { n.contains($0) }
     }
 }
 

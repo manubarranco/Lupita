@@ -1,3 +1,4 @@
+import Foundation
 import CoreGraphics
 import Testing
 @testable import LupitaCore
@@ -227,5 +228,78 @@ import Testing
         GitVocabulary.isEnabled = true
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("abro PR hoy"), resolver: Self.resolver()).count == 1)
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("abro (PR) hoy"), resolver: Self.resolver()).count == 1)
+    }
+
+    // Round 3: inline code counts as backticks.
+
+    /// A flat window with an inline-code box and fake glyph strokes inside the words.
+    static func screen(dark: Bool, scale: Int, boxed: Bool) -> (pixels: [UInt8], width: Int, height: Int, box: CGRect) {
+        let width = 200 * scale, height = 60 * scale
+        let bg: UInt8 = dark ? 33 : 255, boxColor: UInt8 = dark ? 64 : 235, ink: UInt8 = dark ? 230 : 25
+        var px = [UInt8](repeating: 0, count: width * height * 4)
+        func fill(_ x0: Int, _ x1: Int, _ y0: Int, _ y1: Int, _ v: UInt8) {
+            for y in y0..<y1 { for x in x0..<x1 { let i = (y * width + x) * 4; px[i] = v; px[i + 1] = v; px[i + 2] = v; px[i + 3] = 255 } }
+        }
+        fill(0, width, 0, height, bg)
+        let word = CGRect(x: 60 * scale, y: 22 * scale, width: 34 * scale, height: 14 * scale)
+        if boxed { fill(Int(word.minX) - 4 * scale, Int(word.maxX) + 4 * scale, Int(word.minY) - 2 * scale, Int(word.maxY) + 2 * scale, boxColor) }
+        // Strokes: about a third of the word's pixels.
+        for k in 0..<8 { fill(Int(word.minX) + (2 + k * 4) * scale, Int(word.minX) + (3 + k * 4) * scale + 1, Int(word.minY) + 2 * scale, Int(word.maxY) - 2 * scale, ink) }
+        return (px, width, height, word)
+    }
+
+    @Test func aCodeBoxIsSeenInThePixels() {
+        for dark in [false, true] {
+            for scale in [1, 2, 4] {
+                for boxed in [true, false] {
+                    let s = Self.screen(dark: dark, scale: scale, boxed: boxed)
+                    let styled = s.pixels.withUnsafeBufferPointer { CodeBox.isCodeStyled(pixels: $0, width: s.width, height: s.height, box: s.box) }
+                    #expect(styled == boxed, "dark \(dark) scale \(scale) boxed \(boxed)")
+                }
+            }
+        }
+    }
+
+    @Test func aCodeStyledWordCountsAsBackticks() {
+        S.language = "es"; GitVocabulary.isEnabled = true
+        let plain = HighlightPickerTests.row("Ya está en main")
+        let styled = plain.map { $0.text == "main" ? OCRWord(text: $0.text, box: $0.box, codeStyled: true) : $0 }
+        let main = styled.last!
+        let cursor = CGPoint(x: main.box.midX, y: main.box.midY)
+        #expect(!Self.explains(CandidatePicker.pick(words: plain, cursor: cursor, resolver: Self.resolver())))
+        #expect(Self.explains(CandidatePicker.pick(words: styled, cursor: cursor, resolver: Self.resolver())))
+        #expect(HighlightPicker.marks(words: plain, resolver: Self.resolver()).isEmpty)
+        #expect(HighlightPicker.marks(words: styled, resolver: Self.resolver()).count == 1)
+    }
+
+    @Test func aMonospacedRunCountsAsBackticks() {
+        S.language = "es"; GitVocabulary.isEnabled = true
+        let line = "Ya está en main"
+        let range = NSRange(location: 11, length: 4)
+        #expect(!Self.explains(CandidatePicker.pick(line: line, cursorOffset: 12, resolver: Self.resolver())))
+        #expect(Self.explains(CandidatePicker.pick(line: line, cursorOffset: 12, resolver: Self.resolver(), codeRanges: [range])))
+        // The run is somewhere else in the line: no.
+        #expect(!Self.explains(CandidatePicker.pick(line: line, cursorOffset: 12, resolver: Self.resolver(), codeRanges: [NSRange(location: 0, length: 2)])))
+        for name in ["SFMono-Regular", "Menlo-Regular", "Courier New", "JetBrainsMono-Medium", "Consolas", "Fira Code"] { #expect(GitVocabulary.isMonospacedFont(name), "\(name)") }
+        for name in ["SFPro-Text", "Helvetica Neue", "Georgia", "Inter"] { #expect(!GitVocabulary.isMonospacedFont(name), "\(name)") }
+    }
+
+    @Test func aFileOrBranchInTheBlockIsGitContext() {
+        for line in ["pasa ⟦main⟧ a src/app.js", "⟦push⟧ de feature/login", "el ⟦tag⟧ está en README.md", "borra la ⟦rama⟧ fix/ui-bug",
+                     "la ⟦rama⟧ origin/main/old", "⟦main⟧ y Sources/LupitaCore/CodeRefs.swift"] {
+            #expect(Self.explains(Self.pick(line)), "\(line)")
+        }
+    }
+
+    @Test func urlsDatesAndPairsAreNotFilesOrBranches() {
+        for line in ["see https://example.com/branch/x for the ⟦log⟧", "el ⟦main⟧ sale el 10/12", "choose this and/or that ⟦tag⟧",
+                     "the ⟦head⟧ of input/output", "visit github.com/foo/bar and the ⟦fork⟧", "mail a@b.com about the ⟦review⟧", "24/7 ⟦push⟧", "w/o the ⟦stage⟧ or n/a"] {
+            #expect(!Self.explains(Self.pick(line)), "\(line)")
+        }
+        #expect(GitVocabulary.isFileOrBranch("feature/login"))
+        #expect(GitVocabulary.isFileOrBranch("README.md"))
+        #expect(!GitVocabulary.isFileOrBranch("and/or"))
+        #expect(!GitVocabulary.isFileOrBranch("https://x.com/a/b"))
+        #expect(!GitVocabulary.isFileOrBranch("e.g"))
     }
 }

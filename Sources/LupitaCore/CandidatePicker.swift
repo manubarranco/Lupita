@@ -5,10 +5,13 @@ import Foundation
 public struct OCRWord: Sendable, Equatable {
     public let text: String
     public let box: CGRect
+    /// Drawn on an inline-code box (see `CodeBox`): counts as if it carried backticks (D42).
+    public let codeStyled: Bool
 
-    public init(text: String, box: CGRect) {
+    public init(text: String, box: CGRect, codeStyled: Bool = false) {
         self.text = text
         self.box = box
+        self.codeStyled = codeStyled
     }
 }
 
@@ -24,8 +27,9 @@ public enum CandidatePicker {
     static let maxRowGap: CGFloat = 10
 
     /// Text from the Accessibility API: a line and the cursor's UTF-16 offset in it.
+    /// `codeRanges`: UTF-16 ranges of `line` written in a monospaced font (read from Accessibility, D42).
     public static func pick(line: String, cursorOffset: Int, resolver: Resolver,
-                            preferredRepo: String? = nil, fromPath: String? = nil) -> Resolution? {
+                            preferredRepo: String? = nil, fromPath: String? = nil, codeRanges: [NSRange] = []) -> Resolution? {
         let ns = line as NSString
         var best: (range: NSRange, distance: Int, index: Int)?
         var ranges: [NSRange] = []
@@ -42,9 +46,10 @@ public enum CandidatePicker {
         guard let best else { return nil }
         let tail = ns.substring(with: NSRange(location: best.range.location + best.range.length,
                                               length: min(3, ns.length - best.range.location - best.range.length)))
+        let styled = codeRanges.contains { NSIntersectionRange($0, best.range).length > 0 }
         let single = resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
                                       context: String(ns.substring(with: NSRange(location: max(0, best.range.location - 80), length: min(best.range.location, 80)))),
-                                      fromPath: fromPath, after: tail, block: line)
+                                      fromPath: fromPath, after: tail, block: line, codeStyled: styled)
         if !isFound(single) {
             let texts = ranges.map { ns.substring(with: $0) }
             let closing = CharacterSet(charactersIn: ".,;:!?…")
@@ -61,7 +66,7 @@ public enum CandidatePicker {
         let start = max(0, best.range.location - 80)
         let context = ns.substring(with: NSRange(location: start, length: best.range.location - start))
         return resolver.resolve(ns.substring(with: best.range), preferredRepo: preferredRepo,
-                                context: context, fromPath: fromPath, after: tail, block: line)
+                                context: context, fromPath: fromPath, after: tail, block: line, codeStyled: styled)
     }
 
     /// Max words in a glossary term (D23).
@@ -121,14 +126,15 @@ public enum CandidatePicker {
         else { return nil }
         func context(_ i: Int) -> String { String(row[..<i].map(\.text).joined(separator: " ").suffix(80)) }
         let block = HighlightPicker.nearbyText(of: nearest, in: words)
-        let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath, block: block)
+        let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath, block: block,
+                                      codeStyled: target.codeStyled)
         if !isFound(single),
            let term = longerTerm(row.map(\.text), at: index, resolver: resolver, preferredRepo: preferredRepo,
                                  fromPath: fromPath, block: block, context: context) {
             return term
         }
         return resolver.resolve(target.text, preferredRepo: preferredRepo,
-                                context: context(index), fromPath: fromPath, block: block)
+                                context: context(index), fromPath: fromPath, block: block, codeStyled: target.codeStyled)
     }
 
     /// Splits like the resolver does: whitespace and brackets/quotes, keeping `D001:`-style

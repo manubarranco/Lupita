@@ -17,7 +17,7 @@ public enum HighlightPicker {
                     marks.append(trimmed(row[i..<i + length]))
                     i += length
                 } else {
-                    if knows(row[i].text, resolver: resolver, block: block) { marks.append(trimmed(row[i...i])) }
+                    if knows(row[i].text, resolver: resolver, block: block, marked: row[i].codeStyled) { marks.append(trimmed(row[i...i])) }
                     i += 1
                 }
             }
@@ -72,7 +72,7 @@ public enum HighlightPicker {
         return rows(of: near).map { $0.map(\.text).joined(separator: " ") }.joined(separator: " ")
     }
 
-    static func knows(_ text: String, resolver: Resolver, block: String) -> Bool {
+    static func knows(_ text: String, resolver: Resolver, block: String, marked: Bool = false) -> Bool {
         let word = clean(text)
         guard word.count >= 2 else { return false }
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return true }
@@ -80,7 +80,7 @@ public enum HighlightPicker {
         if resolver.resolveTerm(word) != nil { return true }
         if CodeDictionaries.errors[word] != nil { return true }
         if let command = CodeDictionaries.commands[word.lowercased()], command.safe { return true }
-        return GitVocabulary.knows(word, block: block)
+        return GitVocabulary.knows(word, block: block, marked: marked)
     }
 
     /// The box of the words without the punctuation OCR glued to the first and last one.

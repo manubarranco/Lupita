@@ -90,6 +90,16 @@ enum OCR {
         request.usesLanguageCorrection = false
         try VNImageRequestHandler(cgImage: image).perform([request])
 
+        // The pixels, to tell words drawn on an inline-code box from plain text (D42).
+        let width = image.width, height = image.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let drawn = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let ctx = CGContext(data: buffer.baseAddress, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+                                      space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            else { return false }
+            ctx.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
         var words: [OCRWord] = []
         for observation in request.results ?? [] {
             guard let candidate = observation.topCandidates(1).first else { continue }
@@ -103,7 +113,12 @@ enum OCR {
                 let global = CGRect(x: rect.minX + box.minX * rect.width,
                                     y: rect.minY + (1 - box.maxY) * rect.height,
                                     width: box.width * rect.width, height: box.height * rect.height)
-                words.append(OCRWord(text: String(word), box: global))
+                let styled = drawn && pixels.withUnsafeBufferPointer { buffer in
+                    CodeBox.isCodeStyled(pixels: buffer, width: width, height: height, box: CGRect(
+                        x: box.minX * CGFloat(width), y: (1 - box.maxY) * CGFloat(height),
+                        width: box.width * CGFloat(width), height: box.height * CGFloat(height)))
+                }
+                words.append(OCRWord(text: String(word), box: global, codeStyled: styled))
             }
         }
         return words

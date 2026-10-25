@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import LupitaCore
 
 /// Reads the text under the cursor through the Accessibility API (first choice, D14):
 /// exact text, no OCR errors, no screen capture.
@@ -11,6 +12,8 @@ enum TextUnderCursor {
         let offset: Int
         /// Which strategy produced it: `range`, `marker` or `static`.
         var via = ""
+        /// UTF-16 ranges of `line` in a monospaced font: inline code, which counts as backticks (D42).
+        var codeRanges: [NSRange] = []
     }
 
     struct Outcome {
@@ -115,7 +118,13 @@ enum TextUnderCursor {
                    let prefixRange: AnyObject = parameterized(node, "AXTextMarkerRangeForUnorderedTextMarkers", [lineStart, marker] as CFArray),
                    let prefix: String = parameterized(node, "AXStringForTextMarkerRange", prefixRange) {
                     let tail = prefix.components(separatedBy: .newlines).last ?? prefix
-                    return Hit(line: line.trimmingCharacters(in: .newlines), offset: (tail as NSString).length)
+                    var hit = Hit(line: line.trimmingCharacters(in: .newlines), offset: (tail as NSString).length)
+                    let attributed: NSAttributedString? = parameterized(node, "AXAttributedStringForTextMarkerRange", lineRange)
+                    if let attributed {
+                        let skipped = (line as NSString).length - (line.drop { $0.isNewline } as Substring).utf16.count
+                        hit.codeRanges = monospacedRanges(in: attributed).map { NSRange(location: max(0, $0.location - skipped), length: $0.length) }
+                    }
+                    return hit
                 }
                 // Fallback: just the word under the marker, no context.
                 if let wordRange: AnyObject = parameterized(node, "AXRightWordTextMarkerRangeForTextMarker", marker),
@@ -126,6 +135,26 @@ enum TextUnderCursor {
             current = attribute(node, kAXParentAttribute)
         }
         return nil
+    }
+
+    /// Runs of `text` in a monospaced font. Chromium reports the font as an `AXFont` dictionary, other apps as
+    /// an `NSFont`; either way a name such as «SF Mono» or «Menlo» is code. Not checked against the real
+    /// apps yet (D42): a miss only means a lone `main` needs another git word, as before.
+    static func monospacedRanges(in text: NSAttributedString) -> [NSRange] {
+        var out: [NSRange] = []
+        text.enumerateAttributes(in: NSRange(location: 0, length: text.length)) { attributes, range, _ in
+            for value in attributes.values {
+                var names: [String] = []
+                if let font = value as? NSFont {
+                    if font.isFixedPitch { names.append("mono") }
+                    names.append(font.fontName)
+                } else if let dict = value as? [String: Any] {
+                    names += ["AXFontName", "AXFontFamily"].compactMap { dict[$0] as? String }
+                }
+                if names.contains(where: GitVocabulary.isMonospacedFont) { out.append(range); break }
+            }
+        }
+        return out
     }
 
     /// Text views, terminals, editors: ask which character is under the point.

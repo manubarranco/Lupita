@@ -166,7 +166,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         var ax = TextUnderCursor.viaAccessibility(at: point)
         if let text = ax.hit {
             let result = CandidatePicker.pick(line: text.line, cursorOffset: text.offset, resolver: resolver,
-                                              preferredRepo: context.repo, fromPath: context.path)
+                                              preferredRepo: context.repo, fromPath: context.path, codeRanges: text.codeRanges)
             // AX gave text but no word at the cursor (e.g. offset unknown): let OCR try.
             if let result {
                 show(result, at: mouse, method: "ax:\(text.via)", start: start, context: context)

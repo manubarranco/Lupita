@@ -75,7 +75,12 @@ enum TooltipGallery {
             cards.append((term, resolution))
         }
         let menus = [menuImage(gitOn: true), menuImage(gitOn: false)]
-        let sheet = VocabularySheet(cards: cards, menus: menus)
+        var inline: [(String, NSImage)] = []
+        for dark in [false, true] {
+            guard let image = inlineCodeImage(dark: dark, resolver: resolver) else { return 4 }
+            inline.append((dark ? "Inline code · fondo oscuro" : "Inline code · fondo claro", image))
+        }
+        let sheet = VocabularySheet(cards: cards, menus: menus, inline: inline)
         for scheme in [ColorScheme.light, .dark] {
             let path = dir + "/git-vocabulary-" + (scheme == .light ? "light" : "dark") + ".png"
             let renderer = ImageRenderer(content: sheet.environment(\.colorScheme, scheme))
@@ -86,6 +91,52 @@ enum TooltipGallery {
             print(path)
         }
         return 0
+    }
+
+    /// A line with `main` in an inline-code box and the same word as plain text, read by the real OCR and the real
+    /// highlight picker: the underline must appear under the first `main` only (D42).
+    private static func inlineCodeImage(dark: Bool, resolver: Resolver) -> NSImage? {
+        let w = 360.0, h = 130.0, scale = 2.0
+        let drawing = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in
+            (dark ? NSColor(white: 0.13, alpha: 1) : .white).setFill(); r.fill()
+            let fg = dark ? NSColor(white: 0.9, alpha: 1) : NSColor(white: 0.1, alpha: 1)
+            let box = dark ? NSColor(white: 0.25, alpha: 1) : NSColor(white: 0.92, alpha: 1)
+            let ink = dark ? NSColor(red: 1, green: 0.6, blue: 0.5, alpha: 1) : NSColor(red: 0.75, green: 0.2, blue: 0.15, alpha: 1)
+            let body = NSFont.systemFont(ofSize: 15), mono = NSFont.monospacedSystemFont(ofSize: 13.5, weight: .regular)
+            for (row, parts) in [[("Ya está en", false), ("main", true), ("y listo", false)],
+                                 [("Ya está en", false), ("main", false), ("y listo", false)]].enumerated() {
+                var x: CGFloat = 20
+                let y = CGFloat(95 - row * 70)
+                for (s, code) in parts {
+                    let attributes: [NSAttributedString.Key: Any] = [.font: code ? mono : body, .foregroundColor: code ? ink : fg]
+                    let size = (s as NSString).size(withAttributes: attributes)
+                    if code {
+                        box.setFill()
+                        NSBezierPath(roundedRect: NSRect(x: x - 4, y: y - 2, width: size.width + 8, height: size.height + 4), xRadius: 4, yRadius: 4).fill()
+                    }
+                    (s as NSString).draw(at: NSPoint(x: x, y: y), withAttributes: attributes)
+                    x += size.width + (code ? 12 : 4)
+                }
+            }
+            return true
+        }
+        var rect = CGRect(x: 0, y: 0, width: w * scale, height: h * scale)
+        guard let cg = drawing.cgImage(forProposedRect: &rect, context: nil, hints: nil),
+              let words = try? OCR.recognize(cg, in: CGRect(x: 0, y: 0, width: w, height: h)) else { return nil }
+        print((dark ? "dark " : "light ") + words.map { "\($0.text)\($0.codeStyled ? "[code]" : "")" }.joined(separator: " "))
+        let marks = HighlightPicker.marks(words: words, resolver: resolver)
+        let out = NSImage(size: NSSize(width: w, height: h))
+        out.lockFocus()
+        drawing.draw(in: NSRect(x: 0, y: 0, width: w, height: h))
+        (dark ? NSColor(white: 0.95, alpha: 1) : NSColor(white: 0.1, alpha: 1)).setStroke()
+        for m in marks {
+            let line = NSBezierPath()
+            line.move(to: NSPoint(x: m.minX, y: h - m.maxY - 1)); line.line(to: NSPoint(x: m.maxX, y: h - m.maxY - 1))
+            line.lineWidth = 1.2; line.stroke()
+        }
+        out.unlockFocus()
+        print("  marks: \(marks.count)")
+        return out
     }
 
     /// The real menu rows (header, lens, «Explicar términos de:», Git) drawn into an image.
@@ -125,6 +176,7 @@ enum TooltipGallery {
 private struct VocabularySheet: View {
     let cards: [(String, Resolution)]
     let menus: [NSImage]
+    let inline: [(String, NSImage)]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
@@ -134,6 +186,14 @@ private struct VocabularySheet: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("«\(card.0)»").font(.caption.monospaced()).foregroundStyle(.secondary)
                         TooltipView(resolution: card.1, open: { _ in })
+                    }
+                }
+            }
+            HStack(alignment: .top, spacing: 24) {
+                ForEach(Array(inline.enumerated()), id: \.offset) { _, item in
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(item.0 + " · «main» subrayado solo en el código").font(.caption.monospaced()).foregroundStyle(.secondary)
+                        Image(nsImage: item.1).overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.separator))
                     }
                 }
             }
