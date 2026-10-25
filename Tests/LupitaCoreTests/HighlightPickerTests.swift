@@ -54,4 +54,13 @@ import Testing
         let words = Self.row("D023", y: 0) + Self.row("git stash", y: 40)
         #expect(HighlightPicker.marks(words: words, resolver: Self.resolver()).count == 2)
     }
+
+    /// After a hold the lookup reuses the window's words: the word under the pointer is found among all of them.
+    @Test func theWindowsWordsAnswerAPointerLookup() {
+        let words = Self.row("per D023 we use fast-forward", y: 0) + Self.row("nothing here to see", y: 40) + Self.row("and saldo inicial too", y: 80)
+        let atID = CandidatePicker.pick(words: words, cursor: CGPoint(x: 55, y: 7), resolver: Self.resolver())
+        #expect(atID?.key == "D23" || atID?.key == "D023")
+        let atTerm = CandidatePicker.pick(words: words, cursor: CGPoint(x: 80, y: 87), resolver: Self.resolver())
+        #expect(atTerm?.definitions.isEmpty == false)
+    }
 }
