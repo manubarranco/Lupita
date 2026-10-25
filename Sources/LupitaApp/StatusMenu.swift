@@ -8,6 +8,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let store: IndexStore
     private let onHotkeyChange: (HotkeyChoice) -> Void
     var onPrepareRepos: (() -> Void)?
+    var onIDReport: (() -> Void)?
 
     init(store: IndexStore, onHotkeyChange: @escaping (HotkeyChoice) -> Void) {
         self.store = store
@@ -95,6 +96,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(action(S.addFolder, #selector(addRoot)))
         menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
         menu.addItem(action(S.reindex, #selector(reindex)))
+        // Hidden: only there when ⌥ is held as the menu opens (D40).
+        if NSEvent.modifierFlags.contains(.option) { menu.addItem(action(S.idReportMenu, #selector(idReport))) }
         menu.addItem(.separator())
 
         menu.addItem(.sectionHeader(title: S.permissions))
@@ -256,6 +259,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
             Task { await Updater.checkAndReport() }
         }
     }
+
+    @objc private func idReport() { onIDReport?() }
 
     @objc private func prepareRepos() { onPrepareRepos?() }
 

@@ -209,6 +209,44 @@ public enum S {
         t("No usual repo folders found on this Mac.", "No he encontrado carpetas habituales de repos en este Mac.")
     }
 
+    // MARK: ID report (D40)
+    public static var idReportMenu: String { t("Create ID report…", "Crear informe de IDs…") }
+    public static var idReportTitle: String { t("ID report", "Informe de IDs") }
+    public static var idReportIntro: String {
+        t("This report helps find ID formats Lupita does not know yet. It holds only the shape of each ID (letters as A, digits as 9), its prefix, the name of the file where it is written, and counts. It never holds titles, definitions, lines of text or folder paths; your repos are just «repo 1», «repo 2». Lupita sends nothing: you review it, save it and send the email yourself.",
+          "Este informe ayuda a descubrir formatos de ID que Lupita aún no conoce. Solo lleva la forma de cada ID (letras como A, dígitos como 9), su prefijo, el nombre del archivo donde está escrito y recuentos. Nunca lleva títulos, definiciones, líneas de texto ni rutas de carpetas; tus repos son solo «repo 1», «repo 2». Lupita no envía nada: tú lo revisas, lo guardas y envías el correo.")
+    }
+    public static var idReportBuilding: String { t("Reading your files…", "Leyendo tus archivos…") }
+    public static var idReportEmpty: String { t("No rows to report.", "No hay filas que informar.") }
+    public static func idReportRows(_ n: Int) -> String { t("\(n) \(n == 1 ? "row" : "rows")", "\(n) \(n == 1 ? "fila" : "filas")") }
+    public static var idReportRemove: String { t("Remove this row", "Quitar esta fila") }
+    public static var idReportSave: String { t("Save file…", "Guardar archivo…") }
+    public static var idReportPrepareEmail: String { t("Prepare email", "Preparar correo") }
+    public static var idReportSubject: String { t("Lupita ID report", "Informe de IDs de Lupita") }
+    public static var idReportDrag: String { t("Drag this file into the email", "Arrastra este archivo al correo") }
+    public static var idReportSaveFailed: String { t("Couldn't save the file.", "No se pudo guardar el archivo.") }
+    public static func idReportRow(shape: String, prefix: String, place: String, file: String, repo: Int,
+                                   ids: Int, mentions: Int, recognised: Bool, resolved: Bool) -> String {
+        let pre = prefix.isEmpty ? "" : t(" with prefix “\(prefix)”", " con prefijo «\(prefix)»")
+        let status = !recognised ? t("Lupita does not recognise this", "Lupita no lo reconoce")
+            : resolved ? t("Lupita finds it", "Lupita lo encuentra") : t("Lupita finds no definition", "Lupita no encuentra su definición")
+        let count = recognised
+            ? t("\(ids) \(ids == 1 ? "ID" : "IDs"), cited \(mentions)×", "\(ids) \(ids == 1 ? "ID" : "IDs"), citados \(mentions)×")
+            : t("appears \(mentions)×", "aparece \(mentions)×")
+        return t("Shape \(shape)\(pre), written in \(place) · \(file) · repo \(repo) · \(count) · \(status)",
+                 "Forma \(shape)\(pre), escrito en \(place) · \(file) · repo \(repo) · \(count) · \(status)")
+    }
+    public static func place(_ p: String) -> String {
+        switch p {
+        case "heading": t("a heading", "un encabezado")
+        case "table": t("a table", "una tabla")
+        case "list": t("a list", "una lista")
+        case "fileName": t("a file name", "un nombre de archivo")
+        case "frontmatter": t("frontmatter", "el frontmatter")
+        default: t("running text", "texto corrido")
+        }
+    }
+
     // MARK: About, help, updates (D25)
     public static var about: String { t("About \(appName)", "Acerca de \(appName)") }
     public static var help: String { t("Help", "Ayuda") }
