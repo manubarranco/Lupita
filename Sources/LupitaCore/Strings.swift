@@ -29,6 +29,20 @@ public enum S {
         t("Cited \(times) \(times == 1 ? "time" : "times") in \(files) \(files == 1 ? "file" : "files")",
           "Citado \(times) \(times == 1 ? "vez" : "veces") en \(files) \(files == 1 ? "archivo" : "archivos")")
     }
+    // Ranges of IDs (D41)
+    public static func rangeHeader(_ n: Int, noun: String) -> String { t("Range · \(n) \(noun)", "Rango · \(n) \(noun)") }
+    public static func rangeMore(_ n: Int) -> String { t("… \(n) more", "… \(n) más") }
+    public static var notDefined: String { t("not defined", "no definida") }
+    /// «decisions» for `decisions.md` or a `D` prefix, and so on; «IDs» when neither says.
+    public static func rangeNoun(prefix: String, file: String) -> String {
+        let stem = ((file as NSString).lastPathComponent as NSString).deletingPathExtension.lowercased()
+        switch (stem, prefix) {
+        case ("decisions", _), (_, "D"), (_, "ADR"): return t("decisions", "decisiones")
+        case ("lessons", _), (_, "L"): return t("lessons", "lecciones")
+        case ("questions", _), (_, "Q"): return t("questions", "preguntas")
+        default: return "IDs"
+        }
+    }
     public static var fromAnotherRepo: String { t("from another repo", "de otro repo") }
     public static func openAt(_ path: String, line: Int) -> String {
         t("Open \(path) at line \(line)", "Abrir \(path) en la línea \(line)")

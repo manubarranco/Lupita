@@ -67,6 +67,7 @@ public enum HighlightPicker {
         let word = clean(text)
         guard word.count >= 2 else { return false }
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return true }
+        if resolver.rangeList(word) != nil { return true }
         if resolver.resolveTerm(word) != nil { return true }
         if CodeDictionaries.errors[word] != nil { return true }
         if let command = CodeDictionaries.commands[word.lowercased()], command.safe { return true }
