@@ -128,6 +128,59 @@ struct TooltipView: View {
     static let maxRows = 3
 
     var body: some View {
+        if let list = resolution.range {
+            rangeBody(list)
+        } else {
+            definitionsBody
+        }
+    }
+
+    /// A range of IDs (D41): a header, one compact line per ID, repo and file once at the bottom.
+    private func rangeBody(_ list: RangeList) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(S.rangeHeader(list.count, noun: list.noun)).font(.caption).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 5) {
+                ForEach(Array(list.rows.enumerated()), id: \.offset) { _, row in
+                    switch row {
+                    case .more(let n): Text(S.rangeMore(n)).font(.callout).foregroundStyle(.secondary)
+                    case .entry(let e): rangeLine(e)
+                    }
+                }
+            }
+            if list.sharedRepo != nil || list.sharedPath != nil {
+                HStack(spacing: 6) {
+                    if let repo = list.sharedRepo { Text(repo).font(.caption.weight(.semibold)).foregroundStyle(Color.accentColor) }
+                    if let path = list.sharedPath { Text(path).font(.caption.monospaced()).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle) }
+                }
+            }
+        }
+        .padding(14)
+        .frame(width: 440, alignment: .leading)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(.separator))
+    }
+
+    @ViewBuilder private func rangeLine(_ e: RangeList.Entry) -> some View {
+        if let d = e.definition {
+            Button { open(d) } label: {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(e.id).font(.system(.callout, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary)
+                    Text(d.title).font(.body.weight(.medium)).lineLimit(1).truncationMode(.tail)
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(Self.help(d))
+        } else {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(e.id).font(.system(.callout, design: .monospaced).weight(.semibold)).foregroundStyle(.secondary)
+                Text(S.notDefined).font(.body.italic()).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var definitionsBody: some View {
         VStack(alignment: .leading, spacing: 10) {
             if resolution.isSuggestion {
                 Text(S.didYouMean(resolution.key ?? "", read: resolution.query))

@@ -25,6 +25,8 @@ public struct Resolution: Sendable {
     /// The preferred repo has no real definition: the first one shown comes from elsewhere.
     /// The tooltip must say so instead of presenting it as the local meaning.
     public var fromOtherRepo = false
+    /// A range of IDs (D41): the tooltip lists what it spans instead of showing definitions.
+    public var range: RangeList?
 
     /// D13: a short ID reached only through OCR correction is shown as "did you mean…?".
     public var isSuggestion: Bool { kind == .corrected && (key?.count ?? 0) < 4 }
@@ -80,6 +82,13 @@ public struct Resolver: Sendable {
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let fromPath = named == nil || named == preferredRepo ? fromPath : nil
         let preferredRepo = named ?? preferredRepo
+        if let list = rangeList(raw, preferredRepo: preferredRepo, fromPath: fromPath) {
+            let defs = list.entries.compactMap(\.definition)
+            var r = Resolution(query: raw.trimmingCharacters(in: CharacterSet.alphanumerics.inverted), kind: .exact,
+                               key: defs.first?.key, definitions: defs, mentions: nil, alternatives: [])
+            r.range = list
+            return r
+        }
         if CodeRefs.looksLikeAddress(raw) || CodeRefs.looksLikeCommand(raw),
            let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after) {
             return code
@@ -227,7 +236,7 @@ public struct Resolver: Sendable {
     /// Real definitions before weak ones; within each, the preferred repo first, then the
     /// folder nearest to `fromPath`. Weak definitions from other repos are dropped: a `## P1`
     /// section elsewhere says nothing about a `P1` here. `defs` is already ranked.
-    private func result(_ query: String, _ kind: Resolution.Kind, key: String, _ defs: [Definition],
+    func result(_ query: String, _ kind: Resolution.Kind, key: String, _ defs: [Definition],
                         _ repo: String?, _ fromPath: String?) -> Resolution {
         func isPreferred(_ d: Definition) -> Bool { repo.map { d.repo.caseInsensitiveCompare($0) == .orderedSame } ?? false }
         /// Depth of the definition's folder when it is the reader's folder or one of its parents.
