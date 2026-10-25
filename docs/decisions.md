@@ -130,6 +130,10 @@ The block also asks agents to write the IDs and glossary terms they mention to t
 inline code (`D23`, `golden path`): the style does not help OCR, but it shows the reader what can be
 looked up, and it is the style paths, commits and commands already have. Approved by Manu, 2026-10-24.
 
+Removed 2026-10-25 by Manu: holding the shortcut now underlines what can be looked up (D39), so the
+inline-code line no longer earns its place, and on screen the code box made lookups less reliable
+(D42 addendum 2). The block keeps its three sentences; repos that already carry the old line keep working.
+
 ## D22 — Glossary terms: which files, which formats
 Terms come from glossary files: any `.md` whose name contains `glossary`, `glosario`, `nomenclatura` or `terminolog`.
 Four formats: `- **term** — definition`, `**term**: definition`, `| **term** | definition |` and `### term` (a heading
