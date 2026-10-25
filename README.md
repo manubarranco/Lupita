@@ -99,7 +99,6 @@ Add this block at the end of this repo's agent instructions file (`AGENTS.md`, o
 Define each new decision, question, lesson or story once as `## ID — Title` plus a one-line summary.
 Add each new internal term to the glossary (`docs/glossary.md` if there is none) as `- **term** — definition`.
 Where this repo already has a format for these, keep it.
-When you mention one of these IDs or glossary terms to the user, write it as inline code (`D23`, `golden path`) so they can look it up.
 <!-- /lupita -->
 ```
 
