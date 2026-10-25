@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lupita highlight prototype</title>
+<style>
+:root {
+  --bg: #f5f4ef; --stage: #ebe9e2; --win: #fbfaf7; --line: #dedcd3;
+  --ink: #1f1f1d; --muted: #6b6a64; --disc: #ffffff;
+  --text: #2b2b28; --dim: #7a7870;           /* body text, and body text under "La mirada" */
+  --mark: color-mix(in srgb, var(--ink) 13%, transparent);
+  --code-bg: #f0eee7; --bubble: #f0eee7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #1b1b1a; --stage: #262624; --win: #1f1f1e; --line: #353532; --ink: #f0efe9; --muted: #9c9b92; --disc: #31312e;
+    --text: #d9d8d1; --dim: #8d8c84; --mark: color-mix(in srgb, var(--ink) 17%, transparent); --code-bg: #2a2a28; --bubble: #2a2a28; }
+}
+:root[data-theme="dark"] { --bg: #1b1b1a; --stage: #262624; --win: #1f1f1e; --line: #353532; --ink: #f0efe9; --muted: #9c9b92; --disc: #31312e;
+  --text: #d9d8d1; --dim: #8d8c84; --mark: color-mix(in srgb, var(--ink) 17%, transparent); --code-bg: #2a2a28; --bubble: #2a2a28; }
+
+* { box-sizing: border-box; }
+body { margin: 0; padding: 24px 16px 48px; background: var(--bg); color: var(--ink); font: 14px/1.5 -apple-system, system-ui, sans-serif; }
+main { max-width: 760px; margin: 0 auto; }
+h1 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 16px; font-size: 13px; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; font-size: 13px; color: var(--muted); }
+.bar .sp { flex: 1; }
+button { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--muted); border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+#hold { padding: 6px 18px; user-select: none; touch-action: none; }
+body.hold #hold { background: var(--ink); color: var(--bg); }
+kbd { font: 12px ui-monospace, Menlo, monospace; border: 1px solid var(--muted); border-bottom-width: 2px; border-radius: 5px; padding: 0 6px; color: var(--ink); }
+.extra { font-size: 11px; color: var(--muted); border: 1px solid var(--muted); border-radius: 6px; padding: 0 5px; margin-left: 4px; }
+
+/* ---------- the fake agent window ---------- */
+#stage { position: relative; background: var(--stage); border-radius: 12px; padding: 14px; overflow: hidden; cursor: default; touch-action: pan-y; }
+.win { background: var(--win); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.title { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.title i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+.title span { margin-left: 8px; }
+.chat { padding: 16px 20px 20px; color: var(--text); font-size: 14px; line-height: 1.65; }
+.msg { margin: 0 0 14px; }
+.who { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.me { background: var(--bubble); border-radius: 10px; padding: 8px 12px; }
+.chat ul { margin: 6px 0 0; padding-left: 20px; }
+code, pre { font: 12.5px/1.55 ui-monospace, Menlo, monospace; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0 4px; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 10px 12px; margin: 8px 0 0; overflow: hidden; }
+.chat, .chat code, .chat pre { transition: color .22s ease; }
+
+/* ---------- what Lupita knows: .k ---------- */
+.k { --i: 0; border-radius: 3px; background-repeat: no-repeat; background-image: linear-gradient(var(--ink), var(--ink));
+     background-size: 0 0; background-position: 0 calc(100% - 1px); padding-bottom: 1px;
+     transition: background-size .12s ease-in, color .2s ease, box-shadow .2s ease, background-color .2s ease; }
+body.hold .k { transition: background-size .34s cubic-bezier(.2,.7,.2,1) calc(min(var(--i), 18) * 24ms), color .25s ease, box-shadow .25s ease, background-color .25s ease; }
+
+/* 1 · Ink underline: a thin line in Lupita's ink. */
+body.hold[data-dir="ink"] .k { background-size: 100% 1.5px; }
+
+/* 2 · Marker: a soft fill behind the word. Text stays on top, untouched. */
+body[data-dir="marker"] .k { background-image: linear-gradient(var(--mark), var(--mark)); background-position: 0 50%; padding: 1px 3px; margin: 0 -3px; }
+body.hold[data-dir="marker"] .k { background-size: 100% 100%; }
+
+/* 3 · The gaze: everything else dims a little; known words are lit, as seen through the lens. */
+body.hold[data-dir="gaze"] .chat,
+body.hold[data-dir="gaze"] .chat code,
+body.hold[data-dir="gaze"] .chat pre,
+body.hold[data-dir="gaze"] .who { color: var(--dim); }
+body[data-dir="gaze"] .k { background-image: none; padding: 1px 3px; margin: 0 -3px; }
+body.hold[data-dir="gaze"] .k { color: var(--ink); background-color: var(--disc); box-shadow: 0 0 0 1px var(--line), 0 1px 6px color-mix(in srgb, var(--ink) 14%, transparent); }
+
+/* 4 (extra) · Near the lens: the underline is strongest around the pointer and fades with distance. */
+body[data-dir="near"] .k { background-image: linear-gradient(color-mix(in srgb, var(--ink) calc(var(--p, .3) * 100%), transparent), color-mix(in srgb, var(--ink) calc(var(--p, .3) * 100%), transparent)); }
+body.hold[data-dir="near"] .k { background-size: 100% 1.5px; }
+
+/* ---------- Lupita on the pointer (guide: scale .42, eyes only, no mouth) ---------- */
+#lens { position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0; transition: opacity .18s ease; }
+body.hold #lens.on { opacity: 1; }
+#lens .ring { fill: var(--disc); stroke: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .k, body.hold .k, #lens, .chat { transition: none !important; }
+}
+@media (max-width: 560px) { .chat { padding: 12px; font-size: 13px; } #stage { padding: 8px; } }
+</style>
+</head>
+<body data-dir="ink">
+<main>
+  <h1>Lupita · modo resalte</h1>
+  <p class="sub">Mantén <kbd>espacio</kbd> (o pulsa «Mantener») para simular ⌃⌥⌘. Suelta y el resalte se va.</p>
+
+  <div class="bar" role="group" aria-label="Dirección visual">
+    <span>Dirección:</span>
+    <button data-dir="ink" aria-pressed="true">1 · Subrayado de tinta</button>
+    <button data-dir="marker" aria-pressed="false">2 · Rotulador</button>
+    <button data-dir="gaze" aria-pressed="false">3 · La mirada</button>
+    <button data-dir="near" aria-pressed="false">4 · Cerca de la lupa<span class="extra">extra</span></button>
+  </div>
+
+  <div id="stage">
+    <div class="win">
+      <div class="title"><i></i><i></i><i></i><span>agent · lupita-site · feature/glossary</span></div>
+      <div class="chat" id="chat">
+        <div class="msg"><div class="who">You</div><div class="me">ok so are we good to merge the glossary work? D23 said no new deps</div></div>
+        <div class="msg"><div class="who">Agent</div>
+          Almost. Status vs the plan:
+          <ul>
+            <li>L04 done: glossary index now rebuilds on save, no new deps (per D23).</li>
+            <li>E2-S4 blocked on the flaky snapshot test; E2-S3 already green.</li>
+            <li>D14 still needs your call: do we ship the tooltip behind a flag or not?</li>
+          </ul>
+        </div>
+        <div class="msg"><div class="who">Agent</div>
+          Branch is 3 commits behind main, so I'll <code>git stash</code> the WIP, rebase onto main and see if it can fast-forward. If the rebase conflicts I'll fall back to a worktree and cherry-pick.
+          <pre>$ git stash push -m "wip glossary"
+$ git rebase main
+$ npm run test -- --glossary</pre>
+        </div>
+        <div class="msg"><div class="who">Agent</div>
+          Heads up: <code>debounceIndex()</code> is a bit of a yak-shave and the memoized selectors look janky on cold start. Per Q01 I'd defer it, but D006 says the upstream owner decides. Want me to open a hotfix or park it under L07?
+        </div>
+        <div class="msg"><div class="who">You</div><div class="me">park it, ship E2-S3 first and keep D23 as the rule</div></div>
+      </div>
+    </div>
+
+    <svg id="lens" width="64" height="64" viewBox="-42 -42 98 98" aria-hidden="true">
+      <g fill="none" stroke-linecap="round">
+        <circle r="38" stroke-width="14" fill="var(--disc)" stroke="var(--disc)"/>
+        <line x1="28" y1="28" x2="52" y2="52" stroke="var(--disc)" stroke-width="14"/>
+        <circle class="ring" r="38" stroke-width="8"/>
+        <line x1="28" y1="28" x2="52" y2="52" stroke="var(--ink)" stroke-width="8"/>
+        <rect id="eL" fill="var(--ink)" stroke="none"/><rect id="eR" fill="var(--ink)" stroke="none"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="bar">
+    <button id="hold" aria-pressed="false">Mantener</button>
+    <span id="state">suelto</span>
+    <span class="sp"></span>
+    <span>Tema:</span>
+    <button data-theme="auto" aria-pressed="true">Sistema</button>
+    <button data-theme="light" aria-pressed="false">Claro</button>
+    <button data-theme="dark" aria-pressed="false">Oscuro</button>
+  </div>
+</main>
+
+<script>
+// What Lupita can check cheaply (spike): indexed IDs and fixed vocabulary. No code symbols, commits or PRs.
+const ID = /\b(?:D\d{1,3}|L\d{2}|Q\d{2}|QL\d+|E\d-S\d)\b/g;
+const GLOSSARY = ['fast-forward', 'cherry-pick', 'worktree', 'upstream', 'hotfix', 'rebase', 'stash', 'memoized'];
+const WORD = new RegExp(ID.source + '|\\b(?:' + GLOSSARY.join('|') + ')\\b', 'gi');
+const chat = document.getElementById('chat');
+
+// Wrap known words in <span class="k"> (skipping code blocks of symbols, which Lupita does not mark here).
+const walker = document.createTreeWalker(chat, NodeFilter.SHOW_TEXT);
+const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+let n = 0;
+for (const node of nodes) {
+  const text = node.nodeValue; WORD.lastIndex = 0;
+  if (!WORD.test(text)) continue;
+  const frag = document.createDocumentFragment(); let last = 0; WORD.lastIndex = 0; let m;
+  while ((m = WORD.exec(text))) {
+    frag.append(text.slice(last, m.index));
+    const s = document.createElement('span'); s.className = 'k'; s.textContent = m[0]; s.style.setProperty('--i', n++);
+    frag.append(s); last = m.index + m[0].length;
+  }
+  frag.append(text.slice(last)); node.replaceWith(frag);
+}
+const known = [...chat.querySelectorAll('.k')];
+
+const stage = document.getElementById('stage'), lens = document.getElementById('lens');
+const eL = document.getElementById('eL'), eR = document.getElementById('eR'), state = document.getElementById('state'), holdBtn = document.getElementById('hold');
+let ptr = { x: 300, y: 200 }, pos = { x: 324, y: 222 }, look = { x: 0, y: 0 }, h = 22, blink = 0, blinkAt = 0, holding = false;
+
+stage.addEventListener('pointermove', e => { const r = stage.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; });
+stage.addEventListener('pointerenter', e => { const r = stage.getBoundingClientRect(); ptr = { x: e.clientX - r.left, y: e.clientY - r.top }; if (!holding) pos = { x: ptr.x + 24, y: ptr.y + 22 }; });
+
+function setHold(on) {
+  if (on === holding) return;
+  holding = on; document.body.classList.toggle('hold', on); lens.classList.toggle('on', on);
+  holdBtn.setAttribute('aria-pressed', on); state.textContent = on ? 'manteniendo · resalte activo' : 'suelto';
+  if (on) { pos = { x: ptr.x + 24, y: ptr.y + 22 }; updateNear(); } else blink = 1;
+}
+addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat && !/BUTTON|INPUT/.test(document.activeElement.tagName)) { e.preventDefault(); setHold(true); } });
+addEventListener('keyup', e => { if (e.code === 'Space') setHold(false); });
+holdBtn.addEventListener('pointerdown', e => { holdBtn.setPointerCapture(e.pointerId); setHold(true); });
+holdBtn.addEventListener('pointerup', () => setHold(false));
+holdBtn.addEventListener('pointercancel', () => setHold(false));
+holdBtn.addEventListener('keydown', e => { if (e.code === 'Space') e.preventDefault(); });
+addEventListener('blur', () => setHold(false));
+
+document.querySelectorAll('button[data-dir]').forEach(b => b.onclick = () => {
+  document.body.dataset.dir = b.dataset.dir;
+  document.querySelectorAll('button[data-dir]').forEach(x => x.setAttribute('aria-pressed', x === b));
+  setHold(false); known.forEach(k => k.style.removeProperty('--p'));
+});
+document.querySelectorAll('button[data-theme]').forEach(b => b.onclick = () => {
+  if (b.dataset.theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = b.dataset.theme;
+  document.querySelectorAll('button[data-theme]').forEach(x => x.setAttribute('aria-pressed', x === b));
+});
+
+// Direction 4: strength of each underline by distance from the lens.
+function updateNear() {
+  if (document.body.dataset.dir !== 'near') return;
+  const sr = stage.getBoundingClientRect();
+  for (const k of known) {
+    const r = k.getBoundingClientRect(), dx = r.left + r.width / 2 - sr.left - ptr.x, dy = r.top + r.height / 2 - sr.top - ptr.y;
+    k.style.setProperty('--p', Math.max(0.3, 1 - Math.hypot(dx, dy) / 300).toFixed(2));
+  }
+}
+
+const lerp = (a, b, k) => a + (b - a) * k;
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(t) {
+  if (!blinkAt) blinkAt = t + 2500;
+  if (holding) {
+    pos.x = lerp(pos.x, ptr.x + 24, RM ? 1 : 0.22); pos.y = lerp(pos.y, ptr.y + 22, RM ? 1 : 0.22);
+    updateNear();
+    if (t > blinkAt) { blink = 1; blinkAt = t + 2200 + Math.random() * 3000; }
+  }
+  // Eyes follow the pointer (up to 7 units), as in lens-behavior.md; a blink on release.
+  const dx = ptr.x - pos.x, dy = ptr.y - pos.y, d = Math.hypot(dx, dy) || 1;
+  look.x = lerp(look.x, dx / d * 7, 0.2); look.y = lerp(look.y, dy / d * 7, 0.2);
+  h = lerp(h, 20, 0.3);
+  const bk = blink > 0 ? Math.max(0.1, 1 - Math.sin(Math.min(blink, 1) * Math.PI)) : 1; if (blink > 0) blink = Math.max(0, blink - 1 / 9);
+  const eh = Math.max(2, h * bk);
+  for (const [el, cx] of [[eL, -9], [eR, 9]]) {
+    el.setAttribute('x', cx - 5 + look.x); el.setAttribute('y', -eh / 2 + look.y);
+    el.setAttribute('width', 10); el.setAttribute('height', eh); el.setAttribute('rx', Math.min(5, eh / 2));
+  }
+  lens.style.transform = `translate(${(pos.x - 27).toFixed(1)}px, ${(pos.y - 27).toFixed(1)}px)`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

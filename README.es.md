@@ -30,6 +30,8 @@ app: un chat con un agente, un editor, una terminal, el navegador.
    navegadores).
 3. **Aparece un tooltip** con el ID, su título, dos o tres líneas de la definición, el repo y
    el archivo, y cuántas veces se cita. Clic para abrir el archivo en esa línea; Esc lo cierra.
+4. **Mantén el atajo** para ver qué sabe Lupita: se subrayan las palabras de la ventana que
+   sabe explicar. Suelta sobre una para leerla.
 
 El índice se mantiene al día solo: un vigilante de archivos reindexa el repo que cambia, y un
 ID escrito hace unos segundos se encuentra igualmente.
@@ -125,7 +127,8 @@ Lupita pide dos permisos de macOS, y solo los usa cuando pulsas el atajo:
 
 - **Accesibilidad**: para el atajo y para leer el texto exacto bajo el ratón.
 - **Grabación de pantalla**: para leer con el OCR de Apple (Vision) una franja de
-  600 × 80 pt alrededor del ratón, en las apps que no exponen su texto.
+  600 × 80 pt alrededor del ratón, en las apps que no exponen su texto, y, mientras mantienes
+  el atajo, la ventana bajo el ratón, para subrayar lo que Lupita sabe explicar.
 
 Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de lo que
 consultas. La única excepción es **Buscar actualizaciones…** en el menú: pregunta a GitHub por la

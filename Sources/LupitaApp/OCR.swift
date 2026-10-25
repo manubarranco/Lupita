@@ -30,6 +30,58 @@ enum OCR {
         return try recognize(image, in: rect)
     }
 
+    /// What the highlight mode reads (D39): the whole window under the pointer.
+    struct WindowRead {
+        let words: [OCRWord]
+        /// The window in global top-left coordinates (what the words' boxes use).
+        let frame: CGRect
+        /// The window is mostly dark: the marks need light ink.
+        let isDark: Bool
+    }
+
+    /// The frontmost normal window under `point`, not ours, read whole with the same Vision settings.
+    static func window(at point: CGPoint) async throws -> WindowRead? {
+        guard CGPreflightScreenCaptureAccess() else { return nil }
+        let me = ProcessInfo.processInfo.processIdentifier
+        // CGWindowList is ordered front to back; ScreenCaptureKit's list is not.
+        let order = (CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]]) ?? []
+        guard let id = order.first(where: { info in
+            guard (info[kCGWindowLayer as String] as? Int) == 0, (info[kCGWindowOwnerPID as String] as? Int32) != me,
+                  (info[kCGWindowAlpha as String] as? Double ?? 1) > 0.05,
+                  let bounds = (info[kCGWindowBounds as String] as? NSDictionary).flatMap({ CGRect(dictionaryRepresentation: $0) })
+            else { return false }
+            return bounds.contains(point)
+        }).flatMap({ $0[kCGWindowNumber as String] as? CGWindowID }) else { return nil }
+        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        guard let window = content.windows.first(where: { $0.windowID == id }) else { return nil }
+
+        let filter = SCContentFilter(desktopIndependentWindow: window)
+        let config = SCStreamConfiguration()
+        let scale = CGFloat(filter.pointPixelScale)
+        config.width = Int(window.frame.width * scale)
+        config.height = Int(window.frame.height * scale)
+        config.showsCursor = false
+        let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
+        return WindowRead(words: try recognize(image, in: window.frame), frame: window.frame, isDark: isMostlyDark(image))
+    }
+
+    /// Average brightness of the image, from an 8×8 reduction.
+    static func isMostlyDark(_ image: CGImage) -> Bool {
+        var pixels = [UInt8](repeating: 0, count: 8 * 8 * 4)
+        let drawn = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let ctx = CGContext(data: buffer.baseAddress, width: 8, height: 8, bitsPerComponent: 8, bytesPerRow: 32,
+                                      space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+            else { return false }
+            ctx.interpolationQuality = .medium
+            ctx.draw(image, in: CGRect(x: 0, y: 0, width: 8, height: 8))
+            return true
+        }
+        guard drawn else { return false }
+        var sum = 0
+        for i in stride(from: 0, to: pixels.count, by: 4) { sum += Int(pixels[i]) * 3 + Int(pixels[i + 1]) * 6 + Int(pixels[i + 2]) }
+        return Double(sum) / 10 / 64 < 110
+    }
+
     static func recognize(_ image: CGImage, in rect: CGRect) throws -> [OCRWord] {
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate
