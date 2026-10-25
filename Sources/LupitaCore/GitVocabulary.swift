@@ -211,7 +211,8 @@ public enum GitVocabulary {
         Term(names: "CI",
              en: "Automatic checks when changes are uploaded.", es: "Las comprobaciones automáticas al subir cambios.",
              seenEn: "“CI is red”", seenEs: "«CI en rojo»",
-             aliases: [Alias(text: "CI", exact: true)]),
+             // Italic CI is read by the OCR as `C/` or `Cl`: only as a capital word on its own.
+             aliases: [Alias(text: "CI", exact: true), Alias(text: "C/", exact: true), Alias(text: "Cl", exact: true)]),
     ]
 
     // MARK: Lookup tables

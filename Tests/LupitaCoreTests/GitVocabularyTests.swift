@@ -90,7 +90,7 @@ import Testing
             #expect(d.rule == .vocabulary, "\(sentence) → \(d.rule)")
             #expect(d.id == GitVocabulary.terms[n].names, "\(sentence) → \(d.id)")
             #expect(d.title == GitVocabulary.terms[n].es)
-            #expect(d.summary.hasPrefix("Lo verás en: "))
+            #expect(d.summary.hasPrefix("Ejemplo: "))
         }
     }
 
@@ -99,7 +99,7 @@ import Testing
         S.language = "en"
         let again = try #require(Self.resolver().resolveGit("rebase", block: "rebase"))
         #expect(again.definitions[0].title == "Move your commits on top of another branch's latest.")
-        #expect(again.definitions[0].summary == "You'll see it in: “rebase onto main”")
+        #expect(again.definitions[0].summary == "Example: “rebase onto main”")
         #expect(r.definitions[0].rule == .vocabulary)
         S.language = "es"
     }
@@ -207,5 +207,25 @@ import Testing
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("push the button"), resolver: resolver).isEmpty)
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("hay que rebasear y hacer un force push"), resolver: resolver).count == 2)
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("un fast-forward merge limpio"), resolver: resolver).count == 1)
+    }
+
+    // Round 2: Manu found CI not underlined; italic CI is read as `C/` or `Cl` by the OCR.
+    @Test func ciReadByTheOCRAsCSlashOrCl() throws {
+        for reading in ["CI", "C/", "Cl"] {
+            let r = try #require(Self.pick("el ⟦\(reading)⟧ está en rojo"), "\(reading)")
+            #expect(r.definitions.first?.id == "CI", "\(reading)")
+            let marks = HighlightPicker.marks(words: HighlightPickerTests.row("el \(reading) está en rojo"), resolver: Self.resolver())
+            #expect(marks.count == 1, "mark for \(reading)")
+        }
+        // Lower case or inside another word is not CI.
+        #expect(!Self.explains(Self.pick("el ⟦cl⟧ está en rojo")))
+        #expect(!Self.explains(Self.pick("el ⟦Clave⟧ está en rojo")))
+    }
+
+    @Test func prIsNotLeftOutByTheHighlight() {
+        S.language = "es"
+        GitVocabulary.isEnabled = true
+        #expect(HighlightPicker.marks(words: HighlightPickerTests.row("abro PR hoy"), resolver: Self.resolver()).count == 1)
+        #expect(HighlightPicker.marks(words: HighlightPickerTests.row("abro (PR) hoy"), resolver: Self.resolver()).count == 1)
     }
 }

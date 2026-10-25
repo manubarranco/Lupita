@@ -104,7 +104,7 @@ public enum S {
     public static var kindTerminal: String { t("terminal command", "comando de terminal") }
     public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
     public static var kindGit: String { "git" }
-    public static func seenIn(_ example: String) -> String { t("You'll see it in: \(example)", "Lo verás en: \(example)") }
+    public static func seenIn(_ example: String) -> String { t("Example: \(example)", "Ejemplo: \(example)") }
     public static var kindError: String { t("error", "error") }
     public static var kindTag: String { t("HTML tag", "etiqueta HTML") }
     public static var kindPullRequest: String { t("pull request", "pull request") }
