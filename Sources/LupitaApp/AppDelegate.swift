@@ -10,6 +10,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var trigger: Trigger?
     var onboarding: OnboardingWindow?
     private var inFlight = false
+    let highlight = HighlightOverlay()
+    /// Held this long, ⌃⌥⌘ is no longer a quick press: it shows what Lupita knows (D39).
+    private static let holdThreshold: Duration = .milliseconds(350)
+    private var holdTask: Task<Void, Never>?
+    private var holdGeneration = 0
+    /// The current hold went past the threshold: releasing it only hides the marks, it does not look up.
+    private var longHold = false
+    private var scrollMonitors: [Any] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         IndexStore.migrateLegacyRoots()
@@ -26,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
+            let hold = (note.userInfo?["hold"] as? String).flatMap(Double.init)
             let openOnboarding = note.userInfo?["onboarding"] != nil
             let openAbout = note.userInfo?["about"] != nil
             let menuMode = note.userInfo?["menu"] as? String
@@ -40,6 +49,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
                 } else if openOnboarding {
                     self?.onboarding?.show()
+                } else if let hold {
+                    self?.holdChanged(true)
+                    Task { try? await Task.sleep(for: .seconds(hold)); self?.holdChanged(false); self?.longHold = false }
                 } else if let lens {
                     self?.lens.begin()
                     Task { try? await Task.sleep(for: .seconds(lens)); self?.lens.end() }
@@ -62,7 +74,60 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         lens.end()
         trigger = makeTrigger(HotkeyChoice.current, hold: { [weak self] down in
             if down { self?.lens.begin() } else { self?.lens.end() }
-        }) { [weak self] in self?.lookUp() }
+            self?.holdChanged(down)
+        }) { [weak self] in
+            // Released after a long hold: the marks were the answer.
+            if self?.longHold == true { self?.longHold = false; return }
+            self?.lookUp()
+        }
+    }
+
+    // MARK: Highlight mode (D39)
+
+    private func holdChanged(_ down: Bool) {
+        holdGeneration += 1
+        holdTask?.cancel()
+        holdTask = nil
+        if down {
+            longHold = false
+            let generation = holdGeneration
+            holdTask = Task { [weak self] in
+                try? await Task.sleep(for: Self.holdThreshold)
+                guard !Task.isCancelled, let self, generation == holdGeneration else { return }
+                longHold = true
+                showHighlight(generation)
+            }
+        } else {
+            stopHighlight()
+        }
+    }
+
+    private func showHighlight(_ generation: Int) {
+        guard let resolver = store.resolver, !inFlight else { return }
+        let point = Screen.topLeft(NSEvent.mouseLocation)
+        Task { [weak self] in
+            let read = try? await OCR.window(at: point)
+            guard let self, generation == holdGeneration, let read else { return }
+            let marks = HighlightPicker.marks(words: read.words, resolver: resolver)
+            highlight.show(marks, isDark: read.isDark)
+            watchForChanges()
+        }
+    }
+
+    private func stopHighlight() {
+        scrollMonitors.forEach(NSEvent.removeMonitor)
+        scrollMonitors = []
+        NSWorkspace.shared.notificationCenter.removeObserver(self, name: NSWorkspace.didActivateApplicationNotification, object: nil)
+        highlight.hide()
+    }
+
+    /// Scrolling or switching app moves the text from under the marks: they go away without a fade, and
+    /// stay away until the shortcut is pressed again.
+    private func watchForChanges() {
+        let gone: () -> Void = { [weak self] in MainActor.assumeIsolated { self?.highlight.hide(animated: false) } }
+        scrollMonitors.append(NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel) { _ in gone() } as Any)
+        scrollMonitors.append(NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { gone(); return $0 } as Any)
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { _ in gone() }
     }
 
     /// Hotkey pressed: read the text under the cursor, resolve it, show the tooltip.
