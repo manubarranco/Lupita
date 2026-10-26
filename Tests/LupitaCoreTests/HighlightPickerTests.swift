@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 @testable import LupitaCore
 
@@ -43,6 +44,20 @@ import Testing
         let r = Resolver(index: index)
         #expect(HighlightPicker.classified(words: Self.row("see LioS and app"), resolver: r).map(\.kind) == [.id, .id])
         #expect(HighlightPicker.marks(words: Self.row("the App and APP"), resolver: r).isEmpty)
+    }
+
+    /// D49: a file or folder that exists in a repo is underlined like an ID; one that does not, is not.
+    @Test func existingFilesAreMarked() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-hl-\(UUID().uuidString)/atlas")
+        try FileManager.default.createDirectory(at: root.appendingPathComponent("docs"), withIntermediateDirectories: true)
+        try "# D\n".write(to: root.appendingPathComponent("docs/decisions.md"), atomically: true, encoding: .utf8)
+        try "# C\n".write(to: root.appendingPathComponent("CLAUDE.md"), atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: root.deletingLastPathComponent()) }
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: root.path)]
+        let r = Resolver(index: index)
+        let marks = HighlightPicker.classified(words: Self.row("see docs/decisions.md, CLAUDE.md:3 and docs/nope.md y/o"), resolver: r)
+        #expect(marks.map(\.kind) == [.id, .id])
     }
 
     /// The tooltip takes the code font as a hint too: a bare `401` in inline code is a status, as it is underlined.

@@ -191,9 +191,10 @@ enum TooltipGallery {
         try? "- **saldo inicial** — lo que hay al abrir\n".write(to: repo.appendingPathComponent("glossary.md"), atomically: true, encoding: .utf8)
         let index = RefIndex.build(roots: [repo.deletingLastPathComponent().path])
         let resolver = Resolver(index: index)
-        let w: CGFloat = 560, h: CGFloat = 126, scale: CGFloat = 2
+        let w: CGFloat = 560, h: CGFloat = 162, scale: CGFloat = 2
         let lines = ["Según D023 y Q07, el saldo inicial no cambia.", "Haz un rebase y luego un force push a main.",
-                     "En atlas, el <dialog> devuelve HTTP 401 y ENOENT."]
+                     "En atlas, el <dialog> devuelve HTTP 401 y ENOENT.",
+                     "Lee decisions.md y glossary.md:2, no notes.md."]
         var tiles: [NSImage] = []
         for dark in [false, true] {
             let drawing = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in

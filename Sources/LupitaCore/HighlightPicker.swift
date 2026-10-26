@@ -2,8 +2,9 @@ import CoreGraphics
 import Foundation
 
 /// Which OCR words Lupita could explain, for the highlight mode (D39). Only what is cheap to check:
-/// indexed IDs, glossary terms and the fixed dictionaries (git/shell commands, error names). Never
-/// symbols, commits, branches, files or PRs: they cost a search in the repos for every word.
+/// indexed IDs, glossary terms and the fixed dictionaries (git/shell commands, error names), repo names
+/// (D48) and files that exist in a repo (D49, a check on disk). Never symbols, commits, branches or PRs:
+/// they cost a search in the repos for every word.
 public enum HighlightPicker {
     /// A box per known word or phrase, in the same coordinates as the words. Phrases of 2 to 4 words
     /// (`fast-forward merge`, `git stash`) give one box.
@@ -115,6 +116,8 @@ public enum HighlightPicker {
         if word.count >= 3, resolver.index.repos.contains(where: { repo in
             repo.name.allSatisfy(\.isLowercase) ? repo.name == word : repo.name.caseInsensitiveCompare(word) == .orderedSame
         }) { return .id }
+        // A file or folder of a repo (`docs/decisions.md`, `CLAUDE.md:12`): also a place. Checked on disk only (D49).
+        if RepoRefs.isFile(word, repos: resolver.index.repos) { return .id }
         if resolver.resolveTerm(word) != nil { return .term }
         // Error names, HTML tags (`<dialog>`) and HTTP statuses with their hint: fixed tables, as cheap as a term.
         let code = CodeRefs.Text(text: word, codeMarked: marked, before: before)

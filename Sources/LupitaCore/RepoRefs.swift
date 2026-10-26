@@ -166,8 +166,24 @@ public enum RepoRefs {
         return (ns.substring(to: m.range.location), digits.flatMap { Int($0) })
     }
 
-    static func files(_ raw: String, line: Int?, repos: [Repo]) -> [Definition] {
-        let fm = FileManager.default
+    /// Whether `raw` names a file or folder in one of `repos`: the same paths `files` tries, checked on disk
+    /// only, with no git and no reading (D49: cheap enough for the highlight).
+    public static func isFile(_ raw: String, repos: [Repo]) -> Bool {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
+        while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
+        text = text.trimmingCharacters(in: wrappers)
+        guard text.count >= 2, text.count <= 300 else { return false }
+        let (path, _) = splitLine(text)
+        guard path.contains("/") || fileExtensions.contains((path as NSString).pathExtension.lowercased()) else { return false }
+        return candidates(path, repos: repos).contains { repo, relative in
+            let relative = relative.hasSuffix("/") ? String(relative.dropLast()) : relative
+            return !relative.isEmpty && FileManager.default.fileExists(atPath: (repo.path as NSString).appendingPathComponent(relative))
+        }
+    }
+
+    /// The repo-relative paths `raw` could be: inside the repo an absolute path points into, or in every repo,
+    /// the one it names first (`harbor/CLAUDE.md`).
+    static func candidates(_ raw: String, repos: [Repo]) -> [(Repo, String)] {
         var path = raw.hasPrefix("./") ? String(raw.dropFirst(2)) : raw
         path = (path as NSString).expandingTildeInPath
         var candidates: [(Repo, String)] = []
@@ -177,14 +193,18 @@ public enum RepoRefs {
                 candidates.append((repo, String(real.dropFirst(RepoDiscovery.realPath(repo.path).count + 1))))
             }
         } else {
-            // `harbor/CLAUDE.md` names its repo: that one first.
             for repo in repos where path.lowercased().hasPrefix(repo.name.lowercased() + "/") {
                 candidates.append((repo, String(path.dropFirst(repo.name.count + 1))))
             }
             candidates += repos.map { ($0, path) }
         }
+        return candidates
+    }
+
+    static func files(_ raw: String, line: Int?, repos: [Repo]) -> [Definition] {
+        let fm = FileManager.default
         var seen = Set<String>()
-        return candidates.compactMap { repo, relative -> Definition? in
+        return candidates(raw, repos: repos).compactMap { repo, relative -> Definition? in
             let relative = relative.hasSuffix("/") ? String(relative.dropLast()) : relative
             guard !relative.isEmpty else { return nil }
             let absolute = (repo.path as NSString).appendingPathComponent(relative)
