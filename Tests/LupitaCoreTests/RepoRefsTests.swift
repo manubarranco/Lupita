@@ -93,7 +93,8 @@ import Testing
 
     @Test func commitShowsSubjectAndWhereItIs() throws {
         try #require(Git.executable != nil)
-        let sha = try #require(git("rev-parse", "--short=8", "main~1")?.trimmingCharacters(in: .whitespacesAndNewlines))
+        // The full SHA: a short one is all digits now and then (~2 %) and then is not a commit.
+        let sha = try #require(git("rev-parse", "main~1")?.trimmingCharacters(in: .whitespacesAndNewlines))
         let d = resolve(sha)?.definitions.first
         #expect(d?.rule == .commit)
         #expect(d?.title == "docs: first decisions")
