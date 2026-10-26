@@ -99,7 +99,7 @@ import Testing
         let r = try #require(Self.pick("⟦rebasea⟧ sobre main"))
         S.language = "en"
         let again = try #require(Self.resolver().resolveGit("rebase", block: "rebase"))
-        #expect(again.definitions[0].title == "Move your commits on top of another branch's latest.")
+        #expect(again.definitions[0].title == "Redo your work on top of the latest main version, as if you had started now.")
         #expect(again.definitions[0].summary == "Example: “rebase onto main”")
         #expect(r.definitions[0].rule == .vocabulary)
         S.language = "es"
