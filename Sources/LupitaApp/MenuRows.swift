@@ -101,8 +101,8 @@ final class MenuRow: NSView {
         if missing {
             toggle.isHidden = true
             let button = Self.iconButton("exclamationmark.triangle.fill", description: S.findFolder)
-            button.symbolConfiguration = .init(pointSize: 13, weight: .medium)
-            button.contentTintColor = .systemOrange
+            button.symbolConfiguration = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
+                .applying(.init(paletteColors: [.white, .systemOrange]))
             button.target = self
             button.action = #selector(findClicked)
             button.toolTip = S.folderMissing
@@ -202,20 +202,18 @@ final class PillSwitch: NSControl {
 
     override func draw(_ dirtyRect: NSRect) {
         let track = NSBezierPath(roundedRect: bounds, xRadius: bounds.height / 2, yRadius: bounds.height / 2)
-        (isOn ? NSColor.controlAccentColor : NSColor.labelColor.withAlphaComponent(0.18)).setFill()
+        (isMixed ? NSColor.controlAccentColor.withAlphaComponent(0.4)
+            : isOn ? NSColor.controlAccentColor : NSColor.labelColor.withAlphaComponent(0.18)).setFill()
         track.fill()
-        if isMixed {
-            // Half the track in the accent: some on, some off.
-            NSGraphicsContext.saveGraphicsState()
-            track.addClip()
-            NSColor.controlAccentColor.setFill()
-            NSRect(x: 0, y: 0, width: bounds.width / 2, height: bounds.height).fill()
-            NSGraphicsContext.restoreGraphicsState()
-        }
         let d = bounds.height - 4
         let x = isMixed ? (bounds.width - d) / 2 : isOn ? bounds.width - d - 2 : 2
         NSColor.white.setFill()
         NSBezierPath(ovalIn: NSRect(x: x, y: 2, width: d, height: d)).fill()
+        if isMixed {
+            // The dash of a mixed checkbox, in the knob: some on, some off.
+            NSColor.controlAccentColor.setFill()
+            NSBezierPath(roundedRect: NSRect(x: x + d * 0.25, y: 2 + d / 2 - 1, width: d * 0.5, height: 2), xRadius: 1, yRadius: 1).fill()
+        }
         if !isEnabled {
             NSColor.windowBackgroundColor.withAlphaComponent(0.5).setFill()
             track.fill()
@@ -227,5 +225,50 @@ final class PillSwitch: NSControl {
         // Mixed turns everything on, as a mixed checkbox does.
         if isMixed { isMixed = false; isOn = true } else { isOn.toggle() }
         sendAction(action, to: target)
+    }
+}
+
+/// A menu command drawn as a row, so its symbol can sit on the right in the column of the folders' ⊖
+/// (a plain item only takes an image on the left). Highlights like a menu item and closes the menu on click.
+@MainActor
+final class MenuActionRow: NSView {
+    private let label = NSTextField(labelWithString: "")
+    private let icon = NSImageView()
+    private let indent: CGFloat
+    var onClick: (() -> Void)?
+
+    init(title: String, symbol: String, indent: CGFloat = 0) {
+        self.indent = indent
+        super.init(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 24))
+        label.stringValue = title
+        label.font = .menuFont(ofSize: 0)
+        icon.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+        icon.symbolConfiguration = .init(pointSize: 11, weight: .medium)
+        addSubview(label)
+        addSubview(icon)
+        setAccessibilityRole(.menuItem)
+        setAccessibilityLabel(title)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private var highlighted: Bool { enclosingMenuItem?.isHighlighted ?? false }
+
+    override func draw(_ dirtyRect: NSRect) {
+        if highlighted {
+            NSColor.selectedContentBackgroundColor.setFill()
+            NSBezierPath(roundedRect: bounds.insetBy(dx: 5, dy: 0), xRadius: 5, yRadius: 5).fill()
+        }
+        label.textColor = highlighted ? .selectedMenuItemTextColor : .labelColor
+        icon.contentTintColor = highlighted ? .selectedMenuItemTextColor : .secondaryLabelColor
+    }
+
+    override func mouseUp(with event: NSEvent) { onClick?() }
+
+    override func layout() {
+        super.layout()
+        let inset = MenuRow.inset, h = bounds.height, slot: CGFloat = 16
+        icon.frame = NSRect(x: bounds.width - inset - slot, y: (h - slot) / 2, width: slot, height: slot)
+        label.frame = NSRect(x: inset + indent, y: (h - 17) / 2, width: icon.frame.minX - inset - indent - 8, height: 17)
     }
 }

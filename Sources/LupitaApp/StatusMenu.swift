@@ -130,9 +130,10 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         let noteItem = viewItem(note)
         menu.addItem(noteItem)
         self.noteItem = noteItem
-        let add = action(S.addFolder, #selector(addRoot))
-        add.image = NSImage(systemSymbolName: "plus.circle", accessibilityDescription: nil)
-        menu.addItem(add)
+        // ⊕ on the right, in the column of the folders' ⊖.
+        let add = MenuActionRow(title: S.addFolder, symbol: "plus.circle", indent: Self.chevronSpace)
+        add.onClick = { [weak self] in self?.closeMenu(then: { self?.addRoot() }) }
+        menu.addItem(viewItem(add))
         menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
         menu.addItem(action(S.reindex, #selector(reindex)))
         // Hidden: only there when ⌥ is held as the menu opens (D40).
@@ -372,7 +373,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     /// A missing permission, in orange so it stands out: without it Lupita cannot read the screen.
     private func permissionItem(_ name: String, pane: Permissions.Pane) -> NSMenuItem {
         let item = action(S.grant(name), #selector(openPane(_:)), represented: pane.rawValue)
-        let config = NSImage.SymbolConfiguration(paletteColors: [.systemOrange])
+        // White mark on an orange triangle, as on a moved folder's row.
+        let config = NSImage.SymbolConfiguration(paletteColors: [.white, .systemOrange])
         item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
             .withSymbolConfiguration(config)
         return item
