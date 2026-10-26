@@ -96,7 +96,7 @@ public struct Resolver: Sendable {
             return r
         }
         if CodeRefs.looksLikeAddress(raw) || CodeRefs.looksLikeCommand(raw),
-           let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after) {
+           let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after, codeStyled: codeStyled) {
             return code
         }
         // Commits, branches, files and commands never look like IDs: no OCR correction for them.
@@ -109,7 +109,7 @@ public struct Resolver: Sendable {
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
-        if let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after) {
+        if let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after, codeStyled: codeStyled) {
             return code
         }
         // A glossary term (D22) comes after IDs, repo references and code. For text that is not shaped

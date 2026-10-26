@@ -110,8 +110,11 @@ public enum HighlightPicker {
         guard word.count >= 2 else { return nil }
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return .id }
         if resolver.rangeList(word) != nil { return .id }
-        // A repo name points at a place, like an ID. Exact case only: a repo called `app` must not mark every «app».
-        if word.count >= 3, resolver.index.repos.contains(where: { $0.name == word }) { return .id }
+        // A repo name points at a place, like an ID. A plain lowercase name (`app`, `nib`) needs its exact case, so
+        // it does not mark every «app»; any other (`LiOS`, `vector-ui-studio`) any case, as OCR reads `LiOS` as `LioS`.
+        if word.count >= 3, resolver.index.repos.contains(where: { repo in
+            repo.name.allSatisfy(\.isLowercase) ? repo.name == word : repo.name.caseInsensitiveCompare(word) == .orderedSame
+        }) { return .id }
         if resolver.resolveTerm(word) != nil { return .term }
         // Error names, HTML tags (`<dialog>`) and HTTP statuses with their hint: fixed tables, as cheap as a term.
         let code = CodeRefs.Text(text: word, codeMarked: marked, before: before)

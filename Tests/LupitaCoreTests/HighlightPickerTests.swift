@@ -35,6 +35,23 @@ import Testing
         #expect(HighlightPicker.marks(words: Self.row("chapter 401 of Atlas, a <notatag> here"), resolver: r).isEmpty)
     }
 
+    /// OCR reads `LiOS` in a code font as `LioS`; the tooltip finds it, so the underline must too. A plain
+    /// lowercase name keeps its exact case.
+    @Test func mixedCaseRepoNamesMatchAnyCase() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "LiOS", path: "/x/LiOS"), Repo(name: "app", path: "/x/app")]
+        let r = Resolver(index: index)
+        #expect(HighlightPicker.classified(words: Self.row("see LioS and app"), resolver: r).map(\.kind) == [.id, .id])
+        #expect(HighlightPicker.marks(words: Self.row("the App and APP"), resolver: r).isEmpty)
+    }
+
+    /// The tooltip takes the code font as a hint too: a bare `401` in inline code is a status, as it is underlined.
+    @Test func aCodeStyledStatusResolvesLikeItIsUnderlined() {
+        let r = Self.resolver()
+        #expect(r.resolve("401", codeStyled: true).definitions.first?.rule == .error)
+        #expect(r.resolve("401").definitions.first?.rule != .error)
+    }
+
     @Test func ignoresWhatIsNotKnown() {
         let marks = HighlightPicker.marks(words: Self.row("the yak-shave of D999 and debounceIndex()"), resolver: Self.resolver())
         #expect(marks.isEmpty)

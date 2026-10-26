@@ -22,9 +22,10 @@ public enum CodeRefs {
     static let trailing = CharacterSet(charactersIn: ".,;:!?…")
 
     /// The code reference `raw` names, or nil. `before` / `after` are the text around it on its line.
+    /// `codeStyled`: OCR saw it in a code font or box, the same signal the highlight uses.
     public static func resolve(_ raw: String, repos: [Repo], preferredRepo: String?,
-                               before: String? = nil, after: String? = nil) -> Resolution? {
-        guard var text = normalize(raw, before: before ?? "", after: after ?? "") else { return nil }
+                               before: String? = nil, after: String? = nil, codeStyled: Bool = false) -> Resolution? {
+        guard var text = normalize(raw, before: before ?? "", after: after ?? "", codeStyled: codeStyled) else { return nil }
         // `PR #999` with the pointer on `#999`: the word before says it is a PR, not the colour #999999.
         if matches(numberOnly, text.text), matches(prWord, text.before) {
             text = Text(text: "PR " + text.text, codeMarked: text.codeMarked, before: text.before)
@@ -64,9 +65,9 @@ public enum CodeRefs {
         return CodeDictionaries.managers.contains(first) || (first == "git" && TermPackages.isOn(.git))
     }
 
-    static func normalize(_ raw: String, before: String, after: String) -> Text? {
+    static func normalize(_ raw: String, before: String, after: String, codeStyled: Bool = false) -> Text? {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        var marked = text.contains("`") || before.hasSuffix("`") || after.hasPrefix("`")
+        var marked = codeStyled || text.contains("`") || before.hasSuffix("`") || after.hasPrefix("`")
         text = text.trimmingCharacters(in: wrappers)
         while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
         text = text.trimmingCharacters(in: wrappers)
