@@ -187,7 +187,7 @@ public enum S {
 
     // MARK: Onboarding (D21, D24)
     public static var prepareRepos: String { t("Prepare your repos…", "Prepara tus repos…") }
-    public static var onboardingTitle: String { t("Prepare your repos", "Prepara tus repos") }
+    public static var onboardingTitle: String { t("Prepare your repos (optional)", "Prepara tus repos (opcional)") }
     public static func onboardingIntro(percent: Int?) -> String {
         let p = percent.map { "\($0) %" }
         let en = p.map { "Lupita already explains \($0) of what your agents cite. With this rule, also what they create from now on, and their internal vocabulary." }
