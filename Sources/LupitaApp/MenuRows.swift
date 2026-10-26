@@ -186,7 +186,7 @@ final class MenuRow: NSView {
 final class PillSwitch: NSControl {
     static let size = NSSize(width: 30, height: 18)
     var isOn = false { didSet { needsDisplay = true } }
-    /// Some of what it controls is on and some off: knob in the middle, track half tinted.
+    /// Some of what it controls is on and some off: knob on the right with a dash, track softer.
     var isMixed = false { didSet { needsDisplay = true } }
     override var isEnabled: Bool { didSet { needsDisplay = true } }
 
@@ -202,11 +202,13 @@ final class PillSwitch: NSControl {
 
     override func draw(_ dirtyRect: NSRect) {
         let track = NSBezierPath(roundedRect: bounds, xRadius: bounds.height / 2, yRadius: bounds.height / 2)
-        (isMixed ? NSColor.controlAccentColor.withAlphaComponent(0.4)
+        let dark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+        (isMixed ? NSColor.controlAccentColor.withAlphaComponent(dark ? 0.7 : 0.55)
             : isOn ? NSColor.controlAccentColor : NSColor.labelColor.withAlphaComponent(0.18)).setFill()
         track.fill()
         let d = bounds.height - 4
-        let x = isMixed ? (bounds.width - d) / 2 : isOn ? bounds.width - d - 2 : 2
+        // Mixed keeps the knob on the right, as on: the dash and the softer track say «not all».
+        let x = isOn || isMixed ? bounds.width - d - 2 : 2
         NSColor.white.setFill()
         NSBezierPath(ovalIn: NSRect(x: x, y: 2, width: d, height: d)).fill()
         if isMixed {
