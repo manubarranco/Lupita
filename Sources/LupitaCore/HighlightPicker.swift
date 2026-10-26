@@ -25,6 +25,17 @@ public enum HighlightPicker {
         return marks
     }
 
+    /// Below this brightness (0...1) a background takes light ink. Same line as the whole-window guess.
+    public static let darkBelow = 110.0 / 255
+
+    /// Whether the background under a mark is dark: the median brightness behind the words it covers.
+    /// `nil` when none of them was measured, so the caller falls back to the whole window.
+    public static func isDark(behind mark: CGRect, words: [OCRWord]) -> Bool? {
+        let values = words.filter { $0.box.intersects(mark) }.compactMap(\.background).sorted()
+        guard !values.isEmpty else { return nil }
+        return values[values.count / 2] < darkBelow
+    }
+
     static let trailing = CharacterSet(charactersIn: ".,;:!?…)]}\"'`*")
     static let leading = CharacterSet(charactersIn: "([{\"'`*")
 

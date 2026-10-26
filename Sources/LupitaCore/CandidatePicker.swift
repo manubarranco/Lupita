@@ -7,11 +7,15 @@ public struct OCRWord: Sendable, Equatable {
     public let box: CGRect
     /// Drawn on an inline-code box (see `CodeBox`): counts as if it carried backticks (D42).
     public let codeStyled: Bool
+    /// Commonest brightness (0...1) behind the word, when the pixels were measured: picks the
+    /// highlight's ink word by word, so a dark editor next to a light sidebar gets both right.
+    public let background: Double?
 
-    public init(text: String, box: CGRect, codeStyled: Bool = false) {
+    public init(text: String, box: CGRect, codeStyled: Bool = false, background: Double? = nil) {
         self.text = text
         self.box = box
         self.codeStyled = codeStyled
+        self.background = background
     }
 }
 

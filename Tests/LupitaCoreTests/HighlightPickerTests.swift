@@ -63,4 +63,15 @@ import Testing
         let atTerm = CandidatePicker.pick(words: words, cursor: CGPoint(x: 80, y: 87), resolver: Self.resolver())
         #expect(atTerm?.definitions.isEmpty == false)
     }
+
+    // Ink per mark: a dark editor next to a light sidebar in one window.
+    @Test func inkFollowsTheBackgroundUnderEachMark() {
+        let light = OCRWord(text: "D023", box: CGRect(x: 0, y: 0, width: 40, height: 14), background: 0.95)
+        let dark = OCRWord(text: "D023", box: CGRect(x: 300, y: 0, width: 40, height: 14), background: 0.12)
+        let words = [light, dark]
+        #expect(HighlightPicker.isDark(behind: light.box, words: words) == false)
+        #expect(HighlightPicker.isDark(behind: dark.box, words: words) == true)
+        // Nothing measured: the caller falls back to the whole window.
+        #expect(HighlightPicker.isDark(behind: CGRect(x: 600, y: 0, width: 40, height: 14), words: words) == nil)
+    }
 }

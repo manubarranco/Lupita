@@ -113,12 +113,13 @@ enum OCR {
                 let global = CGRect(x: rect.minX + box.minX * rect.width,
                                     y: rect.minY + (1 - box.maxY) * rect.height,
                                     width: box.width * rect.width, height: box.height * rect.height)
-                let styled = drawn && pixels.withUnsafeBufferPointer { buffer in
-                    CodeBox.isCodeStyled(pixels: buffer, width: width, height: height, box: CGRect(
+                let measure = drawn ? pixels.withUnsafeBufferPointer { buffer in
+                    CodeBox.measure(pixels: buffer, width: width, height: height, box: CGRect(
                         x: box.minX * CGFloat(width), y: (1 - box.maxY) * CGFloat(height),
                         width: box.width * CGFloat(width), height: box.height * CGFloat(height)))
-                }
-                words.append(OCRWord(text: String(word), box: global, codeStyled: styled))
+                } : nil
+                words.append(OCRWord(text: String(word), box: global, codeStyled: measure.map(CodeBox.isCodeStyled) ?? false,
+                                     background: measure?.behind))
             }
         }
         return words

@@ -13,8 +13,10 @@ public enum CodeBox {
     /// has its box behind the word and the window's background around it.
     public static func isCodeStyled(pixels: UnsafeBufferPointer<UInt8>, width: Int, height: Int, box: CGRect) -> Bool {
         guard let m = measure(pixels: pixels, width: width, height: height, box: box) else { return false }
-        return abs(m.behind - m.around) >= threshold
+        return isCodeStyled(m)
     }
+
+    public static func isCodeStyled(_ m: Measure) -> Bool { abs(m.behind - m.around) >= threshold }
 
     /// Brightness difference (0...1) between the inside of the box and the line's surroundings that counts as a box.
     public static let threshold = 0.02

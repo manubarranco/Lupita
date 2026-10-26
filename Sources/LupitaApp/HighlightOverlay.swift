@@ -21,64 +21,75 @@ enum HighlightStyle {
     }
 }
 
-/// Underlines what Lupita knows while ⌃⌥⌘ is held. A click-through panel over the window's screen; the
-/// lines draw from left to right and disappear when the shortcut is released.
+/// Underlines what Lupita knows while ⌃⌥⌘ is held. A click-through panel per screen (macOS draws a
+/// window on one display only when each has its own Spaces, the default); the lines draw from left
+/// to right and disappear when the shortcut is released.
 @MainActor
 final class HighlightOverlay {
-    private var panel: NSPanel?
+    private var panels: [NSPanel] = []
 
-    var isShowing: Bool { panel != nil }
+    var isShowing: Bool { !panels.isEmpty }
 
     /// - Parameters:
-    ///   - marks: boxes in global top-left coordinates.
-    func show(_ marks: [CGRect], isDark: Bool) {
+    ///   - marks: boxes in global top-left coordinates, each with whether its background is dark.
+    func show(_ marks: [(box: CGRect, onDark: Bool)]) {
         hide(animated: false)
-        guard !marks.isEmpty, let screen = NSScreen.screens.first else { return }
-        // One panel over every screen: marks keep their global position without a screen lookup.
-        let union = NSScreen.screens.reduce(screen.frame) { $0.union($1.frame) }
-        let panel = NSPanel(contentRect: union, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
-        panel.isFloatingPanel = true
-        panel.level = .popUpMenu - 1  // under the lens
-        panel.backgroundColor = .clear
-        panel.isOpaque = false
-        panel.hasShadow = false
-        panel.ignoresMouseEvents = true
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-        let view = NSView(frame: NSRect(origin: .zero, size: union.size))
-        view.wantsLayer = true
-        panel.contentView = view
-
+        guard !marks.isEmpty, let primary = NSScreen.screens.first else { return }
+        let primaryHeight = primary.frame.height
         let reduce = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
-        let primaryHeight = screen.frame.height
-        let ink = HighlightStyle.ink(onDark: isDark)
-        for (n, mark) in marks.enumerated() {
-            // Top-left global → Cocoa global → the panel's own.
-            let y = primaryHeight - mark.maxY - HighlightStyle.gap - HighlightStyle.thickness - union.minY
-            let line = CALayer()
-            line.backgroundColor = ink
-            line.cornerRadius = HighlightStyle.cornerRadius
-            line.anchorPoint = CGPoint(x: 0, y: 0.5)
-            line.frame = CGRect(x: mark.minX - union.minX, y: y, width: mark.width, height: HighlightStyle.thickness)
-            view.layer?.addSublayer(line)
-            guard !reduce else { continue }
-            let grow = CABasicAnimation(keyPath: "transform.scale.x")
-            grow.fromValue = 0
-            grow.toValue = 1
-            grow.duration = HighlightStyle.fill
-            grow.beginTime = CACurrentMediaTime() + HighlightStyle.stagger * Double(min(n, HighlightStyle.staggerLimit))
-            grow.fillMode = .backwards
-            grow.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.7, 0.2, 1)
-            line.add(grow, forKey: "grow")
+        // Top-left global → Cocoa global.
+        let cocoa = marks.enumerated().map { n, mark in
+            (n: n, onDark: mark.onDark, line: CGRect(x: mark.box.minX,
+                                                    y: primaryHeight - mark.box.maxY - HighlightStyle.gap - HighlightStyle.thickness,
+                                                    width: mark.box.width, height: HighlightStyle.thickness))
         }
-        panel.orderFrontRegardless()
-        self.panel = panel
+        for screen in NSScreen.screens {
+            let frame = screen.frame
+            let here = cocoa.filter { $0.line.intersects(frame) }
+            guard !here.isEmpty else { continue }
+            let panel = NSPanel(contentRect: frame, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
+            panel.isFloatingPanel = true
+            panel.level = .popUpMenu - 1  // under the lens
+            panel.backgroundColor = .clear
+            panel.isOpaque = false
+            panel.hasShadow = false
+            panel.ignoresMouseEvents = true
+            panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+            let view = NSView(frame: NSRect(origin: .zero, size: frame.size))
+            view.wantsLayer = true
+            panel.contentView = view
+
+            for mark in here {
+                let line = CALayer()
+                line.backgroundColor = HighlightStyle.ink(onDark: mark.onDark)
+                line.cornerRadius = HighlightStyle.cornerRadius
+                line.anchorPoint = CGPoint(x: 0, y: 0.5)
+                line.frame = mark.line.offsetBy(dx: -frame.minX, dy: -frame.minY)
+                view.layer?.addSublayer(line)
+                guard !reduce else { continue }
+                let grow = CABasicAnimation(keyPath: "transform.scale.x")
+                grow.fromValue = 0
+                grow.toValue = 1
+                grow.duration = HighlightStyle.fill
+                grow.beginTime = CACurrentMediaTime() + HighlightStyle.stagger * Double(min(mark.n, HighlightStyle.staggerLimit))
+                grow.fillMode = .backwards
+                grow.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.7, 0.2, 1)
+                line.add(grow, forKey: "grow")
+            }
+            // A panel made at a screen's frame can be nudged onto the main screen: pin it back.
+            panel.setFrame(frame, display: false)
+            panel.orderFrontRegardless()
+            panels.append(panel)
+        }
     }
 
     func hide(animated: Bool = true) {
-        guard let panel else { return }
-        self.panel = nil
-        guard animated else { panel.orderOut(nil); return }
-        NSAnimationContext.runAnimationGroup({ $0.duration = HighlightStyle.fadeOut; panel.animator().alphaValue = 0 },
-                                             completionHandler: { panel.orderOut(nil) })
+        let gone = panels
+        panels = []
+        guard animated else { gone.forEach { $0.orderOut(nil) }; return }
+        NSAnimationContext.runAnimationGroup({ ctx in
+            ctx.duration = HighlightStyle.fadeOut
+            gone.forEach { $0.animator().alphaValue = 0 }
+        }, completionHandler: { gone.forEach { $0.orderOut(nil) } })
     }
 }
