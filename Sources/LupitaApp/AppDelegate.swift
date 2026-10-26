@@ -12,8 +12,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let idReport = IDReportWindow()
     private var inFlight = false
     let highlight = HighlightOverlay()
-    /// Held this long, ⌃⌥⌘ is no longer a quick press: it shows what Lupita knows (D39).
-    private static let holdThreshold: Duration = .milliseconds(350)
+    /// Held this long, ⌃⌥⌘ is no longer a quick press: it shows what Lupita knows (D39). The window is
+    /// read from the moment the keys go down, so the marks show as soon as this ends.
+    private static let holdThreshold: Duration = .milliseconds(250)
     private var holdTask: Task<Void, Never>?
     private var holdGeneration = 0
     /// What the OCR read for the marks, kept so the lookup on release does not read the window again.
@@ -91,21 +92,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if down {
             windowRead = nil
             let generation = holdGeneration
+            // Read while waiting: a quick press throws the read away, a hold has it ready.
+            let point = Screen.topLeft(NSEvent.mouseLocation)
+            let read = Task { try? await OCR.window(at: point) }
             holdTask = Task { [weak self] in
                 try? await Task.sleep(for: Self.holdThreshold)
                 guard !Task.isCancelled, let self, generation == holdGeneration else { return }
-                showHighlight(generation)
+                showHighlight(generation, read: read)
             }
         } else {
             stopHighlight()
         }
     }
 
-    private func showHighlight(_ generation: Int) {
+    private func showHighlight(_ generation: Int, read pending: Task<OCR.WindowRead?, Never>) {
         guard let resolver = store.resolver, !inFlight else { return }
-        let point = Screen.topLeft(NSEvent.mouseLocation)
         Task { [weak self] in
-            let read = try? await OCR.window(at: point)
+            let read = await pending.value
             guard let self, generation == holdGeneration, let read else { return }
             let marks = HighlightPicker.marks(words: read.words, resolver: resolver)
             windowRead = read
