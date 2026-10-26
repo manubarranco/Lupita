@@ -82,7 +82,9 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private static let chevronSpace: CGFloat = 16
 
     private lazy var header = MenuHeader(title: S.appName)
-    private lazy var note = MenuNote()
+    /// Made anew each time the menu opens: the last menu's item still holds the old one, and handing
+    /// that same view to a new item left the stats blank on the next open.
+    private var note = MenuNote()
     /// Folders and subfolders whose repos are showing, the repos found in each root, and the folder
     /// rows now in the menu (they go right after `note`).
     private var expanded: Set<String> = []
@@ -127,6 +129,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
 
         menu.addItem(.sectionHeader(title: S.folders))
+        note = MenuNote()
+        refreshNote()
         let noteItem = viewItem(note)
         menu.addItem(noteItem)
         self.noteItem = noteItem
