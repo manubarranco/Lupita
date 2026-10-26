@@ -201,6 +201,8 @@ final class PillSwitch: NSControl {
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
     override func draw(_ dirtyRect: NSRect) {
+        // Locked (its folder is off): drawn off too, its own state kept for when the folder comes back.
+        let isOn = isOn && isEnabled, isMixed = isMixed && isEnabled
         let track = NSBezierPath(roundedRect: bounds, xRadius: bounds.height / 2, yRadius: bounds.height / 2)
         let dark = effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
         (isMixed ? NSColor.controlAccentColor.withAlphaComponent(dark ? 0.7 : 0.55)
