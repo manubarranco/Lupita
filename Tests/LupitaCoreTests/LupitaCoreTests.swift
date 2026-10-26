@@ -20,6 +20,11 @@ import Testing
         #expect(IDGrammar.parse(text) == nil)
     }
 
+    @Test func dropsAlgorithmsAndProducts() {
+        let ids = IDGrammar.tokens(in: "Firma RS256 y HS512, PKCE S256, AES-256, K8s, DB2; RS101 y EOF001 sí.").map(\.id.display)
+        #expect(ids == ["RS101", "EOF001"])
+    }
+
     @Test func findsTokensInProse() {
         let ids = IDGrammar.tokens(in: "Ver D23 y ADR-004 (también E2-S3b), no GPL3.").map(\.id.display)
         #expect(ids == ["D23", "ADR-004", "E2-S3b"])
@@ -38,6 +43,11 @@ import Testing
         ("| M1 | Fix BUG-01 input micrófono | ⬜ |", "M1", .tableRow, "Fix BUG-01 input micrófono"),
         ("| **E8-S6 Exportar facturas (CSV export) \\[Could\\]**   |", "E8-S6", .tableRow, "Exportar facturas (CSV export) [Could]"),
         ("| E10-S2 ✅ Historial de pedidos (/orders)   |", "E10-S2", .tableRow, "Historial de pedidos (/orders)"),
+        ("- [x] T001 Crear modelo de Foo en src/foo.py", "T001", .listOrColon, "Crear modelo de Foo en src/foo.py"),
+        ("- [X] T004 [P] [US2] Escribir pruebas de Bar", "T004", .listOrColon, "Escribir pruebas de Bar"),
+        ("- [ ] T007 [P] Revisar con T003 y T004 el modelo", "T007", .listOrColon, "Revisar con T003 y T004 el modelo"),
+        ("### User Story 1 - Crear Foo (Priority: P1)", "US1", .heading, "Crear Foo"),
+        ("## User Story 12 — Borrar Bar", "US12", .heading, "Borrar Bar"),
     ])
     func acceptsDefinitions(line: String, key: String, rule: DefinitionRule, title: String) {
         let hit = DefinitionRules.lineDefinition(line)
@@ -54,6 +64,9 @@ import Testing
         "| ID | Título |",
         "| **D008** (Caché compartida) | **Alineada** |",
         "|----|--------|",
+        "- [ ] Revisar D23 con el equipo",
+        "- [x] T001",
+        "## Phase 3: User Story 1 — Crear Foo (P1)",
     ])
     func rejectsMentions(line: String) {
         #expect(DefinitionRules.lineDefinition(line) == nil)
@@ -142,6 +155,25 @@ import Testing
         let r = Resolver(index: index)
         #expect(r.resolve("D001", preferredRepo: "atlas", fromPath: "domains/billing/poc.md").definitions.first?.path == "domains/billing/decisions.md")
         #expect(r.resolve("D001", preferredRepo: "atlas", fromPath: "memory/lessons.md").definitions.first?.path == "memory/decisions.md")
+    }
+
+    @Test func specKitTasksAndStoriesResolvePerFeature() {
+        var index = RefIndex()
+        for feature in ["001-foo", "002-bar"] {
+            index.add(text: "## Phase 1: User Story 1 — Base (P1)\n- [x] T001 [US1] Crear \(feature)\n- US1: T001 completa.",
+                      fileName: "tasks.md", repo: "atlas", relativePath: "specs/\(feature)/tasks.md",
+                      absolutePath: "/x/atlas/specs/\(feature)/tasks.md")
+            index.add(text: "### User Story 1 - Historia de \(feature) (Priority: P1)\nComo usuario…",
+                      fileName: "spec.md", repo: "atlas", relativePath: "specs/\(feature)/spec.md",
+                      absolutePath: "/x/atlas/specs/\(feature)/spec.md")
+        }
+        index.rank()
+        let r = Resolver(index: index)
+        let task = r.resolve("T001", preferredRepo: "atlas", fromPath: "specs/002-bar/plan.md").definitions.first
+        #expect(task?.path == "specs/002-bar/tasks.md")
+        let story = r.resolve("US1", preferredRepo: "atlas", fromPath: "specs/001-foo/tasks.md").definitions.first
+        #expect(story?.path == "specs/001-foo/spec.md")
+        #expect(story?.title == "Historia de 001-foo")
     }
 
     @Test func weakSectionsFromOtherReposAreDropped() {

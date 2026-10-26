@@ -22,6 +22,12 @@ public enum IDGrammar {
         "GPL", "LGPL", "AGPL", "BSD", "UTF", "ES", "MP", "IPV", "HTTP", "TLS", "SHA", "MD", "ISO",
     ]
 
+    /// Whole tokens that match the grammar but name an algorithm or a product: `RS256`, `AES-256`,
+    /// `K8s`, `DB2`. Listed by key so `RS101` in a requirements table stays an ID.
+    public static let noise: Set<String> = Set(
+        ["HS", "RS", "PS"].flatMap { p in ["256", "384", "512"].map { p + $0 } }
+            + ["AES128", "AES192", "AES256", "S256", "K8s", "DB2"])
+
     static let tokenRegex = try! NSRegularExpression(
         pattern: #"(?<![A-Za-z0-9_\-])([A-Z]{1,5})(-?)(\d{1,4})([a-z]?)((?:-[A-Z]{1,3}\d{1,4}[a-z]?)*)(?![A-Za-z0-9_])"#
     )
@@ -35,11 +41,9 @@ public enum IDGrammar {
             let number = ns.substring(with: m.range(at: 3))
             let letter = ns.substring(with: m.range(at: 4))
             let compound = ns.substring(with: m.range(at: 5))
-            let id = RefID(
-                display: ns.substring(with: m.range),
-                key: prefix + number + letter + compound,
-                prefix: prefix
-            )
+            let key = prefix + number + letter + compound
+            guard !noise.contains(key) else { return nil }
+            let id = RefID(display: ns.substring(with: m.range), key: key, prefix: prefix)
             return (id, m.range)
         }
     }

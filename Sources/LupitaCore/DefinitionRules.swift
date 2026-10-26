@@ -64,6 +64,13 @@ public enum DefinitionRules {
     // ID and title together: `| **D008** (aside) |` is a mention.
     static let tableTitledCell = try! NSRegularExpression(
         pattern: #"^\s*\|\s*(?:\*\*)?([A-Za-z0-9\-]+?)\s+([^|]+?)\s*\|"#)
+    // `- [x] T001 [P] [US1] Crear modelo de Foo` (spec-kit tasks): the ID is the first token after
+    // the box; the bracketed tags after it are not part of the title.
+    static let task = try! NSRegularExpression(
+        pattern: #"^\s*[-*+]\s+\[[ xX]\]\s+\**([A-Za-z0-9\-]+?)\**\s+(?:\[[^\]]*\]\s*)*(.+)$"#)
+    // `### User Story 1 - Crear Foo (Priority: P1)` (spec-kit) defines `US1`, which tasks and plans cite.
+    static let userStory = try! NSRegularExpression(
+        pattern: #"^#{1,6}\s+User Story\s+(\d{1,4})\s*[-—–:·]\s*(.*?)\s*(?:\(Priority:\s*P\d+\))?\s*$"#)
     static let frontmatterID = try! NSRegularExpression(
         pattern: #"^id:\s*["']?([A-Za-z0-9\-]+)["']?\s*$"#)
     static let leadingDate = try! NSRegularExpression(
@@ -99,6 +106,9 @@ public enum DefinitionRules {
     /// A single line as a definition, or nil if it only mentions IDs.
     public static func lineDefinition(_ line: String, index: Int = 0) -> DefinitionHit? {
         if line.hasPrefix("#") {
+            if let m = match(userStory, line), let id = IDGrammar.parse("US" + m[1]) {
+                return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
+            }
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
@@ -110,6 +120,9 @@ public enum DefinitionRules {
             let title = cleanTitle(m[2].replacingOccurrences(of: "✅", with: "").replacingOccurrences(of: "\\", with: ""))
             guard !title.isEmpty else { return nil }
             return DefinitionHit(id: id, rule: .tableRow, line: index, title: title)
+        }
+        if let m = match(task, line), let id = IDGrammar.parse(m[1]) {
+            return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[2]))
         }
         if let m = match(listOrColon, line), let id = IDGrammar.parse(m[2]) {
             let title = cleanTitle(m[3])
