@@ -27,6 +27,14 @@ import Testing
         #expect(marks.count == 3)
     }
 
+    @Test func marksRepoNamesTagsAndStatuses() {
+        let r = Self.resolver()
+        let kinds = HighlightPicker.classified(words: Self.row("in atlas the <dialog> returns HTTP 401 and ENOENT"), resolver: r).map(\.kind)
+        #expect(kinds == [.id, .term, .term, .term])
+        // No hint, wrong case, not a tag: nothing.
+        #expect(HighlightPicker.marks(words: Self.row("chapter 401 of Atlas, a <notatag> here"), resolver: r).isEmpty)
+    }
+
     @Test func ignoresWhatIsNotKnown() {
         let marks = HighlightPicker.marks(words: Self.row("the yak-shave of D999 and debounceIndex()"), resolver: Self.resolver())
         #expect(marks.isEmpty)

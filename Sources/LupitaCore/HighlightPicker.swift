@@ -31,7 +31,8 @@ public enum HighlightPicker {
                     marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .term))
                     i += length
                 } else {
-                    if let kind = kind(of: row[i].text, resolver: resolver, block: block, marked: row[i].codeStyled) {
+                    let before = row[..<i].map(\.text).joined(separator: " ")
+                    if let kind = kind(of: row[i].text, resolver: resolver, block: block, marked: row[i].codeStyled, before: before) {
                         marks.append(Mark(box: trimmed(row[i...i]), kind: kind))
                     }
                     i += 1
@@ -103,13 +104,18 @@ public enum HighlightPicker {
         kind(of: text, resolver: resolver, block: block, marked: marked) != nil
     }
 
-    static func kind(of text: String, resolver: Resolver, block: String, marked: Bool = false) -> Kind? {
+    /// `before`: the words to the left on the same line, the hint a bare `401` needs (`HTTP 401`).
+    static func kind(of text: String, resolver: Resolver, block: String, marked: Bool = false, before: String = "") -> Kind? {
         let word = clean(text)
         guard word.count >= 2 else { return nil }
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return .id }
         if resolver.rangeList(word) != nil { return .id }
+        // A repo name points at a place, like an ID. Exact case only: a repo called `app` must not mark every «app».
+        if word.count >= 3, resolver.index.repos.contains(where: { $0.name == word }) { return .id }
         if resolver.resolveTerm(word) != nil { return .term }
-        if CodeDictionaries.error(word) != nil { return .term }
+        // Error names, HTML tags (`<dialog>`) and HTTP statuses with their hint: fixed tables, as cheap as a term.
+        let code = CodeRefs.Text(text: word, codeMarked: marked, before: before)
+        if CodeRefs.Errors.resolve(code, repos: [], preferredRepo: nil) != nil { return .term }
         if let command = CodeDictionaries.command(word.lowercased()), command.safe { return .term }
         return GitVocabulary.knows(word, block: block, marked: marked) ? .term : nil
     }
