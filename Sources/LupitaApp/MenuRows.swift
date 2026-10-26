@@ -22,29 +22,32 @@ final class MenuHeader: NSView {
     }
 }
 
-/// Small secondary lines under a section title: the index stats and when it was last updated.
+/// Small secondary lines under a section title: the index stats and when it was last updated. Drawn
+/// by hand, like `PillSwitch`: a label inside an open menu went blank when its text changed (a switch
+/// flipped starts a reindex, which updates these lines).
 @MainActor
 final class MenuNote: NSView {
-    private let text = NSTextField(labelWithString: "")
+    private var lines: [String] = []
 
     init() {
         super.init(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: 34))
-        text.font = .systemFont(ofSize: 11)
-        text.textColor = .secondaryLabelColor
-        text.maximumNumberOfLines = 2
-        addSubview(text)
     }
 
     required init?(coder: NSCoder) { fatalError() }
 
     func update(_ lines: [String]) {
-        text.stringValue = lines.filter { !$0.isEmpty }.joined(separator: "\n")
-        needsLayout = true
+        self.lines = lines.filter { !$0.isEmpty }
+        needsDisplay = true
     }
 
-    override func layout() {
-        super.layout()
-        text.frame = NSRect(x: MenuRow.inset, y: 2, width: bounds.width - MenuRow.inset * 2, height: bounds.height - 4)
+    override func draw(_ dirtyRect: NSRect) {
+        let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor]
+        var y = bounds.height - 2
+        for line in lines {
+            let size = (line as NSString).size(withAttributes: attributes)
+            y -= size.height
+            (line as NSString).draw(at: NSPoint(x: MenuRow.inset + 2, y: y), withAttributes: attributes)
+        }
     }
 }
 
