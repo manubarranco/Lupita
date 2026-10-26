@@ -74,4 +74,10 @@ import Testing
         // Nothing measured: the caller falls back to the whole window.
         #expect(HighlightPicker.isDark(behind: CGRect(x: 600, y: 0, width: 40, height: 14), words: words) == nil)
     }
+
+    // D46: IDs get a solid line, terms a dashed one.
+    @Test func marksSayWhetherTheyAreIDsOrTerms() {
+        let marks = HighlightPicker.classified(words: Self.row("per D023 we use fast-forward and git stash"), resolver: Self.resolver())
+        #expect(marks.map(\.kind) == [.id, .term, .term])
+    }
 }

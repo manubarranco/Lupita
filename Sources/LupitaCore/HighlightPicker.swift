@@ -8,16 +8,32 @@ public enum HighlightPicker {
     /// A box per known word or phrase, in the same coordinates as the words. Phrases of 2 to 4 words
     /// (`fast-forward merge`, `git stash`) give one box.
     public static func marks(words: [OCRWord], resolver: Resolver) -> [CGRect] {
-        var marks: [CGRect] = []
+        classified(words: words, resolver: resolver).map(\.box)
+    }
+
+    /// What a mark points at: an ID defined in the repos (solid line) or a term, a word Lupita explains
+    /// (dashed line).
+    public enum Kind: Sendable { case id, term }
+
+    public struct Mark: Sendable, Equatable {
+        public let box: CGRect
+        public let kind: Kind
+    }
+
+    /// The marks with what each one is, so IDs and terms can be underlined differently.
+    public static func classified(words: [OCRWord], resolver: Resolver) -> [Mark] {
+        var marks: [Mark] = []
         for row in rows(of: words) {
             let block = nearbyText(of: row[0], in: words)
             var i = 0
             while i < row.count {
                 if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
-                    marks.append(trimmed(row[i..<i + length]))
+                    marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .term))
                     i += length
                 } else {
-                    if knows(row[i].text, resolver: resolver, block: block, marked: row[i].codeStyled) { marks.append(trimmed(row[i...i])) }
+                    if let kind = kind(of: row[i].text, resolver: resolver, block: block, marked: row[i].codeStyled) {
+                        marks.append(Mark(box: trimmed(row[i...i]), kind: kind))
+                    }
                     i += 1
                 }
             }
@@ -84,14 +100,18 @@ public enum HighlightPicker {
     }
 
     static func knows(_ text: String, resolver: Resolver, block: String, marked: Bool = false) -> Bool {
+        kind(of: text, resolver: resolver, block: block, marked: marked) != nil
+    }
+
+    static func kind(of text: String, resolver: Resolver, block: String, marked: Bool = false) -> Kind? {
         let word = clean(text)
-        guard word.count >= 2 else { return false }
-        if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return true }
-        if resolver.rangeList(word) != nil { return true }
-        if resolver.resolveTerm(word) != nil { return true }
-        if CodeDictionaries.error(word) != nil { return true }
-        if let command = CodeDictionaries.command(word.lowercased()), command.safe { return true }
-        return GitVocabulary.knows(word, block: block, marked: marked)
+        guard word.count >= 2 else { return nil }
+        if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return .id }
+        if resolver.rangeList(word) != nil { return .id }
+        if resolver.resolveTerm(word) != nil { return .term }
+        if CodeDictionaries.error(word) != nil { return .term }
+        if let command = CodeDictionaries.command(word.lowercased()), command.safe { return .term }
+        return GitVocabulary.knows(word, block: block, marked: marked) ? .term : nil
     }
 
     /// The box of the words without the punctuation OCR glued to the first and last one.

@@ -1,4 +1,5 @@
 import AppKit
+import LupitaCore
 import QuartzCore
 
 /// Where the highlight's look lives (D39). Colour, thickness and timing in one place, so a later theme
@@ -9,6 +10,9 @@ enum HighlightStyle {
     /// Points between the bottom of the word's box and the line.
     static let gap: CGFloat = 0
     static let cornerRadius: CGFloat = 0.75
+    /// Terms get a dashed line, IDs a solid one: dash and gap lengths, in points.
+    static let dash: CGFloat = 3
+    static let dashGap: CGFloat = 2
     /// Fills in word by word, so reading the window hides behind the animation.
     static let fill: CFTimeInterval = 0.34
     static let stagger: CFTimeInterval = 0.024
@@ -31,15 +35,16 @@ final class HighlightOverlay {
     var isShowing: Bool { !panels.isEmpty }
 
     /// - Parameters:
-    ///   - marks: boxes in global top-left coordinates, each with whether its background is dark.
-    func show(_ marks: [(box: CGRect, onDark: Bool)]) {
+    ///   - marks: boxes in global top-left coordinates, each with whether its background is dark and what it
+    ///     is (an ID gets a solid line, a term a dashed one).
+    func show(_ marks: [(box: CGRect, onDark: Bool, kind: HighlightPicker.Kind)]) {
         hide(animated: false)
         guard !marks.isEmpty, let primary = NSScreen.screens.first else { return }
         let primaryHeight = primary.frame.height
         let reduce = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         // Top-left global → Cocoa global.
         let cocoa = marks.enumerated().map { n, mark in
-            (n: n, onDark: mark.onDark, line: CGRect(x: mark.box.minX,
+            (n: n, onDark: mark.onDark, kind: mark.kind, line: CGRect(x: mark.box.minX,
                                                     y: primaryHeight - mark.box.maxY - HighlightStyle.gap - HighlightStyle.thickness,
                                                     width: mark.box.width, height: HighlightStyle.thickness))
         }
@@ -60,11 +65,10 @@ final class HighlightOverlay {
             panel.contentView = view
 
             for mark in here {
-                let line = CALayer()
-                line.backgroundColor = HighlightStyle.ink(onDark: mark.onDark)
-                line.cornerRadius = HighlightStyle.cornerRadius
+                let line = Self.line(mark.kind, ink: HighlightStyle.ink(onDark: mark.onDark))
                 line.anchorPoint = CGPoint(x: 0, y: 0.5)
                 line.frame = mark.line.offsetBy(dx: -frame.minX, dy: -frame.minY)
+                (line as? CAShapeLayer)?.path = Self.dashPath(width: line.frame.width)
                 view.layer?.addSublayer(line)
                 guard !reduce else { continue }
                 let grow = CABasicAnimation(keyPath: "transform.scale.x")
@@ -81,6 +85,35 @@ final class HighlightOverlay {
             panel.orderFrontRegardless()
             panels.append(panel)
         }
+    }
+
+    /// A solid bar for an ID; a dashed stroke for a term, round-capped like the bar's corners.
+    static func line(_ kind: HighlightPicker.Kind, ink: CGColor) -> CALayer {
+        switch kind {
+        case .id:
+            let bar = CALayer()
+            bar.backgroundColor = ink
+            bar.cornerRadius = HighlightStyle.cornerRadius
+            return bar
+        case .term:
+            let dashed = CAShapeLayer()
+            dashed.strokeColor = ink
+            dashed.fillColor = nil
+            dashed.lineWidth = HighlightStyle.thickness
+            dashed.lineCap = .round
+            // A round cap adds half the thickness at each end: shorten the dash so it keeps its length.
+            dashed.lineDashPattern = [HighlightStyle.dash - HighlightStyle.thickness, HighlightStyle.dashGap + HighlightStyle.thickness]
+                .map { NSNumber(value: Double($0)) }
+            return dashed
+        }
+    }
+
+    static func dashPath(width: CGFloat) -> CGPath {
+        let path = CGMutablePath()
+        let y = HighlightStyle.thickness / 2, inset = HighlightStyle.thickness / 2
+        path.move(to: CGPoint(x: inset, y: y))
+        path.addLine(to: CGPoint(x: max(inset, width - inset), y: y))
+        return path
     }
 
     func hide(animated: Bool = true) {

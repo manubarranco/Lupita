@@ -110,9 +110,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task { [weak self] in
             let read = await pending.value
             guard let self, generation == holdGeneration, let read else { return }
-            let marks = HighlightPicker.marks(words: read.words, resolver: resolver)
+            let marks = HighlightPicker.classified(words: read.words, resolver: resolver)
             windowRead = read
-            highlight.show(marks.map { ($0, HighlightPicker.isDark(behind: $0, words: read.words) ?? read.isDark) })
+            highlight.show(marks.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: read.words) ?? read.isDark, $0.kind) })
             watchForChanges()
         }
     }

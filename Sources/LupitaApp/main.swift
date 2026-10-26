@@ -12,6 +12,12 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-vocabulary") {
     exit(code)
 }
 
+// Development aid: the underline of IDs (solid) and terms (dashed) drawn to PNG.
+if let i = CommandLine.arguments.firstIndex(of: "--render-underline") {
+    let code = MainActor.assumeIsolated { TooltipGallery.runUnderline(CommandLine.arguments.dropFirst(i + 1).first) }
+    exit(code)
+}
+
 // Development aid: the menu drawn to PNG with the folders in the current settings (D44).
 if let i = CommandLine.arguments.firstIndex(of: "--render-menu") {
     let code = MainActor.assumeIsolated { TooltipGallery.runMenu(CommandLine.arguments.dropFirst(i + 1).first) }

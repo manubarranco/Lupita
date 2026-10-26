@@ -171,6 +171,74 @@ enum TooltipGallery {
         return image
     }
 
+    // MARK: Underline sheet (D46)
+
+    /// `LupitaApp --render-underline <dir>` writes `underline.png`: a sentence with an ID, a glossary term and
+    /// git words, on a light and a dark background, read by the real OCR and underlined with the real layers.
+    static func runUnderline(_ dir: String?) -> Int32 {
+        guard let dir else {
+            FileHandle.standardError.write(Data("usage: LupitaApp --render-underline <dir>\n".utf8))
+            return 1
+        }
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        S.language = "es"
+        GitVocabulary.isEnabled = true
+        // A tiny repo on disk with one decisions file and one glossary.
+        let repo = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-underline/atlas")
+        try? FileManager.default.createDirectory(at: repo.appendingPathComponent(".git"), withIntermediateDirectories: true)
+        try? "## D023 — Sin dependencias\nNada nuevo.\n\n## Q07 — Qué falta\nAlgo.\n"
+            .write(to: repo.appendingPathComponent("decisions.md"), atomically: true, encoding: .utf8)
+        try? "- **saldo inicial** — lo que hay al abrir\n".write(to: repo.appendingPathComponent("glossary.md"), atomically: true, encoding: .utf8)
+        let index = RefIndex.build(roots: [repo.deletingLastPathComponent().path])
+        let resolver = Resolver(index: index)
+        let w: CGFloat = 560, h: CGFloat = 90, scale: CGFloat = 2
+        let lines = ["Según D023 y Q07, el saldo inicial no cambia.", "Haz un rebase y luego un force push a main."]
+        var tiles: [NSImage] = []
+        for dark in [false, true] {
+            let drawing = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in
+                (dark ? NSColor(white: 0.12, alpha: 1) : .white).setFill(); r.fill()
+                let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 17),
+                                                                 .foregroundColor: dark ? NSColor(white: 0.92, alpha: 1) : NSColor(white: 0.1, alpha: 1)]
+                for (n, line) in lines.enumerated() { (line as NSString).draw(at: NSPoint(x: 20, y: h - 36 - CGFloat(n) * 36), withAttributes: attributes) }
+                return true
+            }
+            var rect = CGRect(x: 0, y: 0, width: w * scale, height: h * scale)
+            guard let cg = drawing.cgImage(forProposedRect: &rect, context: nil, hints: nil),
+                  let words = try? OCR.recognize(cg, in: CGRect(x: 0, y: 0, width: w, height: h)) else { return 2 }
+            let marks = HighlightPicker.classified(words: words, resolver: resolver)
+            print((dark ? "dark: " : "light: ") + marks.map { $0.kind == .id ? "id" : "term" }.joined(separator: " "))
+            let out = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in
+                drawing.draw(in: r)
+                guard let ctx = NSGraphicsContext.current?.cgContext else { return false }
+                let ink = HighlightStyle.ink(onDark: dark)
+                for mark in marks {
+                    let layer = HighlightOverlay.line(mark.kind, ink: ink)
+                    // Top-left box → this image's bottom-left space, just under the word.
+                    layer.frame = CGRect(x: mark.box.minX, y: h - mark.box.maxY - HighlightStyle.gap - HighlightStyle.thickness,
+                                         width: mark.box.width, height: HighlightStyle.thickness)
+                    (layer as? CAShapeLayer)?.path = HighlightOverlay.dashPath(width: layer.frame.width)
+                    ctx.saveGState()
+                    ctx.translateBy(x: layer.frame.minX, y: layer.frame.minY)
+                    layer.frame.origin = .zero
+                    layer.render(in: ctx)
+                    ctx.restoreGState()
+                }
+                return true
+            }
+            tiles.append(out)
+        }
+        let sheet = NSImage(size: NSSize(width: w, height: h * 2), flipped: false) { _ in
+            tiles[0].draw(in: NSRect(x: 0, y: h, width: w, height: h))
+            tiles[1].draw(in: NSRect(x: 0, y: 0, width: w, height: h))
+            return true
+        }
+        var sheetRect = CGRect(x: 0, y: 0, width: w * scale, height: h * 2 * scale)
+        guard let cg = sheet.cgImage(forProposedRect: &sheetRect, context: nil, hints: nil),
+              let png = NSBitmapImageRep(cgImage: cg).representation(using: .png, properties: [:]) else { return 2 }
+        try? png.write(to: URL(fileURLWithPath: dir + "/underline.png"))
+        return 0
+    }
+
     // MARK: Menu sheet (D44)
 
     /// `LupitaApp --render-menu <dir>` writes `menu-light.png` and `menu-dark.png` (permissions granted as they

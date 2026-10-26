@@ -243,3 +243,6 @@ Order: missing permissions first (orange, hidden once granted), then the shortcu
 
 ## D45 — Hide a repo from a folder's list; ⌥ shows what is hidden, live
 With ⌥ held a ⊖ appears on each repo row; clicking it hides the repo: out of the list and out of the index, its switch kept. Hidden repos wait under «Hidden (N)» at the end of their folder, closed by default, each with a ⊕ to bring it back. ⌥ works with the menu already open (a timer in the tracking run loop watches the modifier), and the hidden «Send ID report…» (D40) follows the same rule. No confirmation: hiding is undone in one click from «Hidden». Why: Manu wanted to declutter long folders without a recovery path that resets everything (remove and re-add the folder), 2026-10-26.
+
+## D46 — IDs underlined solid, terms dashed
+While ⌃⌥⌘ is held, an ID defined in the repos (or a range of them) gets the solid line it had; a term (glossary, git vocabulary, commands, error names) gets a dashed one, 3 pt dashes with round ends. Same ink, thickness and per-word colour as before (D39). Why: Manu wanted to tell at a glance what is a reference to a document and what is a word Lupita explains, 2026-10-26. Contact sheet: `LupitaApp --render-underline <dir>`.
