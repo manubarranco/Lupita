@@ -100,7 +100,7 @@ public struct Resolver: Sendable {
             return code
         }
         // Commits, branches, files and commands never look like IDs: no OCR correction for them.
-        if let ref = RepoRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo) { return ref }
+        if let ref = RepoRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, byName: index.markdownByName) { return ref }
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))

@@ -47,11 +47,14 @@ public struct RefIndex: Codable, Sendable {
     public var terms: [String: [Definition]] = [:]
     /// Repo name → markdown files indexed.
     public var filesPerRepo: [String: Int] = [:]
+    /// Lowercased file name → `repo/relative/path` of every markdown file with that name (D49): a bare
+    /// `decisions.md` is found wherever it lives, with no search on disk.
+    public var markdownByName: [String: [String]] = [:]
     public var fileCount: Int { filesPerRepo.values.reduce(0, +) }
 
     public init() {}
 
-    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo }
+    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo, markdownByName }
 
     /// Indexes saved before terms existed still load.
     public init(from decoder: Decoder) throws {
@@ -61,6 +64,7 @@ public struct RefIndex: Codable, Sendable {
         mentions = try c.decode([String: Mentions].self, forKey: .mentions)
         terms = try c.decodeIfPresent([String: [Definition]].self, forKey: .terms) ?? [:]
         filesPerRepo = try c.decode([String: Int].self, forKey: .filesPerRepo)
+        markdownByName = try c.decodeIfPresent([String: [String]].self, forKey: .markdownByName) ?? [:]
     }
 
     public static func build(roots: [String], excluding: Set<String> = []) -> RefIndex {
@@ -95,6 +99,10 @@ public struct RefIndex: Codable, Sendable {
     private mutating func remove(repoNamed name: String) {
         repos.removeAll { $0.name == name }
         filesPerRepo[name] = nil
+        for key in Array(markdownByName.keys) {
+            let kept = markdownByName[key]!.filter { !$0.hasPrefix(name + "/") }
+            markdownByName[key] = kept.isEmpty ? nil : kept
+        }
         for key in Array(definitions.keys) {
             let kept = definitions[key]!.filter { $0.repo != name }
             definitions[key] = kept.isEmpty ? nil : kept
@@ -125,6 +133,7 @@ public struct RefIndex: Codable, Sendable {
 
     /// Indexes one file's content. Exposed for tests.
     public mutating func add(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String) {
+        markdownByName[fileName.lowercased(), default: []].append(repo + "/" + relativePath)
         let lines = text.components(separatedBy: .newlines)
         let hits = DefinitionRules.definitions(fileName: fileName, lines: lines)
         var definedOnLine: [Int: String] = [:]

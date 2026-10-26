@@ -117,7 +117,7 @@ public enum HighlightPicker {
             repo.name.allSatisfy(\.isLowercase) ? repo.name == word : repo.name.caseInsensitiveCompare(word) == .orderedSame
         }) { return .id }
         // A file or folder of a repo (`docs/decisions.md`, `CLAUDE.md:12`): also a place. Checked on disk only (D49).
-        if RepoRefs.isFile(word, repos: resolver.index.repos) { return .id }
+        if RepoRefs.isFile(word, repos: resolver.index.repos, byName: resolver.index.markdownByName) { return .id }
         if resolver.resolveTerm(word) != nil { return .term }
         // Error names, HTML tags (`<dialog>`) and HTTP statuses with their hint: fixed tables, as cheap as a term.
         let code = CodeRefs.Text(text: word, codeMarked: marked, before: before)

@@ -60,6 +60,26 @@ import Testing
         #expect(marks.map(\.kind) == [.id, .id])
     }
 
+    /// A bare name (`decisions.md`) is found wherever the index saw it, shallowest first, in the tooltip and the underline.
+    @Test func bareFileNamesAreFoundAnywhereInTheRepo() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-hl-\(UUID().uuidString)/atlas")
+        for folder in ["docs", "domains/billing"] {
+            try FileManager.default.createDirectory(at: root.appendingPathComponent(folder), withIntermediateDirectories: true)
+            try "# Decisions\n".write(to: root.appendingPathComponent(folder + "/decisions.md"), atomically: true, encoding: .utf8)
+        }
+        defer { try? FileManager.default.removeItem(at: root.deletingLastPathComponent()) }
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: root.path)]
+        for rel in ["domains/billing/decisions.md", "docs/decisions.md"] {
+            index.add(text: "# Decisions\n", fileName: "decisions.md", repo: "atlas", relativePath: rel,
+                      absolutePath: root.appendingPathComponent(rel).path)
+        }
+        let r = Resolver(index: index)
+        #expect(r.resolve("decisions.md", preferredRepo: "atlas").definitions.map(\.path) == ["docs/decisions.md", "domains/billing/decisions.md"])
+        let marks = HighlightPicker.classified(words: Self.row("see decisions.md, not notes.md"), resolver: r)
+        #expect(marks.map(\.kind) == [.id])
+    }
+
     /// The tooltip takes the code font as a hint too: a bare `401` in inline code is a status, as it is underlined.
     @Test func aCodeStyledStatusResolvesLikeItIsUnderlined() {
         let r = Self.resolver()

@@ -20,7 +20,9 @@ public enum RepoRefs {
 
     /// The commit, branch, file or command `raw` names, or nil if it is none of them.
     /// `preferredRepo` is searched first; the others follow, so a hit elsewhere is flagged.
-    public static func resolve(_ raw: String, repos: [Repo], preferredRepo: String?) -> Resolution? {
+    /// `byName`: the index's markdown files by lowercased name, for a bare `decisions.md` outside the repo root.
+    public static func resolve(_ raw: String, repos: [Repo], preferredRepo: String?,
+                               byName: [String: [String]] = [:]) -> Resolution? {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
         while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
         text = text.trimmingCharacters(in: wrappers)
@@ -41,7 +43,7 @@ public enum RepoRefs {
             let (path, line) = splitLine(text)
             let ext = (path as NSString).pathExtension.lowercased()
             guard path.contains("/") || fileExtensions.contains(ext) else { return nil }
-            defs = files(path, line: line, repos: ordered)
+            defs = files(path, line: line, repos: ordered, byName: byName)
             if defs.isEmpty, line == nil, path.contains("/"), !path.hasPrefix("/"), !path.hasPrefix("~") {
                 defs = branches(path, repos: ordered)
             }
@@ -168,14 +170,14 @@ public enum RepoRefs {
 
     /// Whether `raw` names a file or folder in one of `repos`: the same paths `files` tries, checked on disk
     /// only, with no git and no reading (D49: cheap enough for the highlight).
-    public static func isFile(_ raw: String, repos: [Repo]) -> Bool {
+    public static func isFile(_ raw: String, repos: [Repo], byName: [String: [String]] = [:]) -> Bool {
         var text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
         while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
         text = text.trimmingCharacters(in: wrappers)
         guard text.count >= 2, text.count <= 300 else { return false }
         let (path, _) = splitLine(text)
         guard path.contains("/") || fileExtensions.contains((path as NSString).pathExtension.lowercased()) else { return false }
-        return candidates(path, repos: repos).contains { repo, relative in
+        return candidates(path, repos: repos, byName: byName).contains { repo, relative in
             let relative = relative.hasSuffix("/") ? String(relative.dropLast()) : relative
             return !relative.isEmpty && FileManager.default.fileExists(atPath: (repo.path as NSString).appendingPathComponent(relative))
         }
@@ -183,7 +185,7 @@ public enum RepoRefs {
 
     /// The repo-relative paths `raw` could be: inside the repo an absolute path points into, or in every repo,
     /// the one it names first (`harbor/CLAUDE.md`).
-    static func candidates(_ raw: String, repos: [Repo]) -> [(Repo, String)] {
+    static func candidates(_ raw: String, repos: [Repo], byName: [String: [String]] = [:]) -> [(Repo, String)] {
         var path = raw.hasPrefix("./") ? String(raw.dropFirst(2)) : raw
         path = (path as NSString).expandingTildeInPath
         var candidates: [(Repo, String)] = []
@@ -197,14 +199,26 @@ public enum RepoRefs {
                 candidates.append((repo, String(path.dropFirst(repo.name.count + 1))))
             }
             candidates += repos.map { ($0, path) }
+            // A bare name (`decisions.md`) anywhere in a repo, in the repos' order (the window's repo first) and,
+            // inside a repo, the shallowest first: `memory/decisions.md` before `domains/finance/decisions.md`.
+            if !path.contains("/") {
+                let paths = (byName[path.lowercased()] ?? []).sorted {
+                    ($0.split(separator: "/").count, $0) < ($1.split(separator: "/").count, $1)
+                }
+                for repo in repos {
+                    for full in paths where full.hasPrefix(repo.name + "/") {
+                        candidates.append((repo, String(full.dropFirst(repo.name.count + 1))))
+                    }
+                }
+            }
         }
         return candidates
     }
 
-    static func files(_ raw: String, line: Int?, repos: [Repo]) -> [Definition] {
+    static func files(_ raw: String, line: Int?, repos: [Repo], byName: [String: [String]] = [:]) -> [Definition] {
         let fm = FileManager.default
         var seen = Set<String>()
-        return candidates(raw, repos: repos).compactMap { repo, relative -> Definition? in
+        return candidates(raw, repos: repos, byName: byName).compactMap { repo, relative -> Definition? in
             let relative = relative.hasSuffix("/") ? String(relative.dropLast()) : relative
             guard !relative.isEmpty else { return nil }
             let absolute = (repo.path as NSString).appendingPathComponent(relative)
