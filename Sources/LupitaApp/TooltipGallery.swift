@@ -174,7 +174,7 @@ enum TooltipGallery {
     // MARK: Menu sheet (D44)
 
     /// `LupitaApp --render-menu <dir>` writes `menu-light.png` and `menu-dark.png` (permissions granted as they
-    /// are) and `menu-permissions.png` (both missing): the real menu, its folders opened, drawn item by item.
+    /// are), `menu-permissions.png` (both missing) and `menu-option.png` (⌥ held): the real menu, its folders opened, drawn item by item.
     static func runMenu(_ dir: String?) -> Int32 {
         guard let dir else {
             FileHandle.standardError.write(Data("usage: LupitaApp --render-menu <dir>\n".utf8))
@@ -182,8 +182,9 @@ enum TooltipGallery {
         }
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         let status = StatusMenu(store: IndexStore(), onHotkeyChange: { _ in })
-        for (name, dark, missing) in [("menu-light", false, false), ("menu-dark", true, false), ("menu-permissions", false, true)] {
-            let image = menuImage(status.filledForGallery(missingPermissions: missing), dark: dark)
+        for (name, dark, missing, option) in [("menu-light", false, false, false), ("menu-dark", true, false, false),
+                                              ("menu-permissions", false, true, false), ("menu-option", false, false, true)] {
+            let image = menuImage(status.filledForGallery(missingPermissions: missing, option: option), dark: dark)
             guard let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
             else { return 2 }
             try? png.write(to: URL(fileURLWithPath: dir + "/" + name + ".png"))

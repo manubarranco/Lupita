@@ -70,10 +70,17 @@ final class MenuRow: NSView {
     var onToggle: ((Bool) -> Void)?
     var onChevron: (() -> Void)?
     var onRemove: (() -> Void)?
+    /// What the button in the remove slot does: ⊖ remove (a folder), ⊖ hide (a repo, only while ⌥ is
+    /// held) or ⊕ bring back (a hidden repo).
+    enum Slot { case none, remove, hide, restore }
+    private let slot: Slot
+    /// A hide button shows only while ⌥ is held (D45).
+    var showsHide = false { didSet { if slot == .hide { remove?.isHidden = !showsHide } } }
     var onFind: (() -> Void)?
 
     init(title: String, on: Bool, indent: CGFloat = 0, chevron: Bool = false, removable: Bool = false, missing: Bool = false,
-         tooltip: String? = nil) {
+         slot: Slot? = nil, switchless: Bool = false, tooltip: String? = nil) {
+        self.slot = slot ?? (removable ? .remove : .none)
         self.indent = indent
         super.init(frame: NSRect(x: 0, y: 0, width: Self.width, height: 26))
         label.stringValue = title
@@ -93,11 +100,14 @@ final class MenuRow: NSView {
             self.chevron = button
             addSubview(button)
         }
-        if removable {
-            let button = Self.iconButton("minus.circle", description: S.remove)
+        if self.slot != .none {
+            let restore = self.slot == .restore
+            let name = restore ? S.showRepo : self.slot == .hide ? S.hideRepo : S.remove
+            let button = Self.iconButton(restore ? "plus.circle" : "minus.circle", description: name)
             button.target = self
             button.action = #selector(removeClicked)
-            button.toolTip = S.remove
+            button.toolTip = name
+            button.isHidden = self.slot == .hide
             self.remove = button
             addSubview(button)
         }
@@ -113,6 +123,7 @@ final class MenuRow: NSView {
             warning = button
             addSubview(button)
         }
+        toggle.isHidden = toggle.isHidden || switchless
         dim(!on || missing)
     }
 

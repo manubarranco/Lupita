@@ -64,17 +64,19 @@ final class StatusMenu: NSObject, NSMenuDelegate {
             guard case .folder(let path, _, let children) = node else { return [] }
             return [path] + children.flatMap(folders)
         }
-        expanded = Set(store.roots + repoCache.flatMap { RepoTree.build(root: $0.key, repos: $0.value).flatMap(folders) })
+        expanded = Set(store.roots + store.roots.map { $0 + "\u{0}hidden" }
+                       + repoCache.flatMap { RepoTree.build(root: $0.key, repos: $0.value).flatMap(folders) })
     }
 
     /// Dev aid (`--render-menu`): the menu as it opens, with every folder's repos found and shown.
     /// `missingPermissions`: draw the permissions section as if neither were granted.
-    func filledForGallery(missingPermissions: Bool) -> NSMenu {
+    func filledForGallery(missingPermissions: Bool, option: Bool = false) -> NSMenu {
         repoCache = Dictionary(uniqueKeysWithValues: store.roots.map { ($0, RepoDiscovery.repos(under: [$0])) })
         expandAll()
         forceMissingPermissions = missingPermissions
         let menu = NSMenu()
         menuNeedsUpdate(menu)
+        optionChanged(option)
         return menu
     }
     private var forceMissingPermissions = false
@@ -96,11 +98,53 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     private func refreshNote() { note.update([store.summary, store.freshness]) }
 
+    // MARK: ⌥ while the menu is open (D45)
+
+    /// ⌥ shows the repos' hide buttons and «Send ID report…», also when pressed with the menu already
+    /// open. A menu in tracking gets no key events for that: a timer in the tracking run loop mode
+    /// watches the modifier.
+    private var optionDown = false
+    private var hideRows: [MenuRow] = []
+    private var optionTimer: Timer?
+    private var reindexItem: NSMenuItem?
+    private lazy var reportItem = action(S.idReportMenu, #selector(idReport))
+
+    func menuWillOpen(_ menu: NSMenu) {
+        let timer = Timer(timeInterval: 0.05, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.optionChanged(NSEvent.modifierFlags.contains(.option)) }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        optionTimer = timer
+    }
+
+    func menuDidClose(_ menu: NSMenu) {
+        optionTimer?.invalidate()
+        optionTimer = nil
+    }
+
+    private func optionChanged(_ down: Bool) {
+        guard down != optionDown else { return }
+        optionDown = down
+        hideRows.forEach { $0.showsHide = down }
+        showReportItem(down)
+    }
+
+    private func showReportItem(_ show: Bool) {
+        guard let reindexItem, let menu = reindexItem.menu else { return }
+        if show, reportItem.menu == nil {
+            menu.insertItem(reportItem, at: menu.index(of: reindexItem) + 1)
+        } else if !show, let owner = reportItem.menu {
+            owner.removeItem(reportItem)
+        }
+    }
+
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         menu.autoenablesItems = false
         folderRows = []
         stateRows = []
+        hideRows = []
+        optionDown = NSEvent.modifierFlags.contains(.option)
         refreshNote()
         menu.addItem(viewItem(header))
         menu.addItem(.separator())
@@ -139,9 +183,11 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         add.onClick = { [weak self] in self?.closeMenu(then: { self?.addRoot() }) }
         menu.addItem(viewItem(add))
         menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
-        menu.addItem(action(S.reindex, #selector(reindex)))
-        // Hidden: only there when ⌥ is held as the menu opens (D40).
-        if NSEvent.modifierFlags.contains(.option) { menu.addItem(action(S.idReportMenu, #selector(idReport))) }
+        let reindex = action(S.reindex, #selector(reindex))
+        menu.addItem(reindex)
+        reindexItem = reindex
+        // Hidden: only there while ⌥ is held (D40, D45).
+        showReportItem(optionDown)
         menu.addItem(.separator())
 
         menu.addItem(.sectionHeader(title: S.explainTermsOf))
@@ -191,6 +237,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         folderRows.forEach(menu.removeItem)
         folderRows = []
         stateRows = []
+        hideRows = []
         var index = menu.index(of: noteItem)
         for item in store.roots.flatMap(folderItems) {
             index += 1
@@ -216,15 +263,17 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
 
         let repos = repoCache[root]
-        let nodes = repos.map { RepoTree.build(root: root, repos: $0) } ?? []
-        // One repo: no list to open, the folder's row is that repo's switch.
-        let single = nodes.count == 1 && nodes[0].repos.count == 1
+        let hiddenPaths = store.hiddenRepos
+        let hidden = (repos ?? []).filter { hiddenPaths.contains($0.path) }
+        let nodes = repos.map { RepoTree.build(root: root, repos: $0.filter { !hiddenPaths.contains($0.path) }) } ?? []
+        // One repo (and none hidden): no list to open, the folder's row is that repo's switch.
+        let single = nodes.count == 1 && nodes[0].repos.count == 1 && hidden.isEmpty
         let rootRepos = nodes.flatMap(\.repos)
         let rootState: () -> SwitchState = { [weak self] in
             guard let self, !store.disabledRoots.contains(root) else { return .off }
             return RepoTree.state(of: rootRepos, disabled: store.disabledRepos)
         }
-        let hasList = !nodes.isEmpty && !single
+        let hasList = (!nodes.isEmpty && !single) || !hidden.isEmpty
         let row = MenuRow(title: single && nodes[0].title != (root as NSString).lastPathComponent
                               ? title + RepoTree.separator + nodes[0].title : title,
                           on: true, indent: hasList || repos == nil ? 0 : Self.chevronSpace,
@@ -251,7 +300,32 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         row.onRemove = { [weak self] in self?.closeMenu(then: { self?.confirmRemove(root) }) }
         stateRows.append((row, rootState))
         var items = [viewItem(row)]
-        if hasList, expanded.contains(root) { items += nodes.flatMap { nodeItems($0, root: root, depth: 1) } }
+        if hasList, expanded.contains(root) {
+            items += nodes.flatMap { nodeItems($0, root: root, depth: 1) }
+            if !hidden.isEmpty { items += hiddenItems(hidden, root: root) }
+        }
+        return items
+    }
+
+    /// «Hidden (N)», closed by default, with a ⊕ on each repo to bring it back (D45).
+    private func hiddenItems(_ hidden: [Repo], root: String) -> [NSMenuItem] {
+        let key = root + "\u{0}hidden"
+        let group = MenuRow(title: S.hiddenGroup(hidden.count), on: false, indent: 22, chevron: true, switchless: true)
+        group.isExpanded = expanded.contains(key)
+        group.onChevron = { [weak self] in self?.toggleExpanded(key) }
+        var items = [viewItem(group)]
+        guard expanded.contains(key) else { return items }
+        let base = RepoDiscovery.realPath((root as NSString).expandingTildeInPath)
+        for repo in hidden {
+            let relative = repo.path.hasPrefix(base + "/") ? String(repo.path.dropFirst(base.count + 1)) : repo.name
+            let row = MenuRow(title: relative.replacingOccurrences(of: "/", with: RepoTree.separator), on: false, indent: 44,
+                              slot: .restore, switchless: true, tooltip: repo.path)
+            row.onRemove = { [weak self] in
+                self?.store.setHidden(repo.path, hidden: false)
+                DispatchQueue.main.async { self?.renderFolders() }
+            }
+            items.append(viewItem(row))
+        }
         return items
     }
 
@@ -260,7 +334,13 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         let locked: () -> Bool = { [weak self] in self?.store.disabledRoots.contains(root) ?? false }
         switch node {
         case .repo(let repo, let title):
-            let row = MenuRow(title: title, on: true, indent: indent, tooltip: repo.path)
+            let row = MenuRow(title: title, on: true, indent: indent, slot: .hide, tooltip: repo.path)
+            row.showsHide = optionDown
+            row.onRemove = { [weak self] in
+                self?.store.setHidden(repo.path, hidden: true)
+                DispatchQueue.main.async { self?.renderFolders() }
+            }
+            hideRows.append(row)
             let state: () -> SwitchState = { [weak self] in
                 self?.store.disabledRepos.contains(repo.path) == true ? .off : .on
             }

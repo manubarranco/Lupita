@@ -46,6 +46,19 @@ final class IndexStore {
         get { Set(UserDefaults.standard.stringArray(forKey: "disabledRepos") ?? []) }
         set { UserDefaults.standard.set(newValue.sorted(), forKey: "disabledRepos") }
     }
+    /// Repos the user hid from a folder's list (D45): out of the menu's list and out of the index,
+    /// kept under «Hidden» to bring back. Their switch is kept for when they come back.
+    var hiddenRepos: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "hiddenRepos") ?? []) }
+        set { UserDefaults.standard.set(newValue.sorted(), forKey: "hiddenRepos") }
+    }
+    /// What the index leaves out: repos switched off and repos hidden.
+    private var excludedRepos: Set<String> { disabledRepos.union(hiddenRepos) }
+
+    func setHidden(_ path: String, hidden: Bool) {
+        if hidden { hiddenRepos.insert(path) } else { hiddenRepos.remove(path) }
+        rebuild()
+    }
     private var activeRoots: [String] { roots.filter { !disabledRoots.contains($0) } }
 
     func setRoot(_ root: String, enabled: Bool) {
@@ -69,7 +82,9 @@ final class IndexStore {
         let oldBase = RepoDiscovery.realPath((root as NSString).expandingTildeInPath)
         let newBase = RepoDiscovery.realPath(new)
         if disabledRoots.remove(root) != nil { disabledRoots.insert(new) }
-        disabledRepos = Set(disabledRepos.map { $0 == oldBase || $0.hasPrefix(oldBase + "/") ? newBase + $0.dropFirst(oldBase.count) : $0 })
+        let moved: (String) -> String = { $0 == oldBase || $0.hasPrefix(oldBase + "/") ? newBase + $0.dropFirst(oldBase.count) : $0 }
+        disabledRepos = Set(disabledRepos.map(moved))
+        hiddenRepos = Set(hiddenRepos.map(moved))
         roots = Array(Set(roots.map { $0 == root ? new : $0 })).sorted()
     }
 
@@ -77,7 +92,9 @@ final class IndexStore {
     func removeRoot(_ root: String) {
         let base = RepoDiscovery.realPath((root as NSString).expandingTildeInPath)
         disabledRoots.remove(root)
-        disabledRepos = disabledRepos.filter { $0 != base && !$0.hasPrefix(base + "/") }
+        let outside: (String) -> Bool = { $0 != base && !$0.hasPrefix(base + "/") }
+        disabledRepos = disabledRepos.filter(outside)
+        hiddenRepos = hiddenRepos.filter(outside)
         roots = roots.filter { $0 != root }
     }
 
@@ -95,7 +112,7 @@ final class IndexStore {
     func rebuild() {
         isBuilding = true
         notify()
-        let roots = activeRoots, excluding = disabledRepos
+        let roots = activeRoots, excluding = excludedRepos
         watcher.watch(roots)
         Task.detached(priority: .utility) {
             let index = RefIndex.build(roots: roots, excluding: excluding)
@@ -139,7 +156,7 @@ final class IndexStore {
     private func drain() {
         guard !running, var index, rediscoverQueued || !queued.isEmpty else { return }
         running = true
-        let repos = Array(queued.values), rediscover = rediscoverQueued, roots = activeRoots, excluding = disabledRepos
+        let repos = Array(queued.values), rediscover = rediscoverQueued, roots = activeRoots, excluding = excludedRepos
         queued = [:]
         rediscoverQueued = false
         Task.detached(priority: .utility) {

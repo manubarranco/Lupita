@@ -156,6 +156,9 @@ public enum S {
         t("Lupita can't find this folder. Was it moved? Click to find it.",
           "Lupita no encuentra esta carpeta. ¿La has movido? Pulsa para buscarla.")
     }
+    public static var hideRepo: String { t("Hide from the list (and from searches)", "Ocultar de la lista (y de las búsquedas)") }
+    public static var showRepo: String { t("Show again", "Volver a mostrar") }
+    public static func hiddenGroup(_ n: Int) -> String { t("Hidden (\(n))", "Ocultos (\(n))") }
     public static var findFolder: String { t("Find", "Buscar") }
     public static func whereIsFolder(_ path: String) -> String { t("Where is \(path) now?", "¿Dónde está ahora \(path)?") }
 
