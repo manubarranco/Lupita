@@ -19,7 +19,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.delegate = self
         item.menu = menu
         NotificationCenter.default.addObserver(forName: IndexStore.changed, object: store, queue: .main) { [weak self] _ in
-            MainActor.assumeIsolated { self?.refreshHeader() }
+            MainActor.assumeIsolated { self?.refreshNote() }
         }
     }
 
@@ -55,27 +55,62 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     /// Dev aid (`lupita poke --menu`): opens the menu as a click on the icon would.
     func open(expanding: Bool = false) {
-        if expanding { expanded = Set(store.roots) }
+        if expanding { expandAll() }
         item.button?.performClick(nil)
     }
 
+    private func expandAll() {
+        func folders(_ node: RepoNode) -> [String] {
+            guard case .folder(let path, _, let children) = node else { return [] }
+            return [path] + children.flatMap(folders)
+        }
+        expanded = Set(store.roots + repoCache.flatMap { RepoTree.build(root: $0.key, repos: $0.value).flatMap(folders) })
+    }
+
+    /// Dev aid (`--render-menu`): the menu as it opens, with every folder's repos found and shown.
+    /// `missingPermissions`: draw the permissions section as if neither were granted.
+    func filledForGallery(missingPermissions: Bool) -> NSMenu {
+        repoCache = Dictionary(uniqueKeysWithValues: store.roots.map { ($0, RepoDiscovery.repos(under: [$0])) })
+        expandAll()
+        forceMissingPermissions = missingPermissions
+        let menu = NSMenu()
+        menuNeedsUpdate(menu)
+        return menu
+    }
+    private var forceMissingPermissions = false
+    /// Where a folder's name starts when it has a chevron: rows without one line up with it.
+    private static let chevronSpace: CGFloat = 16
+
     private lazy var header = MenuHeader(title: S.appName)
-    /// Folders whose repos are showing, the repos found in each, and the items now in the menu.
+    private lazy var note = MenuNote()
+    /// Folders and subfolders whose repos are showing, the repos found in each root, and the folder
+    /// rows now in the menu (they go right after `note`).
     private var expanded: Set<String> = []
     private var repoCache: [String: [Repo]] = [:]
-    private var repoItems: [String: [NSMenuItem]] = [:]
-    private var folderItems: [String: NSMenuItem] = [:]
+    private var folderRows: [NSMenuItem] = []
+    private var noteItem: NSMenuItem?
+    /// Each switch row with how to work out its state, to refresh them in place after a toggle.
+    private var stateRows: [(row: MenuRow, state: () -> SwitchState)] = []
 
-    private func refreshHeader() { header.update([store.summary, store.freshness]) }
+    private func refreshNote() { note.update([store.summary, store.freshness]) }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         menu.autoenablesItems = false
-        repoItems = [:]
-        folderItems = [:]
-        refreshHeader()
+        folderRows = []
+        stateRows = []
+        refreshNote()
         menu.addItem(viewItem(header))
         menu.addItem(.separator())
+
+        // Permissions only when one is missing: then they come first (D44).
+        let missing = [(S.accessibility, Permissions.accessibility, Permissions.Pane.accessibility),
+                       (S.screenRecording, Permissions.screenRecording, Permissions.Pane.screenRecording)].filter { !$0.1 || forceMissingPermissions }
+        if !missing.isEmpty {
+            menu.addItem(.sectionHeader(title: S.permissions))
+            for (name, _, pane) in missing { menu.addItem(permissionItem(name, pane: pane)) }
+            menu.addItem(.separator())
+        }
 
         let shortcut = NSMenuItem(title: S.shortcut(HotkeyChoice.current.short), action: nil, keyEquivalent: "")
         let choices = NSMenu()
@@ -91,6 +126,19 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.addItem(viewItem(lens))
         menu.addItem(.separator())
 
+        menu.addItem(.sectionHeader(title: S.folders))
+        let noteItem = viewItem(note)
+        menu.addItem(noteItem)
+        self.noteItem = noteItem
+        let add = action(S.addFolder, #selector(addRoot))
+        add.image = NSImage(systemSymbolName: "plus.circle", accessibilityDescription: nil)
+        menu.addItem(add)
+        menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
+        menu.addItem(action(S.reindex, #selector(reindex)))
+        // Hidden: only there when ⌥ is held as the menu opens (D40).
+        if NSEvent.modifierFlags.contains(.option) { menu.addItem(action(S.idReportMenu, #selector(idReport))) }
+        menu.addItem(.separator())
+
         menu.addItem(.sectionHeader(title: S.explainTermsOf))
         for package in TermPackage.allCases {
             let row = MenuRow(title: VocabularyPackages.title(package), on: VocabularyPackages.isOn(package))
@@ -99,24 +147,14 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         menu.addItem(.separator())
 
-        menu.addItem(.sectionHeader(title: S.folders))
-        for root in store.roots { addFolder(root, to: menu) }
-        menu.addItem(action(S.addFolder, #selector(addRoot)))
-        menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
-        menu.addItem(action(S.reindex, #selector(reindex)))
-        // Hidden: only there when ⌥ is held as the menu opens (D40).
-        if NSEvent.modifierFlags.contains(.option) { menu.addItem(action(S.idReportMenu, #selector(idReport))) }
-        menu.addItem(.separator())
-
-        menu.addItem(.sectionHeader(title: S.permissions))
-        menu.addItem(permissionItem(S.accessibility, granted: Permissions.accessibility, pane: .accessibility))
-        menu.addItem(permissionItem(S.screenRecording, granted: Permissions.screenRecording, pane: .screenRecording))
-        menu.addItem(.separator())
         menu.addItem(action(S.about, #selector(showAbout)))
         menu.addItem(action(S.help, #selector(openHelp)))
         menu.addItem(action(Updater.availableVersion.map(S.downloadUpdate) ?? S.checkForUpdates, #selector(checkForUpdates)))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: S.quit, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+
+        renderFolders()
+        discoverRepos()
     }
 
     private func viewItem(_ view: NSView) -> NSMenuItem {
@@ -127,30 +165,157 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     // MARK: Folders and their repos
 
-    private func addFolder(_ root: String, to menu: NSMenu) {
-        let on = !store.disabledRoots.contains(root)
-        let row = MenuRow(title: (root as NSString).abbreviatingWithTildeInPath, on: on, chevron: true, trash: true, tooltip: root)
+    /// Finds the repos of every folder in the background; the folder rows are redrawn when the list
+    /// changes (a repo cloned or moved meanwhile). The cache keeps the menu instant on the next open.
+    private func discoverRepos() {
+        let roots = store.roots
+        Task { [weak self] in
+            let found = await Task.detached(priority: .userInitiated) {
+                Dictionary(uniqueKeysWithValues: roots.map { ($0, RepoDiscovery.repos(under: [$0])) })
+            }.value
+            guard let self else { return }
+            let changed = roots.contains { found[$0] != repoCache[$0] }
+            repoCache.merge(found) { $1 }
+            if changed { renderFolders() }
+        }
+    }
+
+    /// Redraws the folder rows, right under the stats note.
+    private func renderFolders() {
+        guard let noteItem, let menu = noteItem.menu else { return }
+        folderRows.forEach(menu.removeItem)
+        folderRows = []
+        stateRows = []
+        var index = menu.index(of: noteItem)
+        for item in store.roots.flatMap(folderItems) {
+            index += 1
+            menu.insertItem(item, at: index)
+            folderRows.append(item)
+        }
+    }
+
+    /// Updates every switch after a toggle, so a folder shows mixed as soon as one of its repos goes off.
+    private func refreshStates() {
+        for (row, state) in stateRows { row.setState(state()) }
+    }
+
+    private func folderItems(_ root: String) -> [NSMenuItem] {
+        let title = (root as NSString).abbreviatingWithTildeInPath
+        var isDir: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: (root as NSString).expandingTildeInPath, isDirectory: &isDir), isDir.boolValue else {
+            // Moved or deleted: a warning instead of the switch, which opens a panel to find it.
+            let row = MenuRow(title: title, on: false, indent: Self.chevronSpace, removable: true, missing: true, tooltip: root)
+            row.onFind = { [weak self] in self?.closeMenu(then: { self?.findMoved(root) }) }
+            row.onRemove = { [weak self] in self?.closeMenu(then: { self?.confirmRemove(root) }) }
+            return [viewItem(row)]
+        }
+
+        let repos = repoCache[root]
+        let nodes = repos.map { RepoTree.build(root: root, repos: $0) } ?? []
+        // One repo: no list to open, the folder's row is that repo's switch.
+        let single = nodes.count == 1 && nodes[0].repos.count == 1
+        let rootRepos = nodes.flatMap(\.repos)
+        let rootState: () -> SwitchState = { [weak self] in
+            guard let self, !store.disabledRoots.contains(root) else { return .off }
+            return RepoTree.state(of: rootRepos, disabled: store.disabledRepos)
+        }
+        let hasList = !nodes.isEmpty && !single
+        let row = MenuRow(title: single && nodes[0].title != (root as NSString).lastPathComponent
+                              ? title + RepoTree.separator + nodes[0].title : title,
+                          on: true, indent: hasList || repos == nil ? 0 : Self.chevronSpace,
+                          chevron: hasList || repos == nil, removable: true, tooltip: root)
+        row.setState(rootState())
         row.isExpanded = expanded.contains(root)
-        let item = viewItem(row)
         row.onToggle = { [weak self] on in
             guard let self else { return }
-            store.setRoot(root, enabled: on)
-            repoItems[root]?.forEach { ($0.view as? MenuRow)?.setLocked(!on) }
+            let paths = rootRepos.map(\.path)
+            if !on {
+                store.setRoot(root, enabled: false)
+            } else if store.disabledRoots.contains(root) {
+                // Back on: the repos as they were, unless that leaves nothing on.
+                store.setRoot(root, enabled: true)
+                if RepoTree.state(of: rootRepos, disabled: store.disabledRepos) == .off { store.setRepos(paths, enabled: true) }
+            } else {
+                // From mixed: everything on.
+                store.setRepos(paths, enabled: true)
+            }
+            // Redrawn after the click returns: the repos below lock or unlock with the folder.
+            DispatchQueue.main.async { [weak self] in self?.renderFolders() }
         }
-        row.onChevron = { [weak self, weak row, weak item] in
-            guard let self, let row, let item else { return }
-            if expanded.remove(root) == nil { expanded.insert(root) }
-            row.isExpanded = expanded.contains(root)
-            showRepos(of: root, after: item)
+        row.onChevron = { [weak self] in self?.toggleExpanded(root) }
+        row.onRemove = { [weak self] in self?.closeMenu(then: { self?.confirmRemove(root) }) }
+        stateRows.append((row, rootState))
+        var items = [viewItem(row)]
+        if hasList, expanded.contains(root) { items += nodes.flatMap { nodeItems($0, root: root, depth: 1) } }
+        return items
+    }
+
+    private func nodeItems(_ node: RepoNode, root: String, depth: Int) -> [NSMenuItem] {
+        let indent = CGFloat(depth) * 22
+        let locked: () -> Bool = { [weak self] in self?.store.disabledRoots.contains(root) ?? false }
+        switch node {
+        case .repo(let repo, let title):
+            let row = MenuRow(title: title, on: true, indent: indent, tooltip: repo.path)
+            let state: () -> SwitchState = { [weak self] in
+                self?.store.disabledRepos.contains(repo.path) == true ? .off : .on
+            }
+            row.setState(state())
+            row.setLocked(locked())
+            row.onToggle = { [weak self] on in
+                self?.store.setRepo(repo.path, enabled: on)
+                self?.refreshStates()
+            }
+            stateRows.append((row, state))
+            return [viewItem(row)]
+        case .folder(let path, let title, let children):
+            let repos = node.repos
+            let row = MenuRow(title: title, on: true, indent: indent, chevron: true, tooltip: path)
+            let state: () -> SwitchState = { [weak self] in
+                RepoTree.state(of: repos, disabled: self?.store.disabledRepos ?? [])
+            }
+            row.setState(state())
+            row.setLocked(locked())
+            row.isExpanded = expanded.contains(path)
+            row.onToggle = { [weak self] on in
+                self?.store.setRepos(repos.map(\.path), enabled: on)
+                self?.refreshStates()
+            }
+            row.onChevron = { [weak self] in self?.toggleExpanded(path) }
+            stateRows.append((row, state))
+            var items = [viewItem(row)]
+            if expanded.contains(path) { items += children.flatMap { nodeItems($0, root: root, depth: depth + 1) } }
+            return items
         }
-        row.onTrash = { [weak self] in
-            // Close the menu first: an alert cannot run inside its tracking loop.
-            self?.item.menu?.cancelTracking()
-            DispatchQueue.main.async { self?.confirmRemove(root) }
-        }
-        folderItems[root] = item
-        menu.addItem(item)
-        if expanded.contains(root) { showRepos(of: root, after: item) }
+    }
+
+    private func toggleExpanded(_ path: String) {
+        if expanded.remove(path) == nil { expanded.insert(path) }
+        // After the click returns: the row being clicked is one of those redrawn.
+        DispatchQueue.main.async { [weak self] in self?.renderFolders() }
+    }
+
+    /// Closes the menu first: an alert or a panel cannot run inside its tracking loop.
+    private func closeMenu(then work: @escaping () -> Void) {
+        item.menu?.cancelTracking()
+        DispatchQueue.main.async(execute: work)
+    }
+
+    /// A folder that is no longer where it was: the user points at its new place.
+    private func findMoved(_ root: String) {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.prompt = S.findFolder
+        panel.message = S.whereIsFolder((root as NSString).abbreviatingWithTildeInPath)
+        // Start next to where it was: a moved folder is often one level up or down.
+        var parent = ((root as NSString).expandingTildeInPath as NSString).deletingLastPathComponent
+        while !FileManager.default.fileExists(atPath: parent), parent != "/" { parent = (parent as NSString).deletingLastPathComponent }
+        panel.directoryURL = URL(fileURLWithPath: parent)
+        NSApp.activate()
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        expanded.remove(root)
+        repoCache[root] = nil
+        store.relocateRoot(root, to: url.path)
     }
 
     func confirmRemove(_ root: String, dryRun: Bool = false) {
@@ -197,50 +362,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         view.subviews.flatMap { ($0 as? NSImageView).map { [$0] } ?? imageViews(in: $0) }
     }
 
-    private func removeRepoItems(of root: String) {
-        for item in repoItems.removeValue(forKey: root) ?? [] { item.menu?.removeItem(item) }
-    }
-
-    /// Shows (or hides) the repos of a folder right under its row. The list comes from the cache at
-    /// once and is refreshed in the background, so a repo cloned meanwhile appears.
-    private func showRepos(of root: String, after folder: NSMenuItem) {
-        removeRepoItems(of: root)
-        guard expanded.contains(root) else { return }
-        if let cached = repoCache[root] { insertRepos(cached, of: root, after: folder) }
-        Task { [weak self] in
-            let found = await Task.detached(priority: .userInitiated) {
-                RepoDiscovery.repos(under: [root])
-            }.value
-            guard let self, expanded.contains(root), found != repoCache[root] || repoItems[root] == nil else { return }
-            repoCache[root] = found
-            removeRepoItems(of: root)
-            if let folder = folderItems[root] { insertRepos(found, of: root, after: folder) }
-        }
-    }
-
-    private func insertRepos(_ repos: [Repo], of root: String, after folder: NSMenuItem) {
-        guard let menu = folder.menu, var index = Optional(menu.index(of: folder)), index >= 0 else { return }
-        let rootOn = !store.disabledRoots.contains(root)
-        let off = store.disabledRepos
-        var items: [NSMenuItem] = []
-        for repo in repos {
-            let row = MenuRow(title: repo.name, on: !off.contains(repo.path), indent: 22, tooltip: repo.path)
-            row.setLocked(!rootOn)
-            row.onToggle = { [weak self] on in self?.store.setRepo(repo.path, enabled: on) }
-            let item = viewItem(row)
-            index += 1
-            menu.insertItem(item, at: index)
-            items.append(item)
-        }
-        repoItems[root] = items
-    }
-
-    private func disabled(_ title: String) -> NSMenuItem {
-        let item = NSMenuItem(title: title, action: nil, keyEquivalent: "")
-        item.isEnabled = false
-        return item
-    }
-
     private func action(_ title: String, _ selector: Selector, represented: Any? = nil) -> NSMenuItem {
         let item = NSMenuItem(title: title, action: selector, keyEquivalent: "")
         item.target = self
@@ -248,9 +369,13 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         return item
     }
 
-    private func permissionItem(_ name: String, granted: Bool, pane: Permissions.Pane) -> NSMenuItem {
-        if granted { return disabled("✓ \(name)") }
-        return action(S.grant(name), #selector(openPane(_:)), represented: pane.rawValue)
+    /// A missing permission, in orange so it stands out: without it Lupita cannot read the screen.
+    private func permissionItem(_ name: String, pane: Permissions.Pane) -> NSMenuItem {
+        let item = action(S.grant(name), #selector(openPane(_:)), represented: pane.rawValue)
+        let config = NSImage.SymbolConfiguration(paletteColors: [.systemOrange])
+        item.image = NSImage(systemSymbolName: "exclamationmark.triangle.fill", accessibilityDescription: nil)?
+            .withSymbolConfiguration(config)
+        return item
     }
 
     @objc private func showAbout() {

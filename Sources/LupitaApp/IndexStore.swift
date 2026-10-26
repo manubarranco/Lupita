@@ -58,6 +58,21 @@ final class IndexStore {
         rebuild()
     }
 
+    /// Several repos at once (a subfolder's switch), with one rebuild.
+    func setRepos(_ paths: [String], enabled: Bool) {
+        if enabled { disabledRepos.subtract(paths) } else { disabledRepos.formUnion(paths) }
+        rebuild()
+    }
+
+    /// A folder that was moved: the new path takes its place, its switch and what was off inside it.
+    func relocateRoot(_ root: String, to new: String) {
+        let oldBase = RepoDiscovery.realPath((root as NSString).expandingTildeInPath)
+        let newBase = RepoDiscovery.realPath(new)
+        if disabledRoots.remove(root) != nil { disabledRoots.insert(new) }
+        disabledRepos = Set(disabledRepos.map { $0 == oldBase || $0.hasPrefix(oldBase + "/") ? newBase + $0.dropFirst(oldBase.count) : $0 })
+        roots = Array(Set(roots.map { $0 == root ? new : $0 })).sorted()
+    }
+
     /// Forgets a folder and what was switched off inside it.
     func removeRoot(_ root: String) {
         let base = RepoDiscovery.realPath((root as NSString).expandingTildeInPath)

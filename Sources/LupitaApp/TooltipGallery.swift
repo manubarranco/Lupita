@@ -143,7 +143,6 @@ enum TooltipGallery {
     private static func menuImage(off: Set<TermPackage>) -> NSImage {
         let rows: [NSView] = {
             let header = MenuHeader(title: S.appName)
-            header.update([S.summary(ids: 1240, repos: 14, files: 380), S.updated(seconds: 42)])
             let lens = MenuRow(title: S.lens, on: true)
             let title = NSTextField(labelWithString: S.explainTermsOf)
             title.font = .systemFont(ofSize: 11, weight: .semibold)
@@ -171,6 +170,77 @@ enum TooltipGallery {
         image.addRepresentation(rep)
         return image
     }
+
+    // MARK: Menu sheet (D44)
+
+    /// `LupitaApp --render-menu <dir>` writes `menu-light.png` and `menu-dark.png` (permissions granted as they
+    /// are) and `menu-permissions.png` (both missing): the real menu, its folders opened, drawn item by item.
+    static func runMenu(_ dir: String?) -> Int32 {
+        guard let dir else {
+            FileHandle.standardError.write(Data("usage: LupitaApp --render-menu <dir>\n".utf8))
+            return 1
+        }
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        let status = StatusMenu(store: IndexStore(), onHotkeyChange: { _ in })
+        for (name, dark, missing) in [("menu-light", false, false), ("menu-dark", true, false), ("menu-permissions", false, true)] {
+            let image = menuImage(status.filledForGallery(missingPermissions: missing), dark: dark)
+            guard let tiff = image.tiffRepresentation, let png = NSBitmapImageRep(data: tiff)?.representation(using: .png, properties: [:])
+            else { return 2 }
+            try? png.write(to: URL(fileURLWithPath: dir + "/" + name + ".png"))
+            print(name)
+        }
+        return 0
+    }
+
+    /// Each item as the menu draws it: views as they are, text items as label plus icon, separators as a line.
+    private static func menuImage(_ menu: NSMenu, dark: Bool) -> NSImage {
+        let rows: [NSView] = menu.items.map { item in
+            if let view = item.view { return view }
+            let row = NSView(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: item.isSeparatorItem ? 11 : 24))
+            if item.isSeparatorItem {
+                let line = NSBox(frame: NSRect(x: MenuRow.inset, y: 5, width: MenuRow.width - MenuRow.inset * 2, height: 1))
+                line.boxType = .separator
+                row.addSubview(line)
+                return row
+            }
+            var x = MenuRow.inset
+            if let image = item.image {
+                let icon = NSImageView(frame: NSRect(x: x, y: 4, width: 16, height: 16))
+                icon.image = image
+                icon.contentTintColor = .labelColor
+                row.addSubview(icon)
+                x += 22
+            }
+            let label = NSTextField(labelWithString: item.title + (item.submenu != nil ? "  ›" : ""))
+            label.font = item.isSectionHeader ? .systemFont(ofSize: 11, weight: .semibold) : .menuFont(ofSize: 0)
+            label.textColor = item.isSectionHeader ? .secondaryLabelColor : .labelColor
+            label.frame = NSRect(x: x, y: 3, width: MenuRow.width - x - MenuRow.inset, height: 17)
+            row.addSubview(label)
+            return row
+        }
+        let height = rows.reduce(0) { $0 + $1.frame.height } + 12
+        let card = NSView(frame: NSRect(x: 0, y: 0, width: MenuRow.width, height: height))
+        card.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
+        card.wantsLayer = true
+        card.layer?.backgroundColor = (dark ? NSColor(white: 0.17, alpha: 1) : NSColor(white: 0.97, alpha: 1)).cgColor
+        var y = height - 6
+        for row in rows {
+            y -= row.frame.height
+            // A menu item keeps hold of its view's frame: draw it inside a holder placed at the row.
+            let holder = NSView(frame: NSRect(x: 0, y: y, width: MenuRow.width, height: row.frame.height))
+            row.removeFromSuperview()
+            row.setFrameOrigin(.zero)
+            holder.addSubview(row)
+            card.addSubview(holder)
+        }
+        card.layoutSubtreeIfNeeded()
+        let rep = card.bitmapImageRepForCachingDisplay(in: card.bounds)!
+        card.cacheDisplay(in: card.bounds, to: rep)
+        let image = NSImage(size: card.bounds.size)
+        image.addRepresentation(rep)
+        return image
+    }
+
 }
 
 private struct VocabularySheet: View {

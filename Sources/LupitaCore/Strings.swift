@@ -152,6 +152,12 @@ public enum S {
     public static var screenRecording: String { t("Screen Recording (OCR)", "Grabación de pantalla (OCR)") }
     public static func grant(_ permission: String) -> String { t("Grant \(permission)…", "Conceder \(permission)…") }
     public static var quit: String { t("Quit", "Salir") }
+    public static var folderMissing: String {
+        t("Lupita can't find this folder. Was it moved? Click to find it.",
+          "Lupita no encuentra esta carpeta. ¿La has movido? Pulsa para buscarla.")
+    }
+    public static var findFolder: String { t("Find", "Buscar") }
+    public static func whereIsFolder(_ path: String) -> String { t("Where is \(path) now?", "¿Dónde está ahora \(path)?") }
 
     // MARK: Permissions
     public static var permissionsTitle: String {
