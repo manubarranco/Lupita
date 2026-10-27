@@ -129,9 +129,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let live = HoldGeneration(generation)
         currentHold?.end()
         currentHold = live
-        let words = read.words, windowDark = read.isDark
+        let words = read.words, windowDark = read.isDark, pointer = Screen.topLeft(NSEvent.mouseLocation)
         Task.detached(priority: .userInitiated) {
-            HighlightPicker.findSymbols(candidates, resolver: resolver, stop: { !live.isCurrent }) { found in
+            HighlightPicker.findSymbols(candidates, resolver: resolver, near: pointer, stop: { !live.isCurrent }) { found in
                 Task { @MainActor [weak self] in
                     guard let self, live.isCurrent, self.highlight.showing else { return }
                     self.highlight.add(found.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: words) ?? windowDark, $0.kind) })

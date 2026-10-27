@@ -38,9 +38,14 @@ public enum HighlightPicker {
     /// Looks the candidates up in parallel and calls `found` with the marks of each name defined in a repo, in
     /// the order the answers come back (on a background thread). `stop` is checked before each lookup, so
     /// letting go of the shortcut drops what has not started.
-    public static func findSymbols(_ candidates: [String: [CGRect]], resolver: Resolver,
+    /// `near`: the pointer; the names closest to it are looked up first, and past `maxSymbolLookups` the far ones wait.
+    public static func findSymbols(_ candidates: [String: [CGRect]], resolver: Resolver, near: CGPoint? = nil,
                                    stop: @escaping @Sendable () -> Bool, found: @escaping @Sendable ([Mark]) -> Void) {
-        let names = Array(candidates.keys.sorted().prefix(maxSymbolLookups))
+        func distance(_ name: String) -> CGFloat {
+            guard let near else { return 0 }
+            return candidates[name]?.map { hypot($0.midX - near.x, $0.midY - near.y) }.min() ?? .greatestFiniteMagnitude
+        }
+        let names = Array(candidates.keys.sorted().sorted { distance($0) < distance($1) }.prefix(maxSymbolLookups))
         let repos = resolver.index.repos
         DispatchQueue.concurrentPerform(iterations: names.count) { i in
             guard !stop() else { return }
