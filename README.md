@@ -118,6 +118,8 @@ Requires macOS 14 or later. The release build is for Apple Silicon; on an Intel 
 `Lupita.app` to Applications. The app is not notarized yet, so the first time macOS blocks it: open
 **System Settings → Privacy & Security**, scroll down and click **Open Anyway**.
 
+Lupita opens at login on its own; turn it off with **Open at login** in its menu.
+
 **Updating.** Choose **Check for updates…** in Lupita's menu, then **Install and restart**. Lupita
 downloads the new version, checks it is signed with the same certificate, replaces itself and
 reopens. macOS keeps the permissions, so you don't grant them again. This works from 0.9.0 on: to

@@ -39,6 +39,14 @@ final class HighlightOverlay {
     ///     is (an ID gets a solid line, a term a dashed one).
     func show(_ marks: [(box: CGRect, onDark: Bool, kind: HighlightPicker.Kind)]) {
         hide(animated: false)
+        add(marks, staggered: true)
+        // Shown even when empty, so a second layer (D53) has somewhere to draw while the shortcut is held.
+        showing = true
+    }
+
+    /// Marks that arrive after the first ones (symbols, D53): drawn into the panels already up, without the
+    /// left-to-right stagger.
+    func add(_ marks: [(box: CGRect, onDark: Bool, kind: HighlightPicker.Kind)], staggered: Bool = false) {
         guard !marks.isEmpty, let primary = NSScreen.screens.first else { return }
         let primaryHeight = primary.frame.height
         let reduce = NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
@@ -51,19 +59,7 @@ final class HighlightOverlay {
         for screen in NSScreen.screens {
             let frame = screen.frame
             let here = cocoa.filter { $0.line.intersects(frame) }
-            guard !here.isEmpty else { continue }
-            let panel = NSPanel(contentRect: frame, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
-            panel.isFloatingPanel = true
-            panel.level = .popUpMenu - 1  // under the lens
-            panel.backgroundColor = .clear
-            panel.isOpaque = false
-            panel.hasShadow = false
-            panel.ignoresMouseEvents = true
-            panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
-            let view = NSView(frame: NSRect(origin: .zero, size: frame.size))
-            view.wantsLayer = true
-            panel.contentView = view
-
+            guard !here.isEmpty, let view = panel(for: frame).contentView else { continue }
             for mark in here {
                 let line = Self.line(mark.kind, ink: HighlightStyle.ink(onDark: mark.onDark))
                 line.anchorPoint = CGPoint(x: 0, y: 0.5)
@@ -75,16 +71,36 @@ final class HighlightOverlay {
                 grow.fromValue = 0
                 grow.toValue = 1
                 grow.duration = HighlightStyle.fill
-                grow.beginTime = CACurrentMediaTime() + HighlightStyle.stagger * Double(min(mark.n, HighlightStyle.staggerLimit))
+                grow.beginTime = CACurrentMediaTime() + (staggered ? HighlightStyle.stagger * Double(min(mark.n, HighlightStyle.staggerLimit)) : 0)
                 grow.fillMode = .backwards
                 grow.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.7, 0.2, 1)
                 line.add(grow, forKey: "grow")
             }
-            // A panel made at a screen's frame can be nudged onto the main screen: pin it back.
-            panel.setFrame(frame, display: false)
-            panel.orderFrontRegardless()
-            panels.append(panel)
         }
+    }
+
+    /// Whether the marks of this hold are up (the second layer only draws while they are).
+    private(set) var showing = false
+
+    /// The click-through panel over one screen, made the first time a mark falls on it.
+    private func panel(for frame: CGRect) -> NSPanel {
+        if let existing = panels.first(where: { $0.frame == frame }) { return existing }
+        let panel = NSPanel(contentRect: frame, styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
+        panel.isFloatingPanel = true
+        panel.level = .popUpMenu - 1  // under the lens
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.hasShadow = false
+        panel.ignoresMouseEvents = true
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
+        let view = NSView(frame: NSRect(origin: .zero, size: frame.size))
+        view.wantsLayer = true
+        panel.contentView = view
+        // A panel made at a screen's frame can be nudged onto the main screen: pin it back.
+        panel.setFrame(frame, display: false)
+        panel.orderFrontRegardless()
+        panels.append(panel)
+        return panel
     }
 
     /// A solid bar for an ID; a dashed stroke for a term, round-capped like the bar's corners.
@@ -117,6 +133,7 @@ final class HighlightOverlay {
     }
 
     func hide(animated: Bool = true) {
+        showing = false
         let gone = panels
         panels = []
         guard animated else { gone.forEach { $0.orderOut(nil) }; return }

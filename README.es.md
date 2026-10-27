@@ -118,6 +118,8 @@ Necesita macOS 14 o posterior. La release es para Apple Silicon; en un Mac Intel
 mueve `Lupita.app` a Aplicaciones. La app aún no está notarizada, así que la primera vez que macOS la bloquee:
 abre **Ajustes del Sistema → Privacidad y seguridad**, baja hasta el final y pulsa **Abrir igualmente**.
 
+Lupita se abre sola al iniciar sesión; se apaga con **Abrir al iniciar sesión** en su menú.
+
 **Actualizar.** Elige **Buscar actualizaciones…** en el menú de Lupita y luego **Instalar y reiniciar**.
 Lupita descarga la versión nueva, comprueba que está firmada con el mismo certificado, se sustituye
 y se vuelve a abrir. macOS mantiene los permisos, así que no hay que volver a darlos. Funciona

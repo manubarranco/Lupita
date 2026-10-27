@@ -19,6 +19,40 @@ public enum HighlightPicker {
         for repo in resolver.index.repos { _ = CodeRefs.Tokens.table(for: repo) }
     }
 
+    // MARK: Second layer: symbols (D53)
+
+    /// The words shaped like code symbols (`build_glyphs`, `ARM_TENSION`, `bakeBowlStemOpen`, `slider()`, or in
+    /// a code font) that no first-layer mark covers, by name. Looking one up costs a search through the repos'
+    /// source files (about 0.1 s), so these are underlined after the rest, as each lookup comes back.
+    public static func symbolCandidates(words: [OCRWord], excluding marks: [Mark]) -> [String: [CGRect]] {
+        var out: [String: [CGRect]] = [:]
+        for word in words where !marks.contains(where: { $0.box.intersects(word.box) }) {
+            let text = CodeRefs.Text(text: clean(word.text), codeMarked: word.codeStyled, before: "")
+            guard let name = CodeRefs.Symbols.symbolName(text) else { continue }
+            // Only the name itself: `obj.method()` marks the whole word, as the tooltip shows the method.
+            out[name, default: []].append(trimmed(ArraySlice([word])))
+        }
+        return out
+    }
+
+    /// Looks the candidates up in parallel and calls `found` with the marks of each name defined in a repo, in
+    /// the order the answers come back (on a background thread). `stop` is checked before each lookup, so
+    /// letting go of the shortcut drops what has not started.
+    public static func findSymbols(_ candidates: [String: [CGRect]], resolver: Resolver,
+                                   stop: @escaping @Sendable () -> Bool, found: @escaping @Sendable ([Mark]) -> Void) {
+        let names = Array(candidates.keys.sorted().prefix(maxSymbolLookups))
+        let repos = resolver.index.repos
+        DispatchQueue.concurrentPerform(iterations: names.count) { i in
+            guard !stop() else { return }
+            let text = CodeRefs.Text(text: names[i], codeMarked: true, before: "")
+            guard CodeRefs.Symbols.resolve(text, repos: repos, preferredRepo: nil) != nil else { return }
+            found((candidates[names[i]] ?? []).map { Mark(box: $0, kind: .id) })
+        }
+    }
+
+    /// A window full of code (an editor) has hundreds of names: past this many the rest stay unmarked.
+    public static let maxSymbolLookups = 60
+
     /// What a mark points at: an ID defined in the repos (solid line) or a term, a word Lupita explains
     /// (dashed line).
     public enum Kind: Sendable { case id, term }
@@ -148,9 +182,14 @@ public enum HighlightPicker {
         let word = clean(text)
         guard word.count >= 2 else { return nil }
         if let found = known(word, resolver: resolver, block: block, marked: marked, before: before) { return found }
-        // OCR reads the opening «  as a `k` in light windows: `kstashear»`.
-        if text.hasSuffix("»") || text.dropLast().hasSuffix("»"), word.first == "k" || word.first == "K" {
+        // OCR misreads one of a pair of «» as a letter: the opening one as `k` (`kstashear»`), the closing one as
+        // `s` (`«stashears`). With only one of the pair read, the letter on the other end is retried without it.
+        let opens = text.contains("«"), closes = text.contains("»")
+        if closes, !opens, word.first == "k" || word.first == "K" {
             return known(String(word.dropFirst()), resolver: resolver, block: block, marked: marked, before: before)
+        }
+        if opens, !closes, word.last == "s" {
+            return known(String(word.dropLast()), resolver: resolver, block: block, marked: marked, before: before)
         }
         return nil
     }

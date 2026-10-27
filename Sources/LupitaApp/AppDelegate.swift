@@ -20,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// What the OCR read for the marks, kept so the lookup on release does not read the window again.
     /// Dropped when the text may have moved (scroll, another app) and at the next hold.
     private var windowRead: OCR.WindowRead?
+    private var currentHold: HoldGeneration?
     private var scrollMonitors: [Any] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -116,10 +117,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             windowRead = read
             highlight.show(marks.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: read.words) ?? read.isDark, $0.kind) })
             watchForChanges()
+            showSymbols(generation, read: read, marks: marks, resolver: resolver)
+        }
+    }
+
+    /// The second layer (D53): symbols are looked up after the first marks are up, and each one is underlined
+    /// as its answer comes back. Letting go, scrolling or switching app stops the lookups not yet started.
+    private func showSymbols(_ generation: Int, read: OCR.WindowRead, marks: [HighlightPicker.Mark], resolver: Resolver) {
+        let candidates = HighlightPicker.symbolCandidates(words: read.words, excluding: marks)
+        guard !candidates.isEmpty else { return }
+        let live = HoldGeneration(generation)
+        currentHold?.end()
+        currentHold = live
+        let words = read.words, windowDark = read.isDark
+        Task.detached(priority: .userInitiated) {
+            HighlightPicker.findSymbols(candidates, resolver: resolver, stop: { !live.isCurrent }) { found in
+                Task { @MainActor [weak self] in
+                    guard let self, live.isCurrent, self.highlight.showing else { return }
+                    self.highlight.add(found.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: words) ?? windowDark, $0.kind) })
+                }
+            }
         }
     }
 
     private func stopHighlight() {
+        currentHold?.end()
         scrollMonitors.forEach(NSEvent.removeMonitor)
         scrollMonitors = []
         NSWorkspace.shared.notificationCenter.removeObserver(self, name: NSWorkspace.didActivateApplicationNotification, object: nil)
@@ -129,7 +151,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Scrolling or switching app moves the text from under the marks: they go away without a fade, and
     /// stay away until the shortcut is pressed again.
     private func watchForChanges() {
-        let gone: () -> Void = { [weak self] in MainActor.assumeIsolated { self?.windowRead = nil; self?.highlight.hide(animated: false) } }
+        let gone: () -> Void = { [weak self] in MainActor.assumeIsolated { self?.windowRead = nil; self?.currentHold?.end(); self?.highlight.hide(animated: false) } }
         scrollMonitors.append(NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel) { _ in gone() } as Any)
         scrollMonitors.append(NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { gone(); return $0 } as Any)
         NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { _ in gone() }
@@ -291,4 +313,14 @@ enum TriggerLog {
             try? line.write(to: url, atomically: true, encoding: .utf8)
         }
     }
+}
+
+/// Whether a hold of the shortcut is still the current one, readable from the symbol lookups' threads.
+final class HoldGeneration: @unchecked Sendable {
+    private let lock = NSLock()
+    private var ended = false
+    let value: Int
+    init(_ value: Int) { self.value = value }
+    var isCurrent: Bool { lock.lock(); defer { lock.unlock() }; return !ended }
+    func end() { lock.lock(); ended = true; lock.unlock() }
 }

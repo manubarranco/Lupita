@@ -194,14 +194,17 @@ enum TooltipGallery {
         try? FileManager.default.createDirectory(at: repo.appendingPathComponent(".claude/commands"), withIntermediateDirectories: true)
         try? "Retro semanal\n".write(to: repo.appendingPathComponent(".claude/commands/retro.md"), atomically: true, encoding: .utf8)
         try? #"{"scripts": {"build": "astro build"}}"#.write(to: repo.appendingPathComponent("package.json"), atomically: true, encoding: .utf8)
+        // D53: symbols, the second layer.
+        try? "def build_glyphs(p):\n    pass\n\nARM_TENSION = 0.4\n".write(to: repo.appendingPathComponent("engine.py"), atomically: true, encoding: .utf8)
         let index = RefIndex.build(roots: [repo.deletingLastPathComponent().path])
         let resolver = Resolver(index: index)
-        let w: CGFloat = 560, h: CGFloat = 342, scale: CGFloat = 2
+        let w: CGFloat = 560, h: CGFloat = 378, scale: CGFloat = 2
         let lines = ["Según D023 y Q07, el saldo inicial no cambia.", "Haz un rebase y luego un force push a main.",
                      "En atlas, el <dialog> devuelve HTTP 401 y ENOENT.",
                      "Lee decisions.md y glossary.md:2, no notes.md.",
                      "Usa --accent, no --force, y #1a1a1a en localhost:8130.", "Corre npm run build, lanza /retro y mira PR #123.",
-                     "Puedes «stashear» o quedarte en detached HEAD.", "Fue un rebase y luego un fast-", "forward sin conflictos."]
+                     "Puedes «stashear» o quedarte en detached HEAD.", "Fue un rebase y luego un fast-", "forward sin conflictos.",
+                     "Llama build_glyphs con ARM_TENSION, no con no_such_thing."]
         var tiles: [NSImage] = []
         for dark in [false, true] {
             let drawing = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in
@@ -214,7 +217,12 @@ enum TooltipGallery {
             var rect = CGRect(x: 0, y: 0, width: w * scale, height: h * scale)
             guard let cg = drawing.cgImage(forProposedRect: &rect, context: nil, hints: nil),
                   let words = try? OCR.recognize(cg, in: CGRect(x: 0, y: 0, width: w, height: h)) else { return 2 }
-            let marks = HighlightPicker.classified(words: words, resolver: resolver)
+            var marks = HighlightPicker.classified(words: words, resolver: resolver)
+            // The second layer (D53), waited for here: in the app it comes in as each lookup answers.
+            let later = Collected()
+            HighlightPicker.findSymbols(HighlightPicker.symbolCandidates(words: words, excluding: marks), resolver: resolver,
+                                        stop: { false }) { later.add($0) }
+            marks += later.marks
             print((dark ? "dark: " : "light: ") + marks.map { $0.kind == .id ? "id" : "term" }.joined(separator: " "))
             let out = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in
                 drawing.draw(in: r)
@@ -358,4 +366,12 @@ private struct VocabularySheet: View {
         .frame(width: 1460, alignment: .leading)
         .background(Color(nsColor: .windowBackgroundColor))
     }
+}
+
+/// Marks gathered from the symbol lookups' threads.
+final class Collected: @unchecked Sendable {
+    private let lock = NSLock()
+    private var all: [HighlightPicker.Mark] = []
+    func add(_ m: [HighlightPicker.Mark]) { lock.lock(); all += m; lock.unlock() }
+    var marks: [HighlightPicker.Mark] { lock.lock(); defer { lock.unlock() }; return all }
 }

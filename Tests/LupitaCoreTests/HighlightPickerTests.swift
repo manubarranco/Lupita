@@ -172,9 +172,42 @@ import Testing
     /// D51: git words come out alone, inside «», misread as `k…»`, and split across lines.
     @Test func gitWordsInQuotesAndAcrossLines() {
         let r = Self.resolver()
-        #expect(HighlightPicker.marks(words: Self.row("puedes «stashear» o kstashear» antes"), resolver: r).count == 2)
+        #expect(HighlightPicker.marks(words: Self.row("puedes «stashear» o kstashear» o «stashears antes"), resolver: r).count == 3)
+        // A real plural in quotes keeps its s: «rebases» is not misread.
+        #expect(HighlightPicker.marks(words: Self.row("los «saldos» no"), resolver: r).isEmpty)
         #expect(HighlightPicker.marks(words: Self.row("estás en detached HEAD ahora"), resolver: r).count == 1)
         let split = Self.row("hicimos un merge fast-", y: 0) + Self.row("forward ayer", y: 18)
         #expect(HighlightPicker.classified(words: split, resolver: r).map(\.box.minX) == [152, 0])
     }
+
+    /// D53: symbols are a second layer: candidates by shape, found in the repos' source, as answers come back.
+    @Test func symbolsComeAsASecondLayer() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-sym-\(UUID().uuidString)/atlas")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try "def build_glyphs(p):\n    pass\n\nARM_TENSION = 0.4\n".write(to: root.appendingPathComponent("engine.py"), atomically: true, encoding: .utf8)
+        defer { try? FileManager.default.removeItem(at: root.deletingLastPathComponent()) }
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: root.path)]
+        let r = Resolver(index: index)
+        let words = Self.row("llama build_glyphs con ARM_TENSION y no_such_thing ni slider en atlas")
+        let first = HighlightPicker.classified(words: words, resolver: r)
+        let candidates = HighlightPicker.symbolCandidates(words: words, excluding: first)
+        // `slider` is a plain word, `atlas` already marked as a repo: neither is a candidate.
+        #expect(Set(candidates.keys) == ["build_glyphs", "ARM_TENSION", "no_such_thing"])
+        let found = Collected()
+        HighlightPicker.findSymbols(candidates, resolver: r, stop: { false }) { found.add($0) }
+        #expect(found.marks.map(\.box.minX).sorted() == [54, 212])
+        #expect(found.marks.allSatisfy { $0.kind == .id })
+        // Let go before the lookups start: nothing comes back.
+        let none = Collected()
+        HighlightPicker.findSymbols(candidates, resolver: r, stop: { true }) { none.add($0) }
+        #expect(none.marks.isEmpty)
+    }
+}
+
+final class Collected: @unchecked Sendable {
+    private let lock = NSLock()
+    private var all: [HighlightPicker.Mark] = []
+    func add(_ m: [HighlightPicker.Mark]) { lock.lock(); all += m; lock.unlock() }
+    var marks: [HighlightPicker.Mark] { lock.lock(); defer { lock.unlock() }; return all }
 }
