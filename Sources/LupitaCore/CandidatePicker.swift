@@ -156,6 +156,15 @@ public enum CandidatePicker {
         else { return nil }
         func context(_ i: Int) -> String { String(row[..<i].map(\.text).joined(separator: " ").suffix(80)) }
         let block = HighlightPicker.nearbyText(of: nearest, in: words)
+        // In a code font OCR reads `localhost:8130` as `localhost:` and `8130`: the pointer on either half gets the address.
+        let start = target.text.hasSuffix(":") ? index : index > 0 && row[index - 1].text.hasSuffix(":") ? index - 1 : nil
+        if let start, start + 1 < row.count, row[start + 1].box.minX - row[start].box.maxX < row[start].box.height {
+            let joined = row[start].text + row[start + 1].text
+            if CodeRefs.looksLikeAddress(joined),
+               case let r = resolver.resolve(joined, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath, block: block), isFound(r) {
+                return r
+            }
+        }
         let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath, block: block,
                                       codeStyled: target.codeStyled)
         if !isFound(single),

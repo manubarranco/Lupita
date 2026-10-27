@@ -156,6 +156,11 @@ import Testing
         func kinds(_ s: String) -> [HighlightPicker.Kind] { HighlightPicker.classified(words: Self.row(s), resolver: r).map(\.kind) }
         #expect(kinds("usa --accent y #1a1a1a") == [.id, .term])
         #expect(kinds("abre localhost:8130 o http://127.0.0.1:4321/x") == [.term, .term])
+        // OCR splits an address in a code font: one mark over both halves.
+        let split = HighlightPicker.classified(words: Self.row("en localhost: 8130 ya"), resolver: r)
+        #expect(split.count == 1 && split[0].box.minX == 24)
+        // The tooltip answers on either half too.
+        #expect(CandidatePicker.pick(words: Self.row("en localhost: 8130 ya"), cursor: CGPoint(x: 140, y: 7), resolver: r)?.query.hasPrefix("localhost:8130") == true)
         #expect(kinds("lanza /retro y mira PR #123") == [.id, .id])
         // Not a token of the repos, a bare number, a path that is no command, digits only: nothing.
         #expect(kinds("con --force el #12 en /tmp y #333").isEmpty)

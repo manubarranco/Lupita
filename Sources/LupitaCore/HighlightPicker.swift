@@ -39,6 +39,11 @@ public enum HighlightPicker {
                 if i + 1 < row.count, clean(row[i].text).uppercased() == "PR", CodeRefs.matches(prNumber, clean(row[i + 1].text)) {
                     marks.append(Mark(box: trimmed(row[i...i + 1]), kind: .id))
                     i += 2
+                } else if i + 1 < row.count, row[i].text.hasSuffix(":"), row[i + 1].box.minX - row[i].box.maxX < row[i].box.height,
+                          CodeRefs.matches(CodeRefs.Addresses.shape, clean(row[i].text + row[i + 1].text)) {
+                    // In a code font OCR reads `localhost:8130` as two words, `localhost:` and `8130`.
+                    marks.append(Mark(box: trimmed(row[i...i + 1]), kind: .term))
+                    i += 2
                 } else if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
                     marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .term))
                     i += length
