@@ -3,13 +3,20 @@ import Foundation
 
 /// Which OCR words Lupita could explain, for the highlight mode (D39). Only what is cheap to check:
 /// indexed IDs, glossary terms and the fixed dictionaries (git/shell commands, error names), repo names
-/// (D48) and files that exist in a repo (D49, a check on disk). Never symbols, commits, branches or PRs:
-/// they cost a search in the repos for every word.
+/// (D48), files that exist in a repo (D49, a check on disk), and what is told by its shape or one cheap check
+/// (D51): colours, local addresses, `PR #12`, CSS tokens, Claude commands and package scripts. Never symbols,
+/// commits or branches: they cost a search in the repos for every word.
 public enum HighlightPicker {
     /// A box per known word or phrase, in the same coordinates as the words. Phrases of 2 to 4 words
     /// (`fast-forward merge`, `git stash`) give one box.
     public static func marks(words: [OCRWord], resolver: Resolver) -> [CGRect] {
         classified(words: words, resolver: resolver).map(\.box)
+    }
+
+    /// Reads the repos' CSS tokens (D51) while the window is read, so the marks do not wait for them:
+    /// cold they take tens of milliseconds, warm they are a lookup. Call off the main thread.
+    public static func warm(resolver: Resolver) {
+        for repo in resolver.index.repos { _ = CodeRefs.Tokens.table(for: repo) }
     }
 
     /// What a mark points at: an ID defined in the repos (solid line) or a term, a word Lupita explains
@@ -28,7 +35,11 @@ public enum HighlightPicker {
             let block = nearbyText(of: row[0], in: words)
             var i = 0
             while i < row.count {
-                if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
+                // `PR #123`: one solid mark for both words (D51).
+                if i + 1 < row.count, clean(row[i].text).uppercased() == "PR", CodeRefs.matches(prNumber, clean(row[i + 1].text)) {
+                    marks.append(Mark(box: trimmed(row[i...i + 1]), kind: .id))
+                    i += 2
+                } else if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
                     marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .term))
                     i += length
                 } else {
@@ -39,6 +50,22 @@ public enum HighlightPicker {
                     i += 1
                 }
             }
+        }
+        return marks + brokenAcrossLines(rows(of: words), resolver: resolver, words: words)
+    }
+
+    /// A word split at the end of a line with a hyphen (`fast-` / `forward`): both halves are marked when the
+    /// joined word is known (D51). Only between rows right below each other.
+    static func brokenAcrossLines(_ rows: [[OCRWord]], resolver: Resolver, words: [OCRWord]) -> [Mark] {
+        var marks: [Mark] = []
+        for (row, next) in zip(rows, rows.dropFirst()) {
+            guard let end = row.last, let start = next.first, end.text.hasSuffix("-"), !end.text.hasSuffix("--"),
+                  start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
+            let joined = clean(end.text) + clean(start.text)
+            let block = nearbyText(of: end, in: words) + " " + nearbyText(of: start, in: words)
+            guard let kind = kind(of: joined, resolver: resolver, block: block, marked: end.codeStyled) else { continue }
+            marks.append(Mark(box: trimmed(row[(row.count - 1)...]), kind: kind))
+            marks.append(Mark(box: trimmed(next[0...0]), kind: kind))
         }
         return marks
     }
@@ -54,8 +81,8 @@ public enum HighlightPicker {
         return values[values.count / 2] < darkBelow
     }
 
-    static let trailing = CharacterSet(charactersIn: ".,;:!?…)]}\"'`*")
-    static let leading = CharacterSet(charactersIn: "([{\"'`*")
+    static let trailing = CharacterSet(charactersIn: ".,;:!?…)]}\"'`*»”’")
+    static let leading = CharacterSet(charactersIn: "([{\"'`*«“‘")
 
     /// Words on the same line, left to right.
     static func rows(of words: [OCRWord]) -> [[OCRWord]] {
@@ -88,6 +115,12 @@ public enum HighlightPicker {
             if zip(slice, slice.dropFirst()).contains(where: { $1.box.minX - $0.box.maxX > gapLimit }) { continue }
             let phrase = slice.map { clean($0.text) }.joined(separator: " ")
             if resolver.resolveTerm(phrase) != nil { return length }
+            // `npm run build`: a script that exists in a repo's package.json, or a known package command.
+            let parts = phrase.split(separator: " ")
+            if CodeDictionaries.managers.contains(parts[0].lowercased()), length == (["run", "run-script"].contains(parts[1]) ? 3 : 2),
+               CodeRefs.Commands.resolve(CodeRefs.Text(text: phrase, codeMarked: false, before: ""), repos: resolver.index.repos, preferredRepo: nil) != nil {
+                return length
+            }
             if let command = CodeDictionaries.command(phrase.lowercased()), command.safe { return length }
             if GitVocabulary.knows(phrase, block: block) { return length }
         }
@@ -109,6 +142,20 @@ public enum HighlightPicker {
     static func kind(of text: String, resolver: Resolver, block: String, marked: Bool = false, before: String = "") -> Kind? {
         let word = clean(text)
         guard word.count >= 2 else { return nil }
+        if let found = known(word, resolver: resolver, block: block, marked: marked, before: before) { return found }
+        // OCR reads the opening «  as a `k` in light windows: `kstashear»`.
+        if text.hasSuffix("»") || text.dropLast().hasSuffix("»"), word.first == "k" || word.first == "K" {
+            return known(String(word.dropFirst()), resolver: resolver, block: block, marked: marked, before: before)
+        }
+        return nil
+    }
+
+    static let colour = try! NSRegularExpression(pattern: #"^#(?:[0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$"#)
+    static let prNumber = try! NSRegularExpression(pattern: #"^#\d{1,6}$"#)
+
+    private static func known(_ word: String, resolver: Resolver, block: String, marked: Bool, before: String) -> Kind? {
+        guard word.count >= 2 else { return nil }
+        let repos = resolver.index.repos
         if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return .id }
         if resolver.rangeList(word) != nil { return .id }
         // A repo name points at a place, like an ID. A plain lowercase name (`app`, `nib`) needs its exact case, so
@@ -123,7 +170,24 @@ public enum HighlightPicker {
         let code = CodeRefs.Text(text: word, codeMarked: marked, before: before)
         if CodeRefs.Errors.resolve(code, repos: [], preferredRepo: nil) != nil { return .term }
         if let command = CodeDictionaries.command(word.lowercased()), command.safe { return .term }
-        return GitVocabulary.knows(word, block: block, marked: marked) ? .term : nil
+        if GitVocabulary.knows(word, block: block, marked: marked) { return .term }
+        return byShape(word, repos: repos, before: before)
+    }
+
+    /// D51: what the tooltip explains from its shape (a colour, a local address: always an answer, dashed) or
+    /// after one cheap check of something in the repos (a token's declaration, a command's file: solid).
+    /// `PR #12` needs the word before; a bare `#12` could be anything.
+    static func byShape(_ word: String, repos: [Repo], before: String) -> Kind? {
+        if CodeRefs.matches(prNumber, word), CodeRefs.matches(CodeRefs.prWord, before) { return .id }
+        if CodeRefs.matches(colour, word), !word.dropFirst().allSatisfy(\.isNumber) { return .term }
+        if CodeRefs.matches(CodeRefs.Addresses.shape, word) { return .term }
+        if let g = CodeRefs.groups(CodeRefs.Tokens.tokenName, word) {
+            return CodeRefs.Tokens.token(g[1], repos: repos) != nil ? .id : nil
+        }
+        if CodeRefs.matches(RepoRefs.command, word) {
+            return RepoRefs.commands(String(word.dropFirst()), repos: repos).isEmpty ? nil : .id
+        }
+        return nil
     }
 
     /// The box of the words without the punctuation OCR glued to the first and last one.

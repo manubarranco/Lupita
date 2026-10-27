@@ -95,6 +95,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // Read while waiting: a quick press throws the read away, a hold has it ready.
             let point = Screen.topLeft(NSEvent.mouseLocation)
             let read = Task { try? await OCR.window(at: point) }
+            if let resolver = store.resolver { Task.detached(priority: .userInitiated) { HighlightPicker.warm(resolver: resolver) } }
             holdTask = Task { [weak self] in
                 try? await Task.sleep(for: Self.holdThreshold)
                 guard !Task.isCancelled, let self, generation == holdGeneration else { return }

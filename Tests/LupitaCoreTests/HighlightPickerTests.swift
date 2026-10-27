@@ -140,4 +140,36 @@ import Testing
         let marks = HighlightPicker.classified(words: Self.row("per D023 we use fast-forward and git stash"), resolver: Self.resolver())
         #expect(marks.map(\.kind) == [.id, .term, .term])
     }
+
+    /// D51: what the tooltip explains from its shape or one cheap check.
+    @Test func shapesAndCheapChecks() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-hl51-\(UUID().uuidString)/atlas")
+        let fm = FileManager.default
+        try fm.createDirectory(at: root.appendingPathComponent(".claude/commands"), withIntermediateDirectories: true)
+        try "---\ndescription: Retro semanal\n---\n".write(to: root.appendingPathComponent(".claude/commands/retro.md"), atomically: true, encoding: .utf8)
+        try ":root { --accent: #0e5400; }\n".write(to: root.appendingPathComponent("app.css"), atomically: true, encoding: .utf8)
+        try #"{"scripts": {"build": "astro build"}}"#.write(to: root.appendingPathComponent("package.json"), atomically: true, encoding: .utf8)
+        defer { try? fm.removeItem(at: root.deletingLastPathComponent()) }
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: root.path)]
+        let r = Resolver(index: index)
+        func kinds(_ s: String) -> [HighlightPicker.Kind] { HighlightPicker.classified(words: Self.row(s), resolver: r).map(\.kind) }
+        #expect(kinds("usa --accent y #1a1a1a") == [.id, .term])
+        #expect(kinds("abre localhost:8130 o http://127.0.0.1:4321/x") == [.term, .term])
+        #expect(kinds("lanza /retro y mira PR #123") == [.id, .id])
+        // Not a token of the repos, a bare number, a path that is no command, digits only: nothing.
+        #expect(kinds("con --force el #12 en /tmp y #333").isEmpty)
+        let npm = HighlightPicker.classified(words: Self.row("corre npm run build y luego"), resolver: r)
+        // One mark over the three words (`corre` ends at 50, `build` at 172), not over `y luego`.
+        #expect(npm.count == 1 && npm[0].box.minX == 54 && npm[0].box.maxX == 172)
+    }
+
+    /// D51: git words come out alone, inside «», misread as `k…»`, and split across lines.
+    @Test func gitWordsInQuotesAndAcrossLines() {
+        let r = Self.resolver()
+        #expect(HighlightPicker.marks(words: Self.row("puedes «stashear» o kstashear» antes"), resolver: r).count == 2)
+        #expect(HighlightPicker.marks(words: Self.row("estás en detached HEAD ahora"), resolver: r).count == 1)
+        let split = Self.row("hicimos un merge fast-", y: 0) + Self.row("forward ayer", y: 18)
+        #expect(HighlightPicker.classified(words: split, resolver: r).map(\.box.minX) == [152, 0])
+    }
 }

@@ -189,12 +189,19 @@ enum TooltipGallery {
         try? "## D023 — Sin dependencias\nNada nuevo.\n\n## Q07 — Qué falta\nAlgo.\n"
             .write(to: repo.appendingPathComponent("decisions.md"), atomically: true, encoding: .utf8)
         try? "- **saldo inicial** — lo que hay al abrir\n".write(to: repo.appendingPathComponent("glossary.md"), atomically: true, encoding: .utf8)
+        // D51: a token, a Claude command and a package script to find.
+        try? ":root { --accent: #0e5400; }\n".write(to: repo.appendingPathComponent("app.css"), atomically: true, encoding: .utf8)
+        try? FileManager.default.createDirectory(at: repo.appendingPathComponent(".claude/commands"), withIntermediateDirectories: true)
+        try? "Retro semanal\n".write(to: repo.appendingPathComponent(".claude/commands/retro.md"), atomically: true, encoding: .utf8)
+        try? #"{"scripts": {"build": "astro build"}}"#.write(to: repo.appendingPathComponent("package.json"), atomically: true, encoding: .utf8)
         let index = RefIndex.build(roots: [repo.deletingLastPathComponent().path])
         let resolver = Resolver(index: index)
-        let w: CGFloat = 560, h: CGFloat = 162, scale: CGFloat = 2
+        let w: CGFloat = 560, h: CGFloat = 342, scale: CGFloat = 2
         let lines = ["Según D023 y Q07, el saldo inicial no cambia.", "Haz un rebase y luego un force push a main.",
                      "En atlas, el <dialog> devuelve HTTP 401 y ENOENT.",
-                     "Lee decisions.md y glossary.md:2, no notes.md."]
+                     "Lee decisions.md y glossary.md:2, no notes.md.",
+                     "Usa --accent, no --force, y #1a1a1a en localhost:8130.", "Corre npm run build, lanza /retro y mira PR #123.",
+                     "Puedes «stashear» o quedarte en detached HEAD.", "Fue un rebase y luego un fast-", "forward sin conflictos."]
         var tiles: [NSImage] = []
         for dark in [false, true] {
             let drawing = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in
