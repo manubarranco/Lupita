@@ -127,6 +127,7 @@ public enum S {
     }
     public static var pressAndRelease: String { t("press and release", "pulsar y soltar") }
     public static var lens: String { t("Show Lupita", "Mostrar a Lupita") }
+    public static var openAtLogin: String { t("Open at login", "Abrir al iniciar sesión") }
     public static var explainTermsOf: String { t("Explain terms of:", "Explicar términos de:") }
     public static var gitPackage: String { "Git" }
     public static var terminalPackage: String { "Terminal" }

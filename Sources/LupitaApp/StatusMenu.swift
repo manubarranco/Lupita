@@ -107,9 +107,12 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private var hideRows: [MenuRow] = []
     private var optionTimer: Timer?
     private var reindexItem: NSMenuItem?
+    private var loginRow: MenuRow?
     private lazy var reportItem = action(S.idReportMenu, #selector(idReport))
 
     func menuWillOpen(_ menu: NSMenu) {
+        // System Settings › Login Items can change it while the menu is closed.
+        loginRow?.setState(LoginItem.isOn ? .on : .off)
         let timer = Timer(timeInterval: 0.05, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.optionChanged(NSEvent.modifierFlags.contains(.option)) }
         }
@@ -170,6 +173,10 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         let lens = MenuRow(title: S.lens, on: CursorLens.isOn)
         lens.onToggle = { CursorLens.isOn = $0 }
         menu.addItem(viewItem(lens))
+        let login = MenuRow(title: S.openAtLogin, on: LoginItem.isOn)
+        login.onToggle = { LoginItem.set($0) }
+        menu.addItem(viewItem(login))
+        loginRow = login
         menu.addItem(.separator())
 
         menu.addItem(.sectionHeader(title: S.folders))

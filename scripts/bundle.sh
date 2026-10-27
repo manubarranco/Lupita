@@ -20,7 +20,9 @@ if [ -z "$IDENTITY" ]; then
   exit 1
 fi
 swift build -c release --product LupitaApp
-APP=build/Lupita.app
+# Assembled and signed beside the app, then swapped in: if signing fails or waits for a keychain
+# prompt nobody answers, the Lupita.app that has the user's permissions is left as it was.
+APP=build/Lupita.app.new
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp .build/release/LupitaApp "$APP/Contents/MacOS/LupitaApp"
@@ -44,5 +46,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 </dict></plist>
 PLIST
 codesign --force --sign "$IDENTITY" "$APP"
+rm -rf build/Lupita.app
+mv "$APP" build/Lupita.app
+APP=build/Lupita.app
 [ "$IDENTITY" = "-" ] && echo "signed ad-hoc on purpose: permissions reset on every build" || echo "signed with certificate $IDENTITY"
 echo "$APP"
