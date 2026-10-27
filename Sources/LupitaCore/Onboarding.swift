@@ -135,4 +135,12 @@ public enum Versions {
     public static func tag(fromReleaseJSON data: Data) -> String? {
         (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["tag_name"] as? String
     }
+
+    /// The download URL of the release's `Lupita.zip` asset, which "Install and restart" fetches.
+    public static func zipURL(fromReleaseJSON data: Data) -> URL? {
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        let assets = json?["assets"] as? [[String: Any]] ?? []
+        let zip = assets.first { $0["name"] as? String == "Lupita.zip" }
+        return (zip?["browser_download_url"] as? String).flatMap(URL.init(string:))
+    }
 }

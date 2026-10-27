@@ -118,6 +118,13 @@ Requires macOS 14 or later. The release build is for Apple Silicon; on an Intel 
 `Lupita.app` to Applications. The app is not notarized yet, so the first time macOS blocks it: open
 **System Settings → Privacy & Security**, scroll down and click **Open Anyway**.
 
+**Updating.** Choose **Check for updates…** in Lupita's menu, then **Install and restart**. Lupita
+downloads the new version, checks it is signed with the same certificate, replaces itself and
+reopens. macOS keeps the permissions, so you don't grant them again. This works from 0.9.0 on: to
+go from 0.8.0 or earlier to 0.9.0, replace the app by hand once, then in **Privacy & Security**
+remove the old Lupita from **Accessibility** and **Screen Recording** (the **−** button) and grant
+them again. It is the last time.
+
 **From source.** With Xcode or just the Command Line Tools (`xcode-select --install`):
 
 ```bash
@@ -138,7 +145,7 @@ Lupita asks for two macOS permissions, and uses them only when you press the sho
 
 Everything happens on your Mac. Nothing is sent anywhere, and nothing you look up is
 stored. The one exception is **Check for updates…** in the menu: it asks GitHub for the latest
-release, and only when you click it. Lupita never checks in the background. Lupita only keeps its settings and the index of your Markdown files, in memory.
+release, and only when you click it; **Install and restart** then downloads it. Lupita never checks in the background. Lupita only keeps its settings and the index of your Markdown files, in memory.
 
 This is a commitment for future versions too. If Lupita ever uses a language model, it will be
 Apple's on-device model, which runs on your Mac. If a feature ever needed the network, it would

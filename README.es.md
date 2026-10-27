@@ -118,6 +118,13 @@ Necesita macOS 14 o posterior. La release es para Apple Silicon; en un Mac Intel
 mueve `Lupita.app` a Aplicaciones. La app aún no está notarizada, así que la primera vez que macOS la bloquee:
 abre **Ajustes del Sistema → Privacidad y seguridad**, baja hasta el final y pulsa **Abrir igualmente**.
 
+**Actualizar.** Elige **Buscar actualizaciones…** en el menú de Lupita y luego **Instalar y reiniciar**.
+Lupita descarga la versión nueva, comprueba que está firmada con el mismo certificado, se sustituye
+y se vuelve a abrir. macOS mantiene los permisos, así que no hay que volver a darlos. Funciona
+desde la 0.9.0: para pasar de la 0.8.0 o anterior a la 0.9.0, sustituye la app a mano una vez y en
+**Privacidad y seguridad** quita la Lupita antigua de **Accesibilidad** y **Grabación de pantalla**
+(el botón **−**) y vuelve a darle los permisos. Es la última vez.
+
 **Desde el código.** Con Xcode o solo con las Command Line Tools (`xcode-select --install`):
 
 ```bash
@@ -138,7 +145,7 @@ Lupita pide dos permisos de macOS, y solo los usa cuando pulsas el atajo:
 
 Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de lo que
 consultas. La única excepción es **Buscar actualizaciones…** en el menú: pregunta a GitHub por la
-última release, y solo cuando lo pulsas. Lupita nunca comprueba en segundo plano. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
+última release, y solo cuando lo pulsas; **Instalar y reiniciar** la descarga después. Lupita nunca comprueba en segundo plano. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
 
 Es un compromiso también para las versiones futuras. Si Lupita llega a usar un modelo de lenguaje,
 será el modelo de Apple que funciona en tu Mac. Si alguna función necesitara la red, vendría

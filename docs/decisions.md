@@ -164,7 +164,7 @@ permissions, then this window. Approved by Manu, 2026-10-24.
 "Check for updates…" in the menu makes one GET to GitHub's latest-release endpoint and compares `tag_name` with the installed
 version (numeric semver). Never in the background, so "nothing leaves your Mac" stays true except when the user asks. When a newer
 release is found the item becomes "Download Lupita X.Y.Z…" until restart. Automatic installation with Sparkle is postponed until the
-app is notarized. Approved by Manu, 2026-10-24.
+app is notarized. Approved by Manu, 2026-10-24. Install in place: see D50.
 
 ## D26 — Local only, now and in future versions; any language model runs on the Mac
 Replaces the Haiku part of D4. Nothing the user looks up leaves the Mac. If Lupita uses a language model, it is Apple's on-device
@@ -255,3 +255,6 @@ While ⌃⌥⌘ is held, a repo name written with its exact case gets the solid 
 
 ## D49 — The underline marks files and folders that exist in a repo
 While ⌃⌥⌘ is held, a word shaped like a path or a file name (`docs/decisions.md`, `CLAUDE.md:12`) gets the solid line of IDs when it exists in an indexed repo, tried the same ways the tooltip tries it. Only the existence check runs: no git and no reading, which the tooltip still does when the word is looked up. Measured on Manu's repos: 7 ms for a window of 800 words with 440 path-like ones, against about 70 ms for the whole underline. A path that does not exist, or a branch name with a slash, is not marked. A bare markdown name (`decisions.md`) is found wherever the index saw it (a name → paths list filled while indexing, no search on disk), in the tooltip and the underline: the window's repo first and, inside a repo, the shallowest path first (`memory/decisions.md` before `domains/finance/decisions.md`). Bare names of other files (`foo.swift`) still need their path from the repo root. Why: Manu noticed files are not underlined, 2026-10-27; the cost D39 feared was the git lookup, not the check on disk.
+
+## D50 — Releases are signed with one fixed certificate and install themselves in one click
+Every release is signed with the self-signed «Lupita» certificate (10 years, only in Manu's keychain, `scripts/release.sh` refuses any other), and «Check for updates…» offers **Install and restart**: Lupita downloads that release's `Lupita.zip`, accepts it only if it satisfies the running app's designated requirement (same bundle id, same certificate), swaps the bundle and reopens. macOS ties the Accessibility and Screen Recording grants to that requirement, so they carry over. An ad-hoc or dev-signed copy, one run from Downloads without moving it, or a read-only folder still gets «Download…» and the release page. Why: releases ship almost daily, and each ad-hoc release made users delete the app and the permissions and grant them again; reopens D25's «Sparkle after notarization», whose input (rare releases) changed. The paid Apple certificate stays an option for later (it would also remove «Open Anyway»). Approved by Manu, 2026-10-27.

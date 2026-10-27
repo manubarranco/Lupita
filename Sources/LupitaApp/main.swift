@@ -29,6 +29,12 @@ if let i = CommandLine.arguments.firstIndex(of: "--diagnose-window") {
     exit(WindowDiagnostic.run(Array(CommandLine.arguments.dropFirst(i + 1))))
 }
 
+// Development aid: install a release from a local feed without alerts (see Updater).
+if let i = CommandLine.arguments.firstIndex(of: "--update-from") {
+    let code = MainActor.assumeIsolated { Updater.runUpdateFrom(CommandLine.arguments.dropFirst(i + 1).first) }
+    exit(code)
+}
+
 MainActor.assumeIsolated {
     let app = NSApplication.shared
     let delegate = AppDelegate()

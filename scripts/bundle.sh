@@ -1,19 +1,22 @@
 #!/bin/sh
 # Builds build/Lupita.app (menu bar app). No Xcode needed.
-# Signing: a self-signed "Lupita Dev" code-signing certificate in the login keychain (any case)
-# keeps macOS permissions across rebuilds. Without it, the app is signed ad-hoc and macOS
-# forgets the permissions on every build, so the script stops instead. Override with
-# LUPITA_SIGN_IDENTITY; LUPITA_SIGN_IDENTITY=- signs ad-hoc on purpose (the release zip).
-# "Refs Dev" is still accepted: it was the certificate name before the rename.
+# Signing: macOS keeps the Accessibility and Screen Recording permissions only while the app is
+# signed with the same certificate. The script uses, in order: the "Lupita" release certificate
+# (Manu's keychain only, D50: releases and Manu's builds share it), then a self-signed
+# "Lupita Dev" code-signing certificate (contributors; "Refs Dev" is its old name). Without one,
+# it stops. Override with LUPITA_SIGN_IDENTITY; LUPITA_SIGN_IDENTITY=- signs ad-hoc on purpose.
 set -e
 cd "$(dirname "$0")/.."
 # Check the signature first, so a failed check leaves the current build/Lupita.app untouched.
-IDENTITY="${LUPITA_SIGN_IDENTITY:-$(security find-identity -p codesigning | grep -iE '"(Lupita|Refs) Dev"' | head -1 | awk '{print $2}')}"
+IDENTITIES="$(security find-identity -p codesigning)"
+FOUND="$(echo "$IDENTITIES" | grep '"Lupita"' | head -1 | awk '{print $2}')"
+[ -z "$FOUND" ] && FOUND="$(echo "$IDENTITIES" | grep -iE '"(Lupita|Refs) Dev"' | head -1 | awk '{print $2}')"
+IDENTITY="${LUPITA_SIGN_IDENTITY:-$FOUND}"
 if [ -z "$IDENTITY" ]; then
   echo "error: no \"Lupita Dev\" code-signing certificate found, so this build would be signed ad-hoc" >&2
   echo "and macOS would ask for the permissions again. Create the certificate (see README)," >&2
   echo "or, if the keychain is hidden (a sandbox), run outside it." >&2
-  echo "To sign ad-hoc on purpose (the release zip): LUPITA_SIGN_IDENTITY=- $0" >&2
+  echo "To sign ad-hoc on purpose: LUPITA_SIGN_IDENTITY=- $0" >&2
   exit 1
 fi
 swift build -c release --product LupitaApp

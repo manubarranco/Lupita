@@ -200,7 +200,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
         menu.addItem(action(S.about, #selector(showAbout)))
         menu.addItem(action(S.help, #selector(openHelp)))
-        menu.addItem(action(Updater.availableVersion.map(S.downloadUpdate) ?? S.checkForUpdates, #selector(checkForUpdates)))
+        menu.addItem(action(Updater.availableVersion.map(Updater.menuTitle) ?? S.checkForUpdates, #selector(checkForUpdates)))
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: S.quit, action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
 
@@ -473,7 +473,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     @objc private func checkForUpdates() {
         if Updater.availableVersion != nil {
-            NSWorkspace.shared.open(Updater.releasesPage)
+            Updater.offerAvailable()
         } else {
             Task { await Updater.checkAndReport() }
         }

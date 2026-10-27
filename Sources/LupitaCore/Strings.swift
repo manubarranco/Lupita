@@ -284,6 +284,17 @@ public enum S {
     public static func upToDate(_ version: String) -> String { t("You're up to date (\(version))", "Estás al día (\(version))") }
     public static func newVersion(_ version: String) -> String { t("There is a new version: \(version)", "Hay una versión nueva: \(version)") }
     public static var download: String { t("Download", "Descargar") }
+    public static var installAndRestart: String { t("Install and restart", "Instalar y reiniciar") }
+    public static func installUpdate(_ version: String) -> String { t("Install \(appName) \(version)…", "Instalar \(appName) \(version)…") }
+    public static var installing: String { t("Installing the update…", "Instalando la actualización…") }
+    public static var permissionsKept: String {
+        t("Your macOS permissions carry over: you don't need to grant them again.",
+          "Los permisos de macOS se mantienen: no hace falta volver a darlos.")
+    }
+    public static var installFailed: String {
+        t("Couldn't install the update. You can download it and replace the app by hand.",
+          "No se pudo instalar la actualización. Puedes descargarla y sustituir la app a mano.")
+    }
     public static var updateCheckFailed: String {
         t("Couldn't check for updates. Check your connection and try again.", "No se pudo buscar actualizaciones. Revisa tu conexión y vuelve a intentarlo.")
     }
