@@ -1,7 +1,7 @@
 {
   "id": "papel",
   "name": "Papel",
-  "blurb": "Serif editorial sobre papel cálido: el título se lee como un titular, el resto baja en silencio. Esquinas casi rectas y una sombra de hoja sobre la mesa.",
+  "blurb": "Charter sobre papel cálido: el título se lee como un titular, el resto baja en silencio. Esquinas casi rectas y una sombra de hoja sobre la mesa.",
   "axes": [
     "type",
     "color",
@@ -11,6 +11,22 @@
   ],
   "overrides": {
     "primitive": {
+      "font": {
+        "family": {
+          "heading": {
+            "primary": "Charter",
+            "fallback": "serif"
+          },
+          "body": {
+            "primary": "Charter",
+            "fallback": "serif"
+          },
+          "code": {
+            "primary": "PT Mono",
+            "fallback": "monospaced"
+          }
+        }
+      },
       "palette": {
         "papel-surface-light": "#FBF6ECF7",
         "papel-surface-dark": "#2B2620F7",
@@ -63,57 +79,47 @@
     "semantic": {
       "text": {
         "title": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.xl}",
+          "weight": "{font.weight.bold}",
+          "tracking": 0,
           "lineHeight": 1.3
         },
         "id": {
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}",
           "color": "{color.text-accent}",
           "lineHeight": 1.3
         },
-        "description": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.lg}",
-          "lineHeight": 1.5
-        },
-        "placeholder": {
-          "family": "{font.family.serif}",
-          "lineHeight": 1.4
-        },
         "repo": {
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}",
           "tracking": 0.3,
           "lineHeight": 1.3
         },
-        "location": {
-          "size": "{font.size.sm}",
-          "lineHeight": 1.3
-        },
         "eyebrow": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.regular}",
           "italic": true,
           "lineHeight": 1.3
         },
         "footnote": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.sm}",
           "italic": true,
           "lineHeight": 1.3
         },
         "badge": {
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}",
           "tracking": 0.3,
           "lineHeight": 1.3
         },
+        "description": {
+          "lineHeight": 1.5
+        },
+        "location": {
+          "lineHeight": 1.3
+        },
+        "placeholder": {
+          "lineHeight": 1.4
+        },
         "swatch": {
-          "size": "{font.size.sm}",
           "lineHeight": 1.3
         },
         "notice": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.lg}",
           "lineHeight": 1.3
         }
       },
@@ -217,9 +223,6 @@
         "row-pad-x": "{space.6}",
         "row-pad-y": "{space.4}",
         "meta-gap": "{space.4}"
-      },
-      "size": {
-        "width": 460
       }
     }
   }

@@ -1,7 +1,7 @@
 {
   "id": "ind-space",
   "name": "Solo espacio",
-  "blurb": "Lupita con más aire y más ancho. Mismo color, letra y formas.",
+  "blurb": "Cristal con más aire entre las piezas. Mismo color, letra y formas.",
   "axes": [
     "space"
   ],
@@ -22,9 +22,6 @@
         "badge-y": "{space.2}",
         "notice-x": "{space.16}",
         "notice-y": "{space.10}"
-      },
-      "size": {
-        "width": 500
       }
     }
   }

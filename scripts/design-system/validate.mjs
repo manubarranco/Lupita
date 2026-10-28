@@ -2,12 +2,13 @@
 //   node scripts/design-system/validate.mjs [themeId ...] [--json]
 // Exit 1 on any FAIL. Themes with "baseline": true print FAIL as WARN and do not affect the exit code.
 import { existsSync, readFileSync } from 'node:fs'
-import { DS, GROUPS, loadTheme, listThemes, groupOf, leaves, contrastWorst, parseHex, over, ratio } from './lib.mjs'
+import { DS, GROUPS, SIZES, DENSITIES, loadTheme, listThemes, groupOf, leaves, contrastWorst, parseHex, over, ratio } from './lib.mjs'
 
 const args = process.argv.slice(2)
 const asJson = args.includes('--json')
 const ids = args.filter(a => !a.startsWith('--'))
 const themeIds = ids.length ? ids : listThemes()
+
 
 const ROLES = ['title', 'id', 'description', 'repo', 'location', 'badge', 'eyebrow', 'footnote', 'placeholder', 'swatch', 'notice']
 const FIELDS = ['family', 'size', 'weight', 'italic', 'lineHeight', 'tracking', 'color']
@@ -55,6 +56,34 @@ function structural(theme, doc) {
   if (JSON.stringify([...want].sort()) !== JSON.stringify(have)) diffAxes.push(`declared [${have}] but overrides touch [${want}]`)
   add('axes', diffAxes)
 
+  // D55: fonts by role (macOS font + system fallback), the size scale and the density factors
+  const fam = theme.merged.primitive.font.family ?? {}
+  const famProblems = []
+  for (const r of ['heading', 'body', 'code']) {
+    const f = fam[r]
+    if (!f || typeof f.primary !== 'string' || !f.primary) famProblems.push(`font.family.${r}.primary`)
+    if (!f || !['default', 'serif', 'rounded', 'monospaced'].includes(f.fallback)) famProblems.push(`font.family.${r}.fallback`)
+  }
+  for (const k of Object.keys(fam)) if (!['heading', 'body', 'code'].includes(k)) famProblems.push(`unknown font role ${k}`)
+  add('font-roles', famProblems)
+
+  const base = JSON.parse(readFileSync(`${DS}/tokens.json`, 'utf8'))
+  const scaleProblems = []
+  let prev = null
+  for (const step of SIZES) {
+    const s = base.scale[step]
+    if (!s) { scaleProblems.push(`scale.${step} missing`); continue }
+    for (const k of ['heading', 'body', 'code', 'label', 'width', 'swatch']) if (typeof s[k] !== 'number') scaleProblems.push(`scale.${step}.${k}`)
+    if (!(s.heading >= s.body && s.body > s.code && s.code >= s.label)) scaleProblems.push(`${step}: heading ≥ body > code ≥ label broken`)
+    if (s.label < 10) scaleProblems.push(`${step}: label under 10 pt`)
+    if (s.width < 360 || s.width > 520) scaleProblems.push(`${step}: width ${s.width} outside 360..520`)
+    if (prev && !(s.body > prev.body && s.heading > prev.heading && s.width > prev.width)) scaleProblems.push(`${step}: not larger than the step before`)
+    prev = s
+  }
+  if (base.scale.M && (base.scale.M.width !== base.semantic.size.width || base.scale.M.heading !== base.primitive.font.size.heading || base.scale.M.body !== base.primitive.font.size.body)) scaleProblems.push('scale.M does not match the sizes in tokens.json')
+  for (const d of DENSITIES) if (typeof base.density[d] !== 'number') scaleProblems.push(`density.${d}`)
+  add('scale-density', scaleProblems)
+
   add('override-keys', Object.keys(doc.overrides ?? {}).filter(k => k !== 'primitive' && k !== 'semantic').map(k => `overrides.${k}`))
   return out
 }
@@ -100,7 +129,7 @@ function visual(theme, mode, aaa) {
   const sizes = ROLES.map(r => t(r).size)
   push('font-min', Math.min(...sizes) >= 10, Math.min(...sizes), 10)
   push('title-size', t('title').size >= 12, t('title').size, 12)
-  push('description-size', t('description').size >= 12, t('description').size, 12)
+  push('description-size', t('description').size >= 11, t('description').size, 11)
 
   const ti = t('title'), de = t('description'), ey = t('eyebrow')
   const sizeOk = ti.size >= de.size && de.size > ey.size
@@ -159,6 +188,13 @@ for (const id of themeIds) {
     parts.push(`${mode} ${cs.length ? '✗ ' + cs.join(',') : '✓'}`)
     const [minRole, minVal] = Object.entries(res.ratios).sort((a, b) => a[1] - b[1])[0]
     mins.push(`${mode} ${fmt(minVal)}:1 (${minRole})`)
+  }
+  // The size/density extremes must hold the same visual rules (width, row bleed, hierarchy).
+  for (const opts of [{ size: 'S', density: 'compact' }, { size: 'XL', density: 'airy' }]) {
+    const t2 = loadTheme(id, opts), tag = `${opts.size}/${opts.density}`
+    const bad = []
+    for (const mode of ['light', 'dark']) for (const c of visual(t2, mode, !!doc.aaa).checks) if (!c.ok) { record(`${mode}@${tag}`, c); bad.push(`${mode} ${c.rule}`) }
+    parts.push(`${tag} ${bad.length ? '✗ ' + bad.join(',') : '✓'}`)
   }
   lines.push(`${id.padEnd(14)} ${parts.join('  ')}${base ? '  [baseline: FAIL→WARN]' : ''}${doc.aaa ? '  [AAA]' : ''}`)
   if (mins.length) lines.push(`${''.padEnd(14)} min contrast: ${mins.join(' · ')}`)

@@ -1,7 +1,7 @@
 {
   "id": "terminal",
   "name": "Terminal",
-  "blurb": "Una pantalla de consola: fósforo verde sobre negro en los dos modos, todo en monoespaciada y esquinas rectas. En oscuro la pantalla sube un tono y el borde se enciende para despegarse del fondo.",
+  "blurb": "Una pantalla de consola: fósforo verde sobre negro en los dos modos, todo en Monaco (un solo peso: el énfasis lo da el color) y esquinas rectas. En oscuro la pantalla sube un tono y el borde se enciende para despegarse del fondo.",
   "axes": [
     "type",
     "color",
@@ -11,6 +11,22 @@
   ],
   "overrides": {
     "primitive": {
+      "font": {
+        "family": {
+          "heading": {
+            "primary": "Monaco",
+            "fallback": "monospaced"
+          },
+          "body": {
+            "primary": "Monaco",
+            "fallback": "monospaced"
+          },
+          "code": {
+            "primary": "Monaco",
+            "fallback": "monospaced"
+          }
+        }
+      },
       "palette": {
         "terminal-surface-light": "#060906FA",
         "terminal-surface-dark": "#141A14F7",
@@ -45,8 +61,8 @@
     "semantic": {
       "text": {
         "title": {
-          "family": "{font.family.mono}",
-          "weight": "{font.weight.semibold}",
+          "weight": "{font.weight.regular}",
+          "color": "{color.text-accent}",
           "lineHeight": 1.35
         },
         "id": {
@@ -54,44 +70,35 @@
           "color": "{color.text-accent}",
           "lineHeight": 1.3
         },
-        "description": {
-          "family": "{font.family.mono}",
-          "lineHeight": 1.5
-        },
         "placeholder": {
-          "family": "{font.family.mono}",
+          "italic": false,
           "lineHeight": 1.3
         },
         "repo": {
-          "family": "{font.family.mono}",
-          "size": "{font.size.sm}",
-          "lineHeight": 1.3
-        },
-        "location": {
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.regular}",
           "lineHeight": 1.3
         },
         "badge": {
-          "family": "{font.family.mono}",
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.regular}",
           "lineHeight": 1.3
         },
         "eyebrow": {
-          "family": "{font.family.mono}",
-          "size": "{font.size.sm}",
+          "weight": "{font.weight.regular}",
+          "lineHeight": 1.3
+        },
+        "description": {
+          "lineHeight": 1.5
+        },
+        "location": {
           "lineHeight": 1.3
         },
         "footnote": {
-          "family": "{font.family.mono}",
-          "size": "{font.size.sm}",
           "lineHeight": 1.3
         },
         "swatch": {
-          "size": "{font.size.sm}",
           "lineHeight": 1.3
         },
         "notice": {
-          "family": "{font.family.mono}",
           "lineHeight": 1.3
         }
       },
@@ -195,9 +202,6 @@
         "row-pad-x": "{space.6}",
         "row-pad-y": "{space.3}",
         "meta-gap": "{space.3}"
-      },
-      "size": {
-        "width": 480
       }
     }
   }

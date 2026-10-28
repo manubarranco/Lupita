@@ -1,27 +1,29 @@
 {
   "id": "ind-type",
   "name": "Solo tipografía",
-  "blurb": "Lupita con otra letra: serif, títulos mayores. Nada más cambia.",
+  "blurb": "Cristal con otra letra: Charter en títulos y texto, títulos más pesados. Nada más cambia.",
   "axes": [
     "type"
   ],
   "overrides": {
+    "primitive": {
+      "font": {
+        "family": {
+          "heading": {
+            "primary": "Charter",
+            "fallback": "serif"
+          },
+          "body": {
+            "primary": "Charter",
+            "fallback": "serif"
+          }
+        }
+      }
+    },
     "semantic": {
       "text": {
         "title": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.xl}",
-          "weight": "{font.weight.semibold}"
-        },
-        "description": {
-          "family": "{font.family.serif}",
-          "size": "{font.size.lg}"
-        },
-        "placeholder": {
-          "family": "{font.family.serif}"
-        },
-        "id": {
-          "size": "{font.size.lg}"
+          "weight": "{font.weight.bold}"
         }
       }
     }

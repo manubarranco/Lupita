@@ -1,31 +1,5 @@
 {
   "themes": {
-    "lupita": {
-      "results": {
-        "light/definition": [],
-        "dark/definition": [],
-        "light/term": [],
-        "dark/term": [],
-        "light/symbol": [],
-        "dark/symbol": [],
-        "light/suggestion": [],
-        "dark/suggestion": [],
-        "light/ambiguous": [],
-        "dark/ambiguous": [],
-        "light/range": [],
-        "dark/range": [],
-        "light/color": [],
-        "dark/color": [],
-        "light/otherRepo": [],
-        "dark/otherRepo": [],
-        "light/notice": [],
-        "dark/notice": [],
-        "light/stress": [],
-        "dark/stress": []
-      },
-      "renders": 20,
-      "violations": 0
-    },
     "blueprint": {
       "results": {
         "light/definition": [],
@@ -78,59 +52,7 @@
       "renders": 20,
       "violations": 0
     },
-    "compacto": {
-      "results": {
-        "light/definition": [],
-        "dark/definition": [],
-        "light/term": [],
-        "dark/term": [],
-        "light/symbol": [],
-        "dark/symbol": [],
-        "light/suggestion": [],
-        "dark/suggestion": [],
-        "light/ambiguous": [],
-        "dark/ambiguous": [],
-        "light/range": [],
-        "dark/range": [],
-        "light/color": [],
-        "dark/color": [],
-        "light/otherRepo": [],
-        "dark/otherRepo": [],
-        "light/notice": [],
-        "dark/notice": [],
-        "light/stress": [],
-        "dark/stress": []
-      },
-      "renders": 20,
-      "violations": 0
-    },
     "cristal": {
-      "results": {
-        "light/definition": [],
-        "dark/definition": [],
-        "light/term": [],
-        "dark/term": [],
-        "light/symbol": [],
-        "dark/symbol": [],
-        "light/suggestion": [],
-        "dark/suggestion": [],
-        "light/ambiguous": [],
-        "dark/ambiguous": [],
-        "light/range": [],
-        "dark/range": [],
-        "light/color": [],
-        "dark/color": [],
-        "light/otherRepo": [],
-        "dark/otherRepo": [],
-        "light/notice": [],
-        "dark/notice": [],
-        "light/stress": [],
-        "dark/stress": []
-      },
-      "renders": 20,
-      "violations": 0
-    },
-    "grande": {
       "results": {
         "light/definition": [],
         "dark/definition": [],
@@ -336,5 +258,15 @@
       "renders": 20,
       "violations": 0
     }
+  },
+  "matrix": {
+    "themes": 7,
+    "states": 10,
+    "modes": 2,
+    "sizes": 4,
+    "densities": 3,
+    "renders": 1680,
+    "violations": 0,
+    "failing": []
   }
 }

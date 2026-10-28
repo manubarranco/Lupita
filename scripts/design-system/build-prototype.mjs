@@ -3,7 +3,7 @@
 // for every theme and variant, with every style value coming from CSS custom properties generated
 // from the resolved tokens (the static stylesheet only references var(--…); see check-no-raw-style.mjs).
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs'
-import { DS, ROOT, loadTheme, listThemes, leaves } from './lib.mjs'
+import { DS, ROOT, SIZES, DENSITIES, loadTheme, listThemes, leaves } from './lib.mjs'
 
 const ROLES = ['title', 'id', 'description', 'repo', 'location', 'badge', 'eyebrow', 'footnote', 'placeholder', 'swatch', 'notice']
 
@@ -18,26 +18,39 @@ export function buildPrototype() {
   // Semantic keys we expose as CSS variables (primitive names such as radius.lg clash with semantic ones, so the base file is the whitelist).
   const semanticKeys = leaves(base.semantic, '', 'semantic').map(([p]) => p)
   const limitKeys = leaves(base.component.limits, 'component.limits', 'component').map(([p]) => p)
-  const keep = new Set([...semanticKeys, ...limitKeys])
+  const fontKeys = ['font.family.heading', 'font.family.body', 'font.family.code']
+  const keep = new Set([...semanticKeys, ...limitKeys, ...fontKeys])
   const pick = flat => Object.fromEntries(Object.entries(flat).filter(([k]) => keep.has(k)))
 
   const ids = [...listThemes().map(id => [id, false]), ...listVariants().map(id => [id, true])]
   const themes = ids.map(([id, variant]) => {
     const t = loadTheme(id)
     if (t.errors.length) console.warn(`warning: theme ${id}: ${t.errors.join('; ')}`)
-    return { id: t.id, name: t.name, blurb: t.blurb, axes: t.axes, baseline: t.baseline, variant, light: pick(t.light), dark: pick(t.dark) }
+    const out = { id: t.id, name: t.name, blurb: t.blurb, axes: t.axes, variant, light: pick(t.light), dark: pick(t.dark), deltas: {} }
+    // Size and density change few keys: store only what differs from M / normal.
+    for (const size of SIZES) for (const density of DENSITIES) {
+      if (size === 'M' && density === 'normal') continue
+      const v = loadTheme(id, { size, density }), d = {}
+      for (const mode of ['light', 'dark']) {
+        const cur = pick(v[mode]), base = out[mode]
+        d[mode] = Object.fromEntries(Object.entries(cur).filter(([k, x]) => JSON.stringify(x) !== JSON.stringify(base[k])))
+      }
+      out.deltas[`${size}/${density}`] = d
+    }
+    return out
   })
-  const def = themes.find(t => t.baseline) ?? themes.find(t => t.id === 'lupita') ?? themes[0]
+  const def = themes.find(t => t.id === 'cristal') ?? themes[0]
 
   // Default variables (baseline theme, light): the page is usable before any script runs. The client sets the same names inline per tooltip.
   const vars = defaultVars(def.light)
   const generated = `/*GENERATED-VARS*/
 :root {
-  /* Font mapping (this machine): sans → Inter, serif → Bitstream Charter, rounded → Inter (approximation: no SF Rounded here), mono → JetBrains Mono. 1 pt = 1 px. */
-  --font-sans: Inter, system-ui, sans-serif;
-  --font-serif: 'Bitstream Charter', Charter, serif;
-  --font-rounded: Inter, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Fonts the theme names are real macOS fonts, used by name. The system fallbacks have stand-ins here (Chromium cannot reach SF Mono, New York or SF Rounded):
+     default → system-ui (SF Pro), monospaced → Menlo, serif → Charter, rounded → system-ui. 1 pt = 1 px. */
+  --font-fb-default: system-ui, sans-serif;
+  --font-fb-monospaced: Menlo, monospace;
+  --font-fb-serif: Charter, serif;
+  --font-fb-rounded: system-ui, sans-serif;
   /* Constant of the material (macOS regularMaterial saturates what it blurs). */
   --color-surface-saturate: 1.8;
 ${Object.entries(vars).map(([k, v]) => `  ${k}: ${v};`).join('\n')}
@@ -77,7 +90,7 @@ ${textRules}
 .entry-title { flex: 1 1 0; min-width: 0; }
 /*END-STATIC*/`
 
-  const data = { themes, states, semanticKeys, defaultTheme: def.id }
+  const data = { themes, states, semanticKeys, defaultTheme: def.id, sizes: SIZES, densities: DENSITIES }
   const json = JSON.stringify(data).replace(/</g, '\\u003c')
   const client = readFileSync(new URL('./prototype-client.js', import.meta.url), 'utf8')
 
@@ -131,6 +144,8 @@ footer { padding: 4px 16px 24px; color: var(--ink2); font-size: 12px; max-width:
   <h1>Lupita · tooltips</h1>
   <label>Tema <select id="theme"></select></label>
   <button id="mode" type="button" title="Claro / oscuro">Claro</button>
+  <label>Tamaño <select id="size"></select></label>
+  <label>Densidad <select id="density"></select></label>
   <label>Estado <select id="state"></select></label>
   <button id="viewbtn" type="button" title="Un estado o los diez">Un estado</button>
   <span class="sep"></span>
@@ -141,7 +156,7 @@ footer { padding: 4px 16px 24px; color: var(--ink2); font-size: 12px; max-width:
 </header>
 <p id="blurb"></p>
 <main id="view" class="single"></main>
-<footer>Fuentes de sustitución: Inter ≈ SF Pro · Charter ≈ New York · JetBrains Mono ≈ SF Mono. Lo que cuenta son los tamaños relativos, no el trazo exacto. La familia «rounded» se aproxima con Inter (no hay SF Rounded en esta máquina). 1 pt = 1 px.</footer>
+<footer>Las fuentes con nombre (Charter, Monaco, Avenir Next…) son las de macOS. Las del sistema se aproximan: SF Pro es la del navegador, SF Mono ≈ Menlo, New York ≈ Charter y SF Rounded ≈ SF Pro (Chromium no llega a las tres últimas). 1 pt = 1 px.</footer>
 <script id="proto-data" type="application/json">${json}</script>
 <script>
 ${client}
@@ -154,10 +169,11 @@ ${client}
     // Same transformation as varsFor() in the client; kept in sync by test (the page overrides these inline anyway).
     const px = n => `${n}px`, v = {}
     for (const [k, val] of Object.entries(res)) {
+      if (k.startsWith('font.family.')) continue
       const name = '--' + k.replace(/^component\.limits\./, 'limit-').replace(/\./g, '-')
       if (k.startsWith('text.')) {
-        const fam = { sans: 'sans', serif: 'serif', rounded: 'rounded', mono: 'mono' }[val.familyKey] ?? { default: 'sans', monospaced: 'mono', serif: 'serif', rounded: 'rounded' }[val.family] ?? 'sans'
-        Object.assign(v, { [`${name}-family`]: `var(--font-${fam})`, [`${name}-size`]: px(val.size), [`${name}-weight`]: String(val.weight), [`${name}-style`]: val.italic ? 'italic' : 'normal', [`${name}-lh`]: String(val.lineHeight), [`${name}-tracking`]: px(val.tracking), [`${name}-color`]: val.color })
+        const f = res[`font.family.${val.familyKey}`]
+        Object.assign(v, { [`${name}-family`]: f.primary === 'system' ? `var(--font-fb-${f.fallback})` : `"${f.primary}", var(--font-fb-${f.fallback})`, [`${name}-size`]: px(val.size), [`${name}-weight`]: String(val.weight), [`${name}-style`]: val.italic ? 'italic' : 'normal', [`${name}-lh`]: String(val.lineHeight), [`${name}-tracking`]: px(val.tracking), [`${name}-color`]: val.color })
       } else if (k.startsWith('shadow.')) {
         v[name] = val.length ? val.map(l => `${px(l.x)} ${px(l.y)} ${px(l.blur)} ${px(l.spread)} ${l.color}`).join(', ') : '0 0 0 0 transparent'
       } else if (k.startsWith('component.limits.')) { if (typeof val === 'number') v[name] = String(val) }

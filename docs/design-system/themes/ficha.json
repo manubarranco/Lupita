@@ -1,7 +1,7 @@
 {
   "id": "ficha",
   "name": "Ficha",
-  "blurb": "Una interfaz de juego: tarjeta cian clara como un botón, con un borde cian bien marcado y un canto inferior grueso del mismo cian más oscuro; en oscuro, la tarjeta pasa a azul petróleo, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.",
+  "blurb": "Una interfaz de juego: tarjeta cian clara como un botón, con un borde cian bien marcado y un canto inferior grueso del mismo cian más oscuro; en oscuro, la tarjeta pasa a azul petróleo. Letra redondeada (Arial Rounded en los títulos, SF Rounded en el texto). Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.",
   "axes": [
     "type",
     "color",
@@ -11,6 +11,22 @@
   ],
   "overrides": {
     "primitive": {
+      "font": {
+        "family": {
+          "heading": {
+            "primary": "Arial Rounded MT Bold",
+            "fallback": "rounded"
+          },
+          "body": {
+            "primary": "system",
+            "fallback": "rounded"
+          },
+          "code": {
+            "primary": "Menlo",
+            "fallback": "monospaced"
+          }
+        }
+      },
       "palette": {
         "ficha-surface-light": "#D2F3FC",
         "ficha-surface-dark": "#163A47",
@@ -56,61 +72,29 @@
     "semantic": {
       "text": {
         "title": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.xl}",
-          "weight": "{font.weight.semibold}",
+          "weight": "{font.weight.regular}",
           "lineHeight": 1.3
         },
         "id": {
-          "color": "{color.text-accent}",
-          "lineHeight": 1.3
-        },
-        "description": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.lg}",
-          "lineHeight": 1.45
+          "weight": "{font.weight.bold}",
+          "color": "{color.text-accent}"
         },
         "placeholder": {
-          "family": "{font.family.rounded}",
-          "lineHeight": 1.3
+          "italic": false
         },
         "repo": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.sm}",
-          "weight": "{font.weight.bold}",
-          "lineHeight": 1.3
-        },
-        "location": {
-          "size": "{font.size.sm}",
-          "lineHeight": 1.3
+          "weight": "{font.weight.bold}"
         },
         "badge": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.sm}",
-          "weight": "{font.weight.bold}",
-          "lineHeight": 1.3
+          "weight": "{font.weight.bold}"
         },
         "eyebrow": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.sm}",
           "weight": "{font.weight.bold}",
           "color": "{color.text-accent}",
-          "tracking": 0.4,
-          "lineHeight": 1.3
+          "tracking": 0.4
         },
-        "footnote": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.sm}",
-          "lineHeight": 1.3
-        },
-        "swatch": {
-          "size": "{font.size.sm}",
-          "lineHeight": 1.3
-        },
-        "notice": {
-          "family": "{font.family.rounded}",
-          "size": "{font.size.lg}",
-          "lineHeight": 1.3
+        "description": {
+          "lineHeight": 1.45
         }
       },
       "color": {
@@ -213,9 +197,6 @@
         "row-pad-x": "{space.8}",
         "row-pad-y": "{space.4}",
         "meta-gap": "{space.4}"
-      },
-      "size": {
-        "width": 440
       }
     }
   }

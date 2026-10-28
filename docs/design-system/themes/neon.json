@@ -1,7 +1,7 @@
 {
   "id": "neon",
   "name": "Neón",
-  "blurb": "Un rótulo de neón: tubo rosa sobre ciruela profundo en los dos modos, el color cálido de la familia. En claro, una sombra oscura lo asienta y un halo corto del color del tubo lo enciende; en oscuro la luz se derrama alrededor.",
+  "blurb": "Un rótulo de neón: tubo rosa sobre ciruela profundo en los dos modos, con Arial Rounded en los títulos y Avenir Next en el texto. En claro, una sombra oscura lo asienta y un halo corto del color del tubo lo enciende; en oscuro la luz se derrama alrededor.",
   "axes": [
     "type",
     "color",
@@ -11,6 +11,22 @@
   ],
   "overrides": {
     "primitive": {
+      "font": {
+        "family": {
+          "heading": {
+            "primary": "Arial Rounded MT Bold",
+            "fallback": "rounded"
+          },
+          "body": {
+            "primary": "Avenir Next",
+            "fallback": "default"
+          },
+          "code": {
+            "primary": "Menlo",
+            "fallback": "monospaced"
+          }
+        }
+      },
       "palette": {
         "neon-surface-light": "#1F0D24F7",
         "neon-surface-dark": "#2A1430F2",
@@ -63,44 +79,30 @@
     "semantic": {
       "text": {
         "title": {
-          "size": "{font.size.xl}",
-          "weight": "{font.weight.semibold}",
+          "weight": "{font.weight.regular}",
           "lineHeight": 1.3
         },
         "id": {
+          "weight": "{font.weight.bold}",
           "color": "{color.text-accent}",
           "tracking": 0.2
         },
-        "description": {
-          "size": "{font.size.lg}",
-          "lineHeight": 1.45
+        "placeholder": {
+          "italic": false
         },
         "repo": {
-          "size": "{font.size.sm}",
           "weight": "{font.weight.bold}",
           "tracking": 0.4
         },
-        "location": {
-          "size": "{font.size.sm}"
-        },
         "badge": {
-          "size": "{font.size.sm}",
           "weight": "{font.weight.bold}",
           "tracking": 0.4
         },
         "eyebrow": {
-          "size": "{font.size.sm}",
-          "weight": "{font.weight.medium}",
           "tracking": 0.3
         },
-        "footnote": {
-          "size": "{font.size.sm}"
-        },
-        "swatch": {
-          "size": "{font.size.sm}"
-        },
-        "notice": {
-          "size": "{font.size.lg}"
+        "description": {
+          "lineHeight": 1.45
         }
       },
       "color": {
@@ -203,9 +205,6 @@
         "row-pad-x": "{space.8}",
         "row-pad-y": "{space.4}",
         "meta-gap": "{space.4}"
-      },
-      "size": {
-        "width": 440
       }
     }
   }

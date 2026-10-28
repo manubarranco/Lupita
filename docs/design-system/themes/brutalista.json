@@ -1,7 +1,7 @@
 {
   "id": "brutalista",
   "name": "Brutalista",
-  "blurb": "Neobrutalismo: tarjeta limón con trazo negro de 3 pt, esquinas redondeadas y sombra negra dura, sin desenfoque. Los detalles, planos en menta, salmón y lavanda. En oscuro la tarjeta sigue de color y la sombra se vuelve lavanda. Jerarquía por peso, no por gris.",
+  "blurb": "Neobrutalismo: tarjeta limón con trazo negro de 3 pt, esquinas redondeadas y sombra negra dura, sin desenfoque. Avenir Next en los títulos, Helvetica Neue en el texto y PT Mono en los datos. Los detalles, planos en menta, salmón y lavanda. En oscuro la tarjeta sigue de color y la sombra se vuelve lavanda. Jerarquía por peso, no por gris.",
   "axes": [
     "type",
     "color",
@@ -11,6 +11,22 @@
   ],
   "overrides": {
     "primitive": {
+      "font": {
+        "family": {
+          "heading": {
+            "primary": "Avenir Next",
+            "fallback": "default"
+          },
+          "body": {
+            "primary": "Helvetica Neue",
+            "fallback": "default"
+          },
+          "code": {
+            "primary": "PT Mono",
+            "fallback": "monospaced"
+          }
+        }
+      },
       "palette": {
         "brutalista-surface-light": "#FDFD96",
         "brutalista-surface-dark": "#ECE47C",
@@ -56,7 +72,6 @@
     "semantic": {
       "text": {
         "title": {
-          "size": "{font.size.xl}",
           "weight": "{font.weight.bold}",
           "lineHeight": 1.25
         },
@@ -65,7 +80,6 @@
           "color": "{color.text-primary}"
         },
         "description": {
-          "size": "{font.size.lg}",
           "weight": "{font.weight.medium}",
           "color": "{color.text-primary}",
           "lineHeight": 1.4
@@ -74,35 +88,26 @@
           "weight": "{font.weight.medium}"
         },
         "repo": {
-          "size": "{font.size.sm}",
           "weight": "{font.weight.bold}"
         },
         "location": {
-          "size": "{font.size.sm}",
-          "weight": "{font.weight.medium}",
           "color": "{color.text-primary}"
         },
         "badge": {
-          "size": "{font.size.sm}",
           "weight": "{font.weight.bold}"
         },
         "eyebrow": {
-          "size": "{font.size.sm}",
           "weight": "{font.weight.bold}",
           "color": "{color.text-primary}"
         },
         "footnote": {
-          "size": "{font.size.sm}",
           "weight": "{font.weight.medium}",
           "color": "{color.text-primary}"
         },
         "swatch": {
-          "size": "{font.size.sm}",
-          "weight": "{font.weight.medium}",
           "color": "{color.text-primary}"
         },
         "notice": {
-          "size": "{font.size.lg}",
           "weight": "{font.weight.bold}",
           "color": "{color.text-primary}"
         }
@@ -207,9 +212,6 @@
         "row-pad-x": "{space.6}",
         "row-pad-y": "{space.3}",
         "meta-gap": "{space.3}"
-      },
-      "size": {
-        "width": 440
       }
     }
   }

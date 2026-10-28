@@ -62,8 +62,8 @@ async function renderSheet(page, spec, file) {
     })
     sheet.append(grid); document.body.replaceChildren(sheet)
     const checks = jobs.map(({ c, scope }) => {
-      const el = PROTO.renderState(scope, c.state, c.theme, c.mode, {})
-      return { theme: c.theme, mode: c.mode, state: c.state, violations: PROTO.overflowCheck(el) }
+      const el = PROTO.renderState(scope, c.state, c.theme, c.mode, {}, c.size, c.density)
+      return { theme: c.theme, mode: c.mode, state: c.state, size: c.size, density: c.density, violations: PROTO.overflowCheck(el) }
     })
     return checks
   }, spec)
@@ -73,8 +73,9 @@ async function renderSheet(page, spec, file) {
 
 const report = existsSync(`${out}/overflow-report.json`) ? JSON.parse(readFileSync(`${out}/overflow-report.json`, 'utf8')) : { themes: {} }
 let renders = 0, violations = 0
-function record(checks) {
+function record(checks, { keep = true } = {}) {
   for (const c of checks) {
+    if (!keep) { renders++; violations += c.violations.length; if (c.violations.length) console.error('overflow', c.theme, c.mode, c.state, c.size, c.violations); continue }
     const t = report.themes[c.theme] ??= { results: {} }
     t.results[`${c.mode}/${c.state}`] = c.violations
     renders++; violations += c.violations.length
@@ -95,6 +96,7 @@ await page.evaluate(() => document.fonts.ready)
 const meta = await page.evaluate(() => PROTO.themes)
 const states = await page.evaluate(() => PROTO.states.map(s => ({ id: s.id, label: s.label })))
 const info = id => meta.find(t => t.id === id)
+const PROTO_SIZES = await page.evaluate(() => PROTO.sizes), PROTO_DENSITIES = await page.evaluate(() => PROTO.densities)
 
 if (!only || only === 'theme') for (const id of themeIds) {
   const th = info(id), t1 = Date.now()
@@ -121,17 +123,45 @@ if (!only || only === 'compare') {
 }
 
 if (!only || only === 'independence') {
-  const wanted = ['lupita', 'ind-type', 'ind-color', 'ind-shape', 'ind-space', 'ind-shadow']
+  const wanted = ['cristal', 'ind-type', 'ind-color', 'ind-shape', 'ind-space', 'ind-shadow']
   const present = wanted.filter(id => info(id)), missing = wanted.filter(id => !info(id))
   console.log(`independence: present ${present.join(', ') || '-'}; skipped (not found) ${missing.join(', ') || '-'}`)
   const sts = ['definition', 'otherRepo']
   const spec = {
-    title: 'Independencia de los ejes', sub: 'Cada variante cambia UN grupo de tokens sobre Lupita; lo demás debe quedarse igual.', width: 2500, labelWidth: 200,
+    title: 'Independencia de los ejes', sub: 'Cada variante cambia UN grupo de tokens sobre Cristal; lo demás debe quedarse igual.', width: 2500, labelWidth: 200,
     cols: sts.flatMap(s => ['light', 'dark'].map(m => `${states.find(x => x.id === s).label} · ${m === 'light' ? 'claro' : 'oscuro'}`)), heads: true,
-    rows: present.map(id => ({ label: info(id).name, sub: id === 'lupita' ? 'referencia' : `cambia solo: ${info(id).axes?.join(', ') || id.replace('ind-', '')}`, cells: sts.flatMap(s => ['light', 'dark'].map(m => ({ theme: id, mode: m, state: s }))) })),
+    rows: present.map(id => ({ label: info(id).name, sub: id === 'cristal' ? 'referencia' : `cambia solo: ${info(id).axes?.join(', ') || id.replace('ind-', '')}`, cells: sts.flatMap(s => ['light', 'dark'].map(m => ({ theme: id, mode: m, state: s }))) })),
   }
   record(await renderSheet(page, spec, `${out}/independence.png`))
   log('independence.png')
+}
+
+if (!only || only === 'sizes') {
+  const spec = {
+    title: 'Los cuatro tamaños', sub: 'El estado «ID definido» de cada tema en S, M, L y XL, claro, densidad normal. El ancho y la letra crecen con el paso; el resto de la jerarquía no cambia.', width: 2800, labelWidth: 150,
+    cols: PROTO_SIZES, heads: true,
+    rows: themeIds.map(id => ({ label: info(id).name, cells: PROTO_SIZES.map(size => ({ theme: id, mode: 'light', state: 'definition', size, density: 'normal' })) })),
+  }
+  record(await renderSheet(page, spec, `${out}/compare-sizes.png`), { keep: false })
+  log('compare-sizes.png')
+}
+
+// The whole matrix, overflow check only (no screenshots): themes × states × modes × sizes × densities.
+if (!only || only === 'matrix') {
+  const t1 = Date.now(), rows = []
+  const res = await page.evaluate(({ themes, states, sizes, densities }) => {
+    const out = []
+    const cell = PROTO.makeCell('light'); document.body.replaceChildren(cell.stage)
+    for (const theme of themes) for (const state of states) for (const mode of ['light', 'dark']) for (const size of sizes) for (const density of densities) {
+      const el = PROTO.renderState(cell.scope, state, theme, mode, {}, size, density)
+      out.push({ k: [theme, state, mode, size, density].join('/'), v: PROTO.overflowCheck(el) })
+    }
+    return out
+  }, { themes: themeIds, states: states.map(s => s.id), sizes: PROTO_SIZES, densities: PROTO_DENSITIES })
+  const bad = res.filter(r => r.v.length)
+  report.matrix = { themes: themeIds.length, states: states.length, modes: 2, sizes: PROTO_SIZES.length, densities: PROTO_DENSITIES.length, renders: res.length, violations: bad.reduce((n, r) => n + r.v.length, 0), failing: bad.slice(0, 40) }
+  writeFileSync(`${out}/overflow-report.json`, JSON.stringify(report, null, 2) + '\n')
+  log(`matrix: ${res.length} renders, ${report.matrix.violations} violations (${((Date.now() - t1) / 1000).toFixed(1)}s)`)
 }
 
 await browser.close()

@@ -1,10 +1,11 @@
 // Token loader and resolver for the tooltip design system. No dependencies.
 //
-//   loadTheme('papel')  → { id, name, blurb, axes, overrides, merged, light, dark, errors }
+//   loadTheme('papel')                                   → { id, name, blurb, axes, overrides, merged, light, dark, errors }
+//   loadTheme('papel', { size: 'XL', density: 'airy' })  → same, with the size step (S|M|L|XL) and density (compact|normal|airy) applied
 //
 // `merged` is the default tokens with the theme's overrides applied (still with «{refs}»).
 // `light` / `dark` are resolved flat maps: path → value, e.g.
-//   'text.title'           → { familyKey:'sans', family:'default', size:13, weight:500, italic:false, lineHeight:1.2, tracking:0, color:'#000000D9' }
+//   'text.title'           → { familyKey:'heading', family:{primary:'Charter', fallback:'serif'}, size:14, weight:500, italic:false, lineHeight:1.2, tracking:0, color:'#000000D9' }
 //   'color.surface'        → '#F6F6F6D1'
 //   'radius.container'     → 10
 //   'shadow.container'     → [{ x:0, y:8, blur:24, spread:0, color:'#00000047' }, …]
@@ -17,6 +18,8 @@ import { fileURLToPath } from 'node:url'
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 export const DS = `${ROOT}/docs/design-system`
 export const GROUPS = ['type', 'color', 'shape', 'space', 'shadow']
+export const SIZES = ['S', 'M', 'L', 'XL']
+export const DENSITIES = ['compact', 'normal', 'airy']
 
 const readJSON = p => JSON.parse(readFileSync(p, 'utf8'))
 const isObj = v => v && typeof v === 'object' && !Array.isArray(v)
@@ -41,6 +44,7 @@ export function leaves(node, prefix = '', layer = '') {
   for (const [k, v] of Object.entries(node)) {
     const path = prefix ? `${prefix}.${k}` : k
     const composite = layer === 'semantic' && (/^text\./.test(path) && path.split('.').length === 2 || /^color\./.test(path) && path.split('.').length === 2)
+      || layer === 'primitive' && /^font\.family\.[^.]+$/.test(path)
     if (isObj(v) && !composite) out.push(...leaves(v, path, layer))
     else out.push([path, v])
   }
@@ -49,7 +53,10 @@ export function leaves(node, prefix = '', layer = '') {
 
 const REF = /^\{([^}]+)\}$/
 
-export function loadTheme(id) {
+/** Rounds to the nearest half point: the density factor never produces a quarter-pixel edge. */
+const half = n => Math.round(n * 2) / 2
+
+export function loadTheme(id, { size = 'M', density = 'normal' } = {}) {
   const base = readJSON(`${DS}/tokens.json`)
   let doc
   try { doc = readJSON(`${DS}/themes/${id}.json`) } catch { doc = readJSON(`${DS}/variants/${id}.json`) } // variants/: single-group demos
@@ -60,7 +67,22 @@ export function loadTheme(id) {
     component: base.component,
   }
   const errors = []
-  const theme = { id: doc.id, name: doc.name, blurb: doc.blurb, axes: doc.axes ?? [], baseline: !!doc.baseline, notes: doc.notes ?? [], overrides, merged, errors }
+  // Size step (D55): one scale for every theme. It sets the four font sizes, the width and the swatch.
+  const step = base.scale[size]
+  if (!step) errors.push(`unknown size step ${size}`)
+  else {
+    for (const k of ['heading', 'body', 'code', 'label']) merged.primitive.font.size[k] = step[k]
+    merged.semantic.size = { ...merged.semantic.size, width: step.width, swatch: step.swatch }
+  }
+  // Density (D55): a factor over every semantic space token.
+  const factor = base.density[density]
+  if (factor === undefined) errors.push(`unknown density ${density}`)
+  else for (const [k, v] of Object.entries(merged.semantic.space)) {
+    const n = merged.primitive.space[String(v).match(/^\{space\.([^}]+)\}$/)?.[1]]
+    if (n === undefined) errors.push(`space.${k}: cannot scale ${v}`)
+    else merged.semantic.space[k] = half(n * factor)
+  }
+  const theme = { id: doc.id, size, density, name: doc.name, blurb: doc.blurb, axes: doc.axes ?? [], baseline: !!doc.baseline, notes: doc.notes ?? [], overrides, merged, errors }
   for (const mode of ['light', 'dark']) theme[mode] = resolveMode(merged, mode, errors)
   return theme
 }

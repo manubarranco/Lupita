@@ -5,7 +5,7 @@ import { DS, GROUPS, loadTheme, groupOf, leaves } from './lib.mjs'
 
 const problems = []
 const fail = m => problems.push(m)
-const base = loadTheme('lupita')
+const base = loadTheme('cristal')
 
 // Group of a resolved-map path (primitive and semantic names do not clash, so one lookup table is enough).
 function groupOfResolved(path) {

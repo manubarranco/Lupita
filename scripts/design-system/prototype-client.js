@@ -4,12 +4,15 @@
   'use strict'
   var DATA = JSON.parse(document.getElementById('proto-data').textContent)
   var THEMES = DATA.themes, STATES = DATA.states
-  var FAM = { sans: 'sans', serif: 'serif', rounded: 'rounded', mono: 'mono', default: 'sans', monospaced: 'mono' }
   var UNITLESS = { 'color.suggestion-opacity': 1 }
 
   function themeById(id) { return THEMES.find(function (t) { return t.id === id }) || THEMES[0] }
   function stateById(id) { return STATES.find(function (s) { return s.id === id }) || STATES[0] }
-  function fam(t) { return FAM[t.familyKey] || FAM[t.family] || 'sans' }
+  /** CSS font-family for a text role: the macOS font by name, then the stand-in of its system fallback. */
+  function famCss(res, t) {
+    var f = res['font.family.' + t.familyKey]
+    return f.primary === 'system' ? 'var(--font-fb-' + f.fallback + ')' : '"' + f.primary + '", var(--font-fb-' + f.fallback + ')'
+  }
   function px(n) { return n + 'px' }
 
   /** Resolved flat map → { '--css-var': value }. */
@@ -17,8 +20,9 @@
     var v = {}
     Object.keys(res).forEach(function (k) {
       var val = res[k], name = '--' + k.replace(/^component\.limits\./, 'limit-').replace(/\./g, '-')
+      if (k.indexOf('font.family.') === 0) return
       if (k.indexOf('text.') === 0) {
-        v[name + '-family'] = 'var(--font-' + fam(val) + ')'
+        v[name + '-family'] = famCss(res, val)
         v[name + '-size'] = px(val.size)
         v[name + '-weight'] = String(val.weight)
         v[name + '-style'] = val.italic ? 'italic' : 'normal'
@@ -49,8 +53,10 @@
     parts.slice(2).forEach(function (p) { node = node == null ? node : node[p] })
     return node
   }
-  function effective(themeId, mode, overrides) {
-    var res = Object.assign({}, themeById(themeId)[mode])
+  function effective(themeId, mode, overrides, size, density) {
+    var th = themeById(themeId), res = Object.assign({}, th[mode])
+    var delta = th.deltas[(size || 'M') + '/' + (density || 'normal')]
+    if (delta) Object.assign(res, delta[mode])
     Object.keys(overrides || {}).forEach(function (p) { setPath(res, p, overrides[p]) })
     return res
   }
@@ -165,8 +171,9 @@
   function buildNotice(t) { var n = h('div', 'notice'); n.append(T('notice', '', t.text, 'notice')); return n }
 
   /** Renders `stateId` into `container` (a .scope element attached to the document) with the theme/mode variables. */
-  function renderState(container, stateId, themeId, mode, overrides) {
-    var res = effective(themeId, mode, overrides)
+  function renderState(container, stateId, themeId, mode, overrides, size, density) {
+    var res = effective(themeId, mode, overrides, size, density)
+    container.dataset.size = size || 'M'; container.dataset.density = density || 'normal'
     applyVars(container, res)
     container.dataset.theme = themeId; container.dataset.mode = mode; container.dataset.state = stateId
     container._res = res
@@ -180,7 +187,7 @@
   }
   /** Re-applies variables (after a token edit) without rebuilding the DOM. */
   function restyle(container, overrides) {
-    var res = effective(container.dataset.theme, container.dataset.mode, overrides)
+    var res = effective(container.dataset.theme, container.dataset.mode, overrides, container.dataset.size, container.dataset.density)
     applyVars(container, res); container._res = res
     fitAll(container)
   }
@@ -218,6 +225,8 @@
     theme: themeById(params.get('theme') || DATA.defaultTheme).id,
     mode: params.get('mode') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     state: stateById(params.get('state') || 'definition').id,
+    size: DATA.sizes.indexOf(params.get('size')) >= 0 ? params.get('size') : 'M',
+    density: DATA.densities.indexOf(params.get('density')) >= 0 ? params.get('density') : 'normal',
     view: params.get('view') || 'one',
     over: {}
   }
@@ -226,7 +235,7 @@
   var scopes = []
 
   function syncUrl() {
-    var q = new URLSearchParams({ theme: S.theme, mode: S.mode, state: S.state })
+    var q = new URLSearchParams({ theme: S.theme, mode: S.mode, state: S.state, size: S.size, density: S.density })
     if (S.view !== 'one') q.set('view', S.view)
     try { history.replaceState(null, '', '?' + q) } catch (e) { /* file:// in some contexts */ }
   }
@@ -240,7 +249,7 @@
       var box = h('figure', 'card'), cap = h('figcaption', '', stateById(id).label)
       var cell = makeCell(S.mode)
       box.append(cap, cell.stage); main.append(box)
-      renderState(cell.scope, id, S.theme, S.mode, S.over)
+      renderState(cell.scope, id, S.theme, S.mode, S.over, S.size, S.density)
       scopes.push(cell.scope)
     })
     var th = themeById(S.theme)
@@ -251,7 +260,7 @@
 
   // live token editor
   function editablePaths() {
-    var res = themeById(S.theme)[S.mode], out = []
+    var res = effective(S.theme, S.mode, {}, S.size, S.density), out = []
     DATA.semanticKeys.forEach(function (k) {
       if (k.indexOf('text.') === 0) out.push(k + '.size')
       else if (k.indexOf('shadow.') === 0) (res[k] || []).forEach(function (_, i) { out.push(k + '.' + i + '.blur') })
@@ -272,7 +281,7 @@
     showToken()
   }
   function showToken() {
-    var p = $('tok').value, res = effective(S.theme, S.mode, S.over), v = getPath(res, p)
+    var p = $('tok').value, res = effective(S.theme, S.mode, S.over, S.size, S.density), v = getPath(res, p)
     var color = isColorPath(p), box = $('tokval')
     box.type = color ? 'text' : 'number'; box.step = (typeof v === 'number' && v % 1) ? '0.05' : '1'
     box.value = v
@@ -291,6 +300,12 @@
     var ts = $('theme'), ss = $('state')
     THEMES.forEach(function (t) { var o = h('option', '', t.name + (t.variant ? ' (variante)' : '')); o.value = t.id; ts.append(o) })
     STATES.forEach(function (s) { var o = h('option', '', s.label); o.value = s.id; ss.append(o) })
+    var sz = $('size'), de = $('density')
+    DATA.sizes.forEach(function (x) { var o = h('option', '', x); o.value = x; sz.append(o) })
+    DATA.densities.forEach(function (x) { var o = h('option', '', { compact: 'Compacta', normal: 'Normal', airy: 'Amplia' }[x]); o.value = x; de.append(o) })
+    sz.value = S.size; de.value = S.density
+    sz.onchange = function () { S.size = sz.value; fillTokens(); drawMain() }
+    de.onchange = function () { S.density = de.value; fillTokens(); drawMain() }
     ts.value = S.theme; ss.value = S.state
     $('mode').onclick = function () { S.mode = S.mode === 'dark' ? 'light' : 'dark'; $('mode').textContent = S.mode === 'dark' ? 'Oscuro' : 'Claro'; fillTokens(); drawMain() }
     $('mode').textContent = S.mode === 'dark' ? 'Oscuro' : 'Claro'
@@ -301,7 +316,7 @@
     $('tok').onchange = showToken
     $('tokval').oninput = function () { editToken(this.value) }
     $('tokcol').oninput = function () {
-      var cur = String(effective(S.theme, S.mode, S.over)[$('tok').value]), alpha = /^#[0-9a-f]{8}$/i.test(cur) ? cur.slice(7) : ''
+      var cur = String(effective(S.theme, S.mode, S.over, S.size, S.density)[$('tok').value]), alpha = /^#[0-9a-f]{8}$/i.test(cur) ? cur.slice(7) : ''
       editToken(this.value.toUpperCase() + alpha)
     }
     $('reset').onclick = function () { delete S.over[$('tok').value]; restyleAll(); showToken() }
@@ -309,7 +324,7 @@
     fillTokens(); drawMain()
   }
 
-  window.PROTO = { themes: THEMES.map(function (t) { return { id: t.id, name: t.name, blurb: t.blurb, axes: t.axes, variant: !!t.variant } }), states: STATES, renderState: renderState, makeCell: makeCell, overflowCheck: overflowCheck, varsFor: varsFor, effective: effective }
+  window.PROTO = { themes: THEMES.map(function (t) { return { id: t.id, name: t.name, blurb: t.blurb, axes: t.axes, variant: !!t.variant } }), states: STATES, renderState: renderState, sizes: DATA.sizes, densities: DATA.densities, makeCell: makeCell, overflowCheck: overflowCheck, varsFor: varsFor, effective: effective }
   window.renderState = renderState
   if (!params.has('noinit')) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init()
