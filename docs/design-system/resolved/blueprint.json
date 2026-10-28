@@ -172,11 +172,11 @@
   },
   "palette.blueprint-border-light": {
    "$type": "color",
-   "$value": "#FFFFFFB3"
+   "$value": "#FFFFFFE6"
   },
   "palette.blueprint-border-dark": {
    "$type": "color",
-   "$value": "#FFFFFF8C"
+   "$value": "#FFFFFFCC"
   },
   "palette.blueprint-text-primary-light": {
    "$type": "color",
@@ -577,7 +577,7 @@
   },
   "color.border": {
    "$type": "color",
-   "$value": "#FFFFFFB3"
+   "$value": "#FFFFFFE6"
   },
   "color.text-primary": {
    "$type": "color",
@@ -789,7 +789,7 @@
   },
   "component.tooltip.border-color": {
    "$type": "color",
-   "$value": "#FFFFFFB3"
+   "$value": "#FFFFFFE6"
   },
   "component.tooltip.border-width": {
    "$type": "dimension",
@@ -1162,7 +1162,7 @@
   },
   "component.notice.border-color": {
    "$type": "color",
-   "$value": "#FFFFFFB3"
+   "$value": "#FFFFFFE6"
   },
   "component.notice.border-width": {
    "$type": "dimension",
@@ -1388,11 +1388,11 @@
   },
   "palette.blueprint-border-light": {
    "$type": "color",
-   "$value": "#FFFFFFB3"
+   "$value": "#FFFFFFE6"
   },
   "palette.blueprint-border-dark": {
    "$type": "color",
-   "$value": "#FFFFFF8C"
+   "$value": "#FFFFFFCC"
   },
   "palette.blueprint-text-primary-light": {
    "$type": "color",
@@ -1793,7 +1793,7 @@
   },
   "color.border": {
    "$type": "color",
-   "$value": "#FFFFFF8C"
+   "$value": "#FFFFFFCC"
   },
   "color.text-primary": {
    "$type": "color",
@@ -2005,7 +2005,7 @@
   },
   "component.tooltip.border-color": {
    "$type": "color",
-   "$value": "#FFFFFF8C"
+   "$value": "#FFFFFFCC"
   },
   "component.tooltip.border-width": {
    "$type": "dimension",
@@ -2378,7 +2378,7 @@
   },
   "component.notice.border-color": {
    "$type": "color",
-   "$value": "#FFFFFF8C"
+   "$value": "#FFFFFFCC"
   },
   "component.notice.border-width": {
    "$type": "dimension",
