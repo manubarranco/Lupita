@@ -264,7 +264,7 @@ themes.push({
 // ── 9. Mimo ─ rounded type, pastel, pills ───────────────────────────────────────
 themes.push({
   id: 'mimo', name: 'Mimo', axes: ALL,
-  blurb: 'Una interfaz de juego: tarjeta cian como un botón, borde y canto inferior grueso del mismo cian más oscuro, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
+  blurb: 'Una interfaz de juego: tarjeta cian clara como un botón, con un borde cian bien marcado y un canto inferior grueso del mismo cian más oscuro; en oscuro, la tarjeta pasa a azul petróleo, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
   type: {
     title: { family: 'rounded', size: 'xl', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
     description: { family: 'rounded', size: 'lg' }, placeholder: { family: 'rounded', size: 'lg' },
@@ -274,13 +274,14 @@ themes.push({
   lineHeight: 1.3,
   lh: { title: 1.3, description: 1.45 },
   color: {
-    surface: ['#3FD0F0', '#2BB8DA'], 'notice-surface': ['#3FD0F0', '#2BB8DA'],
-    border: ['#16A5C7', '#0F8BAA'],
-    'text-primary': ['#032F3C', '#032F3C'], 'text-secondary': ['#0A4757', '#063A48'], 'text-accent': ['#004F63', '#003D4D'],
-    'badge-bg': ['#FFFFFF', '#FFFFFF'], 'badge-fg': ['#004F63', '#004F63'], 'origin-bg': ['#FFE08A', '#FFE08A'], 'origin-fg': ['#4A3200', '#4A3200'],
-    'swatch-border': ['#032F3CCC', '#032F3CCC'], 'row-hover': ['#8AE4F7', '#62D2EC'],
+    surface: ['#D2F3FC', '#163A47'], 'notice-surface': ['#D2F3FC', '#163A47'],
+    border: ['#16A5C7', '#2BB8DA'],
+    'text-primary': ['#032F3C', '#E6FAFF'], 'text-secondary': ['#0A4757', '#A8DCEA'], 'text-accent': ['#006A82', '#5FD8F5'],
+    'badge-bg': ['#FFFFFF', '#E6FAFF'], 'badge-fg': ['#004F63', '#004F63'], 'origin-bg': ['#FFE08A', '#FFE08A'], 'origin-fg': ['#4A3200', '#4A3200'],
+    'swatch-border': ['#032F3CCC', '#A8DCEACC'], 'row-hover': ['#A8E8F8', '#1F4F5F'],
     shadow: ['#1597B8', '#0E7895'], 'shadow-edge': ['#1597B8', '#0E7895'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
   },
+
 
 
 
