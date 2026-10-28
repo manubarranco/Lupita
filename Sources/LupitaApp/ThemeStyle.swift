@@ -90,8 +90,8 @@ extension View {
 
 /// What the tooltip should look like right now: the reader's choices (Aspecto) plus macOS's accessibility settings.
 enum TooltipStyle {
-    @MainActor static func current(mode: ThemeMode? = nil) -> TooltipTheme {
-        var preferences = ThemePreferences.load()
+    @MainActor static func current(mode: ThemeMode? = nil, defaults: UserDefaults = .standard) -> TooltipTheme {
+        var preferences = ThemePreferences.load(defaults)
         if let mode { preferences.appearance = mode == .dark ? .dark : .light }
         let systemIsDark = NSApp?.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
         let workspace = NSWorkspace.shared

@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var trigger: Trigger?
     var onboarding: OnboardingWindow?
     let idReport = IDReportWindow()
+    let appearance = AspectoWindow()
     private var inFlight = false
     let highlight = HighlightOverlay()
     /// Held this long, ⌃⌥⌘ is no longer a quick press: it shows what Lupita knows (D39). The window is
@@ -34,6 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         onboarding = OnboardingWindow(store: store) { [weak self] in self?.menu?.addRoot() }
         menu?.onPrepareRepos = { [weak self] in self?.onboarding?.show() }
         menu?.onIDReport = { [weak self] in self.map { $0.idReport.show(index: $0.store.index) } }
+        menu?.onAppearance = { [weak self] in self?.appearance.show() }
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
         // Dev aid: `lupita poke` does what the shortcut does, for automated checks that cannot press keys.
