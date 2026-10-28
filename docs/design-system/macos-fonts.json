@@ -1,0 +1,1372 @@
+{
+ "$description": "Font families in /System/Library/Fonts, generated with NSFontManager.availableFontFamilies (+ CoreText file path). Generated on macOS 27.0, not a clean macOS 14.",
+ "families": [
+  {
+   "family": "Academy Engraved LET",
+   "styles": [
+    "Plain"
+   ]
+  },
+  {
+   "family": "Al Bayan",
+   "styles": [
+    "Plain",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Al Nile",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Al Tarikh",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "American Typewriter",
+   "styles": [
+    "Regular",
+    "Light",
+    "Semibold",
+    "Bold",
+    "Condensed",
+    "Condensed Light",
+    "Condensed Bold"
+   ]
+  },
+  {
+   "family": "Andale Mono",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Apple Braille",
+   "styles": [
+    "Regular",
+    "Outline 6 Dot",
+    "Outline 8 Dot",
+    "Pinpoint 6 Dot",
+    "Pinpoint 8 Dot"
+   ]
+  },
+  {
+   "family": "Apple Chancery",
+   "styles": [
+    "Chancery"
+   ]
+  },
+  {
+   "family": "Apple Color Emoji",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Apple SD Gothic Neo",
+   "styles": [
+    "Regular",
+    "Thin",
+    "UltraLight",
+    "Light",
+    "Medium",
+    "SemiBold",
+    "Bold",
+    "ExtraBold",
+    "Heavy"
+   ]
+  },
+  {
+   "family": "Apple Symbols",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "AppleGothic",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "AppleMyungjo",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Arial",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Arial Black",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Arial Hebrew",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Arial Hebrew Scholar",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Arial Narrow",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Arial Rounded MT Bold",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Arial Unicode MS",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Avenir",
+   "styles": [
+    "Book",
+    "Roman",
+    "Book Oblique",
+    "Oblique",
+    "Light",
+    "Light Oblique",
+    "Medium",
+    "Medium Oblique",
+    "Heavy",
+    "Heavy Oblique",
+    "Black",
+    "Black Oblique"
+   ]
+  },
+  {
+   "family": "Avenir Next",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Ultra Light",
+    "Ultra Light Italic",
+    "Medium",
+    "Medium Italic",
+    "Demi Bold",
+    "Demi Bold Italic",
+    "Bold",
+    "Bold Italic",
+    "Heavy",
+    "Heavy Italic"
+   ]
+  },
+  {
+   "family": "Avenir Next Condensed",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Ultra Light",
+    "Ultra Light Italic",
+    "Medium",
+    "Medium Italic",
+    "Demi Bold",
+    "Demi Bold Italic",
+    "Bold",
+    "Bold Italic",
+    "Heavy",
+    "Heavy Italic"
+   ]
+  },
+  {
+   "family": "Ayuthaya",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Baghdad",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Bangla MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Bangla Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Baskerville",
+   "styles": [
+    "Regular",
+    "Italic",
+    "SemiBold",
+    "SemiBold Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Beirut",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Big Caslon",
+   "styles": [
+    "Medium"
+   ]
+  },
+  {
+   "family": "Bodoni 72",
+   "styles": [
+    "Book",
+    "Book Italic",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Bodoni 72 Oldstyle",
+   "styles": [
+    "Bold",
+    "Book",
+    "Book Italic"
+   ]
+  },
+  {
+   "family": "Bodoni 72 Smallcaps",
+   "styles": [
+    "Book"
+   ]
+  },
+  {
+   "family": "Bodoni Ornaments",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Bradley Hand",
+   "styles": [
+    "Bold"
+   ]
+  },
+  {
+   "family": "Brush Script MT",
+   "styles": [
+    "Italic"
+   ]
+  },
+  {
+   "family": "Chalkboard",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Chalkboard SE",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Chalkduster",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Charter",
+   "styles": [
+    "Roman",
+    "Italic",
+    "Bold",
+    "Bold Italic",
+    "Black",
+    "Black Italic"
+   ]
+  },
+  {
+   "family": "Cochin",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Comic Sans MS",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Copperplate",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Corsiva Hebrew",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Courier New",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "DIN Alternate",
+   "styles": [
+    "Bold"
+   ]
+  },
+  {
+   "family": "DIN Condensed",
+   "styles": [
+    "Bold"
+   ]
+  },
+  {
+   "family": "Damascus",
+   "styles": [
+    "Regular",
+    "Light",
+    "Medium",
+    "Semi Bold",
+    "Bold"
+   ]
+  },
+  {
+   "family": "DecoType Naskh",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Devanagari MT",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Devanagari Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Didot",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Diwan Kufi",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Diwan Thuluth",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Euphemia UCAS",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Farah",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Farisi",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Futura",
+   "styles": [
+    "Medium",
+    "Medium Italic",
+    "Bold",
+    "Condensed Medium",
+    "Condensed ExtraBold"
+   ]
+  },
+  {
+   "family": "GB18030 Bitmap",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Galvji",
+   "styles": [
+    "Regular",
+    "Oblique",
+    "Bold",
+    "Bold Oblique"
+   ]
+  },
+  {
+   "family": "Geeza Pro",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Geneva",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Georgia",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Gill Sans",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Light",
+    "Light Italic",
+    "SemiBold",
+    "SemiBold Italic",
+    "Bold",
+    "Bold Italic",
+    "UltraBold"
+   ]
+  },
+  {
+   "family": "Grantha Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Gujarati MT",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Gujarati Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Gurmukhi MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Gurmukhi MT",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Gurmukhi Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Heiti SC",
+   "styles": [
+    "Light",
+    "Medium"
+   ]
+  },
+  {
+   "family": "Heiti TC",
+   "styles": [
+    "Light",
+    "Medium"
+   ]
+  },
+  {
+   "family": "Helvetica",
+   "styles": [
+    "Regular",
+    "Oblique",
+    "Light",
+    "Light Oblique",
+    "Bold",
+    "Bold Oblique"
+   ]
+  },
+  {
+   "family": "Helvetica Neue",
+   "styles": [
+    "Regular",
+    "Italic",
+    "UltraLight",
+    "UltraLight Italic",
+    "Thin",
+    "Thin Italic",
+    "Light",
+    "Light Italic",
+    "Medium",
+    "Medium Italic",
+    "Bold",
+    "Bold Italic",
+    "Condensed Bold",
+    "Condensed Black"
+   ]
+  },
+  {
+   "family": "Herculanum",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Hiragino Maru Gothic ProN",
+   "styles": [
+    "W4"
+   ]
+  },
+  {
+   "family": "Hiragino Mincho ProN",
+   "styles": [
+    "W3",
+    "W6"
+   ]
+  },
+  {
+   "family": "Hiragino Sans",
+   "styles": [
+    "W0",
+    "W1",
+    "W2",
+    "W3",
+    "W4",
+    "W5",
+    "W6",
+    "W7",
+    "W8",
+    "W9"
+   ]
+  },
+  {
+   "family": "Hiragino Sans GB",
+   "styles": [
+    "W3",
+    "W6"
+   ]
+  },
+  {
+   "family": "Hoefler Text",
+   "styles": [
+    "Regular",
+    "Ornaments",
+    "Italic",
+    "Black",
+    "Black Italic"
+   ]
+  },
+  {
+   "family": "ITF Devanagari",
+   "styles": [
+    "Book",
+    "Light",
+    "Medium",
+    "Demi",
+    "Bold"
+   ]
+  },
+  {
+   "family": "ITF Devanagari Marathi",
+   "styles": [
+    "Book",
+    "Light",
+    "Medium",
+    "Demi",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Impact",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "InaiMathi",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kailasa",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kannada MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kannada Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kefa III",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold",
+    "ExtraBold"
+   ]
+  },
+  {
+   "family": "Khmer MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Khmer Sangam MN",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Kohinoor Bangla",
+   "styles": [
+    "Regular",
+    "Light",
+    "Medium",
+    "Semibold",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kohinoor Devanagari",
+   "styles": [
+    "Regular",
+    "Light",
+    "Medium",
+    "Semibold",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kohinoor Gujarati",
+   "styles": [
+    "Regular",
+    "Light",
+    "Medium",
+    "Semibold",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kohinoor Telugu",
+   "styles": [
+    "Regular",
+    "Light",
+    "Medium",
+    "Semibold",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Kokonor",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Krungthep",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "KufiStandardGK",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Lao MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Lao Sangam MN",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Lucida Grande",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Luminari",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Malayalam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Malayalam Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Marker Felt",
+   "styles": [
+    "Thin",
+    "Wide"
+   ]
+  },
+  {
+   "family": "Menlo",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Microsoft Sans Serif",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Mishafi",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Mishafi Gold",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Monaco",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Mshtakan",
+   "styles": [
+    "Regular",
+    "Oblique",
+    "Bold",
+    "BoldOblique"
+   ]
+  },
+  {
+   "family": "Mukta Mahee",
+   "styles": [
+    "Regular",
+    "ExtraLight",
+    "Light",
+    "Medium",
+    "SemiBold",
+    "Bold",
+    "ExtraBold"
+   ]
+  },
+  {
+   "family": "Muna",
+   "styles": [
+    "Regular",
+    "Bold",
+    "Black"
+   ]
+  },
+  {
+   "family": "Myanmar MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Myanmar Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Nadeem",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "New Peninim MT",
+   "styles": [
+    "Regular",
+    "Inclined",
+    "Bold",
+    "Bold Inclined"
+   ]
+  },
+  {
+   "family": "Noteworthy",
+   "styles": [
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Noto Nastaliq Urdu",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Noto Sans Batak",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Noto Sans Kannada",
+   "styles": [
+    "Regular",
+    "Thin",
+    "ExtraLight",
+    "Light",
+    "Medium",
+    "SemiBold",
+    "Bold",
+    "ExtraBold",
+    "Black"
+   ]
+  },
+  {
+   "family": "Noto Sans NKo",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Noto Sans Oriya",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Noto Sans Sunuwar",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Noto Sans Syriac",
+   "styles": [
+    "Regular",
+    "Thin",
+    "ExtraLight",
+    "Light",
+    "Medium",
+    "SemiBold",
+    "Bold",
+    "ExtraBold",
+    "Black"
+   ]
+  },
+  {
+   "family": "Noto Sans Tagalog",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Noto Serif Myanmar",
+   "styles": [
+    "Regular",
+    "Thin",
+    "ExtraLight",
+    "Light",
+    "Medium",
+    "SemiBold",
+    "Bold",
+    "ExtraBold",
+    "Black"
+   ]
+  },
+  {
+   "family": "Optima",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic",
+    "ExtraBlack"
+   ]
+  },
+  {
+   "family": "Oriya MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Oriya Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "PT Mono",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "PT Sans",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "PT Sans Caption",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "PT Sans Narrow",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "PT Serif",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "PT Serif Caption",
+   "styles": [
+    "Regular",
+    "Italic"
+   ]
+  },
+  {
+   "family": "Palatino",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Papyrus",
+   "styles": [
+    "Regular",
+    "Condensed"
+   ]
+  },
+  {
+   "family": "Party LET",
+   "styles": [
+    "Plain"
+   ]
+  },
+  {
+   "family": "Phosphate",
+   "styles": [
+    "Inline",
+    "Solid"
+   ]
+  },
+  {
+   "family": "Plantagenet Cherokee",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Raanana",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "STIX Two Math",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "STIX Two Text",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Medium",
+    "Medium Italic",
+    "SemiBold",
+    "SemiBold Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "STSong",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Sana",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Sathu",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Savoye LET",
+   "styles": [
+    "Plain"
+   ]
+  },
+  {
+   "family": "Shree Devanagari 714",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "SignPainter",
+   "styles": [
+    "HouseScript",
+    "HouseScript Semibold"
+   ]
+  },
+  {
+   "family": "Silom",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Sinhala MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Sinhala Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Skia",
+   "styles": [
+    "Regular",
+    "Condensed",
+    "Extended",
+    "Light",
+    "Light Condensed",
+    "Light Extended",
+    "Bold",
+    "Black Condensed",
+    "Black",
+    "Black Extended"
+   ]
+  },
+  {
+   "family": "Snell Roundhand",
+   "styles": [
+    "Regular",
+    "Bold",
+    "Black"
+   ]
+  },
+  {
+   "family": "Songti SC",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold",
+    "Black"
+   ]
+  },
+  {
+   "family": "Songti TC",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Sukhumvit Set",
+   "styles": [
+    "Text",
+    "Light",
+    "Medium",
+    "Semi Bold",
+    "Bold",
+    "Thin"
+   ]
+  },
+  {
+   "family": "Symbol",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Tahoma",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Tamil MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Tamil Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Telugu MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Telugu Sangam MN",
+   "styles": [
+    "Regular",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Thonburi",
+   "styles": [
+    "Regular",
+    "Light",
+    "Bold"
+   ]
+  },
+  {
+   "family": "Times New Roman",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Trattatello",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Trebuchet MS",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Verdana",
+   "styles": [
+    "Regular",
+    "Italic",
+    "Bold",
+    "Bold Italic"
+   ]
+  },
+  {
+   "family": "Waseem",
+   "styles": [
+    "Regular",
+    "Light"
+   ]
+  },
+  {
+   "family": "Webdings",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Wingdings",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Wingdings 2",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Wingdings 3",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Zapf Dingbats",
+   "styles": [
+    "Regular"
+   ]
+  },
+  {
+   "family": "Zapfino",
+   "styles": [
+    "Regular"
+   ]
+  }
+ ]
+}
