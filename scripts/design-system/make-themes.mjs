@@ -30,6 +30,7 @@ function build(def) {
     for (const [k, v] of Object.entries(out)) if (JSON.stringify(d[k]) !== JSON.stringify(v)) set('semantic', `text.${role}.${k}`, v)
   }
   if (def.lineHeight) for (const role of ROLES) if (!(def.type?.[role] && 'lineHeight' in def.type[role])) set('semantic', `text.${role}.lineHeight`, def.lineHeight)
+  for (const [role, v] of Object.entries(def.lh ?? {})) set('semantic', `text.${role}.lineHeight`, v)
   if (def.tracking) for (const role of ROLES) if (!(def.type?.[role] && 'tracking' in def.type[role])) set('semantic', `text.${role}.tracking`, def.tracking)
 
   // colour: [light, dark] hex pairs, or [light, dark] numbers for blur / opacity
@@ -75,6 +76,7 @@ themes.push({
     badge: { size: 'sm', weight: 'semibold', tracking: 0.3 }, swatch: { size: 'sm' }, notice: { family: 'serif', size: 'lg' },
   },
   lineHeight: 1.3,
+  lh: { title: 1.3, description: 1.5, placeholder: 1.4 },
   color: {
     surface: ['#FBF6ECF7', '#2B2620F7'], 'notice-surface': ['#FBF6ECF7', '#2B2620F7'],
     border: ['#2A241B33', '#F3E9D633'],
@@ -85,9 +87,9 @@ themes.push({
   },
   shadows: { sheet: [{ x: 0, y: 1, blur: 2, spread: 0, color: '{color.shadow-edge}' }, { x: 0, y: 8, blur: 20, spread: -2, color: '{color.shadow}' }] },
   shadow: { container: 'sheet', notice: 'sheet' },
-  radius: { container: 'sm', notice: 'sm', swatch: 'xs', badge: 'xs' },
+  radius: { container: 'sm', notice: 'sm', swatch: 'xs', badge: 'xs', row: 'xs' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '18', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '14', 'notice-y': '10' },
+  space: { padding: '18', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '14', 'notice-y': '10', 'row-pad-x': '6', 'row-pad-y': '4', 'meta-gap': '4' },
   size: { width: 460 },
 })
 
@@ -104,8 +106,9 @@ themes.push({
     swatch: { family: 'mono', size: 'sm' }, notice: { family: 'mono', size: 'md' },
   },
   lineHeight: 1.3,
+  lh: { title: 1.35, description: 1.5 },
   color: {
-    surface: ['#F1F5EEF7', '#0B100BF7'], 'notice-surface': ['#F1F5EEF7', '#0B100BF7'],
+    surface: ['#F6F9F4F7', '#0B100BF7'], 'notice-surface': ['#F6F9F4F7', '#0B100BF7'],
     border: ['#0B6B2A99', '#3DFF7A80'],
     'text-primary': ['#0E2A12', '#D4F7CE'], 'text-secondary': ['#3B5A3E', '#86C081'], 'text-accent': ['#0B6B2A', '#3DFF7A'],
     'badge-bg': ['#0B6B2A1F', '#3DFF7A26'], 'badge-fg': ['#0B4A1D', '#9BFFB8'], 'origin-bg': ['#B8860B33', '#FFB00033'], 'origin-fg': ['#4A3200', '#FFD27A'],
@@ -113,9 +116,9 @@ themes.push({
     shadow: ['#00000000', '#00000000'], 'shadow-edge': ['#00000000', '#00000000'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.7, 0.7],
   },
   shadow: { container: 'none', notice: 'none' },
-  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none' },
+  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none', row: 'none' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '12', 'block-gap': '8', 'range-gap': '6', 'range-line-gap': '4', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '3', 'name-gap': '2', 'swatch-gap': '8', 'swatch-inner-gap': '6', 'badge-x': '5', 'badge-y': '1', 'notice-x': '10', 'notice-y': '6' },
+  space: { padding: '12', 'block-gap': '8', 'range-gap': '6', 'range-line-gap': '4', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '3', 'name-gap': '2', 'swatch-gap': '8', 'swatch-inner-gap': '6', 'badge-x': '5', 'badge-y': '1', 'notice-x': '10', 'notice-y': '6', 'row-pad-x': '6', 'row-pad-y': '3', 'meta-gap': '3' },
   size: { width: 480 },
 })
 
@@ -130,19 +133,20 @@ themes.push({
     repo: { size: 'sm', weight: 'bold', tracking: 0.4 }, location: { size: 'sm' }, badge: { size: 'sm', weight: 'bold', tracking: 0.4 },
     eyebrow: { size: 'sm', weight: 'medium', tracking: 0.3 }, footnote: { size: 'sm' }, swatch: { size: 'sm' }, notice: { size: 'lg' },
   },
+  lh: { title: 1.3, description: 1.45 },
   color: {
-    surface: ['#F7F3FFF5', '#0D0B1AF2'], 'notice-surface': ['#F7F3FFF5', '#0D0B1AF2'],
-    border: ['#5A1FD699', '#00E5FFB3'],
+    surface: ['#F3EDFFF7', '#0D0B1AF2'], 'notice-surface': ['#F3EDFFF7', '#0D0B1AF2'],
+    border: ['#5A1FD6CC', '#00E5FFB3'],
     'text-primary': ['#1A0B3D', '#F4F1FF'], 'text-secondary': ['#4B3A7A', '#B9B2E0'], 'text-accent': ['#5A1FD6', '#00E5FF'],
     'badge-bg': ['#5A1FD61F', '#00E5FF26'], 'badge-fg': ['#3A0FA0', '#9DF3FF'], 'origin-bg': ['#FF2E9333', '#FF2E9340'], 'origin-fg': ['#7A0A47', '#FFC2E3'],
     'swatch-border': ['#5A1FD699', '#00E5FF99'], 'row-hover': ['#5A1FD614', '#00E5FF1A'],
-    shadow: ['#5A1FD655', '#00E5FF66'], 'shadow-edge': ['#5A1FD6', '#00E5FF'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
+    shadow: ['#5A1FD670', '#00E5FF66'], 'shadow-edge': ['#5A1FD6', '#00E5FF'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
   },
   shadows: { glow: [{ x: 0, y: 0, blur: 28, spread: 1, color: '{color.shadow}' }, { x: 0, y: 0, blur: 2, spread: 0, color: '{color.shadow-edge}' }] },
   shadow: { container: 'glow', notice: 'glow' },
-  radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'pill' },
+  radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'pill', row: 'md' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '14', 'notice-y': '10' },
+  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '14', 'notice-y': '10', 'row-pad-x': '8', 'row-pad-y': '4', 'meta-gap': '4' },
   size: { width: 440 },
 })
 
@@ -156,6 +160,7 @@ themes.push({
     footnote: { size: 'xs' }, swatch: { size: 'xs' }, notice: { size: 'md' },
   },
   lineHeight: 1.15,
+  lh: { title: 1.2, description: 1.3 },
   color: {
     surface: ['#F4F4F6F5', '#242426F5'], 'notice-surface': ['#F4F4F6F5', '#242426F5'],
     border: ['#00000026', '#FFFFFF2E'],
@@ -165,9 +170,9 @@ themes.push({
     shadow: ['#00000024', '#00000080'], 'shadow-edge': ['#0000001A', '#00000040'], 'surface-blur': [12, 12], 'suggestion-opacity': [0.75, 0.75],
   },
   shadow: { container: 'sm', notice: 'sm' },
-  radius: { container: 'xs', notice: 'xs', swatch: 'xs', badge: 'xs' },
+  radius: { container: 'xs', notice: 'xs', swatch: 'xs', badge: 'xs', row: 'xs' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '8', 'block-gap': '6', 'range-gap': '5', 'range-line-gap': '3', 'entry-gap': '6', 'inline-gap': '5', 'row-gap': '2', 'name-gap': '1', 'swatch-gap': '6', 'swatch-inner-gap': '4', 'badge-x': '4', 'badge-y': '0', 'notice-x': '8', 'notice-y': '5' },
+  space: { padding: '8', 'block-gap': '8', 'range-gap': '5', 'range-line-gap': '3', 'entry-gap': '6', 'inline-gap': '5', 'row-gap': '3', 'name-gap': '1', 'swatch-gap': '6', 'swatch-inner-gap': '4', 'badge-x': '4', 'badge-y': '1', 'notice-x': '8', 'notice-y': '5', 'row-pad-x': '4', 'row-pad-y': '2', 'meta-gap': '2' },
   size: { width: 360, swatch: 16 },
 })
 
@@ -181,6 +186,7 @@ themes.push({
     eyebrow: { size: 'lg', weight: 'medium' }, footnote: { size: 'lg' }, swatch: { size: 'lg' }, notice: { size: 'xl', color: 'text-primary' },
   },
   lineHeight: 1.35,
+  lh: { title: 1.3, description: 1.55, placeholder: 1.45 },
   color: {
     surface: ['#FFFFFFFF', '#121212FF'], 'notice-surface': ['#FFFFFFFF', '#121212FF'],
     border: ['#1A1A1A', '#FFFFFF'],
@@ -190,9 +196,9 @@ themes.push({
     shadow: ['#00000040', '#00000099'], 'shadow-edge': ['#00000026', '#00000066'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.85, 0.85],
   },
   shadow: { container: 'md', notice: 'md' },
-  radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'md' },
+  radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'md', row: 'md' },
   border: { container: 2, swatch: 2, notice: 2 },
-  space: { padding: '20', 'block-gap': '14', 'range-gap': '12', 'range-line-gap': '8', 'entry-gap': '12', 'inline-gap': '8', 'row-gap': '6', 'name-gap': '3', 'swatch-gap': '14', 'swatch-inner-gap': '8', 'badge-x': '8', 'badge-y': '3', 'notice-x': '16', 'notice-y': '12' },
+  space: { padding: '20', 'block-gap': '14', 'range-gap': '12', 'range-line-gap': '8', 'entry-gap': '12', 'inline-gap': '8', 'row-gap': '6', 'name-gap': '3', 'swatch-gap': '14', 'swatch-inner-gap': '8', 'badge-x': '8', 'badge-y': '3', 'notice-x': '16', 'notice-y': '12', 'row-pad-x': '8', 'row-pad-y': '5', 'meta-gap': '5' },
   size: { width: 520, swatch: 28 },
 })
 
@@ -207,6 +213,7 @@ themes.push({
     eyebrow: { size: 'sm', weight: 'bold', color: 'text-primary' }, footnote: { size: 'sm', weight: 'medium', color: 'text-primary' },
     swatch: { size: 'sm', weight: 'medium', color: 'text-primary' }, notice: { size: 'lg', weight: 'bold', color: 'text-primary' },
   },
+  lh: { title: 1.25, description: 1.4 },
   color: {
     surface: ['#FFF200', '#161616'], 'notice-surface': ['#FFF200', '#161616'],
     border: ['#000000', '#FFF200'],
@@ -217,9 +224,9 @@ themes.push({
   },
   shadows: { hard: [{ x: 6, y: 6, blur: 0, spread: 0, color: '{color.shadow}' }] },
   shadow: { container: 'hard', notice: 'hard' },
-  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none' },
+  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none', row: 'none' },
   border: { container: 3, swatch: 2, notice: 3 },
-  space: { padding: '14', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '5', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '12', 'notice-y': '8' },
+  space: { padding: '14', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '5', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '12', 'notice-y': '8', 'row-pad-x': '6', 'row-pad-y': '3', 'meta-gap': '3' },
   size: { width: 440 },
 })
 
@@ -233,19 +240,20 @@ themes.push({
     eyebrow: { size: 'sm', weight: 'medium' }, footnote: { size: 'sm' }, swatch: { size: 'sm' }, notice: { size: 'lg' },
   },
   lineHeight: 1.25,
+  lh: { title: 1.3, description: 1.45 },
   color: {
     surface: ['#FFFFFFDB', '#141A2CC8'], 'notice-surface': ['#FFFFFFDB', '#141A2CC8'],
     border: ['#FFFFFFE6', '#FFFFFF3D'],
     'text-primary': ['#0B1B2E', '#F5F8FF'], 'text-secondary': ['#2F4259', '#CBD6EC'], 'text-accent': ['#0A3FA8', '#9EC1FF'],
     'badge-bg': ['#0A3FA81A', '#9EC1FF29'], 'badge-fg': ['#082F7C', '#D6E6FF'], 'origin-bg': ['#FF8A3D33', '#FF9F4A33'], 'origin-fg': ['#552200', '#FFD9B8'],
     'swatch-border': ['#0B1B2EB3', '#FFFFFF80'], 'row-hover': ['#0A3FA81A', '#9EC1FF24'],
-    shadow: ['#1B2A4A40', '#00000080'], 'shadow-edge': ['#1B2A4A1A', '#00000040'], 'surface-blur': [40, 40], 'suggestion-opacity': [0.72, 0.72],
+    shadow: ['#1B2A4A40', '#00000080'], 'shadow-edge': ['#1B2A4A33', '#00000040'], 'surface-blur': [40, 40], 'suggestion-opacity': [0.72, 0.72],
   },
   shadows: { deep: [{ x: 0, y: 28, blur: 64, spread: -8, color: '{color.shadow}' }, { x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow-edge}' }] },
   shadow: { container: 'deep', notice: 'deep' },
-  radius: { container: '2xl', notice: 'xl', swatch: 'lg', badge: 'pill' },
+  radius: { container: '2xl', notice: 'xl', swatch: 'lg', badge: 'pill', row: 'md' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '18', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '16', 'notice-y': '10' },
+  space: { padding: '18', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '16', 'notice-y': '10', 'row-pad-x': '8', 'row-pad-y': '4', 'meta-gap': '4' },
   size: { width: 460 },
 })
 
@@ -260,6 +268,7 @@ themes.push({
     eyebrow: { family: 'rounded', size: 'sm', weight: 'medium' }, footnote: { family: 'rounded', size: 'sm' }, swatch: { size: 'sm' }, notice: { family: 'rounded', size: 'lg' },
   },
   lineHeight: 1.3,
+  lh: { title: 1.3, description: 1.45 },
   color: {
     surface: ['#FFF5FAF7', '#2A2036F7'], 'notice-surface': ['#FFF5FAF7', '#2A2036F7'],
     border: ['#F2A9D2', '#7A5AA0'],
@@ -270,9 +279,9 @@ themes.push({
   },
   shadows: { pop: [{ x: 0, y: 6, blur: 0, spread: 0, color: '{color.shadow-edge}' }, { x: 0, y: 14, blur: 28, spread: 0, color: '{color.shadow}' }] },
   shadow: { container: 'pop', notice: 'pop' },
-  radius: { container: '2xl', notice: 'xl', swatch: 'xl', badge: 'pill' },
+  radius: { container: '2xl', notice: 'xl', swatch: 'xl', badge: 'pill', row: 'xl' },
   border: { container: 2, swatch: 2, notice: 2 },
-  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '3', 'notice-x': '16', 'notice-y': '10' },
+  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '3', 'notice-x': '16', 'notice-y': '10', 'row-pad-x': '8', 'row-pad-y': '4', 'meta-gap': '4' },
   size: { width: 440 },
 })
 
@@ -287,6 +296,7 @@ themes.push({
     eyebrow: { family: 'mono', size: 'sm', tracking: 0.5 }, footnote: { family: 'mono', size: 'sm' }, swatch: { size: 'sm' }, notice: { family: 'mono', size: 'md' },
   },
   lineHeight: 1.25,
+  lh: { title: 1.3, description: 1.4 },
   color: {
     surface: ['#F2F7FFF7', '#0B2A5BF5'], 'notice-surface': ['#F2F7FFF7', '#0B2A5BF5'],
     border: ['#0B2A5BCC', '#7CB4FFB3'],
@@ -297,9 +307,9 @@ themes.push({
   },
   shadows: { offset: [{ x: 4, y: 4, blur: 0, spread: 0, color: '{color.shadow}' }] },
   shadow: { container: 'offset', notice: 'offset' },
-  radius: { container: 'xs', notice: 'xs', swatch: 'none', badge: 'xs' },
+  radius: { container: 'xs', notice: 'xs', swatch: 'none', badge: 'xs', row: 'xs' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '12', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '4', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '1', 'notice-x': '12', 'notice-y': '8' },
+  space: { padding: '12', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '4', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '1', 'notice-x': '12', 'notice-y': '8', 'row-pad-x': '6', 'row-pad-y': '3', 'meta-gap': '3' },
   size: { width: 440 },
 })
 

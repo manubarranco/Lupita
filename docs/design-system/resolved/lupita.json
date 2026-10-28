@@ -523,6 +523,10 @@
    "$type": "dimension",
    "$value": 999
   },
+  "radius.row": {
+   "$type": "dimension",
+   "$value": 0
+  },
   "border.container": {
    "$type": "dimension",
    "$value": 1
@@ -590,6 +594,18 @@
   "space.notice-y": {
    "$type": "dimension",
    "$value": 8
+  },
+  "space.row-pad-x": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "space.row-pad-y": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "space.meta-gap": {
+   "$type": "dimension",
+   "$value": 0
   },
   "size.width": {
    "$type": "dimension",
@@ -699,6 +715,22 @@
   "component.row.hover": {
    "$type": "color",
    "$value": "#00000000"
+  },
+  "component.row.pad-x": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "component.row.pad-y": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "component.row.radius": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "component.row.meta-gap": {
+   "$type": "dimension",
+   "$value": 0
   },
   "component.row.suggestion-opacity": {
    "$type": "number",
@@ -1611,6 +1643,10 @@
    "$type": "dimension",
    "$value": 999
   },
+  "radius.row": {
+   "$type": "dimension",
+   "$value": 0
+  },
   "border.container": {
    "$type": "dimension",
    "$value": 1
@@ -1678,6 +1714,18 @@
   "space.notice-y": {
    "$type": "dimension",
    "$value": 8
+  },
+  "space.row-pad-x": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "space.row-pad-y": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "space.meta-gap": {
+   "$type": "dimension",
+   "$value": 0
   },
   "size.width": {
    "$type": "dimension",
@@ -1787,6 +1835,22 @@
   "component.row.hover": {
    "$type": "color",
    "$value": "#00000000"
+  },
+  "component.row.pad-x": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "component.row.pad-y": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "component.row.radius": {
+   "$type": "dimension",
+   "$value": 0
+  },
+  "component.row.meta-gap": {
+   "$type": "dimension",
+   "$value": 0
   },
   "component.row.suggestion-opacity": {
    "$type": "number",

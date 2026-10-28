@@ -48,7 +48,7 @@
         "title": {
           "size": "{font.size.2xl}",
           "weight": "{font.weight.semibold}",
-          "lineHeight": 1.35
+          "lineHeight": 1.3
         },
         "id": {
           "size": "{font.size.xl}",
@@ -57,11 +57,11 @@
         "description": {
           "size": "{font.size.xl}",
           "color": "{color.text-primary}",
-          "lineHeight": 1.35
+          "lineHeight": 1.55
         },
         "placeholder": {
           "size": "{font.size.xl}",
-          "lineHeight": 1.35
+          "lineHeight": 1.45
         },
         "repo": {
           "size": "{font.size.lg}",
@@ -170,7 +170,8 @@
         "container": "{radius.xl}",
         "notice": "{radius.lg}",
         "swatch": "{radius.md}",
-        "badge": "{radius.md}"
+        "badge": "{radius.md}",
+        "row": "{radius.md}"
       },
       "border": {
         "container": 2,
@@ -191,7 +192,10 @@
         "badge-x": "{space.8}",
         "badge-y": "{space.3}",
         "notice-x": "{space.16}",
-        "notice-y": "{space.12}"
+        "notice-y": "{space.12}",
+        "row-pad-x": "{space.8}",
+        "row-pad-y": "{space.5}",
+        "meta-gap": "{space.5}"
       },
       "size": {
         "width": 520,

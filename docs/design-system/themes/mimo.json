@@ -75,7 +75,7 @@
         "description": {
           "family": "{font.family.rounded}",
           "size": "{font.size.lg}",
-          "lineHeight": 1.3
+          "lineHeight": 1.45
         },
         "placeholder": {
           "family": "{font.family.rounded}",
@@ -192,7 +192,8 @@
         "container": "{radius.2xl}",
         "notice": "{radius.xl}",
         "swatch": "{radius.xl}",
-        "badge": "{radius.pill}"
+        "badge": "{radius.pill}",
+        "row": "{radius.xl}"
       },
       "border": {
         "container": 2,
@@ -213,7 +214,10 @@
         "badge-x": "{space.8}",
         "badge-y": "{space.3}",
         "notice-x": "{space.16}",
-        "notice-y": "{space.10}"
+        "notice-y": "{space.10}",
+        "row-pad-x": "{space.8}",
+        "row-pad-y": "{space.4}",
+        "meta-gap": "{space.4}"
       },
       "size": {
         "width": 440

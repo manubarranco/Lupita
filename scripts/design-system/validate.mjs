@@ -110,6 +110,9 @@ function visual(theme, mode, aaa) {
   const w = m['size.width']
   push('width', w >= 360 && w <= 520, w, '360..520')
 
+  const bleedX = m['space.row-pad-x'] <= m['space.padding'], bleedY = m['space.row-pad-y'] * 2 <= m['space.block-gap']
+  push('row-bleed', bleedX && bleedY, `x ${m['space.row-pad-x']}/${m['space.padding']} y ${m['space.row-pad-y']}*2/${m['space.block-gap']}`, 'row inset fits the container padding and the block gap')
+
   const neg = Object.entries(m).filter(([p, v]) => /^radius\./.test(p) && typeof v === 'number' && v < 0).map(([p]) => p)
   push('radius', neg.length === 0, neg.length ? neg.join(',') : 0, '>=0')
   const negB = Object.entries(m).filter(([p, v]) => /^border\./.test(p) && typeof v === 'number' && v < 0).map(([p]) => p)

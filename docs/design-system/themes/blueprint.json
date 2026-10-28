@@ -57,7 +57,7 @@
       "text": {
         "title": {
           "weight": "{font.weight.semibold}",
-          "lineHeight": 1.25
+          "lineHeight": 1.3
         },
         "id": {
           "color": "{color.text-accent}",
@@ -98,7 +98,7 @@
           "lineHeight": 1.25
         },
         "description": {
-          "lineHeight": 1.25
+          "lineHeight": 1.4
         },
         "placeholder": {
           "lineHeight": 1.25
@@ -178,7 +178,8 @@
         "container": "{radius.xs}",
         "notice": "{radius.xs}",
         "swatch": "{radius.none}",
-        "badge": "{radius.xs}"
+        "badge": "{radius.xs}",
+        "row": "{radius.xs}"
       },
       "border": {
         "container": 1,
@@ -199,7 +200,10 @@
         "badge-x": "{space.6}",
         "badge-y": "{space.1}",
         "notice-x": "{space.12}",
-        "notice-y": "{space.8}"
+        "notice-y": "{space.8}",
+        "row-pad-x": "{space.6}",
+        "row-pad-y": "{space.3}",
+        "meta-gap": "{space.3}"
       },
       "size": {
         "width": 440

@@ -431,7 +431,7 @@
     "size": 13,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#0B2A5B",
     "familyKey": "sans"
@@ -457,7 +457,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.4,
     "tracking": 0,
     "color": "#33548C",
     "familyKey": "sans"
@@ -647,6 +647,10 @@
    "$type": "dimension",
    "$value": 2
   },
+  "radius.row": {
+   "$type": "dimension",
+   "$value": 2
+  },
   "border.container": {
    "$type": "dimension",
    "$value": 1
@@ -714,6 +718,18 @@
   "space.notice-y": {
    "$type": "dimension",
    "$value": 8
+  },
+  "space.row-pad-x": {
+   "$type": "dimension",
+   "$value": 6
+  },
+  "space.row-pad-y": {
+   "$type": "dimension",
+   "$value": 3
+  },
+  "space.meta-gap": {
+   "$type": "dimension",
+   "$value": 3
   },
   "size.width": {
    "$type": "dimension",
@@ -803,6 +819,22 @@
    "$type": "color",
    "$value": "#0A55C814"
   },
+  "component.row.pad-x": {
+   "$type": "dimension",
+   "$value": 6
+  },
+  "component.row.pad-y": {
+   "$type": "dimension",
+   "$value": 3
+  },
+  "component.row.radius": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "component.row.meta-gap": {
+   "$type": "dimension",
+   "$value": 3
+  },
   "component.row.suggestion-opacity": {
    "$type": "number",
    "$value": 0.72
@@ -814,7 +846,7 @@
     "size": 13,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#0B2A5B",
     "familyKey": "sans"
@@ -840,7 +872,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.4,
     "tracking": 0,
     "color": "#33548C",
     "familyKey": "sans"
@@ -921,7 +953,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.4,
     "tracking": 0,
     "color": "#33548C",
     "familyKey": "sans"
@@ -947,7 +979,7 @@
     "size": 13,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#0B2A5B",
     "familyKey": "sans"
@@ -1615,7 +1647,7 @@
     "size": 13,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#EAF3FF",
     "familyKey": "sans"
@@ -1641,7 +1673,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.4,
     "tracking": 0,
     "color": "#B2CDF5",
     "familyKey": "sans"
@@ -1831,6 +1863,10 @@
    "$type": "dimension",
    "$value": 2
   },
+  "radius.row": {
+   "$type": "dimension",
+   "$value": 2
+  },
   "border.container": {
    "$type": "dimension",
    "$value": 1
@@ -1898,6 +1934,18 @@
   "space.notice-y": {
    "$type": "dimension",
    "$value": 8
+  },
+  "space.row-pad-x": {
+   "$type": "dimension",
+   "$value": 6
+  },
+  "space.row-pad-y": {
+   "$type": "dimension",
+   "$value": 3
+  },
+  "space.meta-gap": {
+   "$type": "dimension",
+   "$value": 3
   },
   "size.width": {
    "$type": "dimension",
@@ -1987,6 +2035,22 @@
    "$type": "color",
    "$value": "#7CE0FF1F"
   },
+  "component.row.pad-x": {
+   "$type": "dimension",
+   "$value": 6
+  },
+  "component.row.pad-y": {
+   "$type": "dimension",
+   "$value": 3
+  },
+  "component.row.radius": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "component.row.meta-gap": {
+   "$type": "dimension",
+   "$value": 3
+  },
   "component.row.suggestion-opacity": {
    "$type": "number",
    "$value": 0.72
@@ -1998,7 +2062,7 @@
     "size": 13,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#EAF3FF",
     "familyKey": "sans"
@@ -2024,7 +2088,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.4,
     "tracking": 0,
     "color": "#B2CDF5",
     "familyKey": "sans"
@@ -2105,7 +2169,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.4,
     "tracking": 0,
     "color": "#B2CDF5",
     "familyKey": "sans"
@@ -2131,7 +2195,7 @@
     "size": 13,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.25,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#EAF3FF",
     "familyKey": "sans"

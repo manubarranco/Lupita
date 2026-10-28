@@ -419,7 +419,7 @@
     "size": 12,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.2,
     "tracking": 0,
     "color": "#101012",
     "familyKey": "sans"
@@ -445,7 +445,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#4D4D55",
     "familyKey": "sans"
@@ -635,6 +635,10 @@
    "$type": "dimension",
    "$value": 2
   },
+  "radius.row": {
+   "$type": "dimension",
+   "$value": 2
+  },
   "border.container": {
    "$type": "dimension",
    "$value": 1
@@ -653,7 +657,7 @@
   },
   "space.block-gap": {
    "$type": "dimension",
-   "$value": 6
+   "$value": 8
   },
   "space.range-gap": {
    "$type": "dimension",
@@ -673,7 +677,7 @@
   },
   "space.row-gap": {
    "$type": "dimension",
-   "$value": 2
+   "$value": 3
   },
   "space.name-gap": {
    "$type": "dimension",
@@ -693,7 +697,7 @@
   },
   "space.badge-y": {
    "$type": "dimension",
-   "$value": 0
+   "$value": 1
   },
   "space.notice-x": {
    "$type": "dimension",
@@ -702,6 +706,18 @@
   "space.notice-y": {
    "$type": "dimension",
    "$value": 5
+  },
+  "space.row-pad-x": {
+   "$type": "dimension",
+   "$value": 4
+  },
+  "space.row-pad-y": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "space.meta-gap": {
+   "$type": "dimension",
+   "$value": 2
   },
   "size.width": {
    "$type": "dimension",
@@ -745,7 +761,7 @@
   },
   "component.tooltip.block-gap": {
    "$type": "dimension",
-   "$value": 6
+   "$value": 8
   },
   "component.tooltip.surface": {
    "$type": "color",
@@ -781,7 +797,7 @@
   },
   "component.row.gap": {
    "$type": "dimension",
-   "$value": 2
+   "$value": 3
   },
   "component.row.name-gap": {
    "$type": "dimension",
@@ -790,6 +806,22 @@
   "component.row.hover": {
    "$type": "color",
    "$value": "#0050C814"
+  },
+  "component.row.pad-x": {
+   "$type": "dimension",
+   "$value": 4
+  },
+  "component.row.pad-y": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "component.row.radius": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "component.row.meta-gap": {
+   "$type": "dimension",
+   "$value": 2
   },
   "component.row.suggestion-opacity": {
    "$type": "number",
@@ -802,7 +834,7 @@
     "size": 12,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.2,
     "tracking": 0,
     "color": "#101012",
     "familyKey": "sans"
@@ -828,7 +860,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#4D4D55",
     "familyKey": "sans"
@@ -909,7 +941,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#4D4D55",
     "familyKey": "sans"
@@ -935,7 +967,7 @@
     "size": 12,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.2,
     "tracking": 0,
     "color": "#101012",
     "familyKey": "sans"
@@ -1011,7 +1043,7 @@
   },
   "component.badge.pad-y": {
    "$type": "dimension",
-   "$value": 0
+   "$value": 1
   },
   "component.origin-badge.text": {
    "$type": "string",
@@ -1044,7 +1076,7 @@
   },
   "component.origin-badge.pad-y": {
    "$type": "dimension",
-   "$value": 0
+   "$value": 1
   },
   "component.swatch.size": {
    "$type": "dimension",
@@ -1591,7 +1623,7 @@
     "size": 12,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.2,
     "tracking": 0,
     "color": "#F2F2F5",
     "familyKey": "sans"
@@ -1617,7 +1649,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#B4B4BE",
     "familyKey": "sans"
@@ -1807,6 +1839,10 @@
    "$type": "dimension",
    "$value": 2
   },
+  "radius.row": {
+   "$type": "dimension",
+   "$value": 2
+  },
   "border.container": {
    "$type": "dimension",
    "$value": 1
@@ -1825,7 +1861,7 @@
   },
   "space.block-gap": {
    "$type": "dimension",
-   "$value": 6
+   "$value": 8
   },
   "space.range-gap": {
    "$type": "dimension",
@@ -1845,7 +1881,7 @@
   },
   "space.row-gap": {
    "$type": "dimension",
-   "$value": 2
+   "$value": 3
   },
   "space.name-gap": {
    "$type": "dimension",
@@ -1865,7 +1901,7 @@
   },
   "space.badge-y": {
    "$type": "dimension",
-   "$value": 0
+   "$value": 1
   },
   "space.notice-x": {
    "$type": "dimension",
@@ -1874,6 +1910,18 @@
   "space.notice-y": {
    "$type": "dimension",
    "$value": 5
+  },
+  "space.row-pad-x": {
+   "$type": "dimension",
+   "$value": 4
+  },
+  "space.row-pad-y": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "space.meta-gap": {
+   "$type": "dimension",
+   "$value": 2
   },
   "size.width": {
    "$type": "dimension",
@@ -1917,7 +1965,7 @@
   },
   "component.tooltip.block-gap": {
    "$type": "dimension",
-   "$value": 6
+   "$value": 8
   },
   "component.tooltip.surface": {
    "$type": "color",
@@ -1953,7 +2001,7 @@
   },
   "component.row.gap": {
    "$type": "dimension",
-   "$value": 2
+   "$value": 3
   },
   "component.row.name-gap": {
    "$type": "dimension",
@@ -1962,6 +2010,22 @@
   "component.row.hover": {
    "$type": "color",
    "$value": "#7DB0FF1F"
+  },
+  "component.row.pad-x": {
+   "$type": "dimension",
+   "$value": 4
+  },
+  "component.row.pad-y": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "component.row.radius": {
+   "$type": "dimension",
+   "$value": 2
+  },
+  "component.row.meta-gap": {
+   "$type": "dimension",
+   "$value": 2
   },
   "component.row.suggestion-opacity": {
    "$type": "number",
@@ -1974,7 +2038,7 @@
     "size": 12,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.2,
     "tracking": 0,
     "color": "#F2F2F5",
     "familyKey": "sans"
@@ -2000,7 +2064,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#B4B4BE",
     "familyKey": "sans"
@@ -2081,7 +2145,7 @@
     "size": 12,
     "weight": 400,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.3,
     "tracking": 0,
     "color": "#B4B4BE",
     "familyKey": "sans"
@@ -2107,7 +2171,7 @@
     "size": 12,
     "weight": 600,
     "italic": false,
-    "lineHeight": 1.15,
+    "lineHeight": 1.2,
     "tracking": 0,
     "color": "#F2F2F5",
     "familyKey": "sans"
@@ -2183,7 +2247,7 @@
   },
   "component.badge.pad-y": {
    "$type": "dimension",
-   "$value": 0
+   "$value": 1
   },
   "component.origin-badge.text": {
    "$type": "string",
@@ -2216,7 +2280,7 @@
   },
   "component.origin-badge.pad-y": {
    "$type": "dimension",
-   "$value": 0
+   "$value": 1
   },
   "component.swatch.size": {
    "$type": "dimension",

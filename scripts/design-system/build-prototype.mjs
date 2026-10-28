@@ -54,7 +54,7 @@ ${textRules}
 .tooltip.range { gap: var(--space-range-gap); }
 .notice { position: relative; box-sizing: border-box; display: block; width: max-content; max-width: var(--size-width); padding: var(--space-notice-y) var(--space-notice-x); background: var(--color-notice-surface); -webkit-backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); border-radius: var(--radius-notice); box-shadow: var(--shadow-notice); }
 .notice::after { border: var(--border-notice) solid var(--color-border); }
-.row { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-row-gap); min-width: 0; }
+.row { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-row-gap); min-width: 0; padding: var(--space-row-pad-y) var(--space-row-pad-x); margin: calc(var(--space-row-pad-y) * -1) calc(var(--space-row-pad-x) * -1); border-radius: var(--radius-row); }
 .row.hover { background: var(--color-row-hover); }
 .row.muted { opacity: var(--color-suggestion-opacity); }
 .name { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-name-gap); min-width: 0; }
@@ -66,7 +66,7 @@ ${textRules}
 .swatches { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-swatch-gap); }
 .swatch { display: flex; align-items: center; gap: var(--space-swatch-inner-gap); }
 .chip { flex: none; box-sizing: border-box; width: var(--size-swatch); height: var(--size-swatch); border: var(--border-swatch) solid var(--color-swatch-border); border-radius: var(--radius-swatch); }
-.meta { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--space-inline-gap); min-width: 0; }
+.meta { margin-top: var(--space-meta-gap); display: flex; flex-wrap: nowrap; align-items: center; gap: var(--space-inline-gap); min-width: 0; }
 .meta > .repo { flex: 0 1 auto; max-width: 60%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .meta > .location { flex: 1 1 0; min-width: 8ch; }
 .badge { flex: none; padding: var(--space-badge-y) var(--space-badge-x); border-radius: var(--radius-badge); background: var(--color-badge-bg); white-space: nowrap; }

@@ -12,9 +12,9 @@
   "overrides": {
     "primitive": {
       "palette": {
-        "terminal-surface-light": "#F1F5EEF7",
+        "terminal-surface-light": "#F6F9F4F7",
         "terminal-surface-dark": "#0B100BF7",
-        "terminal-notice-surface-light": "#F1F5EEF7",
+        "terminal-notice-surface-light": "#F6F9F4F7",
         "terminal-notice-surface-dark": "#0B100BF7",
         "terminal-border-light": "#0B6B2A99",
         "terminal-border-dark": "#3DFF7A80",
@@ -47,7 +47,7 @@
         "title": {
           "family": "{font.family.mono}",
           "weight": "{font.weight.semibold}",
-          "lineHeight": 1.3
+          "lineHeight": 1.35
         },
         "id": {
           "weight": "{font.weight.regular}",
@@ -56,7 +56,7 @@
         },
         "description": {
           "family": "{font.family.mono}",
-          "lineHeight": 1.3
+          "lineHeight": 1.5
         },
         "placeholder": {
           "family": "{font.family.mono}",
@@ -169,7 +169,8 @@
         "container": "{radius.none}",
         "notice": "{radius.none}",
         "swatch": "{radius.none}",
-        "badge": "{radius.none}"
+        "badge": "{radius.none}",
+        "row": "{radius.none}"
       },
       "border": {
         "container": 1,
@@ -190,7 +191,10 @@
         "badge-x": "{space.5}",
         "badge-y": "{space.1}",
         "notice-x": "{space.10}",
-        "notice-y": "{space.6}"
+        "notice-y": "{space.6}",
+        "row-pad-x": "{space.6}",
+        "row-pad-y": "{space.3}",
+        "meta-gap": "{space.3}"
       },
       "size": {
         "width": 480

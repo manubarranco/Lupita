@@ -47,7 +47,7 @@
         "title": {
           "size": "{font.size.md}",
           "weight": "{font.weight.semibold}",
-          "lineHeight": 1.15
+          "lineHeight": 1.2
         },
         "id": {
           "size": "{font.size.sm}",
@@ -58,7 +58,7 @@
           "lineHeight": 1.15
         },
         "description": {
-          "lineHeight": 1.15
+          "lineHeight": 1.3
         },
         "repo": {
           "lineHeight": 1.15
@@ -156,7 +156,8 @@
         "container": "{radius.xs}",
         "notice": "{radius.xs}",
         "swatch": "{radius.xs}",
-        "badge": "{radius.xs}"
+        "badge": "{radius.xs}",
+        "row": "{radius.xs}"
       },
       "border": {
         "container": 1,
@@ -165,19 +166,22 @@
       },
       "space": {
         "padding": "{space.8}",
-        "block-gap": "{space.6}",
+        "block-gap": "{space.8}",
         "range-gap": "{space.5}",
         "range-line-gap": "{space.3}",
         "entry-gap": "{space.6}",
         "inline-gap": "{space.5}",
-        "row-gap": "{space.2}",
+        "row-gap": "{space.3}",
         "name-gap": "{space.1}",
         "swatch-gap": "{space.6}",
         "swatch-inner-gap": "{space.4}",
         "badge-x": "{space.4}",
-        "badge-y": "{space.0}",
+        "badge-y": "{space.1}",
         "notice-x": "{space.8}",
-        "notice-y": "{space.5}"
+        "notice-y": "{space.5}",
+        "row-pad-x": "{space.4}",
+        "row-pad-y": "{space.2}",
+        "meta-gap": "{space.2}"
       },
       "size": {
         "width": 360,

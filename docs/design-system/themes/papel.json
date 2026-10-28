@@ -75,11 +75,11 @@
         "description": {
           "family": "{font.family.serif}",
           "size": "{font.size.lg}",
-          "lineHeight": 1.3
+          "lineHeight": 1.5
         },
         "placeholder": {
           "family": "{font.family.serif}",
-          "lineHeight": 1.3
+          "lineHeight": 1.4
         },
         "repo": {
           "size": "{font.size.sm}",
@@ -191,7 +191,8 @@
         "container": "{radius.sm}",
         "notice": "{radius.sm}",
         "swatch": "{radius.xs}",
-        "badge": "{radius.xs}"
+        "badge": "{radius.xs}",
+        "row": "{radius.xs}"
       },
       "border": {
         "container": 1,
@@ -212,7 +213,10 @@
         "badge-x": "{space.6}",
         "badge-y": "{space.2}",
         "notice-x": "{space.14}",
-        "notice-y": "{space.10}"
+        "notice-y": "{space.10}",
+        "row-pad-x": "{space.6}",
+        "row-pad-y": "{space.4}",
+        "meta-gap": "{space.4}"
       },
       "size": {
         "width": 460

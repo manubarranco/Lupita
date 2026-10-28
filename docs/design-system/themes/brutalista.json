@@ -57,7 +57,8 @@
       "text": {
         "title": {
           "size": "{font.size.xl}",
-          "weight": "{font.weight.bold}"
+          "weight": "{font.weight.bold}",
+          "lineHeight": 1.25
         },
         "id": {
           "weight": "{font.weight.bold}",
@@ -66,7 +67,8 @@
         "description": {
           "size": "{font.size.lg}",
           "weight": "{font.weight.medium}",
-          "color": "{color.text-primary}"
+          "color": "{color.text-primary}",
+          "lineHeight": 1.4
         },
         "placeholder": {
           "weight": "{font.weight.medium}"
@@ -179,7 +181,8 @@
         "container": "{radius.none}",
         "notice": "{radius.none}",
         "swatch": "{radius.none}",
-        "badge": "{radius.none}"
+        "badge": "{radius.none}",
+        "row": "{radius.none}"
       },
       "border": {
         "container": 3,
@@ -200,7 +203,10 @@
         "badge-x": "{space.6}",
         "badge-y": "{space.2}",
         "notice-x": "{space.12}",
-        "notice-y": "{space.8}"
+        "notice-y": "{space.8}",
+        "row-pad-x": "{space.6}",
+        "row-pad-y": "{space.3}",
+        "meta-gap": "{space.3}"
       },
       "size": {
         "width": 440

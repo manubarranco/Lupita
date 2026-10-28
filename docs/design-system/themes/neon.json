@@ -12,11 +12,11 @@
   "overrides": {
     "primitive": {
       "palette": {
-        "neon-surface-light": "#F7F3FFF5",
+        "neon-surface-light": "#F3EDFFF7",
         "neon-surface-dark": "#0D0B1AF2",
-        "neon-notice-surface-light": "#F7F3FFF5",
+        "neon-notice-surface-light": "#F3EDFFF7",
         "neon-notice-surface-dark": "#0D0B1AF2",
-        "neon-border-light": "#5A1FD699",
+        "neon-border-light": "#5A1FD6CC",
         "neon-border-dark": "#00E5FFB3",
         "neon-text-primary-light": "#1A0B3D",
         "neon-text-primary-dark": "#F4F1FF",
@@ -36,7 +36,7 @@
         "neon-swatch-border-dark": "#00E5FF99",
         "neon-row-hover-light": "#5A1FD614",
         "neon-row-hover-dark": "#00E5FF1A",
-        "neon-shadow-light": "#5A1FD655",
+        "neon-shadow-light": "#5A1FD670",
         "neon-shadow-dark": "#00E5FF66",
         "neon-shadow-edge-light": "#5A1FD6",
         "neon-shadow-edge-dark": "#00E5FF"
@@ -64,14 +64,16 @@
       "text": {
         "title": {
           "size": "{font.size.xl}",
-          "weight": "{font.weight.semibold}"
+          "weight": "{font.weight.semibold}",
+          "lineHeight": 1.3
         },
         "id": {
           "color": "{color.text-accent}",
           "tracking": 0.2
         },
         "description": {
-          "size": "{font.size.lg}"
+          "size": "{font.size.lg}",
+          "lineHeight": 1.45
         },
         "repo": {
           "size": "{font.size.sm}",
@@ -175,7 +177,8 @@
         "container": "{radius.xl}",
         "notice": "{radius.lg}",
         "swatch": "{radius.md}",
-        "badge": "{radius.pill}"
+        "badge": "{radius.pill}",
+        "row": "{radius.md}"
       },
       "border": {
         "container": 1,
@@ -196,7 +199,10 @@
         "badge-x": "{space.8}",
         "badge-y": "{space.2}",
         "notice-x": "{space.14}",
-        "notice-y": "{space.10}"
+        "notice-y": "{space.10}",
+        "row-pad-x": "{space.8}",
+        "row-pad-y": "{space.4}",
+        "meta-gap": "{space.4}"
       },
       "size": {
         "width": 440

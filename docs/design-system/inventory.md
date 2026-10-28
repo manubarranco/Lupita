@@ -87,3 +87,5 @@ Values marked *system* come from macOS (materials, semantic colours, text styles
 | Title / description colour | no `foregroundStyle` → `.primary` | color.text-primary |
 | Badge text colour | no `foregroundStyle` → `.primary` | color.badge-fg, color.origin-fg |
 | Row hover | none today | color.row-hover (transparent in Lupita) |
+| Row hover band: inset and corner | not in 0.9.0 (no hover today); added so a theme can draw a padded band that bleeds into the container padding without moving the text | space.row-pad-x, space.row-pad-y, radius.row (0 in Lupita) |
+| Extra gap above the «kind · repo · path» line | not in 0.9.0; groups the answer apart from its provenance | space.meta-gap (0 in Lupita) |
