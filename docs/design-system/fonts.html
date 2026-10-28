@@ -1,0 +1,192 @@
+<title>Fuentes para Lupita</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=DM+Sans:wght@400;500;600&family=Source+Serif+4:wght@400;600&family=Fraunces:wght@400;600&family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a specimen sheet. A sticky toolbar, then one section per family type; each card is the real tooltip's
+   title, id, description and meta line set in that font, so the choice is judged on the roles it will carry. */
+:root {
+  --bg: #F4F5F7; --card: #FFFFFF; --fg: #16181D; --muted: #5B6270; --line: #D9DCE3;
+  --accent: #1F4FD8; --accent-bg: #E6ECFD; --ok: #1B7A43; --ok-bg: #E2F3E8; --warn: #8A5200; --warn-bg: #FBEBD0;
+  --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121419; --card: #1B1E25; --fg: #ECEEF3; --muted: #A2A8B5; --line: #333844;
+  --accent: #8BA8FF; --accent-bg: #232C4A; --ok: #6FD39A; --ok-bg: #173325; --warn: #F0B866; --warn-bg: #3A2A12; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121419; --card: #1B1E25; --fg: #ECEEF3; --muted: #A2A8B5; --line: #333844;
+  --accent: #8BA8FF; --accent-bg: #232C4A; --ok: #6FD39A; --ok-bg: #173325; --warn: #F0B866; --warn-bg: #3A2A12; color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 14px/1.5 var(--ui); padding-block: 0 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1180px; margin: 0 auto; }
+header { padding-block: 28px 8px; }
+h1 { font-size: 26px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; font-weight: 600; }
+.lede { max-width: 68ch; color: var(--muted); margin: 0; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); padding-block: 10px; margin-top: 16px; }
+.bar .wrap { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.bar label { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 13px; padding: 5px 11px; background: var(--card); color: var(--fg); border: 0; border-right: 1px solid var(--line); cursor: pointer; }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type="text"] { font: inherit; padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); color: var(--fg); width: min(34ch, 100%); }
+.copy { margin-left: auto; font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; }
+.copy:disabled { opacity: .45; cursor: default; }
+
+section { margin-top: 30px; display: grid; gap: 12px; }
+.sub { color: var(--muted); font-size: 13px; margin: 0; max-width: 70ch; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card.picked { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.head { display: flex; gap: 8px; align-items: center; justify-content: space-between; min-width: 0; }
+.name { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.tag { font-size: 11px; padding: 1px 8px; border-radius: 99px; white-space: nowrap; font-weight: 600; }
+.tag.ok { background: var(--ok-bg); color: var(--ok); }
+.tag.no { background: var(--warn-bg); color: var(--warn); }
+.tag.cdn { background: var(--accent-bg); color: var(--accent); }
+.sample { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 4px; min-width: 0; background: var(--bg); }
+.sample .id { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--muted); }
+.sample .title { font-size: 15px; font-weight: 600; line-height: 1.25; }
+.sample .desc { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.sample .meta { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; margin-top: 4px; font-size: 11px; }
+.sample .repo { color: var(--accent); font-weight: 600; }
+.sample .loc { font-family: var(--mono); color: var(--muted); }
+.mono-sample .id, .mono-sample .loc { font-family: inherit; }
+.weights { display: flex; gap: 4px 14px; flex-wrap: wrap; font-size: 14px; }
+.weights span { white-space: nowrap; }
+.pick { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; cursor: pointer; }
+.how { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; }
+.how p { margin: 0; max-width: 78ch; }
+.how b { font-weight: 600; }
+code { font-family: var(--mono); font-size: 12.5px; background: var(--accent-bg); color: var(--accent); padding: 1px 5px; border-radius: 4px; }
+@media (prefers-reduced-motion: no-preference) { .card { transition: border-color .15s; } }
+</style>
+
+<header class="wrap">
+  <h1>Fuentes para Lupita</h1>
+  <p class="lede">Cada tarjeta es un tooltip real (id, título, descripción, repo y ruta) en esa fuente. La página usa las fuentes instaladas en este equipo: las que no tengas salen marcadas como «no instalada». Marca las que te gusten y copia la selección.</p>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <label>Tamaño del título
+      <span class="seg" id="sizes" role="group" aria-label="Tamaño del título">
+        <button type="button" data-s="13" aria-pressed="false">13</button>
+        <button type="button" data-s="15" aria-pressed="true">15</button>
+        <button type="button" data-s="17" aria-pressed="false">17</button>
+      </span>
+    </label>
+    <label for="txt">Texto <input id="txt" type="text" value="Vocabulario de git en lenguaje llano"></label>
+    <button class="copy" id="copy" type="button" disabled>Copiar selección (0)</button>
+  </div>
+</div>
+
+<main class="wrap">
+  <section>
+    <h2>Del sistema (siempre están)</h2>
+    <p class="sub">Son las cuatro familias que ya usa el sistema de diseño. En SwiftUI: <code>.default</code>, <code>.serif</code>, <code>.rounded</code>, <code>.monospaced</code>. Aquí se piden con <code>system-ui</code>, <code>ui-serif</code>, <code>ui-rounded</code> y <code>ui-monospace</code>; según el navegador pueden salir sin la forma exacta de SF.</p>
+    <div class="grid" id="g-system"></div>
+  </section>
+  <section>
+    <h2>Sans que trae macOS</h2>
+    <div class="grid" id="g-sans"></div>
+  </section>
+  <section>
+    <h2>Serif que trae macOS</h2>
+    <div class="grid" id="g-serif"></div>
+  </section>
+  <section>
+    <h2>Monoespaciadas que trae macOS</h2>
+    <p class="sub">Para los roles de id, ruta y muestra de color.</p>
+    <div class="grid" id="g-mono"></div>
+  </section>
+  <section>
+    <h2>Para empaquetar con Lupita (licencia libre)</h2>
+    <p class="sub">Cargadas desde Google Fonts para que las veas aunque no las tengas. Todas son OFL: se pueden incluir en la app.</p>
+    <div class="grid" id="g-pack"></div>
+  </section>
+  <section>
+    <h2>Cómo funcionaría el empaquetado</h2>
+    <div class="how">
+      <p><b>No se instalan en el Mac.</b> Los archivos de fuente (<code>.ttf</code>, <code>.otf</code>) viajan dentro de <code>Lupita.app/Contents/Resources/Fonts</code> y la app los registra solo para su propio proceso al arrancar. Cuando Lupita se cierra, el sistema no las tiene; no aparecen en Font Book ni en otras apps.</p>
+      <p><b>Lo que cuesta:</b> peso en la descarga (entre 100 y 300 KB por estilo; una fuente variable ahorra archivos), la licencia (OFL permite redistribuir; hay que incluir su texto) y un paso más en el script que construye la app.</p>
+      <p><b>Lo que no hay que hacer:</b> instalarlas para el usuario. Ensucia su sistema y puede chocar con una copia que ya tenga.</p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var SAMPLE = { id: 'D42', desc: 'Cuarenta términos validados, con una línea llana y un ejemplo, en español e inglés.', repo: 'lupita', loc: 'docs/decisions.md:212' };
+  var GROUPS = {
+    system: [['system-ui', 'SF Pro (system-ui)', 1], ['ui-serif', 'New York (ui-serif)', 1], ['ui-rounded', 'SF Rounded (ui-rounded)', 1], ['ui-monospace', 'SF Mono (ui-monospace)', 1, 1]],
+    sans: ['Helvetica Neue', 'Avenir Next', 'Avenir', 'Optima', 'Gill Sans', 'Futura', 'Seravek', 'Verdana', 'Trebuchet MS', 'Lucida Grande', 'Arial'],
+    serif: ['Iowan Old Style', 'Charter', 'Athelas', 'Georgia', 'Palatino', 'Baskerville', 'Hoefler Text', 'Cochin', 'Didot', 'Big Caslon', 'Rockwell', 'Times New Roman'],
+    mono: ['Menlo', 'Monaco', 'Courier New', 'Andale Mono', 'American Typewriter'],
+    pack: [['Inter', 'Inter', 0], ['IBM Plex Sans', 'IBM Plex Sans', 0], ['DM Sans', 'DM Sans', 0], ['Source Serif 4', 'Source Serif 4', 0], ['Fraunces', 'Fraunces', 0], ['JetBrains Mono', 'JetBrains Mono', 0, 1], ['IBM Plex Mono', 'IBM Plex Mono', 0, 1]]
+  };
+  var titleSize = 15, text = document.getElementById('txt').value;
+  var picked = {};
+  try { picked = JSON.parse(localStorage.getItem('lupita-fonts') || '{}'); } catch (e) {}
+
+  function installed(name) {
+    var c = document.createElement('canvas').getContext('2d'), probe = 'mmmmmmmmmmlliWWW0123456789', bases = ['monospace', 'serif', 'sans-serif'];
+    for (var i = 0; i < bases.length; i++) {
+      c.font = '72px ' + bases[i]; var a = c.measureText(probe).width;
+      c.font = '72px "' + name + '", ' + bases[i]; if (c.measureText(probe).width !== a) return true;
+    }
+    return false;
+  }
+  function card(item, mono) {
+    var css = typeof item === 'string' ? item : item[0], label = typeof item === 'string' ? item : item[1];
+    var isSys = typeof item !== 'string' && item[2] === 1, isPack = typeof item !== 'string' && item[2] === 0;
+    var isMono = mono || (typeof item !== 'string' && item[3] === 1);
+    var fam = /^ui-|^system-ui$/.test(css) ? css : '"' + css + '"';
+    var ok = isSys || isPack || installed(css);
+    var el = document.createElement('div'); el.className = 'card' + (picked[label] ? ' picked' : ''); el.dataset.label = label;
+    var tag = isPack ? '<span class="tag cdn">libre (OFL)</span>' : isSys ? '<span class="tag ok">sistema</span>' : ok ? '<span class="tag ok">instalada</span>' : '<span class="tag no">no instalada aquí</span>';
+    var h = '<div class="head"><span class="name"></span>' + tag + '</div>';
+    h += '<div class="sample' + (isMono ? ' mono-sample' : '') + '" style="font-family:' + fam + ', system-ui, sans-serif">';
+    h += '<div class="id">' + SAMPLE.id + '</div><div class="title" style="font-size:' + titleSize + 'px">' + '<span class="t"></span></div>';
+    h += '<div class="desc">' + SAMPLE.desc + '</div><div class="meta"><span class="repo">' + SAMPLE.repo + '</span><span class="loc">' + SAMPLE.loc + '</span></div></div>';
+    h += '<div class="weights" style="font-family:' + fam + ', system-ui, sans-serif"><span style="font-weight:400">Regular</span><span style="font-weight:500">Medium</span><span style="font-weight:600">Semibold</span><span style="font-weight:700">Bold</span><span style="font-style:italic">Italic</span></div>';
+    h += '<label class="pick"><input type="checkbox"' + (picked[label] ? ' checked' : '') + '> Me gusta para Lupita</label>';
+    el.innerHTML = h; el.querySelector('.name').textContent = label; el.querySelector('.t').textContent = text;
+    el.querySelector('input').addEventListener('change', function (e) {
+      if (e.target.checked) picked[label] = 1; else delete picked[label];
+      el.classList.toggle('picked', e.target.checked); save(); count();
+    });
+    return el;
+  }
+  function render() {
+    ['system', 'sans', 'serif', 'mono', 'pack'].forEach(function (g) {
+      var host = document.getElementById('g-' + g); host.innerHTML = '';
+      GROUPS[g].forEach(function (it) { host.appendChild(card(it, g === 'mono')); });
+    });
+    count();
+  }
+  function save() { try { localStorage.setItem('lupita-fonts', JSON.stringify(picked)); } catch (e) {} }
+  function count() {
+    var n = Object.keys(picked).length, b = document.getElementById('copy');
+    b.textContent = 'Copiar selección (' + n + ')'; b.disabled = n === 0;
+  }
+  document.getElementById('copy').addEventListener('click', function () {
+    var s = 'Fuentes que me gustan para Lupita: ' + Object.keys(picked).join(', ');
+    var b = this, done = function (m) { b.textContent = m; setTimeout(count, 1600); };
+    try { navigator.clipboard.writeText(s).then(function () { done('Copiado'); }, function () { done(s); }); } catch (e) { done(s); }
+  });
+  document.getElementById('sizes').addEventListener('click', function (e) {
+    var s = e.target.dataset && e.target.dataset.s; if (!s) return;
+    titleSize = +s; Array.prototype.forEach.call(this.children, function (b) { b.setAttribute('aria-pressed', b.dataset.s === s ? 'true' : 'false'); });
+    document.querySelectorAll('.sample .title').forEach(function (t) { t.style.fontSize = titleSize + 'px'; });
+  });
+  document.getElementById('txt').addEventListener('input', function (e) {
+    text = e.target.value || ' '; document.querySelectorAll('.sample .t').forEach(function (t) { t.textContent = text; });
+  });
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(render);
+  render();
+})();
+</script>
