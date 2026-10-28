@@ -126,7 +126,7 @@ if (!only || only === 'independence') {
   console.log(`independence: present ${present.join(', ') || '-'}; skipped (not found) ${missing.join(', ') || '-'}`)
   const sts = ['definition', 'otherRepo']
   const spec = {
-    title: 'Independencia de los ejes', sub: 'Cada variante cambia UN grupo de tokens sobre Lupita; lo demás debe quedarse igual.', width: 2300, labelWidth: 200,
+    title: 'Independencia de los ejes', sub: 'Cada variante cambia UN grupo de tokens sobre Lupita; lo demás debe quedarse igual.', width: 2500, labelWidth: 200,
     cols: sts.flatMap(s => ['light', 'dark'].map(m => `${states.find(x => x.id === s).label} · ${m === 'light' ? 'claro' : 'oscuro'}`)), heads: true,
     rows: present.map(id => ({ label: info(id).name, sub: id === 'lupita' ? 'referencia' : `cambia solo: ${info(id).axes?.join(', ') || id.replace('ind-', '')}`, cells: sts.flatMap(s => ['light', 'dark'].map(m => ({ theme: id, mode: m, state: s }))) })),
   }
