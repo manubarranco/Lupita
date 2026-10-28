@@ -126,7 +126,7 @@ themes.push({
 // ── 4. Neón ─ dark-first, saturated accent, glow as shadow ─────────────────────
 themes.push({
   id: 'neon', name: 'Neón', axes: ALL,
-  blurb: 'Un rótulo de neón: tubo cian sobre índigo profundo en los dos modos. En claro, una sombra oscura lo asienta y un halo corto del color del tubo lo enciende; en oscuro la luz se derrama alrededor.',
+  blurb: 'Un rótulo de neón: tubo rosa sobre ciruela profundo en los dos modos, el color cálido de la familia. En claro, una sombra oscura lo asienta y un halo corto del color del tubo lo enciende; en oscuro la luz se derrama alrededor.',
   type: {
     title: { size: 'xl', weight: 'semibold' },
     id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent', tracking: 0.2 },
@@ -136,13 +136,14 @@ themes.push({
   },
   lh: { title: 1.3, description: 1.45 },
   color: {
-    surface: ['#140F2EF7', '#1C1640F2'], 'notice-surface': ['#140F2EF7', '#1C1640F2'],
-    border: ['#00E5FF', '#00E5FFE6'],
-    'text-primary': ['#F4F1FF', '#F4F1FF'], 'text-secondary': ['#B9B2E0', '#B9B2E0'], 'text-accent': ['#00E5FF', '#00E5FF'],
-    'badge-bg': ['#00E5FF26', '#00E5FF26'], 'badge-fg': ['#9DF3FF', '#9DF3FF'], 'origin-bg': ['#FF2E9340', '#FF2E9340'], 'origin-fg': ['#FFC2E3', '#FFC2E3'],
-    'swatch-border': ['#00E5FF99', '#00E5FF99'], 'row-hover': ['#00E5FF1A', '#00E5FF1A'],
-    shadow: ['#1A0B3D66', '#00E5FF3D'], 'shadow-edge': ['#00D9FFF2', '#00E5FFB3'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
+    surface: ['#1F0D24F7', '#2A1430F2'], 'notice-surface': ['#1F0D24F7', '#2A1430F2'],
+    border: ['#FF4FB0', '#FF4FB0E6'],
+    'text-primary': ['#FFF0F8', '#FFF0F8'], 'text-secondary': ['#E7B8D6', '#E7B8D6'], 'text-accent': ['#FF6EC7', '#FF6EC7'],
+    'badge-bg': ['#FF4FB026', '#FF4FB026'], 'badge-fg': ['#FFC2E3', '#FFC2E3'], 'origin-bg': ['#FFB34733', '#FFB34733'], 'origin-fg': ['#FFD9A3', '#FFD9A3'],
+    'swatch-border': ['#FF6EC7CC', '#FF6EC7CC'], 'row-hover': ['#FF4FB01F', '#FF4FB01F'],
+    shadow: ['#2A0A2266', '#FF4FB03D'], 'shadow-edge': ['#FF3EA5F2', '#FF4FB0B3'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
   },
+
 
   shadows: { glow: [{ x: 0, y: 10, blur: 32, spread: 0, color: '{color.shadow}' }, { x: 0, y: 0, blur: 16, spread: 1, color: '{color.shadow-edge}' }] },
   shadow: { container: 'glow', notice: 'glow' },
@@ -263,7 +264,7 @@ themes.push({
 // ── 9. Mimo ─ rounded type, pastel, pills ───────────────────────────────────────
 themes.push({
   id: 'mimo', name: 'Mimo', axes: ALL,
-  blurb: 'Una interfaz de juego: superficie blanca y plana, borde de 2 pt con un canto inferior grueso que se siente pulsable, esquinas generosas y letra redondeada gruesa. Las etiquetas, en negrita y en color. Amable sin ser infantil: la jerarquía sigue mandando.',
+  blurb: 'Una interfaz de juego: tarjeta turquesa como un botón, borde y canto inferior grueso del mismo turquesa más oscuro, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
   type: {
     title: { family: 'rounded', size: 'xl', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
     description: { family: 'rounded', size: 'lg' }, placeholder: { family: 'rounded', size: 'lg' },
@@ -273,15 +274,16 @@ themes.push({
   lineHeight: 1.3,
   lh: { title: 1.3, description: 1.45 },
   color: {
-    surface: ['#FFFFFF', '#1F1A2B'], 'notice-surface': ['#FFFFFF', '#1F1A2B'],
-    border: ['#E6E0EE', '#3A3150'],
-    'text-primary': ['#2E2340', '#FBF4FF'], 'text-secondary': ['#625577', '#C9BCD9'], 'text-accent': ['#B01E7E', '#FF8AD4'],
-    'badge-bg': ['#FFE3F1', '#4A2A5E'], 'badge-fg': ['#5A1040', '#FFE6F6'], 'origin-bg': ['#D9F0FF', '#22445C'], 'origin-fg': ['#0B3B5C', '#E6F6FF'],
-    'swatch-border': ['#B01E7ECC', '#FF8AD499'], 'row-hover': ['#FFF0F7', '#2B2440'],
-    shadow: ['#D9D0E6', '#3A3150'], 'shadow-edge': ['#D9D0E6', '#3A3150'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
+    surface: ['#5ED6CB', '#3FBFB3'], 'notice-surface': ['#5ED6CB', '#3FBFB3'],
+    border: ['#2BAA9E', '#1E8F84'],
+    'text-primary': ['#04302D', '#04302D'], 'text-secondary': ['#0C4A45', '#073F3A'], 'text-accent': ['#00504A', '#003F3A'],
+    'badge-bg': ['#FFFFFF', '#FFFFFF'], 'badge-fg': ['#00504A', '#00504A'], 'origin-bg': ['#FFE08A', '#FFE08A'], 'origin-fg': ['#4A3200', '#4A3200'],
+    'swatch-border': ['#04302DCC', '#04302DCC'], 'row-hover': ['#8EE6DE', '#5FD3C8'],
+    shadow: ['#1F968B', '#167A71'], 'shadow-edge': ['#1F968B', '#167A71'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
   },
 
-  shadows: { pop: [{ x: 0, y: 4, blur: 0, spread: 0, color: '{color.shadow-edge}' }] },
+
+  shadows: { pop: [{ x: 0, y: 5, blur: 0, spread: 0, color: '{color.shadow-edge}' }] },
   shadow: { container: 'pop', notice: 'pop' },
   radius: { container: '2xl', notice: 'xl', swatch: 'md', badge: 'lg', row: 'lg' },
   border: { container: 2, swatch: 2, notice: 2 },
