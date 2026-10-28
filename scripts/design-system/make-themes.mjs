@@ -207,7 +207,7 @@ themes.push({
 // ── 7. Brutalista ─ flat colour, thick border, hard shadow ──────────────────────
 themes.push({
   id: 'brutalista', name: 'Brutalista', axes: ALL,
-  blurb: 'Color plano, borde de 3 pt, sombra dura sin desenfoque y ninguna esquina redondeada. Jerarquía por peso, no por gris.',
+  blurb: 'Neobrutalismo: tarjeta limón con trazo negro de 3 pt, esquinas redondeadas y sombra negra dura, sin desenfoque. Los detalles, planos en menta, salmón y lavanda. En oscuro la tarjeta sigue de color y la sombra se vuelve lavanda. Jerarquía por peso, no por gris.',
   type: {
     title: { size: 'xl', weight: 'bold' }, id: { family: 'mono', size: 'md', weight: 'bold', color: 'text-primary' },
     description: { size: 'lg', weight: 'medium', color: 'text-primary' }, placeholder: { size: 'lg', weight: 'medium' },
@@ -217,16 +217,17 @@ themes.push({
   },
   lh: { title: 1.25, description: 1.4 },
   color: {
-    surface: ['#FFF200', '#161616'], 'notice-surface': ['#FFF200', '#161616'],
-    border: ['#000000', '#FFF200'],
-    'text-primary': ['#000000', '#FFFFFF'], 'text-secondary': ['#1A1A1A', '#E8E8E8'], 'text-accent': ['#B00000', '#FFF200'],
-    'badge-bg': ['#000000', '#FFF200'], 'badge-fg': ['#FFF200', '#000000'], 'origin-bg': ['#FF4D8D', '#FF4D8D'], 'origin-fg': ['#000000', '#000000'],
-    'swatch-border': ['#000000', '#FFF200'], 'row-hover': ['#00000026', '#FFF20033'],
-    shadow: ['#000000', '#FFF200'], 'shadow-edge': ['#000000', '#FFF200'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.8, 0.8],
+    surface: ['#FDFD96', '#ECE47C'], 'notice-surface': ['#FDFD96', '#ECE47C'],
+    border: ['#000000', '#000000'],
+    'text-primary': ['#000000', '#000000'], 'text-secondary': ['#2B2B2B', '#2B2B2B'], 'text-accent': ['#4B1FC2', '#4B1FC2'],
+    'badge-bg': ['#A7DBD8', '#A7DBD8'], 'badge-fg': ['#000000', '#000000'], 'origin-bg': ['#FFA07A', '#FFA07A'], 'origin-fg': ['#000000', '#000000'],
+    'swatch-border': ['#000000', '#000000'], 'row-hover': ['#C4A1FF', '#C4A1FF'],
+    shadow: ['#000000', '#C4A1FF'], 'shadow-edge': ['#000000', '#C4A1FF'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.8, 0.8],
   },
-  shadows: { hard: [{ x: 6, y: 6, blur: 0, spread: 0, color: '{color.shadow}' }] },
+
+  shadows: { hard: [{ x: 5, y: 5, blur: 0, spread: 0, color: '{color.shadow}' }] },
   shadow: { container: 'hard', notice: 'hard' },
-  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none', row: 'none' },
+  radius: { container: 'xl', notice: 'lg', swatch: 'sm', badge: 'md', row: 'md' },
   border: { container: 3, swatch: 2, notice: 3 },
   space: { padding: '14', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '5', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '12', 'notice-y': '8', 'row-pad-x': '6', 'row-pad-y': '3', 'meta-gap': '3' },
   size: { width: 440 },

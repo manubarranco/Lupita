@@ -1,7 +1,7 @@
 {
   "id": "brutalista",
   "name": "Brutalista",
-  "blurb": "Color plano, borde de 3 pt, sombra dura sin desenfoque y ninguna esquina redondeada. Jerarquía por peso, no por gris.",
+  "blurb": "Neobrutalismo: tarjeta limón con trazo negro de 3 pt, esquinas redondeadas y sombra negra dura, sin desenfoque. Los detalles, planos en menta, salmón y lavanda. En oscuro la tarjeta sigue de color y la sombra se vuelve lavanda. Jerarquía por peso, no por gris.",
   "axes": [
     "type",
     "color",
@@ -12,40 +12,40 @@
   "overrides": {
     "primitive": {
       "palette": {
-        "brutalista-surface-light": "#FFF200",
-        "brutalista-surface-dark": "#161616",
-        "brutalista-notice-surface-light": "#FFF200",
-        "brutalista-notice-surface-dark": "#161616",
+        "brutalista-surface-light": "#FDFD96",
+        "brutalista-surface-dark": "#ECE47C",
+        "brutalista-notice-surface-light": "#FDFD96",
+        "brutalista-notice-surface-dark": "#ECE47C",
         "brutalista-border-light": "#000000",
-        "brutalista-border-dark": "#FFF200",
+        "brutalista-border-dark": "#000000",
         "brutalista-text-primary-light": "#000000",
-        "brutalista-text-primary-dark": "#FFFFFF",
-        "brutalista-text-secondary-light": "#1A1A1A",
-        "brutalista-text-secondary-dark": "#E8E8E8",
-        "brutalista-text-accent-light": "#B00000",
-        "brutalista-text-accent-dark": "#FFF200",
-        "brutalista-badge-bg-light": "#000000",
-        "brutalista-badge-bg-dark": "#FFF200",
-        "brutalista-badge-fg-light": "#FFF200",
+        "brutalista-text-primary-dark": "#000000",
+        "brutalista-text-secondary-light": "#2B2B2B",
+        "brutalista-text-secondary-dark": "#2B2B2B",
+        "brutalista-text-accent-light": "#4B1FC2",
+        "brutalista-text-accent-dark": "#4B1FC2",
+        "brutalista-badge-bg-light": "#A7DBD8",
+        "brutalista-badge-bg-dark": "#A7DBD8",
+        "brutalista-badge-fg-light": "#000000",
         "brutalista-badge-fg-dark": "#000000",
-        "brutalista-origin-bg-light": "#FF4D8D",
-        "brutalista-origin-bg-dark": "#FF4D8D",
+        "brutalista-origin-bg-light": "#FFA07A",
+        "brutalista-origin-bg-dark": "#FFA07A",
         "brutalista-origin-fg-light": "#000000",
         "brutalista-origin-fg-dark": "#000000",
         "brutalista-swatch-border-light": "#000000",
-        "brutalista-swatch-border-dark": "#FFF200",
-        "brutalista-row-hover-light": "#00000026",
-        "brutalista-row-hover-dark": "#FFF20033",
+        "brutalista-swatch-border-dark": "#000000",
+        "brutalista-row-hover-light": "#C4A1FF",
+        "brutalista-row-hover-dark": "#C4A1FF",
         "brutalista-shadow-light": "#000000",
-        "brutalista-shadow-dark": "#FFF200",
+        "brutalista-shadow-dark": "#C4A1FF",
         "brutalista-shadow-edge-light": "#000000",
-        "brutalista-shadow-edge-dark": "#FFF200"
+        "brutalista-shadow-edge-dark": "#C4A1FF"
       },
       "shadow": {
         "hard": [
           {
-            "x": 6,
-            "y": 6,
+            "x": 5,
+            "y": 5,
             "blur": 0,
             "spread": 0,
             "color": "{color.shadow}"
@@ -178,11 +178,11 @@
         "notice": "{shadow.hard}"
       },
       "radius": {
-        "container": "{radius.none}",
-        "notice": "{radius.none}",
-        "swatch": "{radius.none}",
-        "badge": "{radius.none}",
-        "row": "{radius.none}"
+        "container": "{radius.xl}",
+        "notice": "{radius.lg}",
+        "swatch": "{radius.sm}",
+        "badge": "{radius.md}",
+        "row": "{radius.md}"
       },
       "border": {
         "container": 3,
