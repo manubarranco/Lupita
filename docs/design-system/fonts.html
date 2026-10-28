@@ -144,7 +144,7 @@ code { font-family: var(--mono); font-size: 12.5px; background: var(--accent-bg)
     var css = typeof item === 'string' ? item : item[0], label = typeof item === 'string' ? item : item[1];
     var isSys = typeof item !== 'string' && item[2] === 1, isPack = typeof item !== 'string' && item[2] === 0;
     var isMono = mono || (typeof item !== 'string' && item[3] === 1);
-    var fam = /^ui-|^system-ui$/.test(css) ? css : '"' + css + '"';
+    var fam = /^ui-|^system-ui$/.test(css) ? css : "'" + css + "'"; // single quotes: it goes inside a double-quoted style attribute
     var ok = isSys || isPack || installed(css);
     var el = document.createElement('div'); el.className = 'card' + (picked[label] ? ' picked' : ''); el.dataset.label = label;
     var tag = isPack ? '<span class="tag cdn">libre (OFL)</span>' : isSys ? '<span class="tag ok">sistema</span>' : ok ? '<span class="tag ok">instalada</span>' : '<span class="tag no">no instalada aquí</span>';
