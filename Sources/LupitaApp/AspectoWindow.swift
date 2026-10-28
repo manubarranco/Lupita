@@ -10,9 +10,9 @@ struct AspectoView: View {
     var accessibility: ThemeAccessibility? = nil
     @Environment(\.colorScheme) private var colorScheme
 
-    static let stageWidth: CGFloat = 620
+    static let stageWidth: CGFloat = 700
     static let stagePad: CGFloat = 28
-    static let contentWidth: CGFloat = 660
+    static let contentWidth: CGFloat = 740
 
     var systemAccessibility: ThemeAccessibility {
         accessibility ?? ThemeAccessibility(reduceTransparency: NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency,
@@ -79,6 +79,7 @@ struct AspectoStage: View {
     let theme: TooltipTheme
     let state: GalleryState
     var backdrop = true
+    var minHeight: CGFloat = 190
 
     static func insets(_ theme: TooltipTheme, _ state: GalleryState) -> EdgeInsets {
         theme.insets(of: state.notice != nil ? theme.noticeShadow : theme.containerShadow)
@@ -97,7 +98,7 @@ struct AspectoStage: View {
             .padding(.trailing, Self.margin(ins.trailing) - ins.trailing)
             .padding(.bottom, Self.margin(ins.bottom) - ins.bottom)
             .frame(width: AspectoView.stageWidth, alignment: .topLeading)
-            .frame(minHeight: 190, alignment: .topLeading)
+            .frame(minHeight: minHeight, alignment: .topLeading)
             .background {
                 if backdrop { FauxPage(dark: dark) }
             }

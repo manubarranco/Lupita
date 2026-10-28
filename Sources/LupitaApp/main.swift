@@ -12,6 +12,21 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-themes") {
     exit(code)
 }
 
+// Development aid: the «Aspecto» window drawn to PNG for every theme, mode, size and density, and the end-to-end check.
+if let i = CommandLine.arguments.firstIndex(of: "--render-appearance") {
+    let code = MainActor.assumeIsolated { AspectoGallery.run(Array(CommandLine.arguments.dropFirst(i + 1))) }
+    exit(code)
+}
+if let i = CommandLine.arguments.firstIndex(of: "--selftest-appearance") {
+    let code = MainActor.assumeIsolated { AspectoGallery.selftest(Array(CommandLine.arguments.dropFirst(i + 1))) }
+    exit(code)
+}
+// Development aid: open the real Aspecto window, save a picture of it after 3 s and quit.
+if let i = CommandLine.arguments.firstIndex(of: "--show-appearance") {
+    MainActor.assumeIsolated { AspectoGallery.show(CommandLine.arguments.dropFirst(i + 1).first) }
+    exit(0)
+}
+
 // Development aid: the contact sheet of the git vocabulary cards and the menu switch (D42).
 if let i = CommandLine.arguments.firstIndex(of: "--render-vocabulary") {
     let code = MainActor.assumeIsolated { TooltipGallery.runVocabulary(CommandLine.arguments.dropFirst(i + 1).first) }
