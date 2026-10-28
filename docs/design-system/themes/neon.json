@@ -193,10 +193,10 @@
         "name-gap": "{space.3}",
         "swatch-gap": "{space.12}",
         "swatch-inner-gap": "{space.6}",
-        "badge-x": "{space.7}",
+        "badge-x": "{space.8}",
         "badge-y": "{space.2}",
         "notice-x": "{space.14}",
-        "notice-y": "{space.9}"
+        "notice-y": "{space.10}"
       },
       "size": {
         "width": 440

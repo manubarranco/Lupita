@@ -80,7 +80,7 @@ themes.push({
     border: ['#2A241B33', '#F3E9D633'],
     'text-primary': ['#2A241B', '#F6EEDD'], 'text-secondary': ['#645A4C', '#C9BDA8'], 'text-accent': ['#9A3B14', '#F0A27C'],
     'badge-bg': ['#2A241B14', '#F3E9D61F'], 'badge-fg': ['#2A241B', '#F6EEDD'], 'origin-bg': ['#C98A1B33', '#E0A63A33'], 'origin-fg': ['#4F3300', '#FFE6B3'],
-    'swatch-border': ['#2A241B66', '#F3E9D666'], 'row-hover': ['#9A3B140F', '#F0A27C1A'],
+    'swatch-border': ['#2A241BB3', '#F3E9D666'], 'row-hover': ['#9A3B140F', '#F0A27C1A'],
     shadow: ['#3A2A1038', '#00000099'], 'shadow-edge': ['#3A2A1014', '#00000040'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.78, 0.78],
   },
   shadows: { sheet: [{ x: 0, y: 1, blur: 2, spread: 0, color: '{color.shadow-edge}' }, { x: 0, y: 8, blur: 20, spread: -2, color: '{color.shadow}' }] },
@@ -109,7 +109,7 @@ themes.push({
     border: ['#0B6B2A99', '#3DFF7A80'],
     'text-primary': ['#0E2A12', '#D4F7CE'], 'text-secondary': ['#3B5A3E', '#86C081'], 'text-accent': ['#0B6B2A', '#3DFF7A'],
     'badge-bg': ['#0B6B2A1F', '#3DFF7A26'], 'badge-fg': ['#0B4A1D', '#9BFFB8'], 'origin-bg': ['#B8860B33', '#FFB00033'], 'origin-fg': ['#4A3200', '#FFD27A'],
-    'swatch-border': ['#0B6B2A99', '#3DFF7A99'], 'row-hover': ['#0B6B2A1A', '#3DFF7A1F'],
+    'swatch-border': ['#0B6B2ACC', '#3DFF7A99'], 'row-hover': ['#0B6B2A1A', '#3DFF7A1F'],
     shadow: ['#00000000', '#00000000'], 'shadow-edge': ['#00000000', '#00000000'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.7, 0.7],
   },
   shadow: { container: 'none', notice: 'none' },
@@ -142,7 +142,7 @@ themes.push({
   shadow: { container: 'glow', notice: 'glow' },
   radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'pill' },
   border: { container: 1, swatch: 1, notice: 1 },
-  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '7', 'badge-y': '2', 'notice-x': '14', 'notice-y': '9' },
+  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '14', 'notice-y': '10' },
   size: { width: 440 },
 })
 
@@ -161,7 +161,7 @@ themes.push({
     border: ['#00000026', '#FFFFFF2E'],
     'text-primary': ['#101012', '#F2F2F5'], 'text-secondary': ['#4D4D55', '#B4B4BE'], 'text-accent': ['#0050C8', '#7DB0FF'],
     'badge-bg': ['#0000001A', '#FFFFFF1F'], 'badge-fg': ['#101012', '#F2F2F5'], 'origin-bg': ['#FF950033', '#FF9F0A33'], 'origin-fg': ['#4A2A00', '#FFD9A3'],
-    'swatch-border': ['#00000066', '#FFFFFF66'], 'row-hover': ['#0050C814', '#7DB0FF1F'],
+    'swatch-border': ['#000000A6', '#FFFFFF66'], 'row-hover': ['#0050C814', '#7DB0FF1F'],
     shadow: ['#00000024', '#00000080'], 'shadow-edge': ['#0000001A', '#00000040'], 'surface-blur': [12, 12], 'suggestion-opacity': [0.75, 0.75],
   },
   shadow: { container: 'sm', notice: 'sm' },
@@ -238,7 +238,7 @@ themes.push({
     border: ['#FFFFFFE6', '#FFFFFF3D'],
     'text-primary': ['#0B1B2E', '#F5F8FF'], 'text-secondary': ['#2F4259', '#CBD6EC'], 'text-accent': ['#0A3FA8', '#9EC1FF'],
     'badge-bg': ['#0A3FA81A', '#9EC1FF29'], 'badge-fg': ['#082F7C', '#D6E6FF'], 'origin-bg': ['#FF8A3D33', '#FF9F4A33'], 'origin-fg': ['#552200', '#FFD9B8'],
-    'swatch-border': ['#0B1B2E66', '#FFFFFF80'], 'row-hover': ['#0A3FA81A', '#9EC1FF24'],
+    'swatch-border': ['#0B1B2EB3', '#FFFFFF80'], 'row-hover': ['#0A3FA81A', '#9EC1FF24'],
     shadow: ['#1B2A4A40', '#00000080'], 'shadow-edge': ['#1B2A4A1A', '#00000040'], 'surface-blur': [40, 40], 'suggestion-opacity': [0.72, 0.72],
   },
   shadows: { deep: [{ x: 0, y: 28, blur: 64, spread: -8, color: '{color.shadow}' }, { x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow-edge}' }] },
@@ -265,7 +265,7 @@ themes.push({
     border: ['#F2A9D2', '#7A5AA0'],
     'text-primary': ['#3B2A4D', '#FDEBFF'], 'text-secondary': ['#65547A', '#D5C3E4'], 'text-accent': ['#B01E7E', '#FF8AD4'],
     'badge-bg': ['#FFD1E8', '#5A3A7A'], 'badge-fg': ['#5A1040', '#FFE6F6'], 'origin-bg': ['#CDEBFF', '#2D5C7A'], 'origin-fg': ['#0B3B5C', '#E6F6FF'],
-    'swatch-border': ['#B01E7E99', '#FF8AD499'], 'row-hover': ['#FFD1E899', '#5A3A7A99'],
+    'swatch-border': ['#B01E7ECC', '#FF8AD499'], 'row-hover': ['#FFD1E899', '#5A3A7A99'],
     shadow: ['#B01E7E2E', '#00000099'], 'shadow-edge': ['#B01E7E14', '#00000040'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
   },
   shadows: { pop: [{ x: 0, y: 6, blur: 0, spread: 0, color: '{color.shadow-edge}' }, { x: 0, y: 14, blur: 28, spread: 0, color: '{color.shadow}' }] },
@@ -324,7 +324,7 @@ variants.push({
 })
 variants.push({
   id: 'ind-space', name: 'Solo espacio', axes: ['space'], blurb: 'Lupita con más aire y más ancho. Mismo color, letra y formas.',
-  space: { padding: '20', 'block-gap': '14', 'range-gap': '12', 'range-line-gap': '8', 'entry-gap': '12', 'inline-gap': '8', 'row-gap': '6', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '7', 'badge-y': '2', 'notice-x': '16', 'notice-y': '10' },
+  space: { padding: '20', 'block-gap': '14', 'range-gap': '12', 'range-line-gap': '8', 'entry-gap': '12', 'inline-gap': '8', 'row-gap': '6', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '16', 'notice-y': '10' },
   size: { width: 500 },
 })
 variants.push({
