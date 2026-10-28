@@ -8,3 +8,6 @@
 - **grupo (de tokens)** — uno de los cinco ejes independientes: type, color, shape, space, shadow.
 - **variante** — tema que cambia un solo grupo sobre Lupita, para demostrar la independencia (`variants/ind-*.json`).
 - **baseline** — marca de un tema cuyos fallos de contraste se avisan y no fallan: hoy solo Lupita, que conserva los colores del sistema.
+- **papel tipográfico** — uso del texto al que un tema asigna una fuente: `heading`, `body` o `code` (D55).
+- **escala de texto** — los cuatro pasos de tamaño (S, M, L, XL), cada uno una jerarquía completa válida en todos los temas (D55).
+- **densidad** — ajuste de espacios (compacta, normal, amplia) independiente del tema (D55).
