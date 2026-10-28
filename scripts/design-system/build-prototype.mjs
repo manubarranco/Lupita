@@ -67,8 +67,8 @@ ${textRules}
 .swatch { display: flex; align-items: center; gap: var(--space-swatch-inner-gap); }
 .chip { flex: none; box-sizing: border-box; width: var(--size-swatch); height: var(--size-swatch); border: var(--border-swatch) solid var(--color-swatch-border); border-radius: var(--radius-swatch); }
 .meta { display: flex; flex-wrap: nowrap; align-items: center; gap: var(--space-inline-gap); min-width: 0; }
-.meta > .repo { flex: none; max-width: 100%; white-space: nowrap; }
-.meta > .location { flex: 0 1 auto; }
+.meta > .repo { flex: 0 1 auto; max-width: 60%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta > .location { flex: 1 1 0; min-width: 8ch; }
 .badge { flex: none; padding: var(--space-badge-y) var(--space-badge-x); border-radius: var(--radius-badge); background: var(--color-badge-bg); white-space: nowrap; }
 .badge.origin { background: var(--color-origin-bg); color: var(--color-origin-fg); }
 .lines { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-range-line-gap); }

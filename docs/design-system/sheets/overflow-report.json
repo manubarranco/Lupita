@@ -25,6 +25,290 @@
       },
       "renders": 20,
       "violations": 0
+    },
+    "blueprint": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "brutalista": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "compacto": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "cristal": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "grande": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "mimo": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "neon": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "papel": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "terminal": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
+    },
+    "ind-type": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": []
+      },
+      "renders": 4,
+      "violations": 0
+    },
+    "ind-color": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": []
+      },
+      "renders": 4,
+      "violations": 0
+    },
+    "ind-shape": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": []
+      },
+      "renders": 4,
+      "violations": 0
+    },
+    "ind-space": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": []
+      },
+      "renders": 4,
+      "violations": 0
+    },
+    "ind-shadow": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": []
+      },
+      "renders": 4,
+      "violations": 0
     }
   }
 }

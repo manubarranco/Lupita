@@ -190,7 +190,7 @@
     var scope = el.parentElement, res = scope._res, out = []
     var nodes = [el].concat(Array.prototype.slice.call(el.querySelectorAll('[data-role]')))
     nodes.forEach(function (n) {
-      if (n.scrollWidth > n.clientWidth + 1)
+      if (n.scrollWidth > n.clientWidth + 1 && getComputedStyle(n).textOverflow !== 'ellipsis') // an ellipsis is a deliberate clamp, not an overflow
         out.push((n === el ? 'root' : n.dataset.role) + ': scrollWidth ' + n.scrollWidth + ' > clientWidth ' + n.clientWidth + (n.textContent ? ' «' + n.textContent.slice(0, 40) + '»' : ''))
     })
     if (el.dataset.state !== 'notice') {
