@@ -40,8 +40,8 @@ import AppKit
 
     @Test func cristalColorsAndShadow() {
         let light = TooltipTheme.load("cristal", mode: .light), dark = TooltipTheme.load("cristal", mode: .dark)
-        #expect(light.colors.surface == RGBA(hex: "#FFFFFFC7"))
-        #expect(dark.colors.surface == RGBA(hex: "#141A2CC8"))
+        #expect(light.colors.surface == RGBA(hex: "#FFFFFF40"))
+        #expect(dark.colors.surface == RGBA(hex: "#141A2C59"))
         #expect(light.containerShadow.count == 2 && light.containerShadow[0].y == 28 && light.containerShadow[0].blur == 64 && light.containerShadow[0].spread == -8)
         #expect(light.colors.textPrimary == RGBA(hex: "#0B1B2E"))
     }

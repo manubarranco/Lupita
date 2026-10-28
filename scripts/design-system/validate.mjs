@@ -2,7 +2,7 @@
 //   node scripts/design-system/validate.mjs [themeId ...] [--json]
 // Exit 1 on any FAIL. Themes with "baseline": true print FAIL as WARN and do not affect the exit code.
 import { existsSync, readFileSync } from 'node:fs'
-import { DS, GROUPS, SIZES, DENSITIES, loadTheme, listThemes, groupOf, leaves, contrastWorst, parseHex, over, ratio } from './lib.mjs'
+import { DS, GROUPS, SIZES, DENSITIES, loadTheme, listThemes, groupOf, leaves, parseHex, over, ratio } from './lib.mjs'
 
 const args = process.argv.slice(2)
 const asJson = args.includes('--json')
@@ -95,10 +95,21 @@ function visual(theme, mode, aaa) {
   const surface = m['color.surface']
   const t = r => m[`text.${r}`]
   const pages = ['#FFFFFF', '#000000']
+  // A surface with blur is drawn over the system material (D55): the tint goes on top of an approximation of macOS's regular material
+  // (the colours the first version of these tokens measured), which itself sits over the page.
+  const MATERIAL = { light: '#F6F6F6D1', dark: '#2A2A2CD1' }
+  const blur = m['color.surface-blur']
+  const under = page => blur > 0 ? over(parseHex(MATERIAL[mode]), parseHex(page)) : parseHex(page)
+  const surfaceOver = (hex, page) => over(parseHex(hex), under(page))
+  const contrastWorst = (fgHex, surfaceHex) => {
+    let w = Infinity
+    for (const page of pages) { const bg = surfaceOver(surfaceHex, page); w = Math.min(w, ratio(over(parseHex(fgHex), bg), bg)) }
+    return w
+  }
   const worstOn = (fg, bgHex) => { // fg over (bg over page), bg translucent
     let w = Infinity
     for (const page of pages) {
-      const bg = over(parseHex(bgHex), parseHex(page))
+      const bg = surfaceOver(bgHex, page)
       w = Math.min(w, ratio(over(parseHex(fg), bg), bg))
     }
     return w
@@ -106,7 +117,7 @@ function visual(theme, mode, aaa) {
   const worstOnBadge = (fg, badgeBg) => {
     let w = Infinity
     for (const page of pages) {
-      const bg = over(parseHex(badgeBg), over(parseHex(surface), parseHex(page)))
+      const bg = over(parseHex(badgeBg), surfaceOver(surface, page))
       w = Math.min(w, ratio(over(parseHex(fg), bg), bg))
     }
     return w

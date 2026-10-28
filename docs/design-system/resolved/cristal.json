@@ -119,8 +119,8 @@
    }
   },
   "color": {
-   "surface": "#FFFFFFC7",
-   "noticeSurface": "#FFFFFFC7",
+   "surface": "#FFFFFF40",
+   "noticeSurface": "#FFFFFF40",
    "border": "#FFFFFFE6",
    "textPrimary": "#0B1B2E",
    "textSecondary": "#2F4259",
@@ -305,8 +305,8 @@
    }
   },
   "color": {
-   "surface": "#141A2CC8",
-   "noticeSurface": "#141A2CC8",
+   "surface": "#141A2C59",
+   "noticeSurface": "#141A2C59",
    "border": "#FFFFFF3D",
    "textPrimary": "#F5F8FF",
    "textSecondary": "#CBD6EC",

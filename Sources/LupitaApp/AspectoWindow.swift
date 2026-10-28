@@ -90,6 +90,8 @@ struct AspectoView: View {
 
     private var stage: some View {
         ZStack {
+            // Development aid: LUPITA_ASPECTO_BACKDROP=1 puts a faux page behind the cards, to judge a material.
+            if ProcessInfo.processInfo.environment["LUPITA_ASPECTO_BACKDROP"] != nil { FauxPage(dark: colorScheme == .dark) }
             HStack(spacing: 0) {
                 ForEach(Array(Self.ids.enumerated()), id: \.element) { _, id in
                     AspectoSlide(theme: theme(id), state: state).frame(width: Self.stageWidth, height: Self.stageHeight)
