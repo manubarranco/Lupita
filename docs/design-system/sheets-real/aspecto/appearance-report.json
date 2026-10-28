@@ -1,0 +1,4544 @@
+{
+  "captures" : 168,
+  "note" : "sample: size of the sample canvas (pt); shadowClipPixels: non-transparent pixels on the edge of the panel (tooltip + shadow insets, +8 pt margin) and canvasEdgePixels: on the edge of the sample canvas, both drawn over nothing; widthOverflow\/heightOverflow: points the content's ideal size exceeds the width of the token \/ the height under that width.",
+  "results" : [
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        360
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        216
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        382
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        238
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        410
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        266
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        368
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        224
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        390
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        246
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        418
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        274
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        391
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        247
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        413
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        269
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        441
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        297
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        413
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        269
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        435
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        291
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        463
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        319
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        360
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        216
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        382
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        238
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        410
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        266
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        368
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        224
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        390
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        246
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        418
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        274
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        391
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        247
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        413
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        269
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        441
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        297
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-cristal-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        413
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        269
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-cristal-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        435
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        291
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-cristal-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        463
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        36,
+        64,
+        92,
+        64
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "cristal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        319
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        272
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        208
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        294
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        230
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        322
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        258
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        281
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        217
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        303
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        239
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        331
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        267
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        309
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        245
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        331
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        267
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        359
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        295
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        332
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        268
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        354
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        290
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        382
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        318
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        272
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        208
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        294
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        230
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        322
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        258
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        281
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        217
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        303
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        239
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        331
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        267
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        309
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        245
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        331
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        267
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        359
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        295
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-papel-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        332
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        268
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-papel-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        354
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        290
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-papel-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        382
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        12,
+        20,
+        28,
+        20
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "papel",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        318
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        249
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        193
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        284
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        228
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        303
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        247
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        258
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        202
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        272
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        216
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        291
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        235
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        311
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        255
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        325
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        269
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        344
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        288
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        337
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        281
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        351
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        295
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        370
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        314
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        249
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        193
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        284
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        228
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        303
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        247
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        258
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        202
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        272
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        216
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        291
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        235
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        311
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        255
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        325
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        269
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        344
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        288
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-terminal-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        337
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        281
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-terminal-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        351
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        295
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-terminal-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        370
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        0,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "terminal",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        314
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        287
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        308
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        228
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        335
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        255
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        297
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        217
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        318
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        238
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        345
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        265
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        327
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        247
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        348
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        268
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        375
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        295
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        351
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        271
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        372
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        292
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        399
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        319
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        287
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        308
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        228
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        335
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        255
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        297
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        217
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        318
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        238
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        345
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        265
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        327
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        247
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        348
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        268
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        375
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        295
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-neon-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        351
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        271
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-neon-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        372
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        292
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-neon-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        399
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        22,
+        32,
+        42,
+        32
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "neon",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        319
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        248
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        192
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        266
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        210
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        287
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        231
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        260
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        204
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        278
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        222
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        299
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        243
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        288
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        232
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        306
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        250
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        327
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        271
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        308
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        252
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        326
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        270
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        347
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        291
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        248
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        192
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        266
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        210
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        287
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        231
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        260
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        204
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        278
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        222
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        299
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        243
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        288
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        232
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        306
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        250
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        327
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        271
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-brutalista-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        308
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        252
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-brutalista-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        326
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        270
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-brutalista-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        347
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        5
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        291
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        259
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        203
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        280
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        224
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        307
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        251
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        269
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        213
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        290
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        234
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        317
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        261
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        296
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        240
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        317
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        261
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        344
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        288
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        316
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        260
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        337
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        281
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        364
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        308
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        259
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        203
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        280
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        224
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        307
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        251
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        269
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        213
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        290
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        234
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        317
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        261
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        296
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        240
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        317
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        261
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        344
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        288
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-ficha-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        316
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        260
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-ficha-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        337
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        281
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-ficha-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        364
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        5,
+        0
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "ficha",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        308
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-claro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        239
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        183
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-claro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        275
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        219
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-claro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        295
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        239
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-claro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        246
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        190
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-claro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        263
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-claro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        283
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        227
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-claro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        301
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        245
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-claro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        318
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        262
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-claro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        338
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        282
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-claro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        319
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        263
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-claro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        336
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        280
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-claro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "claro",
+      "sample" : [
+        700,
+        356
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        300
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-oscuro-S-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        239
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        183
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-oscuro-S-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        275
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        219
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-oscuro-S-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        295
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "S",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 400,
+      "tooltip" : [
+        400,
+        239
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-oscuro-M-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        246
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        190
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-oscuro-M-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        263
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-oscuro-M-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        283
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "M",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 440,
+      "tooltip" : [
+        440,
+        227
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-oscuro-L-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        301
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        245
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-oscuro-L-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        318
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        262
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-oscuro-L-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        338
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "L",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 480,
+      "tooltip" : [
+        480,
+        282
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "compacta",
+      "file" : "aspecto-blueprint-oscuro-XL-compacta.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        319
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        263
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "normal",
+      "file" : "aspecto-blueprint-oscuro-XL-normal.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        336
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        280
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvasEdgePixels" : 0,
+      "density" : "amplia",
+      "file" : "aspecto-blueprint-oscuro-XL-amplia.png",
+      "heightOverflow" : 0,
+      "mode" : "oscuro",
+      "sample" : [
+        700,
+        356
+      ],
+      "shadowClipPixels" : 0,
+      "shadowInsets" : [
+        0,
+        0,
+        4,
+        4
+      ],
+      "size" : "XL",
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tokenWidth" : 520,
+      "tooltip" : [
+        520,
+        300
+      ],
+      "widthOverflow" : 0
+    }
+  ],
+  "shadowClipViolations" : 0,
+  "textClipViolations" : 0
+}
