@@ -96,7 +96,7 @@ themes.push({
 // ── 3. Terminal ─ everything monospaced, square, flat ───────────────────────────
 themes.push({
   id: 'terminal', name: 'Terminal', axes: ALL,
-  blurb: 'Todo en monoespaciada, esquinas rectas y cero sombra: un panel de consola. En oscuro, fósforo verde sobre negro.',
+  blurb: 'Una pantalla de consola: fósforo verde sobre negro en los dos modos, todo en monoespaciada y esquinas rectas. En oscuro la pantalla sube un tono y el borde se enciende para despegarse del fondo.',
   type: {
     title: { family: 'mono', size: 'lg', weight: 'semibold' },
     id: { family: 'mono', size: 'md', weight: 'regular', color: 'text-accent' },
@@ -108,13 +108,14 @@ themes.push({
   lineHeight: 1.3,
   lh: { title: 1.35, description: 1.5 },
   color: {
-    surface: ['#F6F9F4F7', '#0B100BF7'], 'notice-surface': ['#F6F9F4F7', '#0B100BF7'],
-    border: ['#0B6B2A99', '#3DFF7A80'],
-    'text-primary': ['#0E2A12', '#D4F7CE'], 'text-secondary': ['#3B5A3E', '#86C081'], 'text-accent': ['#0B6B2A', '#3DFF7A'],
-    'badge-bg': ['#0B6B2A1F', '#3DFF7A26'], 'badge-fg': ['#0B4A1D', '#9BFFB8'], 'origin-bg': ['#B8860B33', '#FFB00033'], 'origin-fg': ['#4A3200', '#FFD27A'],
-    'swatch-border': ['#0B6B2ACC', '#3DFF7A99'], 'row-hover': ['#0B6B2A1A', '#3DFF7A1F'],
+    surface: ['#060906FA', '#141A14F7'], 'notice-surface': ['#060906FA', '#141A14F7'],
+    border: ['#060906', '#3DFF7A66'],
+    'text-primary': ['#D4F7CE', '#D4F7CE'], 'text-secondary': ['#86C081', '#86C081'], 'text-accent': ['#3DFF7A', '#3DFF7A'],
+    'badge-bg': ['#3DFF7A26', '#3DFF7A26'], 'badge-fg': ['#9BFFB8', '#9BFFB8'], 'origin-bg': ['#FFB00033', '#FFB00033'], 'origin-fg': ['#FFD27A', '#FFD27A'],
+    'swatch-border': ['#3DFF7A99', '#3DFF7A99'], 'row-hover': ['#3DFF7A1F', '#3DFF7A1F'],
     shadow: ['#00000000', '#00000000'], 'shadow-edge': ['#00000000', '#00000000'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.7, 0.7],
   },
+
   shadow: { container: 'none', notice: 'none' },
   radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none', row: 'none' },
   border: { container: 1, swatch: 1, notice: 1 },
@@ -125,7 +126,7 @@ themes.push({
 // ── 4. Neón ─ dark-first, saturated accent, glow as shadow ─────────────────────
 themes.push({
   id: 'neon', name: 'Neón', axes: ALL,
-  blurb: 'Pensado para oscuro: índigo profundo, acento cian y un halo en lugar de sombra. En claro pasa a lavanda con violeta eléctrico.',
+  blurb: 'Un rótulo de neón: tubo cian sobre índigo profundo en los dos modos. En claro, una sombra oscura lo asienta y un halo corto del color del tubo lo enciende; en oscuro la luz se derrama alrededor.',
   type: {
     title: { size: 'xl', weight: 'semibold' },
     id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent', tracking: 0.2 },
@@ -135,14 +136,15 @@ themes.push({
   },
   lh: { title: 1.3, description: 1.45 },
   color: {
-    surface: ['#F3EDFFF7', '#0D0B1AF2'], 'notice-surface': ['#F3EDFFF7', '#0D0B1AF2'],
-    border: ['#5A1FD6CC', '#00E5FFB3'],
-    'text-primary': ['#1A0B3D', '#F4F1FF'], 'text-secondary': ['#4B3A7A', '#B9B2E0'], 'text-accent': ['#5A1FD6', '#00E5FF'],
-    'badge-bg': ['#5A1FD61F', '#00E5FF26'], 'badge-fg': ['#3A0FA0', '#9DF3FF'], 'origin-bg': ['#FF2E9333', '#FF2E9340'], 'origin-fg': ['#7A0A47', '#FFC2E3'],
-    'swatch-border': ['#5A1FD699', '#00E5FF99'], 'row-hover': ['#5A1FD614', '#00E5FF1A'],
-    shadow: ['#5A1FD670', '#00E5FF66'], 'shadow-edge': ['#5A1FD6', '#00E5FF'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
+    surface: ['#140F2EF7', '#1C1640F2'], 'notice-surface': ['#140F2EF7', '#1C1640F2'],
+    border: ['#00E5FF', '#00E5FFE6'],
+    'text-primary': ['#F4F1FF', '#F4F1FF'], 'text-secondary': ['#B9B2E0', '#B9B2E0'], 'text-accent': ['#00E5FF', '#00E5FF'],
+    'badge-bg': ['#00E5FF26', '#00E5FF26'], 'badge-fg': ['#9DF3FF', '#9DF3FF'], 'origin-bg': ['#FF2E9340', '#FF2E9340'], 'origin-fg': ['#FFC2E3', '#FFC2E3'],
+    'swatch-border': ['#00E5FF99', '#00E5FF99'], 'row-hover': ['#00E5FF1A', '#00E5FF1A'],
+    shadow: ['#1A0B3D66', '#00E5FF3D'], 'shadow-edge': ['#00D9FFF2', '#00E5FFB3'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
   },
-  shadows: { glow: [{ x: 0, y: 0, blur: 28, spread: 1, color: '{color.shadow}' }, { x: 0, y: 0, blur: 2, spread: 0, color: '{color.shadow-edge}' }] },
+
+  shadows: { glow: [{ x: 0, y: 10, blur: 32, spread: 0, color: '{color.shadow}' }, { x: 0, y: 0, blur: 16, spread: 1, color: '{color.shadow-edge}' }] },
   shadow: { container: 'glow', notice: 'glow' },
   radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'pill', row: 'md' },
   border: { container: 1, swatch: 1, notice: 1 },
@@ -288,7 +290,7 @@ themes.push({
 // ── 10. Blueprint ─ technical drawing ───────────────────────────────────────────
 themes.push({
   id: 'blueprint', name: 'Blueprint', axes: ALL,
-  blurb: 'Plano técnico: azul de cianotipia, línea fina, identificadores y rutas en monoespaciada y una sombra de dibujo desplazada. En claro, papel de delineante.',
+  blurb: 'Un plano de cianotipia: azul de Prusia con línea y letra blancas en los dos modos, identificadores y rutas en monoespaciada y una sombra de dibujo desplazada. En oscuro, el azul baja un tono.',
   type: {
     title: { size: 'lg', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
     description: { size: 'md' }, placeholder: { size: 'lg' }, repo: { family: 'mono', size: 'sm', weight: 'semibold' },
@@ -298,13 +300,14 @@ themes.push({
   lineHeight: 1.25,
   lh: { title: 1.3, description: 1.4 },
   color: {
-    surface: ['#F2F7FFF7', '#0B2A5BF5'], 'notice-surface': ['#F2F7FFF7', '#0B2A5BF5'],
-    border: ['#0B2A5BCC', '#7CB4FFB3'],
-    'text-primary': ['#0B2A5B', '#EAF3FF'], 'text-secondary': ['#33548C', '#B2CDF5'], 'text-accent': ['#0A55C8', '#7CE0FF'],
-    'badge-bg': ['#0A55C81F', '#7CE0FF26'], 'badge-fg': ['#08408F', '#C9F2FF'], 'origin-bg': ['#E0A60033', '#FFC64D33'], 'origin-fg': ['#4D3600', '#FFE6A8'],
-    'swatch-border': ['#0B2A5B99', '#7CB4FF99'], 'row-hover': ['#0A55C814', '#7CE0FF1F'],
-    shadow: ['#0B2A5B38', '#00000066'], 'shadow-edge': ['#0B2A5B1A', '#7CB4FF33'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.72, 0.72],
+    surface: ['#1D4F91F7', '#173F75F5'], 'notice-surface': ['#1D4F91F7', '#173F75F5'],
+    border: ['#FFFFFFB3', '#FFFFFF8C'],
+    'text-primary': ['#FFFFFF', '#FFFFFF'], 'text-secondary': ['#C9DCF5', '#C9DCF5'], 'text-accent': ['#9FE3FF', '#9FE3FF'],
+    'badge-bg': ['#FFFFFF1F', '#FFFFFF1F'], 'badge-fg': ['#FFFFFF', '#FFFFFF'], 'origin-bg': ['#FFD34D33', '#FFD34D33'], 'origin-fg': ['#FFF3CC', '#FFF3CC'],
+    'swatch-border': ['#FFFFFFB3', '#FFFFFF99'], 'row-hover': ['#FFFFFF14', '#FFFFFF14'],
+    shadow: ['#0B2A5B4D', '#00000080'], 'shadow-edge': ['#0B2A5B1A', '#FFFFFF1F'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.72, 0.72],
   },
+
   shadows: { offset: [{ x: 4, y: 4, blur: 0, spread: 0, color: '{color.shadow}' }] },
   shadow: { container: 'offset', notice: 'offset' },
   radius: { container: 'xs', notice: 'xs', swatch: 'none', badge: 'xs', row: 'xs' },

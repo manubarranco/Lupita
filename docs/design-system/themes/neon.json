@@ -1,7 +1,7 @@
 {
   "id": "neon",
   "name": "Neón",
-  "blurb": "Pensado para oscuro: índigo profundo, acento cian y un halo en lugar de sombra. En claro pasa a lavanda con violeta eléctrico.",
+  "blurb": "Un rótulo de neón: tubo cian sobre índigo profundo en los dos modos. En claro, una sombra oscura lo asienta y un halo corto del color del tubo lo enciende; en oscuro la luz se derrama alrededor.",
   "axes": [
     "type",
     "color",
@@ -12,49 +12,49 @@
   "overrides": {
     "primitive": {
       "palette": {
-        "neon-surface-light": "#F3EDFFF7",
-        "neon-surface-dark": "#0D0B1AF2",
-        "neon-notice-surface-light": "#F3EDFFF7",
-        "neon-notice-surface-dark": "#0D0B1AF2",
-        "neon-border-light": "#5A1FD6CC",
-        "neon-border-dark": "#00E5FFB3",
-        "neon-text-primary-light": "#1A0B3D",
+        "neon-surface-light": "#140F2EF7",
+        "neon-surface-dark": "#1C1640F2",
+        "neon-notice-surface-light": "#140F2EF7",
+        "neon-notice-surface-dark": "#1C1640F2",
+        "neon-border-light": "#00E5FF",
+        "neon-border-dark": "#00E5FFE6",
+        "neon-text-primary-light": "#F4F1FF",
         "neon-text-primary-dark": "#F4F1FF",
-        "neon-text-secondary-light": "#4B3A7A",
+        "neon-text-secondary-light": "#B9B2E0",
         "neon-text-secondary-dark": "#B9B2E0",
-        "neon-text-accent-light": "#5A1FD6",
+        "neon-text-accent-light": "#00E5FF",
         "neon-text-accent-dark": "#00E5FF",
-        "neon-badge-bg-light": "#5A1FD61F",
+        "neon-badge-bg-light": "#00E5FF26",
         "neon-badge-bg-dark": "#00E5FF26",
-        "neon-badge-fg-light": "#3A0FA0",
+        "neon-badge-fg-light": "#9DF3FF",
         "neon-badge-fg-dark": "#9DF3FF",
-        "neon-origin-bg-light": "#FF2E9333",
+        "neon-origin-bg-light": "#FF2E9340",
         "neon-origin-bg-dark": "#FF2E9340",
-        "neon-origin-fg-light": "#7A0A47",
+        "neon-origin-fg-light": "#FFC2E3",
         "neon-origin-fg-dark": "#FFC2E3",
-        "neon-swatch-border-light": "#5A1FD699",
+        "neon-swatch-border-light": "#00E5FF99",
         "neon-swatch-border-dark": "#00E5FF99",
-        "neon-row-hover-light": "#5A1FD614",
+        "neon-row-hover-light": "#00E5FF1A",
         "neon-row-hover-dark": "#00E5FF1A",
-        "neon-shadow-light": "#5A1FD670",
-        "neon-shadow-dark": "#00E5FF66",
-        "neon-shadow-edge-light": "#5A1FD6",
-        "neon-shadow-edge-dark": "#00E5FF"
+        "neon-shadow-light": "#1A0B3D66",
+        "neon-shadow-dark": "#00E5FF3D",
+        "neon-shadow-edge-light": "#00D9FFF2",
+        "neon-shadow-edge-dark": "#00E5FFB3"
       },
       "shadow": {
         "glow": [
           {
             "x": 0,
-            "y": 0,
-            "blur": 28,
-            "spread": 1,
+            "y": 10,
+            "blur": 32,
+            "spread": 0,
             "color": "{color.shadow}"
           },
           {
             "x": 0,
             "y": 0,
-            "blur": 2,
-            "spread": 0,
+            "blur": 16,
+            "spread": 1,
             "color": "{color.shadow-edge}"
           }
         ]
