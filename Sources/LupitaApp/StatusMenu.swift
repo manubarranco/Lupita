@@ -9,6 +9,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let onHotkeyChange: (HotkeyChoice) -> Void
     var onPrepareRepos: (() -> Void)?
     var onIDReport: (() -> Void)?
+    var onAppearance: (() -> Void)?
 
     init(store: IndexStore, onHotkeyChange: @escaping (HotkeyChoice) -> Void) {
         self.store = store
@@ -205,6 +206,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         menu.addItem(.separator())
 
+        menu.addItem(action(S.appearanceMenu, #selector(showAppearance)))
         menu.addItem(action(S.about, #selector(showAbout)))
         menu.addItem(action(S.help, #selector(openHelp)))
         menu.addItem(action(Updater.availableVersion.map(Updater.menuTitle) ?? S.checkForUpdates, #selector(checkForUpdates)))
@@ -487,6 +489,8 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     }
 
     @objc private func idReport() { onIDReport?() }
+
+    @objc private func showAppearance() { onAppearance?() }
 
     @objc private func prepareRepos() { onPrepareRepos?() }
 
