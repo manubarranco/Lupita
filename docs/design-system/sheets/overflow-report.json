@@ -309,6 +309,32 @@
       },
       "renders": 4,
       "violations": 0
+    },
+    "ficha": {
+      "results": {
+        "light/definition": [],
+        "dark/definition": [],
+        "light/term": [],
+        "dark/term": [],
+        "light/symbol": [],
+        "dark/symbol": [],
+        "light/suggestion": [],
+        "dark/suggestion": [],
+        "light/ambiguous": [],
+        "dark/ambiguous": [],
+        "light/range": [],
+        "dark/range": [],
+        "light/color": [],
+        "dark/color": [],
+        "light/otherRepo": [],
+        "dark/otherRepo": [],
+        "light/notice": [],
+        "dark/notice": [],
+        "light/stress": [],
+        "dark/stress": []
+      },
+      "renders": 20,
+      "violations": 0
     }
   }
 }

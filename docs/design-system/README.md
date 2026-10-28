@@ -66,6 +66,7 @@ Each role carries `family, size, weight, italic, lineHeight, tracking, color`. F
 3. `node scripts/design-system/make-themes.mjs` writes `themes/<id>.json`.
 4. `node scripts/design-system/run-all.mjs` until it says `ALL GREEN`.
 5. `node scripts/design-system/render-sheets.mjs --themes <id>` and look at `sheets/theme-<id>.png` next to Lupita before keeping it.
+   Playwright is not in the repo. On Manu's Mac it lives in `~/.local/share/lupita-tools`: run with `NODE_PATH=~/.local/share/lupita-tools/node_modules`.
 
 ## Mapping to SwiftUI (for the port)
 
