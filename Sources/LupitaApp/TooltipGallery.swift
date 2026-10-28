@@ -7,7 +7,7 @@ import SwiftUI
 /// so `scripts/contact-sheet.swift` can lay them out. It draws the real `TooltipView`; nothing is shown on screen.
 @MainActor
 enum TooltipGallery {
-    static let canvas = CGSize(width: 500, height: 280)
+    static let canvas = CGSize(width: 540, height: 320)
 
     static func run(_ args: [String]) -> Int32 {
         guard let dir = args.first else {
@@ -28,7 +28,7 @@ enum TooltipGallery {
             }
             for scheme in [ColorScheme.light, .dark] {
                 let name = String(format: "%02d-%@.png", n + 1, scheme == .light ? "light" : "dark")
-                write(TooltipView(resolution: resolution, open: { _ in }), scheme: scheme, to: dir + "/" + name)
+                write(TooltipView(resolution: resolution, theme: TooltipStyle.current(mode: scheme == .dark ? .dark : .light), open: { _ in }), scheme: scheme, to: dir + "/" + name)
             }
             print(String(format: "%02d  %@", n + 1, text))
         }
@@ -39,7 +39,7 @@ enum TooltipGallery {
         let backdrop = scheme == .light ? Color(white: 0.96) : Color(white: 0.13)
         let framed = ZStack(alignment: .topLeading) {
             backdrop
-            view.padding(20)
+            view.padding(40)
         }
         .frame(width: canvas.width, height: canvas.height)
         .environment(\.colorScheme, scheme)
@@ -341,7 +341,7 @@ private struct VocabularySheet: View {
                 ForEach(Array(cards.enumerated()), id: \.offset) { _, card in
                     VStack(alignment: .leading, spacing: 6) {
                         Text("«\(card.0)»").font(.caption.monospaced()).foregroundStyle(.secondary)
-                        TooltipView(resolution: card.1, open: { _ in })
+                        TooltipView(resolution: card.1, theme: TooltipStyle.current(), open: { _ in })
                     }
                 }
             }
@@ -374,4 +374,256 @@ final class Collected: @unchecked Sendable {
     private var all: [HighlightPicker.Mark] = []
     func add(_ m: [HighlightPicker.Mark]) { lock.lock(); all += m; lock.unlock() }
     var marks: [HighlightPicker.Mark] { lock.lock(); defer { lock.unlock() }; return all }
+}
+
+// MARK: - Themes sheet (D55)
+
+/// The ten states of `docs/design-system/states.json`, built by hand as the `Resolution`s the real views receive.
+struct GalleryState {
+    let id: String
+    let label: String
+    let resolution: Resolution?
+    let notice: String?
+    var hover: Int? = nil
+
+    @MainActor func view(_ theme: TooltipTheme) -> AnyView {
+        if let notice { return AnyView(NoticeView(text: notice, theme: theme)) }
+        return AnyView(TooltipView(resolution: resolution!, theme: theme, open: { _ in }, previewHover: hover))
+    }
+}
+
+enum GalleryStates {
+    private static func def(_ id: String, _ rule: DefinitionRule = .heading, title: String, summary: String = "", repo: String = "",
+                            path: String = "", line: Int = 0, colors: [ColorSample]? = nil, file: Bool = true) -> Definition {
+        .made(id: id, repo: repo, path: path, line: line, rule: rule, title: title, summary: summary,
+              absolutePath: file ? "/Users/demo/\(repo)/\(path)" : "", colors: colors)
+    }
+
+    static let all: [GalleryState] = {
+        let d42 = def("D42", title: "Vocabulario de git en lenguaje llano",
+                      summary: "Cuarenta términos validados por Manu, con una línea llana y un ejemplo, en español e inglés.",
+                      repo: "lupita", path: "docs/decisions.md", line: 212)
+        let d43 = def("D43", title: "Los interruptores solo apagan diccionarios fijos", summary: "Lo que sale de los repos queda siempre encendido.",
+                      repo: "lupita", path: "docs/decisions.md", line: 221)
+        let d23 = def("D23", title: "Un solo punto de verdad para los tokens", summary: "Los componentes leen roles, nunca valores.",
+                      repo: "ds-agentico", path: "docs/decisions.md", line: 140)
+        let os = def("OS", .term, title: "Sistema operativo", summary: "El software que gestiona el equipo y los programas.", file: false)
+        let d5 = def("D5", title: "Orden de las fases", summary: "Primero el sistema, después los temas.", repo: "lios", path: "memory/decisions.md", line: 88)
+        let range = RangeList.made(entries: [
+            ("D40", def("D40", title: "Informe de IDs que envían los usuarios", repo: "lupita", path: "docs/decisions.md", line: 190)),
+            ("D41", def("D41", title: "Los rangos listan el tramo", repo: "lupita", path: "docs/decisions.md", line: 200)),
+            ("D42", d42), ("D43", nil)], noun: "decisiones", sharedRepo: "lupita", sharedPath: "docs/decisions.md")
+        let accent = def("--accent", .token, title: "Color de acento de la interfaz", summary: "Se usa en enlaces, foco y el repo del tooltip.",
+                         repo: "vector-ui-studio", path: "src/tokens.css", line: 12,
+                         colors: [ColorSample(label: "claro", hex: "#2F6FED"), ColorSample(label: "oscuro", hex: "#8AB4FF")])
+        let stress = def("ARCHITECTURE-DECISION-RECORD-0042-SUPERSEDED-BY-0057", .symbol,
+                         title: "Migrar el motor de resolución de referencias a un índice incremental que se actualiza en segundo plano cuando cambia un archivo, conservando la compatibilidad con los glosarios del repo y sin bloquear el atajo ni el subrayado mientras dura la reindexación completa",
+                         summary: "La reindexación completa recorre todos los repos activos y, mientras no termina, se sirven las respuestas del índice anterior para que el atajo nunca espere; al acabar se cambia de índice de una sola vez y se descarta el viejo.",
+                         repo: "lupita-con-un-nombre-de-repo-muy-largo-de-verdad",
+                         path: "docs/decisions/architecture/2026/10/0042-incremental-index-with-background-reindex.md", line: 1204)
+        var cited: [String: Int] = [:]
+        for (i, n) in [3, 3, 2, 2, 2].enumerated() { cited["lupita/docs/f\(i).md"] = n }
+        var many: [String: Int] = [:]
+        for i in 0..<86 { many["lupita/docs/g\(i).md"] = 14 }
+        many["lupita/docs/big.md"] = 44
+        return [
+            GalleryState(id: "definition", label: "ID definido", resolution: .made(query: "D42", key: "D42", definitions: [d42, d43], mentions: .made(byFile: cited)), notice: nil, hover: 1),
+            GalleryState(id: "term", label: "Término", resolution: .made(query: "rebase", key: "rebase", definitions: [
+                def("rebase", .term, title: "rebase", summary: "Reescribe tus commits encima de otra rama para que la historia quede en línea recta. Cambia los commits: no lo hagas sobre ramas ya compartidas.", file: false)]), notice: nil),
+            GalleryState(id: "symbol", label: "Símbolo sin comentario", resolution: .made(query: "build_glyphs", key: "build_glyphs", definitions: [
+                def("build_glyphs()", .symbol, title: "", repo: "nib", path: "Sources/glyphs.py", line: 318)]), notice: nil),
+            GalleryState(id: "suggestion", label: "¿Querías decir…?", resolution: .made(query: "023", kind: .corrected, key: "D23", definitions: [d23]), notice: nil),
+            GalleryState(id: "ambiguous", label: "Lectura dudosa", resolution: .made(query: "0S", kind: .ambiguous, key: nil, definitions: [os, d5]), notice: nil),
+            GalleryState(id: "range", label: "Rango", resolution: .made(query: "D40-D43", key: "D40", definitions: range.entries.compactMap(\.definition), range: range), notice: nil),
+            GalleryState(id: "color", label: "Color", resolution: .made(query: "--accent", key: "--accent", definitions: [accent]), notice: nil),
+            GalleryState(id: "otherRepo", label: "De otro repo", resolution: .made(query: "FR-001", key: "FR-001", definitions: [
+                def("FR-001", title: "El usuario ve la definición sin salir de la ventana", summary: "Requisito funcional del producto original.", repo: "automata", path: "docs/spec.md", line: 31)], fromOtherRepo: true), notice: nil),
+            GalleryState(id: "notice", label: "Aviso", resolution: nil, notice: "Lupita no encuentra nada para «ZX9» en tus repos."),
+            GalleryState(id: "stress", label: "Estrés: textos largos", resolution: .made(query: "ADR-0042", key: "ADR-0042", definitions: [stress], mentions: .made(byFile: many), fromOtherRepo: true), notice: nil),
+        ]
+    }()
+}
+
+/// One drawn tooltip: the real view, its size, and the two measures of the report.
+struct ThemeRender {
+    let theme: TooltipTheme
+    let state: GalleryState
+    let box: CGSize
+    let panel: CGSize
+    let insets: EdgeInsets
+    var shadowClipPixels = 0
+    var widthOverflow = 0.0
+    var heightOverflow = 0.0
+    var canvas = CGSize.zero
+}
+
+@MainActor
+enum ThemeGallery {
+    static let stageWidth: CGFloat = 560
+    static let stagePad: CGFloat = 28
+
+    static func insets(_ theme: TooltipTheme, _ state: GalleryState) -> EdgeInsets {
+        theme.insets(of: state.notice != nil ? theme.noticeShadow : theme.containerShadow)
+    }
+
+    /// Measures one state in one theme: sizes, shadow reaching the panel's edge, content wider or taller than its frame.
+    static func measure(_ theme: TooltipTheme, _ state: GalleryState) -> ThemeRender {
+        let ins = insets(theme, state)
+        let padded = state.view(theme).padding(ins)
+        let host = NSHostingView(rootView: padded)
+        let fit = host.fittingSize
+        let box = CGSize(width: fit.width - ins.leading - ins.trailing, height: fit.height - ins.top - ins.bottom)
+        var r = ThemeRender(theme: theme, state: state, box: box, panel: fit, insets: ins)
+
+        // (a) Shadow clip: the panel alone over nothing, with 8 pt of margin more; any visible pixel on the edge of that margin is a shadow the panel would cut.
+        let renderer = ImageRenderer(content: padded.padding(8).environment(\.colorScheme, theme.mode == .dark ? .dark : .light))
+        renderer.scale = 2
+        renderer.isOpaque = false
+        if let image = renderer.cgImage { r.shadowClipPixels = edgePixels(image) }
+
+        // (b) Text clip: the ideal width must be the width the tooltip was given, and the height under that width the ideal height.
+        let expectedWidth = state.notice != nil ? fit.width : theme.width + ins.leading + ins.trailing
+        r.widthOverflow = max(0, Double(fit.width - expectedWidth))
+        let proposed = NSHostingController(rootView: padded).sizeThatFits(in: CGSize(width: fit.width, height: 100_000))
+        r.heightOverflow = max(0, Double(abs(proposed.height - fit.height)))
+        if state.notice != nil { r.widthOverflow = max(0, Double(fit.width - ins.leading - ins.trailing - theme.width)) }
+        return r
+    }
+
+    /// Pixels on the edge of the image that are not transparent (alpha ≥ 2/255).
+    static func edgePixels(_ image: CGImage) -> Int {
+        let w = image.width, h = image.height
+        var data = [UInt8](repeating: 0, count: w * h * 4)
+        guard let ctx = CGContext(data: &data, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                  space: CGColorSpace(name: CGColorSpace.sRGB)!, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return -1 }
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        var n = 0
+        for y in 0..<h { for x in 0..<w {
+            let onEdge = y == 0 || y == h - 1 || x == 0 || x == w - 1
+            if onEdge && data[(y * w + x) * 4 + 3] >= 2 { n += 1 }
+        } }
+        return n
+    }
+
+    // MARK: Sheets
+
+    static func run(_ args: [String]) -> Int32 {
+        guard let dir = args.first else {
+            FileHandle.standardError.write(Data("usage: LupitaApp --render-themes <dir>\n".utf8))
+            return 1
+        }
+        try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
+        S.language = "es"
+        var entries: [[String: Any]] = []
+        var shadow = 0, text = 0, count = 0
+        func record(_ r: ThemeRender, stageHeight: CGFloat) {
+            count += 1
+            shadow += r.shadowClipPixels > 0 ? 1 : 0
+            text += (r.widthOverflow > 0.5 || r.heightOverflow > 0.5) ? 1 : 0
+            entries.append(["theme": r.theme.id, "mode": r.theme.mode.rawValue, "state": r.state.id,
+                            "tooltip": [r.box.width, r.box.height], "panel": [r.panel.width, r.panel.height],
+                            "canvas": [stageWidth, stageHeight],
+                            "shadowClipPixels": r.shadowClipPixels, "widthOverflow": r.widthOverflow, "heightOverflow": r.heightOverflow])
+        }
+        for id in TooltipTheme.ids {
+            var cells: [[ThemeRender]] = []   // [state][light, dark]
+            for state in GalleryStates.all {
+                cells.append([ThemeMode.light, .dark].map { measure(TooltipTheme.load(id, mode: $0), state) })
+            }
+            for row in cells { let h = stageHeight(row); row.forEach { record($0, stageHeight: h) } }
+            let name = TooltipTheme.names.first { $0.id == id }?.name ?? id
+            write(SheetView(title: name, rows: cells), to: dir + "/theme-\(id).png")
+            print("theme-\(id).png")
+        }
+        for stateID in ["definition", "stress"] {
+            guard let state = GalleryStates.all.first(where: { $0.id == stateID }) else { continue }
+            let rows = TooltipTheme.ids.map { id in [ThemeMode.light, .dark].map { measure(TooltipTheme.load(id, mode: $0), state) } }
+            write(SheetView(title: "Todos los temas · \(state.label)", rows: rows, labelsAreThemes: true), to: dir + "/compare-\(stateID).png")
+            print("compare-\(stateID).png")
+        }
+        let report: [String: Any] = ["renders": count, "shadowClipViolations": shadow, "textClipViolations": text,
+                                     "note": "shadowClipPixels: non-transparent pixels on the edge of the panel (tooltip + shadow insets) drawn over nothing; widthOverflow/heightOverflow: points the content's ideal size exceeds the frame it was given.",
+                                     "results": entries]
+        if let json = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted, .sortedKeys]) {
+            try? json.write(to: URL(fileURLWithPath: dir + "/render-report.json"))
+        }
+        print("renders: \(count) · shadow violations: \(shadow) · text violations: \(text)")
+        return shadow + text == 0 ? 0 : 3
+    }
+
+    static func stageHeight(_ pair: [ThemeRender]) -> CGFloat {
+        max(120, (pair.map { $0.box.height }.max() ?? 0) + stagePad * 2)
+    }
+
+    private static func write<V: View>(_ view: V, to path: String) {
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 2
+        guard let image = renderer.cgImage,
+              let png = NSBitmapImageRep(cgImage: image).representation(using: .png, properties: [:]) else { return }
+        try? png.write(to: URL(fileURLWithPath: path))
+    }
+}
+
+/// The contact sheet: light and dark columns, one row per state (or per theme), each tooltip over the prototype's faux backdrop.
+private struct SheetView: View {
+    let title: String
+    let rows: [[ThemeRender]]
+    var labelsAreThemes = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text(title).font(.system(size: 26, weight: .semibold))
+            Text("Dibujado con TooltipView y NoticeView reales · tamaño M · densidad normal").font(.system(size: 13)).foregroundStyle(Color(white: 0.45))
+            HStack(spacing: 20) {
+                Color.clear.frame(width: 150, height: 1)
+                ForEach(["Claro", "Oscuro"], id: \.self) { Text($0).font(.system(size: 13, weight: .semibold)).frame(width: ThemeGallery.stageWidth, alignment: .leading) }
+            }
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, pair in
+                let height = ThemeGallery.stageHeight(pair)
+                HStack(alignment: .top, spacing: 20) {
+                    Text(labelsAreThemes ? pair[0].theme.name : pair[0].state.label)
+                        .font(.system(size: 13, weight: .medium)).frame(width: 150, alignment: .leading)
+                    ForEach(Array(pair.enumerated()), id: \.offset) { _, r in Stage(render: r, height: height) }
+                }
+            }
+        }
+        .padding(32)
+        .background(Color(white: 0.97))
+        .environment(\.colorScheme, .light)
+    }
+}
+
+/// Faux text lines and a colour band behind the tooltip, as in the prototype, so a material can be seen working.
+private struct Stage: View {
+    let render: ThemeRender
+    let height: CGFloat
+    static let lines: [CGFloat] = [92, 78, 86, 64, 90, 70, 84, 58, 94, 76, 88, 66, 80, 72, 90, 60]
+
+    var body: some View {
+        let dark = render.theme.mode == .dark
+        let w = ThemeGallery.stageWidth
+        ZStack(alignment: .topLeading) {
+            Color(red: dark ? 0.11 : 0.949, green: dark ? 0.11 : 0.949, blue: dark ? 0.118 : 0.957)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(Self.lines.enumerated()), id: \.offset) { i, pct in
+                    if i > 0 { Spacer(minLength: 0) }
+                    RoundedRectangle(cornerRadius: 4).fill(dark ? Color(white: 0.33) : Color(white: 0.77))
+                        .frame(width: (w - 40) * pct / 100, height: 7)
+                }
+            }
+            .padding(.horizontal, 20).padding(.vertical, 14)
+            LinearGradient(colors: [Color(red: 0.9, green: 0.28, blue: 0.3), Color(red: 0.96, green: 0.65, blue: 0.14), Color(red: 0.24, green: 0.39, blue: 0.87)],
+                           startPoint: .leading, endPoint: .trailing)
+                .opacity(0.85).frame(width: w, height: height * 0.26).offset(y: height * 0.34)
+            render.state.view(render.theme)
+                .padding(render.insets)
+                .padding(.leading, ThemeGallery.stagePad - render.insets.leading)
+                .padding(.top, ThemeGallery.stagePad - render.insets.top)
+        }
+        .frame(width: w, height: height, alignment: .topLeading)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(dark ? Color(white: 0.23) : Color(white: 0.85)))
+        .environment(\.colorScheme, dark ? .dark : .light)
+    }
 }

@@ -6,6 +6,12 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-tooltips") {
     exit(code)
 }
 
+// Development aid: every theme × light/dark × the ten states of the design system, drawn with the real views.
+if let i = CommandLine.arguments.firstIndex(of: "--render-themes") {
+    let code = MainActor.assumeIsolated { ThemeGallery.run(Array(CommandLine.arguments.dropFirst(i + 1))) }
+    exit(code)
+}
+
 // Development aid: the contact sheet of the git vocabulary cards and the menu switch (D42).
 if let i = CommandLine.arguments.firstIndex(of: "--render-vocabulary") {
     let code = MainActor.assumeIsolated { TooltipGallery.runVocabulary(CommandLine.arguments.dropFirst(i + 1).first) }

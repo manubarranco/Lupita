@@ -1,0 +1,2808 @@
+{
+  "note" : "shadowClipPixels: non-transparent pixels on the edge of the panel (tooltip + shadow insets) drawn over nothing; widthOverflow\/heightOverflow: points the content's ideal size exceeds the frame it was given.",
+  "renders" : 140,
+  "results" : [
+    {
+      "canvas" : [
+        560,
+        302
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        374
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        246
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        302
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        374
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        246
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        196
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        268
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        140
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        196
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        268
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        140
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        152
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        224
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        96
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        152
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        224
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        96
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        193
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        265
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        137
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        193
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        265
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        137
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        268
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        340
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        212
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        268
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        340
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        212
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        224
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        296
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        168
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        224
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        296
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        168
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        197
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        269
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        141
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        197
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        269
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        141
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        172
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        244
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        116
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        172
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        244
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        116
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        453,
+        163
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "cristal",
+      "tooltip" : [
+        325,
+        35
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        453,
+        163
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "cristal",
+      "tooltip" : [
+        325,
+        35
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        350
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        568,
+        422
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        294
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        350
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        568,
+        422
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "cristal",
+      "tooltip" : [
+        440,
+        294
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        295
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        279
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        239
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        295
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        279
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        239
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        175
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        159
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        119
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        175
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        159
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        119
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        150
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        134
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        94
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        150
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        134
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        94
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        189
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        173
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        133
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        189
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        173
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        133
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        263
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        247
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        263
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        247
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        221
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        205
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        165
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        221
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        205
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        165
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        195
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        179
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        139
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        195
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        179
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        139
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        170
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        154
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        114
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        170
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        154
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        114
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        334,
+        75
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "papel",
+      "tooltip" : [
+        294,
+        35
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        334,
+        75
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "papel",
+      "tooltip" : [
+        294,
+        35
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        323
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        480,
+        307
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        267
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        323
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        480,
+        307
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "papel",
+      "tooltip" : [
+        440,
+        267
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        272
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        216
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        216
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        272
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        216
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        216
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        179
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        123
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        123
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        179
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        123
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        123
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        135
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        79
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        79
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        135
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        79
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        79
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        172
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        116
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        116
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        172
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        116
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        116
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        237
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        181
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        181
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        237
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        181
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        181
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        202
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        146
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        146
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        202
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        146
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        146
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        176
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        120
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        120
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        176
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        120
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        120
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        176
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        120
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        120
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        176
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        120
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        120
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        373,
+        27
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "terminal",
+      "tooltip" : [
+        373,
+        27
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        373,
+        27
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "terminal",
+      "tooltip" : [
+        373,
+        27
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        336
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        280
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        280
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        336
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        280
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "terminal",
+      "tooltip" : [
+        440,
+        280
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        294
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        302
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        238
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        294
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        302
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        238
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        174
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        182
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        118
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        174
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        182
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        118
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        147
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        155
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        91
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        147
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        155
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        91
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        187
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        195
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        131
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        187
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        195
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        131
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        263
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        271
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        263
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        271
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        215
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        223
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        159
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        215
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        223
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        159
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        193
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        201
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        137
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        193
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        201
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        137
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        168
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        176
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        112
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        168
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        176
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        112
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        368,
+        100
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "neon",
+      "tooltip" : [
+        304,
+        36
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        368,
+        100
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "neon",
+      "tooltip" : [
+        304,
+        36
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        340
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        504,
+        348
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        284
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        340
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        504,
+        348
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "neon",
+      "tooltip" : [
+        440,
+        284
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        278
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        227
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        222
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        278
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        227
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        222
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        185
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        134
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        129
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        185
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        134
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        129
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        141
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        90
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        85
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        141
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        90
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        85
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        177
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        126
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        121
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        177
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        126
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        121
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        248
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        197
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        192
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        248
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        197
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        192
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        214
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        163
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        158
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        214
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        163
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        158
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        184
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        133
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        128
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        184
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        133
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        128
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        160
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        109
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        104
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        160
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        109
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        104
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        319,
+        36
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "brutalista",
+      "tooltip" : [
+        314,
+        31
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        319,
+        36
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "brutalista",
+      "tooltip" : [
+        314,
+        31
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        332
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        445,
+        281
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        276
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        332
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        445,
+        281
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "brutalista",
+      "tooltip" : [
+        440,
+        276
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        290
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        239
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        234
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        290
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        239
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        234
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        173
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        122
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        117
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        173
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        122
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        117
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        148
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        97
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        92
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        148
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        97
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        92
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        185
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        134
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        129
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        185
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        134
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        129
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        261
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        210
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        205
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        261
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        210
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        205
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        214
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        163
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        158
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        214
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        163
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        158
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        193
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        142
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        137
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        193
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        142
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        137
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        168
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        117
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        112
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        168
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        117
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        112
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        317,
+        40
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "ficha",
+      "tooltip" : [
+        317,
+        35
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        317,
+        40
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "ficha",
+      "tooltip" : [
+        317,
+        35
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        335
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        440,
+        284
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        279
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        335
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        440,
+        284
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "ficha",
+      "tooltip" : [
+        440,
+        279
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        263
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        211
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        263
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        211
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "definition",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        207
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        153
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        101
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        97
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        153
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        101
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "term",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        97
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        131
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        79
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        75
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        131
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        79
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "symbol",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        75
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        168
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        116
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        112
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        168
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        116
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "suggestion",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        112
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        232
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        180
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        176
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        232
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        180
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "ambiguous",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        176
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        191
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        139
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        135
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        191
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        139
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "range",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        135
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        173
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        121
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        117
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        173
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        121
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "color",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        117
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        169
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        117
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        113
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        169
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        117
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "otherRepo",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        113
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        289,
+        34
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "blueprint",
+      "tooltip" : [
+        285,
+        30
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        120
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        289,
+        34
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "notice",
+      "theme" : "blueprint",
+      "tooltip" : [
+        285,
+        30
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        291
+      ],
+      "heightOverflow" : 0,
+      "mode" : "light",
+      "panel" : [
+        444,
+        239
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        235
+      ],
+      "widthOverflow" : 0
+    },
+    {
+      "canvas" : [
+        560,
+        291
+      ],
+      "heightOverflow" : 0,
+      "mode" : "dark",
+      "panel" : [
+        444,
+        239
+      ],
+      "shadowClipPixels" : 0,
+      "state" : "stress",
+      "theme" : "blueprint",
+      "tooltip" : [
+        440,
+        235
+      ],
+      "widthOverflow" : 0
+    }
+  ],
+  "shadowClipViolations" : 0,
+  "textClipViolations" : 0
+}
