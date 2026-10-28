@@ -2,7 +2,7 @@ import AppKit
 import LupitaCore
 import SwiftUI
 
-/// «Aspecto» (D55): a carousel of the themes over a fixed faux page, and under it the reader's other settings. One slide per
+/// «Aspecto» (D55): a carousel of the themes, and under it the reader's other settings. One slide per
 /// theme, each with its name and a representative card drawn at the chosen size and density; moving to a slide chooses
 /// that theme. Every control goes through `AppearanceModel`, which saves it; the real tooltip reads it when it opens.
 struct AspectoView: View {
@@ -17,11 +17,11 @@ struct AspectoView: View {
     private var drag: CGFloat { get { dragState.wrappedValue } nonmutating set { dragState.wrappedValue = newValue } }
 
     static let stageWidth: CGFloat = 700
-    static let stageHeight: CGFloat = 470
+    static let stageHeight: CGFloat = 410
     static let stagePad: CGFloat = 28
     static let contentWidth: CGFloat = 740
     /// The window never changes size: stage, dots, the theme's blurb (two lines) and three controls.
-    static let contentHeight: CGFloat = 702
+    static let contentHeight: CGFloat = 640
     private static let ids = TooltipTheme.ids
 
     var systemAccessibility: ThemeAccessibility {
@@ -35,7 +35,6 @@ struct AspectoView: View {
         p.themeID = id
         return p.theme(systemIsDark: colorScheme == .dark, accessibility: systemAccessibility)
     }
-    var sampleIsDark: Bool { theme(model.preferences.themeID).mode == .dark }
     var state: GalleryState { GalleryStates.all.first { $0.id == model.state } ?? GalleryStates.all[0] }
 
     var body: some View {
@@ -91,7 +90,6 @@ struct AspectoView: View {
 
     private var stage: some View {
         ZStack {
-            FauxPage(dark: sampleIsDark)   // the page stays still; only the slides move
             HStack(spacing: 0) {
                 ForEach(Array(Self.ids.enumerated()), id: \.element) { _, id in
                     AspectoSlide(theme: theme(id), state: state).frame(width: Self.stageWidth, height: Self.stageHeight)
@@ -103,9 +101,8 @@ struct AspectoView: View {
             arrow("chevron.right", S.appearanceNext, enabled: index < Self.ids.count - 1, alignment: .trailing) { go(to: index + 1) }
         }
         .frame(width: Self.stageWidth, height: Self.stageHeight)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay { RoundedRectangle(cornerRadius: 10).strokeBorder(sampleIsDark ? Color(white: 0.23) : Color(white: 0.85)) }
-        .environment(\.colorScheme, sampleIsDark ? .dark : .light)
+        .clipped()
+        .contentShape(Rectangle())
         .gesture(DragGesture(minimumDistance: 6)
             .onChanged { drag = $0.translation.width }
             .onEnded { finish($0.translation.width) })
@@ -164,9 +161,7 @@ private struct AspectoSlide: View {
         let fit = natural.height > 0 ? min(1, (AspectoView.stageHeight - 24) / natural.height) : 1
         VStack(spacing: 16) {
             Text(theme.name).font(.title2.weight(.semibold)).foregroundStyle(.primary)
-                .padding(.horizontal, 16).padding(.vertical, 6)
-                .background(.regularMaterial, in: Capsule()).overlay(Capsule().strokeBorder(.separator))
-            state.view(theme)
+            state.view(theme).environment(\.colorScheme, theme.mode == .dark ? .dark : .light)
         }
         .background(GeometryReader { geo in Color.clear.onAppear { natural = geo.size }.onChange(of: geo.size) { _, s in natural = s } })
         .scaleEffect(fit)
@@ -311,6 +306,7 @@ final class AspectoWindow {
             w.title = S.appearanceTitle
             w.styleMask = [.titled, .closable]
             w.isReleasedWhenClosed = false
+            w.setContentSize(NSSize(width: AspectoView.contentWidth, height: AspectoView.contentHeight))   // before centring: the hosting view sizes itself later
             w.center()
             window = w
         }
