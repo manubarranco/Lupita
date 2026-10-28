@@ -32,7 +32,7 @@ A theme file is `{ id, name, blurb, axes, overrides: { primitive, semantic } }`,
 | **space** | `space.*` | `space.*`, `size.*` (width, swatch) |
 | **shadow** | `shadow.*` | `shadow.*` |
 
-[sheets/independence.png](sheets/independence.png) shows Lupita next to five variants that each change **one** group; `check-independence.mjs` proves the diff stays inside that group.
+[sheets/independence.png](sheets/independence.png) shows Cristal next to five variants that each change **one** group; `check-independence.mjs` proves the diff stays inside that group.
 
 ## Text hierarchy (fixed; a theme changes the look, not the order)
 
@@ -77,7 +77,7 @@ Each role carries `family, size, weight, italic, lineHeight, tracking, color`.
 2. Change only what is yours: `fonts` (by role), `type` (weights, colours, tracking; never sizes), `color` (pairs `[light, dark]`), `radius`/`border`, `space`/`size`, `shadows`/`shadow`.
 3. `node scripts/design-system/make-themes.mjs` writes `themes/<id>.json`.
 4. `node scripts/design-system/run-all.mjs` until it says `ALL GREEN`.
-5. `node scripts/design-system/render-sheets.mjs --themes <id>` and look at `sheets/theme-<id>.png` next to Lupita before keeping it.
+5. `node scripts/design-system/render-sheets.mjs --themes <id>` and look at `sheets/theme-<id>.png` next to Cristal before keeping it.
    Playwright is not in the repo. On Manu's Mac it lives in `~/.local/share/lupita-tools`: run with `NODE_PATH=~/.local/share/lupita-tools/node_modules`.
 
 ## Mapping to SwiftUI (for the port)
