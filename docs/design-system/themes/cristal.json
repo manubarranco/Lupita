@@ -1,0 +1,212 @@
+{
+  "id": "cristal",
+  "name": "Cristal",
+  "blurb": "Vidrio esmerilado: fondo translúcido con desenfoque fuerte, esquinas de 20 pt, borde de luz y una sombra profunda y difusa.",
+  "axes": [
+    "type",
+    "color",
+    "shape",
+    "space",
+    "shadow"
+  ],
+  "overrides": {
+    "primitive": {
+      "palette": {
+        "cristal-surface-light": "#FFFFFFDB",
+        "cristal-surface-dark": "#141A2CC8",
+        "cristal-notice-surface-light": "#FFFFFFDB",
+        "cristal-notice-surface-dark": "#141A2CC8",
+        "cristal-border-light": "#FFFFFFE6",
+        "cristal-border-dark": "#FFFFFF3D",
+        "cristal-text-primary-light": "#0B1B2E",
+        "cristal-text-primary-dark": "#F5F8FF",
+        "cristal-text-secondary-light": "#2F4259",
+        "cristal-text-secondary-dark": "#CBD6EC",
+        "cristal-text-accent-light": "#0A3FA8",
+        "cristal-text-accent-dark": "#9EC1FF",
+        "cristal-badge-bg-light": "#0A3FA81A",
+        "cristal-badge-bg-dark": "#9EC1FF29",
+        "cristal-badge-fg-light": "#082F7C",
+        "cristal-badge-fg-dark": "#D6E6FF",
+        "cristal-origin-bg-light": "#FF8A3D33",
+        "cristal-origin-bg-dark": "#FF9F4A33",
+        "cristal-origin-fg-light": "#552200",
+        "cristal-origin-fg-dark": "#FFD9B8",
+        "cristal-swatch-border-light": "#0B1B2E66",
+        "cristal-swatch-border-dark": "#FFFFFF80",
+        "cristal-row-hover-light": "#0A3FA81A",
+        "cristal-row-hover-dark": "#9EC1FF24",
+        "cristal-shadow-light": "#1B2A4A40",
+        "cristal-shadow-dark": "#00000080",
+        "cristal-shadow-edge-light": "#1B2A4A1A",
+        "cristal-shadow-edge-dark": "#00000040"
+      },
+      "shadow": {
+        "deep": [
+          {
+            "x": 0,
+            "y": 28,
+            "blur": 64,
+            "spread": -8,
+            "color": "{color.shadow}"
+          },
+          {
+            "x": 0,
+            "y": 2,
+            "blur": 6,
+            "spread": 0,
+            "color": "{color.shadow-edge}"
+          }
+        ]
+      }
+    },
+    "semantic": {
+      "text": {
+        "title": {
+          "size": "{font.size.xl}",
+          "tracking": 0.1,
+          "lineHeight": 1.25
+        },
+        "description": {
+          "size": "{font.size.lg}",
+          "lineHeight": 1.25
+        },
+        "repo": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "location": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "badge": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "eyebrow": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.medium}",
+          "lineHeight": 1.25
+        },
+        "footnote": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "swatch": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "notice": {
+          "size": "{font.size.lg}",
+          "lineHeight": 1.25
+        },
+        "id": {
+          "lineHeight": 1.25
+        },
+        "placeholder": {
+          "lineHeight": 1.25
+        }
+      },
+      "color": {
+        "surface": {
+          "light": "{palette.cristal-surface-light}",
+          "dark": "{palette.cristal-surface-dark}"
+        },
+        "notice-surface": {
+          "light": "{palette.cristal-notice-surface-light}",
+          "dark": "{palette.cristal-notice-surface-dark}"
+        },
+        "border": {
+          "light": "{palette.cristal-border-light}",
+          "dark": "{palette.cristal-border-dark}"
+        },
+        "text-primary": {
+          "light": "{palette.cristal-text-primary-light}",
+          "dark": "{palette.cristal-text-primary-dark}"
+        },
+        "text-secondary": {
+          "light": "{palette.cristal-text-secondary-light}",
+          "dark": "{palette.cristal-text-secondary-dark}"
+        },
+        "text-accent": {
+          "light": "{palette.cristal-text-accent-light}",
+          "dark": "{palette.cristal-text-accent-dark}"
+        },
+        "badge-bg": {
+          "light": "{palette.cristal-badge-bg-light}",
+          "dark": "{palette.cristal-badge-bg-dark}"
+        },
+        "badge-fg": {
+          "light": "{palette.cristal-badge-fg-light}",
+          "dark": "{palette.cristal-badge-fg-dark}"
+        },
+        "origin-bg": {
+          "light": "{palette.cristal-origin-bg-light}",
+          "dark": "{palette.cristal-origin-bg-dark}"
+        },
+        "origin-fg": {
+          "light": "{palette.cristal-origin-fg-light}",
+          "dark": "{palette.cristal-origin-fg-dark}"
+        },
+        "swatch-border": {
+          "light": "{palette.cristal-swatch-border-light}",
+          "dark": "{palette.cristal-swatch-border-dark}"
+        },
+        "row-hover": {
+          "light": "{palette.cristal-row-hover-light}",
+          "dark": "{palette.cristal-row-hover-dark}"
+        },
+        "shadow": {
+          "light": "{palette.cristal-shadow-light}",
+          "dark": "{palette.cristal-shadow-dark}"
+        },
+        "shadow-edge": {
+          "light": "{palette.cristal-shadow-edge-light}",
+          "dark": "{palette.cristal-shadow-edge-dark}"
+        },
+        "surface-blur": {
+          "light": 40,
+          "dark": 40
+        },
+        "suggestion-opacity": {
+          "light": 0.72,
+          "dark": 0.72
+        }
+      },
+      "shadow": {
+        "container": "{shadow.deep}",
+        "notice": "{shadow.deep}"
+      },
+      "radius": {
+        "container": "{radius.2xl}",
+        "notice": "{radius.xl}",
+        "swatch": "{radius.lg}",
+        "badge": "{radius.pill}"
+      },
+      "border": {
+        "container": 1,
+        "swatch": 1,
+        "notice": 1
+      },
+      "space": {
+        "padding": "{space.18}",
+        "block-gap": "{space.12}",
+        "range-gap": "{space.10}",
+        "range-line-gap": "{space.6}",
+        "entry-gap": "{space.10}",
+        "inline-gap": "{space.8}",
+        "row-gap": "{space.5}",
+        "name-gap": "{space.3}",
+        "swatch-gap": "{space.12}",
+        "swatch-inner-gap": "{space.6}",
+        "badge-x": "{space.8}",
+        "badge-y": "{space.2}",
+        "notice-x": "{space.16}",
+        "notice-y": "{space.10}"
+      },
+      "size": {
+        "width": 460
+      }
+    }
+  }
+}

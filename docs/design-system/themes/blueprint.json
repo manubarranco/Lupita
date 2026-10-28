@@ -1,0 +1,209 @@
+{
+  "id": "blueprint",
+  "name": "Blueprint",
+  "blurb": "Plano técnico: azul de cianotipia, línea fina, identificadores y rutas en monoespaciada y una sombra de dibujo desplazada. En claro, papel de delineante.",
+  "axes": [
+    "type",
+    "color",
+    "shape",
+    "space",
+    "shadow"
+  ],
+  "overrides": {
+    "primitive": {
+      "palette": {
+        "blueprint-surface-light": "#F2F7FFF7",
+        "blueprint-surface-dark": "#0B2A5BF5",
+        "blueprint-notice-surface-light": "#F2F7FFF7",
+        "blueprint-notice-surface-dark": "#0B2A5BF5",
+        "blueprint-border-light": "#0B2A5BCC",
+        "blueprint-border-dark": "#7CB4FFB3",
+        "blueprint-text-primary-light": "#0B2A5B",
+        "blueprint-text-primary-dark": "#EAF3FF",
+        "blueprint-text-secondary-light": "#33548C",
+        "blueprint-text-secondary-dark": "#B2CDF5",
+        "blueprint-text-accent-light": "#0A55C8",
+        "blueprint-text-accent-dark": "#7CE0FF",
+        "blueprint-badge-bg-light": "#0A55C81F",
+        "blueprint-badge-bg-dark": "#7CE0FF26",
+        "blueprint-badge-fg-light": "#08408F",
+        "blueprint-badge-fg-dark": "#C9F2FF",
+        "blueprint-origin-bg-light": "#E0A60033",
+        "blueprint-origin-bg-dark": "#FFC64D33",
+        "blueprint-origin-fg-light": "#4D3600",
+        "blueprint-origin-fg-dark": "#FFE6A8",
+        "blueprint-swatch-border-light": "#0B2A5B99",
+        "blueprint-swatch-border-dark": "#7CB4FF99",
+        "blueprint-row-hover-light": "#0A55C814",
+        "blueprint-row-hover-dark": "#7CE0FF1F",
+        "blueprint-shadow-light": "#0B2A5B38",
+        "blueprint-shadow-dark": "#00000066",
+        "blueprint-shadow-edge-light": "#0B2A5B1A",
+        "blueprint-shadow-edge-dark": "#7CB4FF33"
+      },
+      "shadow": {
+        "offset": [
+          {
+            "x": 4,
+            "y": 4,
+            "blur": 0,
+            "spread": 0,
+            "color": "{color.shadow}"
+          }
+        ]
+      }
+    },
+    "semantic": {
+      "text": {
+        "title": {
+          "weight": "{font.weight.semibold}",
+          "lineHeight": 1.25
+        },
+        "id": {
+          "color": "{color.text-accent}",
+          "lineHeight": 1.25
+        },
+        "repo": {
+          "family": "{font.family.mono}",
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "location": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "badge": {
+          "family": "{font.family.mono}",
+          "size": "{font.size.sm}",
+          "tracking": 0.4,
+          "lineHeight": 1.25
+        },
+        "eyebrow": {
+          "family": "{font.family.mono}",
+          "size": "{font.size.sm}",
+          "tracking": 0.5,
+          "lineHeight": 1.25
+        },
+        "footnote": {
+          "family": "{font.family.mono}",
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "swatch": {
+          "size": "{font.size.sm}",
+          "lineHeight": 1.25
+        },
+        "notice": {
+          "family": "{font.family.mono}",
+          "lineHeight": 1.25
+        },
+        "description": {
+          "lineHeight": 1.25
+        },
+        "placeholder": {
+          "lineHeight": 1.25
+        }
+      },
+      "color": {
+        "surface": {
+          "light": "{palette.blueprint-surface-light}",
+          "dark": "{palette.blueprint-surface-dark}"
+        },
+        "notice-surface": {
+          "light": "{palette.blueprint-notice-surface-light}",
+          "dark": "{palette.blueprint-notice-surface-dark}"
+        },
+        "border": {
+          "light": "{palette.blueprint-border-light}",
+          "dark": "{palette.blueprint-border-dark}"
+        },
+        "text-primary": {
+          "light": "{palette.blueprint-text-primary-light}",
+          "dark": "{palette.blueprint-text-primary-dark}"
+        },
+        "text-secondary": {
+          "light": "{palette.blueprint-text-secondary-light}",
+          "dark": "{palette.blueprint-text-secondary-dark}"
+        },
+        "text-accent": {
+          "light": "{palette.blueprint-text-accent-light}",
+          "dark": "{palette.blueprint-text-accent-dark}"
+        },
+        "badge-bg": {
+          "light": "{palette.blueprint-badge-bg-light}",
+          "dark": "{palette.blueprint-badge-bg-dark}"
+        },
+        "badge-fg": {
+          "light": "{palette.blueprint-badge-fg-light}",
+          "dark": "{palette.blueprint-badge-fg-dark}"
+        },
+        "origin-bg": {
+          "light": "{palette.blueprint-origin-bg-light}",
+          "dark": "{palette.blueprint-origin-bg-dark}"
+        },
+        "origin-fg": {
+          "light": "{palette.blueprint-origin-fg-light}",
+          "dark": "{palette.blueprint-origin-fg-dark}"
+        },
+        "swatch-border": {
+          "light": "{palette.blueprint-swatch-border-light}",
+          "dark": "{palette.blueprint-swatch-border-dark}"
+        },
+        "row-hover": {
+          "light": "{palette.blueprint-row-hover-light}",
+          "dark": "{palette.blueprint-row-hover-dark}"
+        },
+        "shadow": {
+          "light": "{palette.blueprint-shadow-light}",
+          "dark": "{palette.blueprint-shadow-dark}"
+        },
+        "shadow-edge": {
+          "light": "{palette.blueprint-shadow-edge-light}",
+          "dark": "{palette.blueprint-shadow-edge-dark}"
+        },
+        "surface-blur": {
+          "light": 0,
+          "dark": 0
+        },
+        "suggestion-opacity": {
+          "light": 0.72,
+          "dark": 0.72
+        }
+      },
+      "shadow": {
+        "container": "{shadow.offset}",
+        "notice": "{shadow.offset}"
+      },
+      "radius": {
+        "container": "{radius.xs}",
+        "notice": "{radius.xs}",
+        "swatch": "{radius.none}",
+        "badge": "{radius.xs}"
+      },
+      "border": {
+        "container": 1,
+        "swatch": 1,
+        "notice": 1
+      },
+      "space": {
+        "padding": "{space.12}",
+        "block-gap": "{space.10}",
+        "range-gap": "{space.8}",
+        "range-line-gap": "{space.4}",
+        "entry-gap": "{space.8}",
+        "inline-gap": "{space.8}",
+        "row-gap": "{space.4}",
+        "name-gap": "{space.2}",
+        "swatch-gap": "{space.10}",
+        "swatch-inner-gap": "{space.6}",
+        "badge-x": "{space.6}",
+        "badge-y": "{space.1}",
+        "notice-x": "{space.12}",
+        "notice-y": "{space.8}"
+      },
+      "size": {
+        "width": 440
+      }
+    }
+  }
+}

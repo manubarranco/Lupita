@@ -1,0 +1,23 @@
+{
+  "id": "ind-shape",
+  "name": "Solo forma",
+  "blurb": "Lupita con esquinas de 20 pt, cápsulas más cuadradas y borde de 2 pt. Mismo color, letra y espacios.",
+  "axes": [
+    "shape"
+  ],
+  "overrides": {
+    "semantic": {
+      "radius": {
+        "container": "{radius.2xl}",
+        "notice": "{radius.xl}",
+        "swatch": "{radius.lg}",
+        "badge": "{radius.sm}"
+      },
+      "border": {
+        "container": 2,
+        "swatch": 2,
+        "notice": 2
+      }
+    }
+  }
+}

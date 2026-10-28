@@ -1,0 +1,31 @@
+{
+  "id": "ind-space",
+  "name": "Solo espacio",
+  "blurb": "Lupita con más aire y más ancho. Mismo color, letra y formas.",
+  "axes": [
+    "space"
+  ],
+  "overrides": {
+    "semantic": {
+      "space": {
+        "padding": "{space.20}",
+        "block-gap": "{space.14}",
+        "range-gap": "{space.12}",
+        "range-line-gap": "{space.8}",
+        "entry-gap": "{space.12}",
+        "inline-gap": "{space.8}",
+        "row-gap": "{space.6}",
+        "name-gap": "{space.3}",
+        "swatch-gap": "{space.12}",
+        "swatch-inner-gap": "{space.6}",
+        "badge-x": "{space.7}",
+        "badge-y": "{space.2}",
+        "notice-x": "{space.16}",
+        "notice-y": "{space.10}"
+      },
+      "size": {
+        "width": 500
+      }
+    }
+  }
+}

@@ -1,0 +1,338 @@
+// Authoring aid: compact theme definitions → docs/design-system/themes/*.json and variants/*.json.
+// The JSON files are the artefact (and what the port reads); this script only saves typing palette pairs
+// and refs. Re-run it after editing a definition: `node scripts/design-system/make-themes.mjs`.
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
+import { DS } from './lib.mjs'
+
+const base = JSON.parse(readFileSync(`${DS}/tokens.json`, 'utf8'))
+const ROLES = Object.keys(base.semantic.text)
+
+/** One theme definition → theme document. Every colour is a [light, dark] pair; each pair becomes two palette entries. */
+function build(def) {
+  const overrides = { primitive: {}, semantic: {} }
+  const set = (layer, path, value) => {
+    const keys = path.split('.')
+    let node = overrides[layer]
+    for (const k of keys.slice(0, -1)) node = node[k] ??= {}
+    node[keys.at(-1)] = value
+  }
+
+  // type: families/sizes/weights overrides per role, only the fields that differ from the default
+  for (const [role, fields] of Object.entries(def.type ?? {})) {
+    if (!ROLES.includes(role)) throw new Error(`${def.id}: unknown text role ${role}`)
+    const d = base.semantic.text[role]
+    const out = {}
+    if (fields.family) out.family = `{font.family.${fields.family}}`
+    if (fields.size) out.size = `{font.size.${fields.size}}`
+    if (fields.weight) out.weight = `{font.weight.${fields.weight}}`
+    if (fields.color) out.color = `{color.${fields.color}}`
+    for (const k of ['italic', 'lineHeight', 'tracking']) if (k in fields) out[k] = fields[k]
+    for (const [k, v] of Object.entries(out)) if (JSON.stringify(d[k]) !== JSON.stringify(v)) set('semantic', `text.${role}.${k}`, v)
+  }
+  if (def.lineHeight) for (const role of ROLES) if (!(def.type?.[role] && 'lineHeight' in def.type[role])) set('semantic', `text.${role}.lineHeight`, def.lineHeight)
+  if (def.tracking) for (const role of ROLES) if (!(def.type?.[role] && 'tracking' in def.type[role])) set('semantic', `text.${role}.tracking`, def.tracking)
+
+  // colour: [light, dark] hex pairs, or [light, dark] numbers for blur / opacity
+  for (const [name, pair] of Object.entries(def.color ?? {})) {
+    if (typeof pair[0] === 'number') { set('semantic', `color.${name}`, { light: pair[0], dark: pair[1] }); continue }
+    const key = `${def.id}-${name}`
+    set('primitive', `palette.${key}-light`, pair[0])
+    set('primitive', `palette.${key}-dark`, pair[1])
+    set('semantic', `color.${name}`, { light: `{palette.${key}-light}`, dark: `{palette.${key}-dark}` })
+  }
+  for (const [name, layers] of Object.entries(def.shadows ?? {})) set('primitive', `shadow.${name}`, layers)
+  for (const [role, v] of Object.entries(def.shadow ?? {})) set('semantic', `shadow.${role}`, `{shadow.${v}}`)
+  for (const [role, v] of Object.entries(def.radius ?? {})) set('semantic', `radius.${role}`, `{radius.${v}}`)
+  for (const [role, v] of Object.entries(def.border ?? {})) set('semantic', `border.${role}`, v)
+  for (const [role, v] of Object.entries(def.space ?? {})) set('semantic', `space.${role}`, `{space.${v}}`)
+  for (const [role, v] of Object.entries(def.size ?? {})) set('semantic', `size.${role}`, v)
+
+  if (!Object.keys(overrides.primitive).length) delete overrides.primitive
+  if (!Object.keys(overrides.semantic).length) delete overrides.semantic
+  const doc = { id: def.id, name: def.name, blurb: def.blurb, axes: def.axes }
+  if (def.aaa) doc.aaa = true
+  if (def.notes) doc.notes = def.notes
+  doc.overrides = overrides
+  return doc
+}
+
+const ALL = ['type', 'color', 'shape', 'space', 'shadow']
+const sans = (o) => o
+const themes = []
+const variants = []
+
+// ── 2. Papel ─ editorial serif, warm paper, soft shadow ────────────────────────
+themes.push({
+  id: 'papel', name: 'Papel', axes: ALL,
+  blurb: 'Serif editorial sobre papel cálido: el título se lee como un titular, el resto baja en silencio. Esquinas casi rectas y una sombra de hoja sobre la mesa.',
+  type: {
+    title: { family: 'serif', size: 'xl', weight: 'medium' },
+    id: { family: 'mono', size: 'sm', weight: 'semibold', color: 'text-accent' },
+    description: { family: 'serif', size: 'lg', color: 'text-secondary' },
+    placeholder: { family: 'serif', size: 'lg' },
+    repo: { family: 'sans', size: 'sm', weight: 'semibold', tracking: 0.3 },
+    location: { size: 'sm' }, eyebrow: { family: 'serif', size: 'sm', italic: true }, footnote: { family: 'serif', size: 'sm', italic: true },
+    badge: { size: 'sm', weight: 'semibold', tracking: 0.3 }, swatch: { size: 'sm' }, notice: { family: 'serif', size: 'lg' },
+  },
+  lineHeight: 1.3,
+  color: {
+    surface: ['#FBF6ECF7', '#2B2620F7'], 'notice-surface': ['#FBF6ECF7', '#2B2620F7'],
+    border: ['#2A241B33', '#F3E9D633'],
+    'text-primary': ['#2A241B', '#F6EEDD'], 'text-secondary': ['#645A4C', '#C9BDA8'], 'text-accent': ['#9A3B14', '#F0A27C'],
+    'badge-bg': ['#2A241B14', '#F3E9D61F'], 'badge-fg': ['#2A241B', '#F6EEDD'], 'origin-bg': ['#C98A1B33', '#E0A63A33'], 'origin-fg': ['#4F3300', '#FFE6B3'],
+    'swatch-border': ['#2A241B66', '#F3E9D666'], 'row-hover': ['#9A3B140F', '#F0A27C1A'],
+    shadow: ['#3A2A1038', '#00000099'], 'shadow-edge': ['#3A2A1014', '#00000040'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.78, 0.78],
+  },
+  shadows: { sheet: [{ x: 0, y: 1, blur: 2, spread: 0, color: '{color.shadow-edge}' }, { x: 0, y: 8, blur: 20, spread: -2, color: '{color.shadow}' }] },
+  shadow: { container: 'sheet', notice: 'sheet' },
+  radius: { container: 'sm', notice: 'sm', swatch: 'xs', badge: 'xs' },
+  border: { container: 1, swatch: 1, notice: 1 },
+  space: { padding: '18', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '14', 'notice-y': '10' },
+  size: { width: 460 },
+})
+
+// ── 3. Terminal ─ everything monospaced, square, flat ───────────────────────────
+themes.push({
+  id: 'terminal', name: 'Terminal', axes: ALL,
+  blurb: 'Todo en monoespaciada, esquinas rectas y cero sombra: un panel de consola. En oscuro, fósforo verde sobre negro.',
+  type: {
+    title: { family: 'mono', size: 'lg', weight: 'semibold' },
+    id: { family: 'mono', size: 'md', weight: 'regular', color: 'text-accent' },
+    description: { family: 'mono', size: 'md' }, placeholder: { family: 'mono', size: 'lg' },
+    repo: { family: 'mono', size: 'sm', weight: 'semibold' }, location: { family: 'mono', size: 'sm' },
+    badge: { family: 'mono', size: 'sm', weight: 'semibold' }, eyebrow: { family: 'mono', size: 'sm' }, footnote: { family: 'mono', size: 'sm' },
+    swatch: { family: 'mono', size: 'sm' }, notice: { family: 'mono', size: 'md' },
+  },
+  lineHeight: 1.3,
+  color: {
+    surface: ['#F1F5EEF7', '#0B100BF7'], 'notice-surface': ['#F1F5EEF7', '#0B100BF7'],
+    border: ['#0B6B2A99', '#3DFF7A80'],
+    'text-primary': ['#0E2A12', '#D4F7CE'], 'text-secondary': ['#3B5A3E', '#86C081'], 'text-accent': ['#0B6B2A', '#3DFF7A'],
+    'badge-bg': ['#0B6B2A1F', '#3DFF7A26'], 'badge-fg': ['#0B4A1D', '#9BFFB8'], 'origin-bg': ['#B8860B33', '#FFB00033'], 'origin-fg': ['#4A3200', '#FFD27A'],
+    'swatch-border': ['#0B6B2A99', '#3DFF7A99'], 'row-hover': ['#0B6B2A1A', '#3DFF7A1F'],
+    shadow: ['#00000000', '#00000000'], 'shadow-edge': ['#00000000', '#00000000'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.7, 0.7],
+  },
+  shadow: { container: 'none', notice: 'none' },
+  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none' },
+  border: { container: 1, swatch: 1, notice: 1 },
+  space: { padding: '12', 'block-gap': '8', 'range-gap': '6', 'range-line-gap': '4', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '3', 'name-gap': '2', 'swatch-gap': '8', 'swatch-inner-gap': '6', 'badge-x': '5', 'badge-y': '1', 'notice-x': '10', 'notice-y': '6' },
+  size: { width: 480 },
+})
+
+// ── 4. Neón ─ dark-first, saturated accent, glow as shadow ─────────────────────
+themes.push({
+  id: 'neon', name: 'Neón', axes: ALL,
+  blurb: 'Pensado para oscuro: índigo profundo, acento cian y un halo en lugar de sombra. En claro pasa a lavanda con violeta eléctrico.',
+  type: {
+    title: { size: 'xl', weight: 'semibold' },
+    id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent', tracking: 0.2 },
+    description: { size: 'lg' }, placeholder: { size: 'lg' },
+    repo: { size: 'sm', weight: 'bold', tracking: 0.4 }, location: { size: 'sm' }, badge: { size: 'sm', weight: 'bold', tracking: 0.4 },
+    eyebrow: { size: 'sm', weight: 'medium', tracking: 0.3 }, footnote: { size: 'sm' }, swatch: { size: 'sm' }, notice: { size: 'lg' },
+  },
+  color: {
+    surface: ['#F7F3FFF5', '#0D0B1AF2'], 'notice-surface': ['#F7F3FFF5', '#0D0B1AF2'],
+    border: ['#5A1FD699', '#00E5FFB3'],
+    'text-primary': ['#1A0B3D', '#F4F1FF'], 'text-secondary': ['#4B3A7A', '#B9B2E0'], 'text-accent': ['#5A1FD6', '#00E5FF'],
+    'badge-bg': ['#5A1FD61F', '#00E5FF26'], 'badge-fg': ['#3A0FA0', '#9DF3FF'], 'origin-bg': ['#FF2E9333', '#FF2E9340'], 'origin-fg': ['#7A0A47', '#FFC2E3'],
+    'swatch-border': ['#5A1FD699', '#00E5FF99'], 'row-hover': ['#5A1FD614', '#00E5FF1A'],
+    shadow: ['#5A1FD655', '#00E5FF66'], 'shadow-edge': ['#5A1FD6', '#00E5FF'], 'surface-blur': [24, 24], 'suggestion-opacity': [0.7, 0.7],
+  },
+  shadows: { glow: [{ x: 0, y: 0, blur: 28, spread: 1, color: '{color.shadow}' }, { x: 0, y: 0, blur: 2, spread: 0, color: '{color.shadow-edge}' }] },
+  shadow: { container: 'glow', notice: 'glow' },
+  radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'pill' },
+  border: { container: 1, swatch: 1, notice: 1 },
+  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '7', 'badge-y': '2', 'notice-x': '14', 'notice-y': '9' },
+  size: { width: 440 },
+})
+
+// ── 5. Compacto ─ dense and quiet ───────────────────────────────────────────────
+themes.push({
+  id: 'compacto', name: 'Compacto', axes: ALL,
+  blurb: 'Lo más denso que sigue siendo legible: ancho mínimo, espacios cortos, esquinas mínimas y una sombra apenas insinuada. Para quien lo ve cien veces al día.',
+  type: {
+    title: { size: 'md', weight: 'semibold' }, id: { size: 'sm', weight: 'semibold' }, description: { size: 'md' },
+    placeholder: { size: 'md' }, repo: { size: 'xs' }, location: { size: 'xs' }, badge: { size: 'xs' }, eyebrow: { size: 'xs' },
+    footnote: { size: 'xs' }, swatch: { size: 'xs' }, notice: { size: 'md' },
+  },
+  lineHeight: 1.15,
+  color: {
+    surface: ['#F4F4F6F5', '#242426F5'], 'notice-surface': ['#F4F4F6F5', '#242426F5'],
+    border: ['#00000026', '#FFFFFF2E'],
+    'text-primary': ['#101012', '#F2F2F5'], 'text-secondary': ['#4D4D55', '#B4B4BE'], 'text-accent': ['#0050C8', '#7DB0FF'],
+    'badge-bg': ['#0000001A', '#FFFFFF1F'], 'badge-fg': ['#101012', '#F2F2F5'], 'origin-bg': ['#FF950033', '#FF9F0A33'], 'origin-fg': ['#4A2A00', '#FFD9A3'],
+    'swatch-border': ['#00000066', '#FFFFFF66'], 'row-hover': ['#0050C814', '#7DB0FF1F'],
+    shadow: ['#00000024', '#00000080'], 'shadow-edge': ['#0000001A', '#00000040'], 'surface-blur': [12, 12], 'suggestion-opacity': [0.75, 0.75],
+  },
+  shadow: { container: 'sm', notice: 'sm' },
+  radius: { container: 'xs', notice: 'xs', swatch: 'xs', badge: 'xs' },
+  border: { container: 1, swatch: 1, notice: 1 },
+  space: { padding: '8', 'block-gap': '6', 'range-gap': '5', 'range-line-gap': '3', 'entry-gap': '6', 'inline-gap': '5', 'row-gap': '2', 'name-gap': '1', 'swatch-gap': '6', 'swatch-inner-gap': '4', 'badge-x': '4', 'badge-y': '0', 'notice-x': '8', 'notice-y': '5' },
+  size: { width: 360, swatch: 16 },
+})
+
+// ── 6. Grande ─ legibility first, AAA ───────────────────────────────────────────
+themes.push({
+  id: 'grande', name: 'Grande', axes: ALL, aaa: true,
+  blurb: 'Legibilidad máxima: letra de 13 a 17 pt, contraste AAA, borde grueso, fondo sin transparencia y mucho aire. El tema que no pide esfuerzo.',
+  type: {
+    title: { size: '2xl', weight: 'semibold' }, id: { size: 'xl', weight: 'semibold' }, description: { size: 'xl', color: 'text-primary' },
+    placeholder: { size: 'xl' }, repo: { size: 'lg', weight: 'bold' }, location: { size: 'lg' }, badge: { size: 'md', weight: 'bold' },
+    eyebrow: { size: 'lg', weight: 'medium' }, footnote: { size: 'lg' }, swatch: { size: 'lg' }, notice: { size: 'xl', color: 'text-primary' },
+  },
+  lineHeight: 1.35,
+  color: {
+    surface: ['#FFFFFFFF', '#121212FF'], 'notice-surface': ['#FFFFFFFF', '#121212FF'],
+    border: ['#1A1A1A', '#FFFFFF'],
+    'text-primary': ['#000000', '#FFFFFF'], 'text-secondary': ['#2E2E2E', '#DCDCDC'], 'text-accent': ['#003A9E', '#A8C8FF'],
+    'badge-bg': ['#E3E3E3', '#333333'], 'badge-fg': ['#000000', '#FFFFFF'], 'origin-bg': ['#FFE3A3', '#6B4A00'], 'origin-fg': ['#2E1F00', '#FFF3D6'],
+    'swatch-border': ['#1A1A1A', '#FFFFFF'], 'row-hover': ['#003A9E1F', '#A8C8FF29'],
+    shadow: ['#00000040', '#00000099'], 'shadow-edge': ['#00000026', '#00000066'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.85, 0.85],
+  },
+  shadow: { container: 'md', notice: 'md' },
+  radius: { container: 'xl', notice: 'lg', swatch: 'md', badge: 'md' },
+  border: { container: 2, swatch: 2, notice: 2 },
+  space: { padding: '20', 'block-gap': '14', 'range-gap': '12', 'range-line-gap': '8', 'entry-gap': '12', 'inline-gap': '8', 'row-gap': '6', 'name-gap': '3', 'swatch-gap': '14', 'swatch-inner-gap': '8', 'badge-x': '8', 'badge-y': '3', 'notice-x': '16', 'notice-y': '12' },
+  size: { width: 520, swatch: 28 },
+})
+
+// ── 7. Brutalista ─ flat colour, thick border, hard shadow ──────────────────────
+themes.push({
+  id: 'brutalista', name: 'Brutalista', axes: ALL,
+  blurb: 'Color plano, borde de 3 pt, sombra dura sin desenfoque y ninguna esquina redondeada. Jerarquía por peso, no por gris.',
+  type: {
+    title: { size: 'xl', weight: 'bold' }, id: { family: 'mono', size: 'md', weight: 'bold', color: 'text-primary' },
+    description: { size: 'lg', weight: 'medium', color: 'text-primary' }, placeholder: { size: 'lg', weight: 'medium' },
+    repo: { size: 'sm', weight: 'bold' }, location: { size: 'sm', weight: 'medium', color: 'text-primary' }, badge: { size: 'sm', weight: 'bold' },
+    eyebrow: { size: 'sm', weight: 'bold', color: 'text-primary' }, footnote: { size: 'sm', weight: 'medium', color: 'text-primary' },
+    swatch: { size: 'sm', weight: 'medium', color: 'text-primary' }, notice: { size: 'lg', weight: 'bold', color: 'text-primary' },
+  },
+  color: {
+    surface: ['#FFF200', '#161616'], 'notice-surface': ['#FFF200', '#161616'],
+    border: ['#000000', '#FFF200'],
+    'text-primary': ['#000000', '#FFFFFF'], 'text-secondary': ['#1A1A1A', '#E8E8E8'], 'text-accent': ['#B00000', '#FFF200'],
+    'badge-bg': ['#000000', '#FFF200'], 'badge-fg': ['#FFF200', '#000000'], 'origin-bg': ['#FF4D8D', '#FF4D8D'], 'origin-fg': ['#000000', '#000000'],
+    'swatch-border': ['#000000', '#FFF200'], 'row-hover': ['#00000026', '#FFF20033'],
+    shadow: ['#000000', '#FFF200'], 'shadow-edge': ['#000000', '#FFF200'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.8, 0.8],
+  },
+  shadows: { hard: [{ x: 6, y: 6, blur: 0, spread: 0, color: '{color.shadow}' }] },
+  shadow: { container: 'hard', notice: 'hard' },
+  radius: { container: 'none', notice: 'none', swatch: 'none', badge: 'none' },
+  border: { container: 3, swatch: 2, notice: 3 },
+  space: { padding: '14', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '5', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '2', 'notice-x': '12', 'notice-y': '8' },
+  size: { width: 440 },
+})
+
+// ── 8. Cristal ─ big radius, glow edge, deep diffuse shadow ─────────────────────
+themes.push({
+  id: 'cristal', name: 'Cristal', axes: ALL,
+  blurb: 'Vidrio esmerilado: fondo translúcido con desenfoque fuerte, esquinas de 20 pt, borde de luz y una sombra profunda y difusa.',
+  type: {
+    title: { size: 'xl', weight: 'medium', tracking: 0.1 }, id: { size: 'md', weight: 'semibold' }, description: { size: 'lg' },
+    placeholder: { size: 'lg' }, repo: { size: 'sm', weight: 'semibold' }, location: { size: 'sm' }, badge: { size: 'sm', weight: 'semibold' },
+    eyebrow: { size: 'sm', weight: 'medium' }, footnote: { size: 'sm' }, swatch: { size: 'sm' }, notice: { size: 'lg' },
+  },
+  lineHeight: 1.25,
+  color: {
+    surface: ['#FFFFFFDB', '#141A2CC8'], 'notice-surface': ['#FFFFFFDB', '#141A2CC8'],
+    border: ['#FFFFFFE6', '#FFFFFF3D'],
+    'text-primary': ['#0B1B2E', '#F5F8FF'], 'text-secondary': ['#2F4259', '#CBD6EC'], 'text-accent': ['#0A3FA8', '#9EC1FF'],
+    'badge-bg': ['#0A3FA81A', '#9EC1FF29'], 'badge-fg': ['#082F7C', '#D6E6FF'], 'origin-bg': ['#FF8A3D33', '#FF9F4A33'], 'origin-fg': ['#552200', '#FFD9B8'],
+    'swatch-border': ['#0B1B2E66', '#FFFFFF80'], 'row-hover': ['#0A3FA81A', '#9EC1FF24'],
+    shadow: ['#1B2A4A40', '#00000080'], 'shadow-edge': ['#1B2A4A1A', '#00000040'], 'surface-blur': [40, 40], 'suggestion-opacity': [0.72, 0.72],
+  },
+  shadows: { deep: [{ x: 0, y: 28, blur: 64, spread: -8, color: '{color.shadow}' }, { x: 0, y: 2, blur: 6, spread: 0, color: '{color.shadow-edge}' }] },
+  shadow: { container: 'deep', notice: 'deep' },
+  radius: { container: '2xl', notice: 'xl', swatch: 'lg', badge: 'pill' },
+  border: { container: 1, swatch: 1, notice: 1 },
+  space: { padding: '18', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '2', 'notice-x': '16', 'notice-y': '10' },
+  size: { width: 460 },
+})
+
+// ── 9. Mimo ─ rounded type, pastel, pills ───────────────────────────────────────
+themes.push({
+  id: 'mimo', name: 'Mimo', axes: ALL,
+  blurb: 'Tipografía redondeada, pastel y cápsulas generosas. Amable sin ser infantil: la jerarquía sigue mandando.',
+  type: {
+    title: { family: 'rounded', size: 'xl', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
+    description: { family: 'rounded', size: 'lg' }, placeholder: { family: 'rounded', size: 'lg' },
+    repo: { family: 'rounded', size: 'sm', weight: 'bold' }, location: { size: 'sm' }, badge: { family: 'rounded', size: 'sm', weight: 'bold' },
+    eyebrow: { family: 'rounded', size: 'sm', weight: 'medium' }, footnote: { family: 'rounded', size: 'sm' }, swatch: { size: 'sm' }, notice: { family: 'rounded', size: 'lg' },
+  },
+  lineHeight: 1.3,
+  color: {
+    surface: ['#FFF5FAF7', '#2A2036F7'], 'notice-surface': ['#FFF5FAF7', '#2A2036F7'],
+    border: ['#F2A9D2', '#7A5AA0'],
+    'text-primary': ['#3B2A4D', '#FDEBFF'], 'text-secondary': ['#65547A', '#D5C3E4'], 'text-accent': ['#B01E7E', '#FF8AD4'],
+    'badge-bg': ['#FFD1E8', '#5A3A7A'], 'badge-fg': ['#5A1040', '#FFE6F6'], 'origin-bg': ['#CDEBFF', '#2D5C7A'], 'origin-fg': ['#0B3B5C', '#E6F6FF'],
+    'swatch-border': ['#B01E7E99', '#FF8AD499'], 'row-hover': ['#FFD1E899', '#5A3A7A99'],
+    shadow: ['#B01E7E2E', '#00000099'], 'shadow-edge': ['#B01E7E14', '#00000040'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
+  },
+  shadows: { pop: [{ x: 0, y: 6, blur: 0, spread: 0, color: '{color.shadow-edge}' }, { x: 0, y: 14, blur: 28, spread: 0, color: '{color.shadow}' }] },
+  shadow: { container: 'pop', notice: 'pop' },
+  radius: { container: '2xl', notice: 'xl', swatch: 'xl', badge: 'pill' },
+  border: { container: 2, swatch: 2, notice: 2 },
+  space: { padding: '16', 'block-gap': '12', 'range-gap': '10', 'range-line-gap': '6', 'entry-gap': '10', 'inline-gap': '8', 'row-gap': '5', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '8', 'badge-y': '3', 'notice-x': '16', 'notice-y': '10' },
+  size: { width: 440 },
+})
+
+// ── 10. Blueprint ─ technical drawing ───────────────────────────────────────────
+themes.push({
+  id: 'blueprint', name: 'Blueprint', axes: ALL,
+  blurb: 'Plano técnico: azul de cianotipia, línea fina, identificadores y rutas en monoespaciada y una sombra de dibujo desplazada. En claro, papel de delineante.',
+  type: {
+    title: { size: 'lg', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
+    description: { size: 'md' }, placeholder: { size: 'lg' }, repo: { family: 'mono', size: 'sm', weight: 'semibold' },
+    location: { size: 'sm' }, badge: { family: 'mono', size: 'sm', weight: 'semibold', tracking: 0.4 },
+    eyebrow: { family: 'mono', size: 'sm', tracking: 0.5 }, footnote: { family: 'mono', size: 'sm' }, swatch: { size: 'sm' }, notice: { family: 'mono', size: 'md' },
+  },
+  lineHeight: 1.25,
+  color: {
+    surface: ['#F2F7FFF7', '#0B2A5BF5'], 'notice-surface': ['#F2F7FFF7', '#0B2A5BF5'],
+    border: ['#0B2A5BCC', '#7CB4FFB3'],
+    'text-primary': ['#0B2A5B', '#EAF3FF'], 'text-secondary': ['#33548C', '#B2CDF5'], 'text-accent': ['#0A55C8', '#7CE0FF'],
+    'badge-bg': ['#0A55C81F', '#7CE0FF26'], 'badge-fg': ['#08408F', '#C9F2FF'], 'origin-bg': ['#E0A60033', '#FFC64D33'], 'origin-fg': ['#4D3600', '#FFE6A8'],
+    'swatch-border': ['#0B2A5B99', '#7CB4FF99'], 'row-hover': ['#0A55C814', '#7CE0FF1F'],
+    shadow: ['#0B2A5B38', '#00000066'], 'shadow-edge': ['#0B2A5B1A', '#7CB4FF33'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.72, 0.72],
+  },
+  shadows: { offset: [{ x: 4, y: 4, blur: 0, spread: 0, color: '{color.shadow}' }] },
+  shadow: { container: 'offset', notice: 'offset' },
+  radius: { container: 'xs', notice: 'xs', swatch: 'none', badge: 'xs' },
+  border: { container: 1, swatch: 1, notice: 1 },
+  space: { padding: '12', 'block-gap': '10', 'range-gap': '8', 'range-line-gap': '4', 'entry-gap': '8', 'inline-gap': '8', 'row-gap': '4', 'name-gap': '2', 'swatch-gap': '10', 'swatch-inner-gap': '6', 'badge-x': '6', 'badge-y': '1', 'notice-x': '12', 'notice-y': '8' },
+  size: { width: 440 },
+})
+
+// ── single-group variants, to prove independence ────────────────────────────────
+variants.push({
+  id: 'ind-type', name: 'Solo tipografía', axes: ['type'], blurb: 'Lupita con otra letra: serif, títulos mayores. Nada más cambia.',
+  type: { title: { family: 'serif', size: 'xl', weight: 'semibold' }, description: { family: 'serif', size: 'lg' }, placeholder: { family: 'serif' }, id: { size: 'lg' } },
+})
+variants.push({
+  id: 'ind-color', name: 'Solo color', axes: ['color'], blurb: 'Lupita con otra paleta: pizarra y acento naranja. Mismas formas, mismos espacios, misma letra.',
+  color: {
+    surface: ['#EEF1F5F5', '#1F2630F5'], 'notice-surface': ['#EEF1F5F5', '#1F2630F5'], border: ['#2C3A4E33', '#CBD6E640'],
+    'text-primary': ['#18212D', '#F1F4F8'], 'text-secondary': ['#4A5A70', '#B7C3D4'], 'text-accent': ['#B4470A', '#FFA866'],
+    'badge-bg': ['#2C3A4E1F', '#CBD6E62E'], 'badge-fg': ['#18212D', '#F1F4F8'], 'origin-bg': ['#B4470A29', '#FFA86633'], 'origin-fg': ['#5A2300', '#FFD9BD'],
+    'swatch-border': ['#2C3A4E66', '#CBD6E699'], 'row-hover': ['#B4470A14', '#FFA8661F'],
+    shadow: ['#18212D47', '#00000099'], 'shadow-edge': ['#18212D1A', '#00000040'], 'surface-blur': [20, 20], 'suggestion-opacity': [0.75, 0.75],
+  },
+})
+variants.push({
+  id: 'ind-shape', name: 'Solo forma', axes: ['shape'], blurb: 'Lupita con esquinas de 20 pt, cápsulas más cuadradas y borde de 2 pt. Mismo color, letra y espacios.',
+  radius: { container: '2xl', notice: 'xl', swatch: 'lg', badge: 'sm' }, border: { container: 2, swatch: 2, notice: 2 },
+})
+variants.push({
+  id: 'ind-space', name: 'Solo espacio', axes: ['space'], blurb: 'Lupita con más aire y más ancho. Mismo color, letra y formas.',
+  space: { padding: '20', 'block-gap': '14', 'range-gap': '12', 'range-line-gap': '8', 'entry-gap': '12', 'inline-gap': '8', 'row-gap': '6', 'name-gap': '3', 'swatch-gap': '12', 'swatch-inner-gap': '6', 'badge-x': '7', 'badge-y': '2', 'notice-x': '16', 'notice-y': '10' },
+  size: { width: 500 },
+})
+variants.push({
+  id: 'ind-shadow', name: 'Solo sombra', axes: ['shadow'], blurb: 'Lupita con una sombra grande y alta, como si flotara. Mismo color, letra, formas y espacios.',
+  shadow: { container: 'lg', notice: 'lg' },
+})
+
+mkdirSync(`${DS}/themes`, { recursive: true })
+mkdirSync(`${DS}/variants`, { recursive: true })
+for (const t of themes) { writeFileSync(`${DS}/themes/${t.id}.json`, JSON.stringify(build(t), null, 2) + '\n'); console.log('theme  ', t.id) }
+for (const v of variants) { writeFileSync(`${DS}/variants/${v.id}.json`, JSON.stringify(build(v), null, 2) + '\n'); console.log('variant', v.id) }

@@ -1,0 +1,210 @@
+{
+  "id": "brutalista",
+  "name": "Brutalista",
+  "blurb": "Color plano, borde de 3 pt, sombra dura sin desenfoque y ninguna esquina redondeada. Jerarquía por peso, no por gris.",
+  "axes": [
+    "type",
+    "color",
+    "shape",
+    "space",
+    "shadow"
+  ],
+  "overrides": {
+    "primitive": {
+      "palette": {
+        "brutalista-surface-light": "#FFF200",
+        "brutalista-surface-dark": "#161616",
+        "brutalista-notice-surface-light": "#FFF200",
+        "brutalista-notice-surface-dark": "#161616",
+        "brutalista-border-light": "#000000",
+        "brutalista-border-dark": "#FFF200",
+        "brutalista-text-primary-light": "#000000",
+        "brutalista-text-primary-dark": "#FFFFFF",
+        "brutalista-text-secondary-light": "#1A1A1A",
+        "brutalista-text-secondary-dark": "#E8E8E8",
+        "brutalista-text-accent-light": "#B00000",
+        "brutalista-text-accent-dark": "#FFF200",
+        "brutalista-badge-bg-light": "#000000",
+        "brutalista-badge-bg-dark": "#FFF200",
+        "brutalista-badge-fg-light": "#FFF200",
+        "brutalista-badge-fg-dark": "#000000",
+        "brutalista-origin-bg-light": "#FF4D8D",
+        "brutalista-origin-bg-dark": "#FF4D8D",
+        "brutalista-origin-fg-light": "#000000",
+        "brutalista-origin-fg-dark": "#000000",
+        "brutalista-swatch-border-light": "#000000",
+        "brutalista-swatch-border-dark": "#FFF200",
+        "brutalista-row-hover-light": "#00000026",
+        "brutalista-row-hover-dark": "#FFF20033",
+        "brutalista-shadow-light": "#000000",
+        "brutalista-shadow-dark": "#FFF200",
+        "brutalista-shadow-edge-light": "#000000",
+        "brutalista-shadow-edge-dark": "#FFF200"
+      },
+      "shadow": {
+        "hard": [
+          {
+            "x": 6,
+            "y": 6,
+            "blur": 0,
+            "spread": 0,
+            "color": "{color.shadow}"
+          }
+        ]
+      }
+    },
+    "semantic": {
+      "text": {
+        "title": {
+          "size": "{font.size.xl}",
+          "weight": "{font.weight.bold}"
+        },
+        "id": {
+          "weight": "{font.weight.bold}",
+          "color": "{color.text-primary}"
+        },
+        "description": {
+          "size": "{font.size.lg}",
+          "weight": "{font.weight.medium}",
+          "color": "{color.text-primary}"
+        },
+        "placeholder": {
+          "weight": "{font.weight.medium}"
+        },
+        "repo": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}"
+        },
+        "location": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.medium}",
+          "color": "{color.text-primary}"
+        },
+        "badge": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}"
+        },
+        "eyebrow": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}",
+          "color": "{color.text-primary}"
+        },
+        "footnote": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.medium}",
+          "color": "{color.text-primary}"
+        },
+        "swatch": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.medium}",
+          "color": "{color.text-primary}"
+        },
+        "notice": {
+          "size": "{font.size.lg}",
+          "weight": "{font.weight.bold}",
+          "color": "{color.text-primary}"
+        }
+      },
+      "color": {
+        "surface": {
+          "light": "{palette.brutalista-surface-light}",
+          "dark": "{palette.brutalista-surface-dark}"
+        },
+        "notice-surface": {
+          "light": "{palette.brutalista-notice-surface-light}",
+          "dark": "{palette.brutalista-notice-surface-dark}"
+        },
+        "border": {
+          "light": "{palette.brutalista-border-light}",
+          "dark": "{palette.brutalista-border-dark}"
+        },
+        "text-primary": {
+          "light": "{palette.brutalista-text-primary-light}",
+          "dark": "{palette.brutalista-text-primary-dark}"
+        },
+        "text-secondary": {
+          "light": "{palette.brutalista-text-secondary-light}",
+          "dark": "{palette.brutalista-text-secondary-dark}"
+        },
+        "text-accent": {
+          "light": "{palette.brutalista-text-accent-light}",
+          "dark": "{palette.brutalista-text-accent-dark}"
+        },
+        "badge-bg": {
+          "light": "{palette.brutalista-badge-bg-light}",
+          "dark": "{palette.brutalista-badge-bg-dark}"
+        },
+        "badge-fg": {
+          "light": "{palette.brutalista-badge-fg-light}",
+          "dark": "{palette.brutalista-badge-fg-dark}"
+        },
+        "origin-bg": {
+          "light": "{palette.brutalista-origin-bg-light}",
+          "dark": "{palette.brutalista-origin-bg-dark}"
+        },
+        "origin-fg": {
+          "light": "{palette.brutalista-origin-fg-light}",
+          "dark": "{palette.brutalista-origin-fg-dark}"
+        },
+        "swatch-border": {
+          "light": "{palette.brutalista-swatch-border-light}",
+          "dark": "{palette.brutalista-swatch-border-dark}"
+        },
+        "row-hover": {
+          "light": "{palette.brutalista-row-hover-light}",
+          "dark": "{palette.brutalista-row-hover-dark}"
+        },
+        "shadow": {
+          "light": "{palette.brutalista-shadow-light}",
+          "dark": "{palette.brutalista-shadow-dark}"
+        },
+        "shadow-edge": {
+          "light": "{palette.brutalista-shadow-edge-light}",
+          "dark": "{palette.brutalista-shadow-edge-dark}"
+        },
+        "surface-blur": {
+          "light": 0,
+          "dark": 0
+        },
+        "suggestion-opacity": {
+          "light": 0.8,
+          "dark": 0.8
+        }
+      },
+      "shadow": {
+        "container": "{shadow.hard}",
+        "notice": "{shadow.hard}"
+      },
+      "radius": {
+        "container": "{radius.none}",
+        "notice": "{radius.none}",
+        "swatch": "{radius.none}",
+        "badge": "{radius.none}"
+      },
+      "border": {
+        "container": 3,
+        "swatch": 2,
+        "notice": 3
+      },
+      "space": {
+        "padding": "{space.14}",
+        "block-gap": "{space.10}",
+        "range-gap": "{space.8}",
+        "range-line-gap": "{space.5}",
+        "entry-gap": "{space.8}",
+        "inline-gap": "{space.8}",
+        "row-gap": "{space.4}",
+        "name-gap": "{space.2}",
+        "swatch-gap": "{space.10}",
+        "swatch-inner-gap": "{space.6}",
+        "badge-x": "{space.6}",
+        "badge-y": "{space.2}",
+        "notice-x": "{space.12}",
+        "notice-y": "{space.8}"
+      },
+      "size": {
+        "width": 440
+      }
+    }
+  }
+}

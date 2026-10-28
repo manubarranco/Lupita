@@ -1,0 +1,110 @@
+{
+  "id": "ind-color",
+  "name": "Solo color",
+  "blurb": "Lupita con otra paleta: pizarra y acento naranja. Mismas formas, mismos espacios, misma letra.",
+  "axes": [
+    "color"
+  ],
+  "overrides": {
+    "primitive": {
+      "palette": {
+        "ind-color-surface-light": "#EEF1F5F5",
+        "ind-color-surface-dark": "#1F2630F5",
+        "ind-color-notice-surface-light": "#EEF1F5F5",
+        "ind-color-notice-surface-dark": "#1F2630F5",
+        "ind-color-border-light": "#2C3A4E33",
+        "ind-color-border-dark": "#CBD6E640",
+        "ind-color-text-primary-light": "#18212D",
+        "ind-color-text-primary-dark": "#F1F4F8",
+        "ind-color-text-secondary-light": "#4A5A70",
+        "ind-color-text-secondary-dark": "#B7C3D4",
+        "ind-color-text-accent-light": "#B4470A",
+        "ind-color-text-accent-dark": "#FFA866",
+        "ind-color-badge-bg-light": "#2C3A4E1F",
+        "ind-color-badge-bg-dark": "#CBD6E62E",
+        "ind-color-badge-fg-light": "#18212D",
+        "ind-color-badge-fg-dark": "#F1F4F8",
+        "ind-color-origin-bg-light": "#B4470A29",
+        "ind-color-origin-bg-dark": "#FFA86633",
+        "ind-color-origin-fg-light": "#5A2300",
+        "ind-color-origin-fg-dark": "#FFD9BD",
+        "ind-color-swatch-border-light": "#2C3A4E66",
+        "ind-color-swatch-border-dark": "#CBD6E699",
+        "ind-color-row-hover-light": "#B4470A14",
+        "ind-color-row-hover-dark": "#FFA8661F",
+        "ind-color-shadow-light": "#18212D47",
+        "ind-color-shadow-dark": "#00000099",
+        "ind-color-shadow-edge-light": "#18212D1A",
+        "ind-color-shadow-edge-dark": "#00000040"
+      }
+    },
+    "semantic": {
+      "color": {
+        "surface": {
+          "light": "{palette.ind-color-surface-light}",
+          "dark": "{palette.ind-color-surface-dark}"
+        },
+        "notice-surface": {
+          "light": "{palette.ind-color-notice-surface-light}",
+          "dark": "{palette.ind-color-notice-surface-dark}"
+        },
+        "border": {
+          "light": "{palette.ind-color-border-light}",
+          "dark": "{palette.ind-color-border-dark}"
+        },
+        "text-primary": {
+          "light": "{palette.ind-color-text-primary-light}",
+          "dark": "{palette.ind-color-text-primary-dark}"
+        },
+        "text-secondary": {
+          "light": "{palette.ind-color-text-secondary-light}",
+          "dark": "{palette.ind-color-text-secondary-dark}"
+        },
+        "text-accent": {
+          "light": "{palette.ind-color-text-accent-light}",
+          "dark": "{palette.ind-color-text-accent-dark}"
+        },
+        "badge-bg": {
+          "light": "{palette.ind-color-badge-bg-light}",
+          "dark": "{palette.ind-color-badge-bg-dark}"
+        },
+        "badge-fg": {
+          "light": "{palette.ind-color-badge-fg-light}",
+          "dark": "{palette.ind-color-badge-fg-dark}"
+        },
+        "origin-bg": {
+          "light": "{palette.ind-color-origin-bg-light}",
+          "dark": "{palette.ind-color-origin-bg-dark}"
+        },
+        "origin-fg": {
+          "light": "{palette.ind-color-origin-fg-light}",
+          "dark": "{palette.ind-color-origin-fg-dark}"
+        },
+        "swatch-border": {
+          "light": "{palette.ind-color-swatch-border-light}",
+          "dark": "{palette.ind-color-swatch-border-dark}"
+        },
+        "row-hover": {
+          "light": "{palette.ind-color-row-hover-light}",
+          "dark": "{palette.ind-color-row-hover-dark}"
+        },
+        "shadow": {
+          "light": "{palette.ind-color-shadow-light}",
+          "dark": "{palette.ind-color-shadow-dark}"
+        },
+        "shadow-edge": {
+          "light": "{palette.ind-color-shadow-edge-light}",
+          "dark": "{palette.ind-color-shadow-edge-dark}"
+        },
+        "surface-blur": {
+          "light": 20,
+          "dark": 20
+        },
+        "suggestion-opacity": {
+          "light": 0.75,
+          "dark": 0.75
+        }
+      }
+    }
+  }
+}

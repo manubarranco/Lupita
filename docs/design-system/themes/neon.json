@@ -1,0 +1,206 @@
+{
+  "id": "neon",
+  "name": "Neón",
+  "blurb": "Pensado para oscuro: índigo profundo, acento cian y un halo en lugar de sombra. En claro pasa a lavanda con violeta eléctrico.",
+  "axes": [
+    "type",
+    "color",
+    "shape",
+    "space",
+    "shadow"
+  ],
+  "overrides": {
+    "primitive": {
+      "palette": {
+        "neon-surface-light": "#F7F3FFF5",
+        "neon-surface-dark": "#0D0B1AF2",
+        "neon-notice-surface-light": "#F7F3FFF5",
+        "neon-notice-surface-dark": "#0D0B1AF2",
+        "neon-border-light": "#5A1FD699",
+        "neon-border-dark": "#00E5FFB3",
+        "neon-text-primary-light": "#1A0B3D",
+        "neon-text-primary-dark": "#F4F1FF",
+        "neon-text-secondary-light": "#4B3A7A",
+        "neon-text-secondary-dark": "#B9B2E0",
+        "neon-text-accent-light": "#5A1FD6",
+        "neon-text-accent-dark": "#00E5FF",
+        "neon-badge-bg-light": "#5A1FD61F",
+        "neon-badge-bg-dark": "#00E5FF26",
+        "neon-badge-fg-light": "#3A0FA0",
+        "neon-badge-fg-dark": "#9DF3FF",
+        "neon-origin-bg-light": "#FF2E9333",
+        "neon-origin-bg-dark": "#FF2E9340",
+        "neon-origin-fg-light": "#7A0A47",
+        "neon-origin-fg-dark": "#FFC2E3",
+        "neon-swatch-border-light": "#5A1FD699",
+        "neon-swatch-border-dark": "#00E5FF99",
+        "neon-row-hover-light": "#5A1FD614",
+        "neon-row-hover-dark": "#00E5FF1A",
+        "neon-shadow-light": "#5A1FD655",
+        "neon-shadow-dark": "#00E5FF66",
+        "neon-shadow-edge-light": "#5A1FD6",
+        "neon-shadow-edge-dark": "#00E5FF"
+      },
+      "shadow": {
+        "glow": [
+          {
+            "x": 0,
+            "y": 0,
+            "blur": 28,
+            "spread": 1,
+            "color": "{color.shadow}"
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "blur": 2,
+            "spread": 0,
+            "color": "{color.shadow-edge}"
+          }
+        ]
+      }
+    },
+    "semantic": {
+      "text": {
+        "title": {
+          "size": "{font.size.xl}",
+          "weight": "{font.weight.semibold}"
+        },
+        "id": {
+          "color": "{color.text-accent}",
+          "tracking": 0.2
+        },
+        "description": {
+          "size": "{font.size.lg}"
+        },
+        "repo": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}",
+          "tracking": 0.4
+        },
+        "location": {
+          "size": "{font.size.sm}"
+        },
+        "badge": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.bold}",
+          "tracking": 0.4
+        },
+        "eyebrow": {
+          "size": "{font.size.sm}",
+          "weight": "{font.weight.medium}",
+          "tracking": 0.3
+        },
+        "footnote": {
+          "size": "{font.size.sm}"
+        },
+        "swatch": {
+          "size": "{font.size.sm}"
+        },
+        "notice": {
+          "size": "{font.size.lg}"
+        }
+      },
+      "color": {
+        "surface": {
+          "light": "{palette.neon-surface-light}",
+          "dark": "{palette.neon-surface-dark}"
+        },
+        "notice-surface": {
+          "light": "{palette.neon-notice-surface-light}",
+          "dark": "{palette.neon-notice-surface-dark}"
+        },
+        "border": {
+          "light": "{palette.neon-border-light}",
+          "dark": "{palette.neon-border-dark}"
+        },
+        "text-primary": {
+          "light": "{palette.neon-text-primary-light}",
+          "dark": "{palette.neon-text-primary-dark}"
+        },
+        "text-secondary": {
+          "light": "{palette.neon-text-secondary-light}",
+          "dark": "{palette.neon-text-secondary-dark}"
+        },
+        "text-accent": {
+          "light": "{palette.neon-text-accent-light}",
+          "dark": "{palette.neon-text-accent-dark}"
+        },
+        "badge-bg": {
+          "light": "{palette.neon-badge-bg-light}",
+          "dark": "{palette.neon-badge-bg-dark}"
+        },
+        "badge-fg": {
+          "light": "{palette.neon-badge-fg-light}",
+          "dark": "{palette.neon-badge-fg-dark}"
+        },
+        "origin-bg": {
+          "light": "{palette.neon-origin-bg-light}",
+          "dark": "{palette.neon-origin-bg-dark}"
+        },
+        "origin-fg": {
+          "light": "{palette.neon-origin-fg-light}",
+          "dark": "{palette.neon-origin-fg-dark}"
+        },
+        "swatch-border": {
+          "light": "{palette.neon-swatch-border-light}",
+          "dark": "{palette.neon-swatch-border-dark}"
+        },
+        "row-hover": {
+          "light": "{palette.neon-row-hover-light}",
+          "dark": "{palette.neon-row-hover-dark}"
+        },
+        "shadow": {
+          "light": "{palette.neon-shadow-light}",
+          "dark": "{palette.neon-shadow-dark}"
+        },
+        "shadow-edge": {
+          "light": "{palette.neon-shadow-edge-light}",
+          "dark": "{palette.neon-shadow-edge-dark}"
+        },
+        "surface-blur": {
+          "light": 24,
+          "dark": 24
+        },
+        "suggestion-opacity": {
+          "light": 0.7,
+          "dark": 0.7
+        }
+      },
+      "shadow": {
+        "container": "{shadow.glow}",
+        "notice": "{shadow.glow}"
+      },
+      "radius": {
+        "container": "{radius.xl}",
+        "notice": "{radius.lg}",
+        "swatch": "{radius.md}",
+        "badge": "{radius.pill}"
+      },
+      "border": {
+        "container": 1,
+        "swatch": 1,
+        "notice": 1
+      },
+      "space": {
+        "padding": "{space.16}",
+        "block-gap": "{space.12}",
+        "range-gap": "{space.10}",
+        "range-line-gap": "{space.6}",
+        "entry-gap": "{space.10}",
+        "inline-gap": "{space.8}",
+        "row-gap": "{space.5}",
+        "name-gap": "{space.3}",
+        "swatch-gap": "{space.12}",
+        "swatch-inner-gap": "{space.6}",
+        "badge-x": "{space.7}",
+        "badge-y": "{space.2}",
+        "notice-x": "{space.14}",
+        "notice-y": "{space.9}"
+      },
+      "size": {
+        "width": 440
+      }
+    }
+  }
+}

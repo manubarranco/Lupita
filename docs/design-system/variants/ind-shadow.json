@@ -1,0 +1,16 @@
+{
+  "id": "ind-shadow",
+  "name": "Solo sombra",
+  "blurb": "Lupita con una sombra grande y alta, como si flotara. Mismo color, letra, formas y espacios.",
+  "axes": [
+    "shadow"
+  ],
+  "overrides": {
+    "semantic": {
+      "shadow": {
+        "container": "{shadow.lg}",
+        "notice": "{shadow.lg}"
+      }
+    }
+  }
+}
