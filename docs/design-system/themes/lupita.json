@@ -1,0 +1,8 @@
+{
+  "id": "lupita",
+  "name": "Lupita",
+  "blurb": "The look of 0.9.0: system fonts, macOS material, hairline border, 10 pt corners. The anchor every other theme is read against.",
+  "baseline": true,
+  "axes": [],
+  "overrides": {}
+}

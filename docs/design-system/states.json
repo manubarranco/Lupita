@@ -1,0 +1,29 @@
+{
+  "$description": "Sample content for the ten tooltip states drawn by the prototype and the contact sheets. Spanish, like the author's daily use. `kind` is the badge text; `origin` shows «de otro repo»; `hover` draws the row in its hover state; `muted` is a suggestion (75 % opacity).",
+  "states": [
+    { "id": "definition", "label": "ID definido", "tooltip": { "type": "definitions", "rows": [
+        { "id": "D42", "title": "Vocabulario de git en lenguaje llano", "description": "Cuarenta términos validados por Manu, con una línea llana y un ejemplo, en español e inglés.", "repo": "lupita", "location": "docs/decisions.md:212" },
+        { "id": "D43", "title": "Los interruptores solo apagan diccionarios fijos", "description": "Lo que sale de los repos queda siempre encendido.", "repo": "lupita", "location": "docs/decisions.md:221", "hover": true } ],
+      "footnotes": ["Citado 12 veces en 5 archivos"] } },
+    { "id": "term", "label": "Término", "tooltip": { "type": "definitions", "rows": [
+        { "kind": "git", "title": "rebase", "description": "Reescribe tus commits encima de otra rama para que la historia quede en línea recta. Cambia los commits: no lo hagas sobre ramas ya compartidas." } ] } },
+    { "id": "symbol", "label": "Símbolo sin comentario", "tooltip": { "type": "definitions", "rows": [
+        { "id": "build_glyphs()", "kind": "símbolo", "placeholderTitle": "sin comentario", "repo": "nib", "location": "Sources/glyphs.py:318" } ] } },
+    { "id": "suggestion", "label": "¿Querías decir…?", "tooltip": { "type": "definitions", "eyebrow": "¿Querías decir D23? (leído: 023)", "rows": [
+        { "id": "D23", "title": "Un solo punto de verdad para los tokens", "description": "Los componentes leen roles, nunca valores.", "repo": "ds-agentico", "location": "docs/decisions.md:140", "muted": true } ] } },
+    { "id": "ambiguous", "label": "Lectura dudosa", "tooltip": { "type": "definitions", "eyebrow": "Lectura dudosa de «0S»", "rows": [
+        { "id": "OS", "title": "Sistema operativo", "kind": "término", "description": "El software que gestiona el equipo y los programas." },
+        { "id": "D5", "title": "Orden de las fases", "description": "Primero el sistema, después los temas.", "repo": "lios", "location": "memory/decisions.md:88" } ] } },
+    { "id": "range", "label": "Rango", "tooltip": { "type": "range", "eyebrow": "5 decisiones, de D40 a D44",
+        "entries": [ { "id": "D40", "title": "Informe de IDs que envían los usuarios" }, { "id": "D41", "title": "Los rangos listan el tramo" }, { "id": "D42", "title": "Vocabulario de git en lenguaje llano" }, { "id": "D43", "title": null } ],
+        "more": "y 1 más", "sharedRepo": "lupita", "sharedPath": "docs/decisions.md" } },
+    { "id": "color", "label": "Color", "tooltip": { "type": "definitions", "rows": [
+        { "id": "--accent", "kind": "token CSS", "title": "Color de acento de la interfaz", "swatches": [ { "hex": "#2F6FED", "label": "claro" }, { "hex": "#8AB4FF", "label": "oscuro" } ], "description": "Se usa en enlaces, foco y el repo del tooltip.", "repo": "vector-ui-studio", "location": "src/tokens.css:12" } ] } },
+    { "id": "otherRepo", "label": "De otro repo", "tooltip": { "type": "definitions", "rows": [
+        { "id": "FR-001", "title": "El usuario ve la definición sin salir de la ventana", "description": "Requisito funcional del producto original.", "repo": "automata", "location": "docs/spec.md:31", "origin": true } ] } },
+    { "id": "notice", "label": "Aviso", "tooltip": { "type": "notice", "text": "Lupita no encuentra nada para «ZX9» en tus repos." } },
+    { "id": "stress", "label": "Estrés: textos largos", "tooltip": { "type": "definitions", "rows": [
+        { "id": "ARCHITECTURE-DECISION-RECORD-0042-SUPERSEDED-BY-0057", "title": "Migrar el motor de resolución de referencias a un índice incremental que se actualiza en segundo plano cuando cambia un archivo, conservando la compatibilidad con los glosarios del repo y sin bloquear el atajo ni el subrayado mientras dura la reindexación completa", "description": "La reindexación completa recorre todos los repos activos y, mientras no termina, se sirven las respuestas del índice anterior para que el atajo nunca espere; al acabar se cambia de índice de una sola vez y se descarta el viejo.", "kind": "decisión", "repo": "lupita-con-un-nombre-de-repo-muy-largo-de-verdad", "location": "docs/decisions/architecture/2026/10/0042-incremental-index-with-background-reindex.md:1204", "origin": true } ],
+      "footnotes": ["Citado 1.248 veces en 87 archivos"] } }
+  ]
+}
