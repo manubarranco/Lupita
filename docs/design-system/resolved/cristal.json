@@ -119,8 +119,8 @@
    }
   },
   "color": {
-   "surface": "#FFFFFFDB",
-   "noticeSurface": "#FFFFFFDB",
+   "surface": "#FFFFFFC7",
+   "noticeSurface": "#FFFFFFC7",
    "border": "#FFFFFFE6",
    "textPrimary": "#0B1B2E",
    "textSecondary": "#2F4259",
