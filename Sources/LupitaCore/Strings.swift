@@ -277,6 +277,21 @@ public enum S {
         }
     }
 
+    // MARK: Appearance window (D55)
+    public static var appearanceMenu: String { t("Appearance…", "Aspecto…") }
+    public static var appearanceTitle: String { t("Appearance", "Aspecto") }
+    public static var appearanceTheme: String { t("Theme", "Tema") }
+    public static var appearanceMode: String { t("Mode", "Modo") }
+    public static var appearanceSize: String { t("Size", "Tamaño") }
+    public static var appearanceDensity: String { t("Density", "Densidad") }
+    public static var appearanceSample: String { t("Sample", "Muestra") }
+    public static var modeSystem: String { t("System", "Sistema") }
+    public static var modeLight: String { t("Light", "Claro") }
+    public static var modeDark: String { t("Dark", "Oscuro") }
+    public static var densityCompact: String { t("Compact", "Compacta") }
+    public static var densityNormal: String { t("Normal", "Normal") }
+    public static var densityAiry: String { t("Airy", "Amplia") }
+
     // MARK: About, help, updates (D25)
     public static var about: String { t("About \(appName)", "Acerca de \(appName)") }
     public static var help: String { t("Help", "Ayuda") }
