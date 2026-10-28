@@ -264,7 +264,7 @@ themes.push({
 // ── 9. Mimo ─ rounded type, pastel, pills ───────────────────────────────────────
 themes.push({
   id: 'mimo', name: 'Mimo', axes: ALL,
-  blurb: 'Una interfaz de juego: tarjeta turquesa como un botón, borde y canto inferior grueso del mismo turquesa más oscuro, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
+  blurb: 'Una interfaz de juego: tarjeta cian como un botón, borde y canto inferior grueso del mismo cian más oscuro, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
   type: {
     title: { family: 'rounded', size: 'xl', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
     description: { family: 'rounded', size: 'lg' }, placeholder: { family: 'rounded', size: 'lg' },
@@ -274,13 +274,14 @@ themes.push({
   lineHeight: 1.3,
   lh: { title: 1.3, description: 1.45 },
   color: {
-    surface: ['#5ED6CB', '#3FBFB3'], 'notice-surface': ['#5ED6CB', '#3FBFB3'],
-    border: ['#2BAA9E', '#1E8F84'],
-    'text-primary': ['#04302D', '#04302D'], 'text-secondary': ['#0C4A45', '#073F3A'], 'text-accent': ['#00504A', '#003F3A'],
-    'badge-bg': ['#FFFFFF', '#FFFFFF'], 'badge-fg': ['#00504A', '#00504A'], 'origin-bg': ['#FFE08A', '#FFE08A'], 'origin-fg': ['#4A3200', '#4A3200'],
-    'swatch-border': ['#04302DCC', '#04302DCC'], 'row-hover': ['#8EE6DE', '#5FD3C8'],
-    shadow: ['#1F968B', '#167A71'], 'shadow-edge': ['#1F968B', '#167A71'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
+    surface: ['#3FD0F0', '#2BB8DA'], 'notice-surface': ['#3FD0F0', '#2BB8DA'],
+    border: ['#16A5C7', '#0F8BAA'],
+    'text-primary': ['#032F3C', '#032F3C'], 'text-secondary': ['#0A4757', '#063A48'], 'text-accent': ['#004F63', '#003D4D'],
+    'badge-bg': ['#FFFFFF', '#FFFFFF'], 'badge-fg': ['#004F63', '#004F63'], 'origin-bg': ['#FFE08A', '#FFE08A'], 'origin-fg': ['#4A3200', '#4A3200'],
+    'swatch-border': ['#032F3CCC', '#032F3CCC'], 'row-hover': ['#8AE4F7', '#62D2EC'],
+    shadow: ['#1597B8', '#0E7895'], 'shadow-edge': ['#1597B8', '#0E7895'], 'surface-blur': [0, 0], 'suggestion-opacity': [0.75, 0.75],
   },
+
 
 
   shadows: { pop: [{ x: 0, y: 5, blur: 0, spread: 0, color: '{color.shadow-edge}' }] },
