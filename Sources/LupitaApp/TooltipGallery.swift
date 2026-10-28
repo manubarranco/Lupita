@@ -449,6 +449,13 @@ enum ThemeGallery {
         }
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         S.language = "es"
+        // `--render-themes <dir> --tile <theme> <state> <light|dark>`: one stage (tooltip over the faux backdrop), for pixel comparisons.
+        if let i = args.firstIndex(of: "--tile"), args.count > i + 3,
+           let state = GalleryStates.all.first(where: { $0.id == args[i + 2] }) {
+            let r = measure(TooltipTheme.load(args[i + 1], mode: args[i + 3] == "dark" ? .dark : .light), state)
+            write(Stage(render: r, height: stageHeight([r])).environment(\.colorScheme, args[i + 3] == "dark" ? .dark : .light), to: dir + "/tile-\(args[i + 1])-\(args[i + 2])-\(args[i + 3]).png")
+            return 0
+        }
         var entries: [[String: Any]] = []
         var shadow = 0, text = 0, count = 0
         func record(_ r: ThemeRender, stageHeight: CGFloat) {
