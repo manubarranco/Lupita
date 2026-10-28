@@ -1,6 +1,6 @@
 {
- "id": "recreo",
- "name": "Recreo",
+ "id": "ficha",
+ "name": "Ficha",
  "light": {
   "font.family.sans": {
    "$type": "fontFamily",
@@ -154,115 +154,115 @@
    "$type": "color",
    "$value": "#0000004D"
   },
-  "palette.recreo-surface-light": {
+  "palette.ficha-surface-light": {
    "$type": "color",
    "$value": "#D2F3FC"
   },
-  "palette.recreo-surface-dark": {
+  "palette.ficha-surface-dark": {
    "$type": "color",
    "$value": "#163A47"
   },
-  "palette.recreo-notice-surface-light": {
+  "palette.ficha-notice-surface-light": {
    "$type": "color",
    "$value": "#D2F3FC"
   },
-  "palette.recreo-notice-surface-dark": {
+  "palette.ficha-notice-surface-dark": {
    "$type": "color",
    "$value": "#163A47"
   },
-  "palette.recreo-border-light": {
+  "palette.ficha-border-light": {
    "$type": "color",
    "$value": "#16A5C7"
   },
-  "palette.recreo-border-dark": {
+  "palette.ficha-border-dark": {
    "$type": "color",
    "$value": "#2BB8DA"
   },
-  "palette.recreo-text-primary-light": {
+  "palette.ficha-text-primary-light": {
    "$type": "color",
    "$value": "#032F3C"
   },
-  "palette.recreo-text-primary-dark": {
+  "palette.ficha-text-primary-dark": {
    "$type": "color",
    "$value": "#E6FAFF"
   },
-  "palette.recreo-text-secondary-light": {
+  "palette.ficha-text-secondary-light": {
    "$type": "color",
    "$value": "#0A4757"
   },
-  "palette.recreo-text-secondary-dark": {
+  "palette.ficha-text-secondary-dark": {
    "$type": "color",
    "$value": "#A8DCEA"
   },
-  "palette.recreo-text-accent-light": {
+  "palette.ficha-text-accent-light": {
    "$type": "color",
    "$value": "#006A82"
   },
-  "palette.recreo-text-accent-dark": {
+  "palette.ficha-text-accent-dark": {
    "$type": "color",
    "$value": "#5FD8F5"
   },
-  "palette.recreo-badge-bg-light": {
+  "palette.ficha-badge-bg-light": {
    "$type": "color",
    "$value": "#FFFFFF"
   },
-  "palette.recreo-badge-bg-dark": {
+  "palette.ficha-badge-bg-dark": {
    "$type": "color",
    "$value": "#E6FAFF"
   },
-  "palette.recreo-badge-fg-light": {
+  "palette.ficha-badge-fg-light": {
    "$type": "color",
    "$value": "#004F63"
   },
-  "palette.recreo-badge-fg-dark": {
+  "palette.ficha-badge-fg-dark": {
    "$type": "color",
    "$value": "#004F63"
   },
-  "palette.recreo-origin-bg-light": {
+  "palette.ficha-origin-bg-light": {
    "$type": "color",
    "$value": "#FFE08A"
   },
-  "palette.recreo-origin-bg-dark": {
+  "palette.ficha-origin-bg-dark": {
    "$type": "color",
    "$value": "#FFE08A"
   },
-  "palette.recreo-origin-fg-light": {
+  "palette.ficha-origin-fg-light": {
    "$type": "color",
    "$value": "#4A3200"
   },
-  "palette.recreo-origin-fg-dark": {
+  "palette.ficha-origin-fg-dark": {
    "$type": "color",
    "$value": "#4A3200"
   },
-  "palette.recreo-swatch-border-light": {
+  "palette.ficha-swatch-border-light": {
    "$type": "color",
    "$value": "#032F3CCC"
   },
-  "palette.recreo-swatch-border-dark": {
+  "palette.ficha-swatch-border-dark": {
    "$type": "color",
    "$value": "#A8DCEACC"
   },
-  "palette.recreo-row-hover-light": {
+  "palette.ficha-row-hover-light": {
    "$type": "color",
    "$value": "#A8E8F8"
   },
-  "palette.recreo-row-hover-dark": {
+  "palette.ficha-row-hover-dark": {
    "$type": "color",
    "$value": "#1F4F5F"
   },
-  "palette.recreo-shadow-light": {
+  "palette.ficha-shadow-light": {
    "$type": "color",
    "$value": "#1597B8"
   },
-  "palette.recreo-shadow-dark": {
+  "palette.ficha-shadow-dark": {
    "$type": "color",
    "$value": "#0E7895"
   },
-  "palette.recreo-shadow-edge-light": {
+  "palette.ficha-shadow-edge-light": {
    "$type": "color",
    "$value": "#1597B8"
   },
-  "palette.recreo-shadow-edge-dark": {
+  "palette.ficha-shadow-edge-dark": {
    "$type": "color",
    "$value": "#0E7895"
   },
@@ -1370,115 +1370,115 @@
    "$type": "color",
    "$value": "#0000004D"
   },
-  "palette.recreo-surface-light": {
+  "palette.ficha-surface-light": {
    "$type": "color",
    "$value": "#D2F3FC"
   },
-  "palette.recreo-surface-dark": {
+  "palette.ficha-surface-dark": {
    "$type": "color",
    "$value": "#163A47"
   },
-  "palette.recreo-notice-surface-light": {
+  "palette.ficha-notice-surface-light": {
    "$type": "color",
    "$value": "#D2F3FC"
   },
-  "palette.recreo-notice-surface-dark": {
+  "palette.ficha-notice-surface-dark": {
    "$type": "color",
    "$value": "#163A47"
   },
-  "palette.recreo-border-light": {
+  "palette.ficha-border-light": {
    "$type": "color",
    "$value": "#16A5C7"
   },
-  "palette.recreo-border-dark": {
+  "palette.ficha-border-dark": {
    "$type": "color",
    "$value": "#2BB8DA"
   },
-  "palette.recreo-text-primary-light": {
+  "palette.ficha-text-primary-light": {
    "$type": "color",
    "$value": "#032F3C"
   },
-  "palette.recreo-text-primary-dark": {
+  "palette.ficha-text-primary-dark": {
    "$type": "color",
    "$value": "#E6FAFF"
   },
-  "palette.recreo-text-secondary-light": {
+  "palette.ficha-text-secondary-light": {
    "$type": "color",
    "$value": "#0A4757"
   },
-  "palette.recreo-text-secondary-dark": {
+  "palette.ficha-text-secondary-dark": {
    "$type": "color",
    "$value": "#A8DCEA"
   },
-  "palette.recreo-text-accent-light": {
+  "palette.ficha-text-accent-light": {
    "$type": "color",
    "$value": "#006A82"
   },
-  "palette.recreo-text-accent-dark": {
+  "palette.ficha-text-accent-dark": {
    "$type": "color",
    "$value": "#5FD8F5"
   },
-  "palette.recreo-badge-bg-light": {
+  "palette.ficha-badge-bg-light": {
    "$type": "color",
    "$value": "#FFFFFF"
   },
-  "palette.recreo-badge-bg-dark": {
+  "palette.ficha-badge-bg-dark": {
    "$type": "color",
    "$value": "#E6FAFF"
   },
-  "palette.recreo-badge-fg-light": {
+  "palette.ficha-badge-fg-light": {
    "$type": "color",
    "$value": "#004F63"
   },
-  "palette.recreo-badge-fg-dark": {
+  "palette.ficha-badge-fg-dark": {
    "$type": "color",
    "$value": "#004F63"
   },
-  "palette.recreo-origin-bg-light": {
+  "palette.ficha-origin-bg-light": {
    "$type": "color",
    "$value": "#FFE08A"
   },
-  "palette.recreo-origin-bg-dark": {
+  "palette.ficha-origin-bg-dark": {
    "$type": "color",
    "$value": "#FFE08A"
   },
-  "palette.recreo-origin-fg-light": {
+  "palette.ficha-origin-fg-light": {
    "$type": "color",
    "$value": "#4A3200"
   },
-  "palette.recreo-origin-fg-dark": {
+  "palette.ficha-origin-fg-dark": {
    "$type": "color",
    "$value": "#4A3200"
   },
-  "palette.recreo-swatch-border-light": {
+  "palette.ficha-swatch-border-light": {
    "$type": "color",
    "$value": "#032F3CCC"
   },
-  "palette.recreo-swatch-border-dark": {
+  "palette.ficha-swatch-border-dark": {
    "$type": "color",
    "$value": "#A8DCEACC"
   },
-  "palette.recreo-row-hover-light": {
+  "palette.ficha-row-hover-light": {
    "$type": "color",
    "$value": "#A8E8F8"
   },
-  "palette.recreo-row-hover-dark": {
+  "palette.ficha-row-hover-dark": {
    "$type": "color",
    "$value": "#1F4F5F"
   },
-  "palette.recreo-shadow-light": {
+  "palette.ficha-shadow-light": {
    "$type": "color",
    "$value": "#1597B8"
   },
-  "palette.recreo-shadow-dark": {
+  "palette.ficha-shadow-dark": {
    "$type": "color",
    "$value": "#0E7895"
   },
-  "palette.recreo-shadow-edge-light": {
+  "palette.ficha-shadow-edge-light": {
    "$type": "color",
    "$value": "#1597B8"
   },
-  "palette.recreo-shadow-edge-dark": {
+  "palette.ficha-shadow-edge-dark": {
    "$type": "color",
    "$value": "#0E7895"
   },

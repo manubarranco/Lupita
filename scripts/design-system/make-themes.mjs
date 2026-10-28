@@ -261,9 +261,9 @@ themes.push({
   size: { width: 460 },
 })
 
-// ── 9. Recreo ─ rounded type, pressable cyan card ───────────────────────────────────────
+// ── 9. Ficha (Tile) ─ rounded type, pressable cyan card ───────────────────────────────────────
 themes.push({
-  id: 'recreo', name: 'Recreo', axes: ALL,
+  id: 'ficha', name: 'Ficha', axes: ALL,
   blurb: 'Una interfaz de juego: tarjeta cian clara como un botón, con un borde cian bien marcado y un canto inferior grueso del mismo cian más oscuro; en oscuro, la tarjeta pasa a azul petróleo, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
   type: {
     title: { family: 'rounded', size: 'xl', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
