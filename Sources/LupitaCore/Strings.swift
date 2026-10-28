@@ -285,6 +285,8 @@ public enum S {
     public static var appearanceSize: String { t("Size", "Tamaño") }
     public static var appearanceDensity: String { t("Density", "Densidad") }
     public static var appearanceSample: String { t("Sample", "Muestra") }
+    public static var appearancePrevious: String { t("Previous theme", "Tema anterior") }
+    public static var appearanceNext: String { t("Next theme", "Tema siguiente") }
     public static var modeSystem: String { t("System", "Sistema") }
     public static var modeLight: String { t("Light", "Claro") }
     public static var modeDark: String { t("Dark", "Oscuro") }

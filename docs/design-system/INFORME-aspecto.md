@@ -5,13 +5,13 @@ Rama `claude/aspecto-77327a` (desde `claude/modest-archimedes-oikgin`). **Nada m
 ## Qué hay
 - **El sistema de diseño en el modelo D55**: tres papeles de fuente (títulos, texto, código), escala de tamaño S/M/L/XL, densidad compacta/normal/amplia y **7 temas** (Cristal por defecto, Papel, Terminal, Neón, Brutalista, Ficha, Blueprint). Grande, Compacto y Lupita ya no son temas.
 - **El tooltip, los avisos y la muestra de color leen esos números**: en `TooltipPanel.swift` no queda ningún valor de estilo escrito a mano; la sombra la dibuja el tema.
-- **Ventana «Aspecto»** (menú → «Aspecto…», encima de «Acerca de»): tooltip de muestra vivo con selector de los 10 estados y cuatro controles (tema, modo, tamaño, densidad). Lo elegido se guarda y el tooltip real lo usa la siguiente vez que aparece, sin reiniciar. Sigue los ajustes de macOS de «aumentar contraste» y «reducir transparencia».
+- **Ventana «Aspecto»** (menú → «Aspecto…», encima de «Acerca de»): un **carrusel de temas**: el fondo queda quieto y cada slide trae el nombre del tema y una card representativa centrada; se pasa con un gesto horizontal del trackpad, con las flechas de los lados o del teclado, o con los puntitos. Debajo, la descripción del tema y los controles de modo, tamaño y densidad. La ventana tiene tamaño fijo y no hay selector de muestra (una sola, representativa). Lo elegido se guarda y el tooltip real lo usa la siguiente vez que aparece, sin reiniciar. Sigue los ajustes de macOS de «aumentar contraste» y «reducir transparencia».
 - **Hojas de contacto reales** (dibujadas por la app, no HTML): `docs/design-system/sheets-real/` (7 temas × claro/oscuro × 10 estados) y `sheets-real/aspecto/` (tamaños y densidades de la ventana).
 - **Números**: 215 tests en verde (184 de antes sin tocar + 31 nuevos), `run-all` en verde, 1680 renders HTML sin desbordes, 140 renders reales sin recortes de sombra ni de texto, 168 capturas de la ventana sin recortes. App firmada con el certificado de siempre y arrancada.
 
 ## Qué se propone
 1. Probar con el plan de 5 puntos de abajo y decidir qué temas se quedan.
-2. Decidir si «Aspecto» pasa los nombres de los estados de muestra a inglés/español (hoy solo español) y si la muestra tiene alto fijo.
+2. Decidir si la muestra única («ID definido») es lo bastante representativa o conviene que incluya también una insignia o un color.
 3. Cuando lo apruebes, el merge es tuyo.
 
 ## Por qué
@@ -24,6 +24,7 @@ Tamaño y densidad son preferencias de quien lee, no de un tema (D55); con token
 - **Sombras**: SwiftUI no tiene «extensión» de sombra; Cristal y Papel salen algo más anchas y Neón algo menos difuso.
 - **Terminal** (Monaco, un solo peso): sin negrita; título e identificador en verde. **Neón, Ficha, Blueprint**: «sin definición» sin cursiva (sus fuentes no tienen).
 - **Dos Lupita a la vez**: está arrancada la tuya (build viejo) y la nueva; ciérrala antes de probar, comparten atajo.
+- **El gesto del trackpad y las flechas no las he podido probar con una persona** (sí compila, se dibuja y el selftest pasa); es lo primero que mirar.
 - Un tooltip ya abierto no cambia al tocar «Aspecto»; el siguiente sí.
 - Detalle y lista completa: `decisiones-pendientes.md` en la carpeta de notas de la sesión.
 
