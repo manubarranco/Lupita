@@ -1,6 +1,6 @@
 {
-  "id": "mimo",
-  "name": "Mimo",
+  "id": "recreo",
+  "name": "Recreo",
   "blurb": "Una interfaz de juego: tarjeta cian clara como un botón, con un borde cian bien marcado y un canto inferior grueso del mismo cian más oscuro; en oscuro, la tarjeta pasa a azul petróleo, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.",
   "axes": [
     "type",
@@ -12,34 +12,34 @@
   "overrides": {
     "primitive": {
       "palette": {
-        "mimo-surface-light": "#D2F3FC",
-        "mimo-surface-dark": "#163A47",
-        "mimo-notice-surface-light": "#D2F3FC",
-        "mimo-notice-surface-dark": "#163A47",
-        "mimo-border-light": "#16A5C7",
-        "mimo-border-dark": "#2BB8DA",
-        "mimo-text-primary-light": "#032F3C",
-        "mimo-text-primary-dark": "#E6FAFF",
-        "mimo-text-secondary-light": "#0A4757",
-        "mimo-text-secondary-dark": "#A8DCEA",
-        "mimo-text-accent-light": "#006A82",
-        "mimo-text-accent-dark": "#5FD8F5",
-        "mimo-badge-bg-light": "#FFFFFF",
-        "mimo-badge-bg-dark": "#E6FAFF",
-        "mimo-badge-fg-light": "#004F63",
-        "mimo-badge-fg-dark": "#004F63",
-        "mimo-origin-bg-light": "#FFE08A",
-        "mimo-origin-bg-dark": "#FFE08A",
-        "mimo-origin-fg-light": "#4A3200",
-        "mimo-origin-fg-dark": "#4A3200",
-        "mimo-swatch-border-light": "#032F3CCC",
-        "mimo-swatch-border-dark": "#A8DCEACC",
-        "mimo-row-hover-light": "#A8E8F8",
-        "mimo-row-hover-dark": "#1F4F5F",
-        "mimo-shadow-light": "#1597B8",
-        "mimo-shadow-dark": "#0E7895",
-        "mimo-shadow-edge-light": "#1597B8",
-        "mimo-shadow-edge-dark": "#0E7895"
+        "recreo-surface-light": "#D2F3FC",
+        "recreo-surface-dark": "#163A47",
+        "recreo-notice-surface-light": "#D2F3FC",
+        "recreo-notice-surface-dark": "#163A47",
+        "recreo-border-light": "#16A5C7",
+        "recreo-border-dark": "#2BB8DA",
+        "recreo-text-primary-light": "#032F3C",
+        "recreo-text-primary-dark": "#E6FAFF",
+        "recreo-text-secondary-light": "#0A4757",
+        "recreo-text-secondary-dark": "#A8DCEA",
+        "recreo-text-accent-light": "#006A82",
+        "recreo-text-accent-dark": "#5FD8F5",
+        "recreo-badge-bg-light": "#FFFFFF",
+        "recreo-badge-bg-dark": "#E6FAFF",
+        "recreo-badge-fg-light": "#004F63",
+        "recreo-badge-fg-dark": "#004F63",
+        "recreo-origin-bg-light": "#FFE08A",
+        "recreo-origin-bg-dark": "#FFE08A",
+        "recreo-origin-fg-light": "#4A3200",
+        "recreo-origin-fg-dark": "#4A3200",
+        "recreo-swatch-border-light": "#032F3CCC",
+        "recreo-swatch-border-dark": "#A8DCEACC",
+        "recreo-row-hover-light": "#A8E8F8",
+        "recreo-row-hover-dark": "#1F4F5F",
+        "recreo-shadow-light": "#1597B8",
+        "recreo-shadow-dark": "#0E7895",
+        "recreo-shadow-edge-light": "#1597B8",
+        "recreo-shadow-edge-dark": "#0E7895"
       },
       "shadow": {
         "pop": [
@@ -115,60 +115,60 @@
       },
       "color": {
         "surface": {
-          "light": "{palette.mimo-surface-light}",
-          "dark": "{palette.mimo-surface-dark}"
+          "light": "{palette.recreo-surface-light}",
+          "dark": "{palette.recreo-surface-dark}"
         },
         "notice-surface": {
-          "light": "{palette.mimo-notice-surface-light}",
-          "dark": "{palette.mimo-notice-surface-dark}"
+          "light": "{palette.recreo-notice-surface-light}",
+          "dark": "{palette.recreo-notice-surface-dark}"
         },
         "border": {
-          "light": "{palette.mimo-border-light}",
-          "dark": "{palette.mimo-border-dark}"
+          "light": "{palette.recreo-border-light}",
+          "dark": "{palette.recreo-border-dark}"
         },
         "text-primary": {
-          "light": "{palette.mimo-text-primary-light}",
-          "dark": "{palette.mimo-text-primary-dark}"
+          "light": "{palette.recreo-text-primary-light}",
+          "dark": "{palette.recreo-text-primary-dark}"
         },
         "text-secondary": {
-          "light": "{palette.mimo-text-secondary-light}",
-          "dark": "{palette.mimo-text-secondary-dark}"
+          "light": "{palette.recreo-text-secondary-light}",
+          "dark": "{palette.recreo-text-secondary-dark}"
         },
         "text-accent": {
-          "light": "{palette.mimo-text-accent-light}",
-          "dark": "{palette.mimo-text-accent-dark}"
+          "light": "{palette.recreo-text-accent-light}",
+          "dark": "{palette.recreo-text-accent-dark}"
         },
         "badge-bg": {
-          "light": "{palette.mimo-badge-bg-light}",
-          "dark": "{palette.mimo-badge-bg-dark}"
+          "light": "{palette.recreo-badge-bg-light}",
+          "dark": "{palette.recreo-badge-bg-dark}"
         },
         "badge-fg": {
-          "light": "{palette.mimo-badge-fg-light}",
-          "dark": "{palette.mimo-badge-fg-dark}"
+          "light": "{palette.recreo-badge-fg-light}",
+          "dark": "{palette.recreo-badge-fg-dark}"
         },
         "origin-bg": {
-          "light": "{palette.mimo-origin-bg-light}",
-          "dark": "{palette.mimo-origin-bg-dark}"
+          "light": "{palette.recreo-origin-bg-light}",
+          "dark": "{palette.recreo-origin-bg-dark}"
         },
         "origin-fg": {
-          "light": "{palette.mimo-origin-fg-light}",
-          "dark": "{palette.mimo-origin-fg-dark}"
+          "light": "{palette.recreo-origin-fg-light}",
+          "dark": "{palette.recreo-origin-fg-dark}"
         },
         "swatch-border": {
-          "light": "{palette.mimo-swatch-border-light}",
-          "dark": "{palette.mimo-swatch-border-dark}"
+          "light": "{palette.recreo-swatch-border-light}",
+          "dark": "{palette.recreo-swatch-border-dark}"
         },
         "row-hover": {
-          "light": "{palette.mimo-row-hover-light}",
-          "dark": "{palette.mimo-row-hover-dark}"
+          "light": "{palette.recreo-row-hover-light}",
+          "dark": "{palette.recreo-row-hover-dark}"
         },
         "shadow": {
-          "light": "{palette.mimo-shadow-light}",
-          "dark": "{palette.mimo-shadow-dark}"
+          "light": "{palette.recreo-shadow-light}",
+          "dark": "{palette.recreo-shadow-dark}"
         },
         "shadow-edge": {
-          "light": "{palette.mimo-shadow-edge-light}",
-          "dark": "{palette.mimo-shadow-edge-dark}"
+          "light": "{palette.recreo-shadow-edge-light}",
+          "dark": "{palette.recreo-shadow-edge-dark}"
         },
         "surface-blur": {
           "light": 0,

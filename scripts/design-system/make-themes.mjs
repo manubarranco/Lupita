@@ -261,9 +261,9 @@ themes.push({
   size: { width: 460 },
 })
 
-// ── 9. Mimo ─ rounded type, pastel, pills ───────────────────────────────────────
+// ── 9. Recreo ─ rounded type, pressable cyan card ───────────────────────────────────────
 themes.push({
-  id: 'mimo', name: 'Mimo', axes: ALL,
+  id: 'recreo', name: 'Recreo', axes: ALL,
   blurb: 'Una interfaz de juego: tarjeta cian clara como un botón, con un borde cian bien marcado y un canto inferior grueso del mismo cian más oscuro; en oscuro, la tarjeta pasa a azul petróleo, esquinas generosas y letra redondeada gruesa. Las insignias, blancas como fichas. Amable sin ser infantil: la jerarquía sigue mandando.',
   type: {
     title: { family: 'rounded', size: 'xl', weight: 'semibold' }, id: { family: 'mono', size: 'md', weight: 'semibold', color: 'text-accent' },
