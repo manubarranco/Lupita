@@ -14,6 +14,20 @@ extension Color {
     }
 }
 
+/// A rounded rectangle, or a capsule for the radius 999 of the tokens; insettable so a border can sit inside it.
+struct ThemeShape: InsettableShape {
+    var radius: Double
+    var inset: CGFloat = 0
+
+    func path(in rect: CGRect) -> Path {
+        let r = rect.insetBy(dx: inset, dy: inset)
+        let corner = radius >= 999 ? min(r.width, r.height) / 2 : max(CGFloat(radius) - inset, 0)
+        return RoundedRectangle(cornerRadius: corner).path(in: r)
+    }
+
+    func inset(by amount: CGFloat) -> ThemeShape { ThemeShape(radius: radius, inset: inset + amount) }
+}
+
 extension TooltipTheme {
     /// The font of a text role, resolved for this Mac (a named font that is missing falls back as the tokens say).
     func font(_ role: TextRole) -> Font {
@@ -24,9 +38,7 @@ extension TooltipTheme {
     func color(_ role: TextRole) -> Color { Color(rgba: text(role).color) }
 
     /// A rounded rectangle, or a capsule for the radius 999 of the tokens.
-    func shape(_ radius: Double) -> AnyShape {
-        radius >= 999 ? AnyShape(Capsule()) : AnyShape(RoundedRectangle(cornerRadius: radius))
-    }
+    func shape(_ radius: Double) -> ThemeShape { ThemeShape(radius: radius) }
 
     /// The room a shadow needs around its view.
     func insets(of layers: [ShadowLayer]) -> EdgeInsets {

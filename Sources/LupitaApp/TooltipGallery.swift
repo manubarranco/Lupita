@@ -7,7 +7,7 @@ import SwiftUI
 /// so `scripts/contact-sheet.swift` can lay them out. It draws the real `TooltipView`; nothing is shown on screen.
 @MainActor
 enum TooltipGallery {
-    static let canvas = CGSize(width: 500, height: 280)
+    static let canvas = CGSize(width: 540, height: 320)
 
     static func run(_ args: [String]) -> Int32 {
         guard let dir = args.first else {
@@ -28,7 +28,7 @@ enum TooltipGallery {
             }
             for scheme in [ColorScheme.light, .dark] {
                 let name = String(format: "%02d-%@.png", n + 1, scheme == .light ? "light" : "dark")
-                write(TooltipView(resolution: resolution, open: { _ in }), scheme: scheme, to: dir + "/" + name)
+                write(TooltipView(resolution: resolution, theme: TooltipStyle.current(mode: scheme == .dark ? .dark : .light), open: { _ in }), scheme: scheme, to: dir + "/" + name)
             }
             print(String(format: "%02d  %@", n + 1, text))
         }
@@ -39,7 +39,7 @@ enum TooltipGallery {
         let backdrop = scheme == .light ? Color(white: 0.96) : Color(white: 0.13)
         let framed = ZStack(alignment: .topLeading) {
             backdrop
-            view.padding(20)
+            view.padding(40)
         }
         .frame(width: canvas.width, height: canvas.height)
         .environment(\.colorScheme, scheme)
@@ -341,7 +341,7 @@ private struct VocabularySheet: View {
                 ForEach(Array(cards.enumerated()), id: \.offset) { _, card in
                     VStack(alignment: .leading, spacing: 6) {
                         Text("«\(card.0)»").font(.caption.monospaced()).foregroundStyle(.secondary)
-                        TooltipView(resolution: card.1, open: { _ in })
+                        TooltipView(resolution: card.1, theme: TooltipStyle.current(), open: { _ in })
                     }
                 }
             }
