@@ -2,41 +2,127 @@
 
 # Lupita
 
-**Tu agente dice `D23`, `L04`, `E2-S4`. Lupita te dice qué significan.**
+**Señala lo que cita tu agente de código. Lee qué significa.**
 
-Apunta a cualquier referencia, en cualquier app, pulsa un atajo y lee su definición en tus repos.
+`D23`, `e455cf7`, `fix/search`, `/retro`, `--accent`: Lupita te los explica en cualquier app, desde tus propios repos. Pulsa ⌃⌥⌘ y un tooltip te da la respuesta.
 
-Los agentes de código (Claude Code, Cursor, Devin, Copilot…) guardan su memoria en archivos
-Markdown y la citan por ID: *"como se decidió en D23, y a la espera de Q07, he aplicado
-L34"*. El agente sabe qué son. Tú no te acuerdas. Lupita es una app de la barra de menús de
-macOS que te enseña la definición de la referencia que tienes bajo el ratón, en cualquier
-app: un chat con un agente, un editor, una terminal, el navegador.
+![Demo de Lupita: al señalar D003 en un chat con un agente aparece su definición](docs/demo.gif)
 
-![Demo de Lupita: al apuntar a D003 en un chat con un agente aparece su definición](docs/demo.gif)
+**[⬇ Descarga Lupita para macOS](https://github.com/manubarranco/Lupita/releases/latest/download/Lupita.zip)**
 
-**[⬇ Descarga Lupita para macOS](https://github.com/manubarranco/Lupita/releases/latest/download/Lupita.zip)** (Apple Silicon, macOS 14 o posterior)
+macOS 14 o posterior, Apple Silicon · Gratis y de código abierto (MIT) · Todo se queda en tu Mac
 
 [Read in English](README.md)
 
+## Qué explica
+
+Los agentes de código (Claude Code, Cursor, Devin, Copilot…) citan su propia memoria: *"como se
+decidió en D23, y a la espera de Q07, he aplicado L34"*. El agente sabe qué son. Tú no te
+acuerdas. Lupita lee la respuesta en tus repos, estés leyendo donde estés: un chat con un
+agente, un editor, una terminal, el navegador.
+
+- **Los IDs de tus agentes**: decisiones, preguntas, lecciones e historias (`D23`, `Q07`, `E2-S3`), del Markdown donde se definen.
+- **Git**: commits, ramas, pull requests y nombres de repo, consultados al momento (`e455cf7`, `fix/search`, `PR 123`).
+- **Archivos, comandos y código**: `docs/decisions.md:12`, `/retro`, `build_glyphs`, `npm run build`.
+- **Tu vocabulario**: términos de glosario, tokens CSS y colores, direcciones locales (`el libro mayor`, `--accent`, `localhost:8130`).
+- **La jerga del oficio**: palabras de git, comandos de shell, errores y estados HTTP en una línea llana (`rebase`, `chmod`, `ENOENT`).
+
+La lista completa está en [Referencia](#referencia).
+
 ## Cómo funciona
 
-1. **Indexa tus repos.** Registras una o varias carpetas (`~/Repos` por defecto). Lupita
-   encuentra los repos git que hay dentro y lee sus `.md`, buscando IDs que estén
-   **definidos** en algún sitio, no solo mencionados. Los prefijos se descubren, no se
-   configuran: `D`, `Q`, `ADR`, `QL`, `E2-S3b` o lo que se hayan inventado tus agentes.
-2. **Apuntas y pulsas ⌃⌥⌘** (las tres a la vez y sueltas). Lupita lee la palabra bajo el
-   ratón: con la accesibilidad de macOS cuando la app expone su texto, o con OCR en tu Mac
-   sobre una franja pequeña alrededor del ratón cuando no (VS Code, Cursor, Claude,
-   navegadores).
-3. **Aparece un tooltip** con el ID, su título, dos o tres líneas de la definición, el repo y
-   el archivo, y cuántas veces se cita. Clic para abrir el archivo en esa línea; Esc lo cierra.
-4. **Mantén el atajo** para ver qué sabe Lupita: se subrayan las palabras de la ventana que
-   sabe explicar. Suelta sobre una para leerla.
+1. **Añade tus repos.** Lupita indexa los repos git de `~/Repos`, o de las carpetas que elijas. Mantiene el índice al día solo.
+2. **Señala y pulsa ⌃⌥⌘.** Las tres teclas a la vez, y sueltas.
+3. **Lee el tooltip.** Muestra el título, dos o tres líneas de la definición, el repo y el archivo. Clic para abrir el archivo en esa línea; Esc lo cierra.
+4. **Mantén ⌃⌥⌘ para ver qué sabe explicar Lupita.** Se subrayan las referencias de la ventana. Suelta sobre una para leerla.
 
-El índice se mantiene al día solo: un vigilante de archivos reindexa el repo que cambia, y un
-ID escrito hace unos segundos se encuentra igualmente.
+## Instalar
+
+**Primera instalación.** Descarga `Lupita.zip` en [Releases](../../releases), descomprímelo y
+mueve `Lupita.app` a Aplicaciones. La app aún no está notarizada, así que macOS la bloquea la
+primera vez. Abre **Ajustes del Sistema → Privacidad y seguridad**, baja hasta el final y pulsa
+**Abrir igualmente**. Después, da los permisos de Accesibilidad y Grabación de pantalla cuando te
+los pida ([por qué](#permisos-y-privacidad)).
+
+Lupita se abre sola al iniciar sesión; se apaga con **Abrir al iniciar sesión** en su menú.
+
+**Actualizar.** Elige **Buscar actualizaciones…** en el menú de Lupita y luego **Instalar y
+reiniciar**. Lupita comprueba que la versión nueva está firmada con el mismo certificado, se
+sustituye y se vuelve a abrir. macOS mantiene los permisos, así que no hay que volver a darlos.
+
+**¿Vienes de la 0.8.0 o anterior?** Sustituye la app a mano una vez. Después, en **Privacidad y
+seguridad**, quita la Lupita antigua de **Accesibilidad** y **Grabación de pantalla** (el botón
+**−**) y vuelve a darle los permisos. Es la última vez.
+
+Necesita macOS 14 o posterior. La release es para Apple Silicon; en un Mac Intel,
+[compílala desde el código](#desarrollo).
+
+## Permisos y privacidad
+
+Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de lo que consultas.
+Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
+
+Pide dos permisos de macOS, y solo los usa cuando pulsas el atajo:
+
+- **Accesibilidad**: para el atajo y para leer el texto exacto bajo el puntero (10-40 ms en apps nativas).
+- **Grabación de pantalla**: para las apps que no exponen su texto (VS Code, Cursor, Claude,
+  navegadores). Lupita lee una franja de 600 × 80 pt alrededor del puntero con el OCR de Apple
+  (Vision), en tu Mac. Mientras mantienes el atajo, lee la ventana bajo el puntero, para
+  subrayar lo que sabe explicar.
+
+La única llamada de red es **Buscar actualizaciones…**: pregunta a GitHub por la última release,
+y solo cuando lo pulsas. **Instalar y reiniciar** la descarga después. Lupita nunca comprueba en
+segundo plano.
+
+Es un compromiso también para las versiones futuras. Si Lupita llega a usar un modelo de lenguaje,
+será el modelo de Apple que funciona en tu Mac. Si alguna función necesitara la red, vendría
+apagada, claramente señalada, y solo funcionaría si tú la activas.
+
+### Informe de IDs (opcional, lo envías tú)
+
+Para ayudar a descubrir formatos de ID que Lupita aún no conoce, mantén **⌥** al abrir el menú
+de Lupita y elige **Crear informe de IDs…**. Lupita te enseña todas las filas antes de guardar
+nada y puedes quitar cualquiera. Una fila solo lleva la forma de un ID (letras como `A`, dígitos
+como `9`: `E2-S3` pasa a `A9-A9`), su prefijo y dónde está escrito (encabezado, tabla, lista,
+nombre de archivo, frontmatter). Añade el nombre del archivo, recuentos y si Lupita lo encuentra.
+Nunca lleva títulos, definiciones, líneas de texto, rutas de carpetas ni nombres de repos
+(los repos son «repo 1», «repo 2»). Guardas el archivo o abres un correo nuevo con él adjunto,
+y **tú** pulsas enviar: Lupita no hace ninguna llamada de red.
+
+## Que tus agentes sean fáciles de consultar
+
+Lupita funciona sin configurar nada: ya explica la mayor parte de lo que citan tus agentes. Una
+regla en las instrucciones de tu agente la lleva más lejos: a lo que creen a partir de ahora y a
+su vocabulario interno.
+
+Lupita nunca escribe en tus repos. Te da un prompt para tu propio agente. Si el agente falla, no
+hace nada; no pide commit ni decisiones de criterio. Pégale esto a tu agente (el prompt va siempre
+en inglés; los agentes lo leen):
+
+```text
+Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
+
+<!-- lupita -->
+Define each new decision, question, lesson or story once as `## ID — Title` plus a one-line summary.
+Add each new internal term to the glossary (`docs/glossary.md` if there is none) as `- **term** — definition`.
+Where this repo already has a format for these, keep it.
+<!-- /lupita -->
+```
+
+La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista los repos con
+`AGENTS.md` o `CLAUDE.md`, cuántas referencias aún no explica nada y si la regla está puesta.
+**Copiar y abrir** copia el prompt y abre el repo en tu editor (Cursor, VS Code, Windsurf, Zed o
+Finder), listo para pegar.
+
+En [`examples/demo-project`](examples/demo-project) hay un proyecto pequeño que usa todos los
+formatos.
+
+## Referencia
 
 ### Qué cuenta como definición
+
+Lupita busca IDs que estén **definidos** en algún sitio, no solo mencionados. Los prefijos se
+descubren, no se configuran: `D`, `Q`, `ADR`, `QL`, `E2-S3b` o lo que se hayan inventado tus agentes.
 
 | Formato | Ejemplo |
 |---|---|
@@ -47,14 +133,17 @@ ID escrito hace unos segundos se encuentra igualmente.
 | Frontmatter | `id: ADR-004` |
 
 Todo lo demás es una mención. Las secciones *sobre* un ID (`## D34 parte 2`) y las etiquetas
-de prioridad (`## P1`) se reconocen y no estorban.
+de prioridad (`## P1`) se reconocen y no estorban. Un vigilante de archivos reindexa el repo que
+cambia, así que un ID escrito hace unos segundos se encuentra igualmente.
 
-### Más allá de los IDs: commits, ramas, archivos, comandos y código
+### Todo lo que explica Lupita
 
-Los agentes también citan cosas que viven en git y en el disco. Lupita las busca en el momento
-en que las señalas, así que nunca están desactualizadas:
+Commits, ramas, archivos y el resto se consultan en el momento en que los señalas, así que nunca están desactualizados.
 
-| Señalas | La ficha muestra |
+<details>
+<summary>Los 13 tipos de referencia, con lo que muestra el tooltip</summary>
+
+| Señalas | El tooltip muestra |
 |---|---|
 | Un nombre de repo (`atlas`) | El título y la primera línea de su README, la rama actual, el último commit y los cambios sin commitear |
 | Un commit (`e455cf7`) | Su mensaje, la fecha y si está en `main`. Clic: el commit en GitHub |
@@ -70,104 +159,21 @@ en que las señalas, así que nunca están desactualizadas:
 | Una palabra de git en prosa (`rebase`, `fast-forward`, `detached HEAD`, `pushear`) | Una línea en lenguaje llano y un ejemplo. Una palabra que también es del habla corriente (`main`, `push`, `rama`) solo cuenta junto a otra palabra de git, en inline code o junto al nombre de un archivo o rama |
 | Una PR (`#123`, `PR 123`) | Título y fecha del merge, leídos del historial git local del repo de la ventana; o «No está en el historial local» |
 
+</details>
+
 Commits, ramas y PRs necesitan git (las Command Line Tools); sin ellas, simplemente no se reconocen.
 
-Los diccionarios fijos se pueden apagar en **Explicar términos de:** del menú, cada uno encendido por defecto: **Git**
-(palabras de git en prosa y comandos `git …`), **Terminal** (comandos de shell como `rm` o `chmod`) y **Development**
-(errores, estados HTTP y etiquetas HTML). Solo cubren conocimiento general de un oficio que quizá ya tienes: lo que sale
-de tus repos (IDs, glosarios, commits, ramas, archivos, PRs, símbolos, tokens, direcciones locales y scripts de
-`package.json`) está siempre encendido.
+**Apaga la jerga que ya conoces.** En **Explicar términos de:** del menú, cada diccionario fijo
+está encendido por defecto: **Git** (palabras de git en prosa y comandos `git …`), **Terminal**
+(comandos de shell como `rm` o `chmod`) y **Development** (errores, estados HTTP y etiquetas
+HTML). Lo que sale de tus repos (IDs, glosarios, commits, ramas, archivos, PRs, símbolos, tokens,
+direcciones locales y scripts de `package.json`) está siempre encendido.
 
 ### Qué repo, cuando los IDs coinciden
 
 `D001` suele existir en todos los repos. Lupita elige el bueno por este orden: un repo nombrado
 justo antes del ID, un repo nombrado en el archivo que lees, el repo de la ventana activa, la
 carpeta más cercana. Si la definición viene de otro repo, el tooltip lo dice.
-
-## Que tus agentes sean fáciles de consultar
-
-Lupita funciona sin ninguna regla: ya explica la mayor parte de lo que citan tus agentes. La
-regla lo lleva más lejos: lo que tus agentes creen a partir de ahora y su vocabulario interno.
-Lupita nunca escribe en tus repos: te da un prompt para tu propio agente. Es seguro por diseño:
-si el agente falla, no hace nada; no pide commit; no pide decisiones de criterio. Pégale esto a
-tu agente (el prompt va siempre en inglés; los agentes lo leen):
-
-```text
-Add this block at the end of this repo's agent instructions file (`AGENTS.md`, or `CLAUDE.md` if there is no `AGENTS.md`). Change nothing else. If the block is already there, do nothing.
-
-<!-- lupita -->
-Define each new decision, question, lesson or story once as `## ID — Title` plus a one-line summary.
-Add each new internal term to the glossary (`docs/glossary.md` if there is none) as `- **term** — definition`.
-Where this repo already has a format for these, keep it.
-<!-- /lupita -->
-```
-
-La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista los repos con
-`AGENTS.md` o `CLAUDE.md`, cuántas citas aún no explica nada y si la regla está puesta. **Copiar y
-abrir** copia el prompt y abre el repo en tu editor (Cursor, VS Code, Windsurf, Zed o Finder),
-listo para pegar.
-
-En [`examples/demo-project`](examples/demo-project) hay un proyecto pequeño que usa todos los
-formatos.
-
-## Instalar
-
-Necesita macOS 14 o posterior. La release es para Apple Silicon; en un Mac Intel, compílala desde el código.
-
-**Desde una release.** Descarga `Lupita.zip` en [Releases](../../releases), descomprímelo y
-mueve `Lupita.app` a Aplicaciones. La app aún no está notarizada, así que la primera vez que macOS la bloquee:
-abre **Ajustes del Sistema → Privacidad y seguridad**, baja hasta el final y pulsa **Abrir igualmente**.
-
-Lupita se abre sola al iniciar sesión; se apaga con **Abrir al iniciar sesión** en su menú.
-
-**Actualizar.** Elige **Buscar actualizaciones…** en el menú de Lupita y luego **Instalar y reiniciar**.
-Lupita descarga la versión nueva, comprueba que está firmada con el mismo certificado, se sustituye
-y se vuelve a abrir. macOS mantiene los permisos, así que no hay que volver a darlos. Funciona
-desde la 0.9.0: para pasar de la 0.8.0 o anterior a la 0.9.0, sustituye la app a mano una vez y en
-**Privacidad y seguridad** quita la Lupita antigua de **Accesibilidad** y **Grabación de pantalla**
-(el botón **−**) y vuelve a darle los permisos. Es la última vez.
-
-**Desde el código.** Con Xcode o solo con las Command Line Tools (`xcode-select --install`):
-
-```bash
-git clone https://github.com/manubarranco/Lupita.git
-cd Lupita
-./scripts/bundle.sh
-open build/Lupita.app
-```
-
-## Permisos y privacidad
-
-Lupita pide dos permisos de macOS, y solo los usa cuando pulsas el atajo:
-
-- **Accesibilidad**: para el atajo y para leer el texto exacto bajo el ratón.
-- **Grabación de pantalla**: para leer con el OCR de Apple (Vision) una franja de
-  600 × 80 pt alrededor del ratón, en las apps que no exponen su texto, y, mientras mantienes
-  el atajo, la ventana bajo el ratón, para subrayar lo que Lupita sabe explicar.
-
-Todo ocurre en tu Mac. No se envía nada a ningún sitio y no se guarda nada de lo que
-consultas. La única excepción es **Buscar actualizaciones…** en el menú: pregunta a GitHub por la
-última release, y solo cuando lo pulsas; **Instalar y reiniciar** la descarga después. Lupita nunca comprueba en segundo plano. Lupita solo guarda sus ajustes y el índice de tus archivos Markdown, en memoria.
-
-Es un compromiso también para las versiones futuras. Si Lupita llega a usar un modelo de lenguaje,
-será el modelo de Apple que funciona en tu Mac. Si alguna función necesitara la red, vendría
-apagada, claramente señalada, y solo funcionaría si tú la activas.
-
-### Informe de IDs (opcional, lo envías tú)
-
-Para ayudar a descubrir formatos de ID que Lupita aún no conoce, mantén **⌥** al abrir el menú
-de Lupita y elige **Crear informe de IDs…**. Lupita te enseña todas las filas antes de guardar
-nada y puedes quitar cualquiera. Una fila solo lleva la forma de un ID (letras como `A`, dígitos
-como `9`: `E2-S3` pasa a `A9-A9`), su prefijo, dónde está escrito (encabezado, tabla, lista,
-nombre de archivo, frontmatter), el nombre del archivo, recuentos y si Lupita lo encuentra.
-Nunca lleva títulos, definiciones, líneas de texto, rutas de carpetas ni nombres de repos
-(los repos son «repo 1», «repo 2»). Guardas el archivo o abres un correo nuevo con él adjunto,
-y **tú** pulsas enviar: Lupita no hace ninguna llamada de red.
-
-Si compilas desde el código, macOS olvida los permisos en cada compilación salvo que la app
-esté firmada con un certificado estable: crea en Acceso a Llaveros un certificado autofirmado
-de **Firma de código** llamado `Lupita Dev` y `scripts/bundle.sh` lo usará. Sin él el script
-se para; para compilar igualmente con firma ad-hoc, ejecuta `LUPITA_SIGN_IDENTITY=- ./scripts/bundle.sh`.
 
 ## Límites conocidos
 
@@ -192,6 +198,20 @@ Lupita es para el momento intermedio: estás leyendo lo que ha escrito un agente
 necesitas saber qué está citando.
 
 ## Desarrollo
+
+Para compilar desde el código, con Xcode o solo con las Command Line Tools (`xcode-select --install`):
+
+```bash
+git clone https://github.com/manubarranco/Lupita.git
+cd Lupita
+./scripts/bundle.sh
+open build/Lupita.app
+```
+
+macOS olvida los permisos en cada compilación salvo que la app esté firmada con un certificado
+estable: crea en Acceso a Llaveros un certificado autofirmado de **Firma de código** llamado
+`Lupita Dev` y `scripts/bundle.sh` lo usará. Sin él el script se para; para compilar igualmente
+con firma ad-hoc, ejecuta `LUPITA_SIGN_IDENTITY=- ./scripts/bundle.sh`.
 
 ```bash
 ./scripts/test.sh                 # tests (funciona sin Xcode)
