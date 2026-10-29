@@ -63,7 +63,7 @@ import AppKit
             let layers = TooltipTheme.load(id).insetShadow
             #expect(layers.isEmpty == (id != "neon"), "\(id)")
         }
-        #expect(TooltipTheme.load("neon").insetShadow.first?.blur == 14)
+        #expect(TooltipTheme.load("neon").insetShadow.first?.blur == 10)
     }
 
     @Test func cristalIsTheDefault() {

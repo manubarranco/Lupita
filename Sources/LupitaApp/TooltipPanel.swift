@@ -16,6 +16,8 @@ final class TooltipPanel {
         let i = shadowInsets
         return NSRect(x: f.minX + i.left, y: f.minY + i.bottom, width: f.width - i.left - i.right, height: f.height - i.top - i.bottom)
     }
+    /// The whole panel, margin included (dev aid).
+    var windowFrame: NSRect? { panel?.frame }
     /// The room the shadow takes around the visible box; the panel is the box plus this.
     private var shadowInsets = NSEdgeInsets()
     /// The tooltip's own window number, so a lookup on top of it can read it.
@@ -63,9 +65,11 @@ final class TooltipPanel {
         close()
         let host = FirstClickHostingView(rootView: view.padding(insets))
         let size = host.fittingSize
+        host.sizingOptions = []   // the panel keeps the size measured here; the hosting view must not resize its window
         let panel = NSPanel(contentRect: NSRect(origin: .zero, size: size),
                             styleMask: [.nonactivatingPanel, .borderless], backing: .buffered, defer: false)
         panel.contentView = host
+        panel.setContentSize(size)   // the hosting view may have grown the window by itself: the panel is exactly the fitting size
         panel.isFloatingPanel = true
         panel.level = .popUpMenu
         panel.backgroundColor = .clear

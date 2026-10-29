@@ -56,15 +56,15 @@
         "neon-shadow-dark": "#FF4FB03D",
         "neon-shadow-edge-light": "#FF3EA5F2",
         "neon-shadow-edge-dark": "#FF4FB0B3",
-        "neon-inner-glow-light": "#FF4FB04D",
-        "neon-inner-glow-dark": "#FF4FB04D"
+        "neon-inner-glow-light": "#FF4FB026",
+        "neon-inner-glow-dark": "#FF4FB026"
       },
       "shadow": {
         "glowIn": [
           {
             "x": 0,
             "y": 0,
-            "blur": 14,
+            "blur": 10,
             "spread": 0,
             "color": "{color.inner-glow}"
           }

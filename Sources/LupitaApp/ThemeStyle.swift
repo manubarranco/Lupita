@@ -70,10 +70,7 @@ extension View {
                         shape.fill(Color.black)
                             .shadow(color: Color(rgba: layer.color), radius: layer.blur / 2, x: layer.x, y: layer.y)
                             .mask {   // the shadow is outside the box only: a translucent surface must not show it through
-                                ZStack {
-                                    Rectangle().fill(Color.black).padding(-400)
-                                    shape.fill(Color.black).blendMode(.destinationOut)
-                                }.compositingGroup()
+                                OutsideShape(radius: radius).fill(Color.black, style: FillStyle(eoFill: true))
                             }
                     }
                     if theme.surfaceBlur > 0 {
@@ -105,5 +102,16 @@ enum TooltipStyle {
         let accessibility = ThemeAccessibility(reduceTransparency: workspace.accessibilityDisplayShouldReduceTransparency,
                                                increaseContrast: workspace.accessibilityDisplayShouldIncreaseContrast)
         return preferences.theme(systemIsDark: systemIsDark, accessibility: accessibility)
+    }
+}
+
+/// Everything around a `ThemeShape` (a big rectangle with the shape cut out), as a Shape so it takes no room of its own:
+/// a negative `padding` on a mask made the hosting window grow by hundreds of points.
+private struct OutsideShape: Shape {
+    let radius: Double
+    func path(in rect: CGRect) -> Path {
+        var p = Path(rect.insetBy(dx: -400, dy: -400))
+        p.addPath(ThemeShape(radius: radius).path(in: rect))
+        return p
     }
 }

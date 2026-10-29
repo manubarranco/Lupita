@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 // Development aid: draw tooltips to PNG files and exit (see TooltipGallery).
 if let i = CommandLine.arguments.firstIndex(of: "--render-tooltips") {
@@ -42,6 +43,23 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-underline") {
 // Development aid: the menu drawn to PNG with the folders in the current settings (D44).
 if let i = CommandLine.arguments.firstIndex(of: "--render-menu") {
     let code = MainActor.assumeIsolated { TooltipGallery.runMenu(CommandLine.arguments.dropFirst(i + 1).first) }
+    exit(code)
+}
+
+// Development aid: where a notice lands for a mouse at x,y (Cocoa points), to check it sits next to the cursor.
+if let i = CommandLine.arguments.firstIndex(of: "--probe-notice") {
+    let code = MainActor.assumeIsolated { () -> Int32 in
+        let app = NSApplication.shared
+        app.setActivationPolicy(.accessory)
+        let parts = (CommandLine.arguments.dropFirst(i + 1).first ?? "600,500").split(separator: ",").compactMap { Double($0) }
+        let mouse = NSPoint(x: parts.first ?? 600, y: parts.last ?? 500)
+        let panel = TooltipPanel()
+        panel.showNotice("Lupita no encuentra nada para «ZX9» en tus repos.", at: mouse)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+        guard let f = panel.frame, let w = panel.windowFrame else { return 1 }
+        print("mouse \(mouse)\nvisible \(f)\nwindow \(w)\ngap right \(f.minX - mouse.x) · gap below \(mouse.y - f.maxY)")
+        return 0
+    }
     exit(code)
 }
 
