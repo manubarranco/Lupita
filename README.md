@@ -53,9 +53,10 @@ when you ask.
 To read your screen it asks for two macOS permissions, and uses them only when you press the
 shortcut:
 
-- **Accessibility**: for the shortcut, and to read text in apps that allow it.
-- **Screen Recording**: to read apps that don't (Cursor, Claude or your browser) with macOS's
-  own OCR.
+- **Accessibility**: for the shortcut, and to read text in apps that support macOS
+  accessibility.
+- **Screen Recording**: to read text in apps that don't support it (Cursor, Claude or your
+  browser), with macOS's own OCR.
 
 ## Install
 

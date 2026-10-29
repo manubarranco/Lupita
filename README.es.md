@@ -50,9 +50,10 @@ no guarda lo que consultas. La única conexión es buscar actualizaciones, y sol
 
 Para leer tu pantalla te pedirá dos permisos de macOS, y solo los usa cuando pulsas el atajo:
 
-- **Accesibilidad**: para el atajo y para leer el texto de las apps que lo permiten.
-- **Grabación de pantalla**: para leer con el OCR de macOS las apps que no lo permiten (Cursor,
-  Claude o el navegador).
+- **Accesibilidad**: para el atajo y para leer el texto de las apps compatibles con la
+  accesibilidad de macOS.
+- **Grabación de pantalla**: para leer con el OCR de macOS el texto de las apps que no son
+  compatibles (Cursor, Claude o el navegador).
 
 ## Instalar
 
