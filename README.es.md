@@ -4,7 +4,7 @@
 
 **Tu agente dice `D23`, `L04`, `E2-S4`. Lupita te dice qué significan.**
 
-Apunta a cualquier referencia, en cualquier app, pulsa un atajo y lee su definición en tus repos.
+Apunta a cualquier referencia, en cualquier app, pulsa un atajo y lee su definición desde tus repos.
 
 [Read in English](README.md)
 
