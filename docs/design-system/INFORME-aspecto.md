@@ -19,13 +19,15 @@ Tamaño y densidad son preferencias de quien lee, no de un tema (D55); con token
 
 ## Riesgo (lo que no cuadra o no pude ver)
 - **Son 7 temas, no 8**: el brief contaba mal (10 − Lupita − Grande − Compacto). No inventé un octavo.
-- **El material de Cristal** se ve plano en las hojas (limitación de los renders sin pantalla); en la ventana viva sí deja ver lo de atrás. A mirar en el test.
+- **Cristal usa el material nativo de macOS** con un velo ligero (blanco 25 % en claro, azul oscuro 35 % en oscuro) y un borde fino como el separador del sistema. En las hojas sin pantalla sale plano; sobre contenido real sí transparenta. La validación de contraste modela el material.
+- **Terminal** tiene borde verde en los dos modos; **Neón** un halo interior suave (si no convence, se quita borrando una línea del tema).
 - **Parecido con el prototipo HTML**: en píxeles Cristal difiere un 7,6 % (el criterio pedía < 2 %): el texto cae 1-3 pt distinto y el material no se ve en el render. El alto del tooltip coincide a 2 pt (246 vs 248). `sheets-real/cristal-swift-vs-html.png`.
 - **Sombras**: SwiftUI no tiene «extensión» de sombra; Cristal y Papel salen algo más anchas y Neón algo menos difuso.
 - **Terminal** (Monaco, un solo peso): sin negrita; título e identificador en verde. **Neón, Ficha, Blueprint**: «sin definición» sin cursiva (sus fuentes no tienen).
-- **Dos Lupita a la vez**: está arrancada la tuya (build viejo) y la nueva; ciérrala antes de probar, comparten atajo.
+- Se corrigió que el panel del tooltip crecía solo cientos de puntos al abrirse: el aviso y Lupita salían lejos del cursor (`LupitaApp --probe-notice x,y` lo mide).
 - **El gesto del trackpad y las flechas no las he podido probar con una persona** (sí compila, se dibuja y el selftest pasa); es lo primero que mirar.
 - Un tooltip ya abierto no cambia al tocar «Aspecto»; el siguiente sí.
+- Cifras actuales: 218 tests en verde.
 - Detalle y lista completa: `decisiones-pendientes.md` en la carpeta de notas de la sesión.
 
 ## Test plan (5 puntos)
