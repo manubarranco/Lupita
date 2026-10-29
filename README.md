@@ -13,8 +13,8 @@ they say things like:
 
 > *Logged L023 and D042. Open questions Q34-36 are still pending. Shall we start with E3S1?*
 
-Lupita is a macOS menu bar app that looks those references up for you, the same way agents do,
-and explains them on the spot.
+Lupita is a macOS menu bar app that looks those references up in your repos, the same way your
+agents do, and explains them on the spot.
 
 ![Lupita demo: pointing at D003 in an agent chat shows its definition](docs/demo.gif)
 

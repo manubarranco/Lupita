@@ -12,8 +12,8 @@ contigo se olvidan de que tú no tienes su contexto ni su memoria de trabajo, y 
 
 > *Queda anotado L023 y D042. Queda pendiente resolver las preguntas abiertas Q34-36. ¿Empezamos con E3S1?*
 
-Lupita es una app de la barra de menús de macOS que busca esas referencias por ti, igual que
-hacen los agentes, y te las explica en el sitio.
+Lupita es una app de la barra de menús de macOS que busca esas referencias en tus repos, igual
+que hacen tus agentes, y te las explica en el sitio.
 
 ![Demo de Lupita: al señalar D003 en un chat con un agente aparece su definición](docs/demo.gif)
 
