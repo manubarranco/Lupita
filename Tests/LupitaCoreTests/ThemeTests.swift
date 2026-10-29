@@ -46,6 +46,26 @@ import AppKit
         #expect(light.colors.textPrimary == RGBA(hex: "#0B1B2E"))
     }
 
+    @Test func cristalBorderIsAHairlineLikeTheSystemSeparator() {
+        #expect(TooltipTheme.load("cristal", mode: .light).colors.border == RGBA(hex: "#00000024"))
+        #expect(TooltipTheme.load("cristal", mode: .dark).colors.border == RGBA(hex: "#FFFFFF29"))
+    }
+
+    @Test func terminalHasAVisibleEdgeInBothModes() {
+        for mode in ThemeMode.allCases {
+            let t = TooltipTheme.load("terminal", mode: mode)
+            #expect(t.colors.border == RGBA(hex: "#3DFF7A99") && t.border.container >= 1)
+        }
+    }
+
+    @Test func onlyNeonDrawsAnInnerHalo() {
+        for id in TooltipTheme.ids {
+            let layers = TooltipTheme.load(id).insetShadow
+            #expect(layers.isEmpty == (id != "neon"), "\(id)")
+        }
+        #expect(TooltipTheme.load("neon").insetShadow.first?.blur == 14)
+    }
+
     @Test func cristalIsTheDefault() {
         #expect(TooltipTheme.defaultID == "cristal" && TooltipTheme.ids.first == "cristal")
         #expect(TooltipTheme.load("no-such-theme").id == "cristal")

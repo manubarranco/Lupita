@@ -61,11 +61,11 @@ ${Object.entries(vars).map(([k, v]) => `  ${k}: ${v};`).join('\n')}
 
   const staticCss = `/*STATIC*/
 ${textRules}
-.tooltip { position: relative; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; width: var(--size-width); padding: var(--space-padding); gap: var(--space-block-gap); background: var(--color-surface); -webkit-backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); border-radius: var(--radius-container); box-shadow: var(--shadow-container); text-align: left; }
+.tooltip { position: relative; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; width: var(--size-width); padding: var(--space-padding); gap: var(--space-block-gap); background: var(--color-surface); -webkit-backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); border-radius: var(--radius-container); box-shadow: var(--shadow-container), var(--shadow-inset); text-align: left; }
 .tooltip::after, .notice::after { content: ""; position: absolute; inset: 0; box-sizing: border-box; border-radius: inherit; pointer-events: none; }
 .tooltip::after { border: var(--border-container) solid var(--color-border); }
 .tooltip.range { gap: var(--space-range-gap); }
-.notice { position: relative; box-sizing: border-box; display: block; width: max-content; max-width: var(--size-width); padding: var(--space-notice-y) var(--space-notice-x); background: var(--color-notice-surface); -webkit-backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); border-radius: var(--radius-notice); box-shadow: var(--shadow-notice); }
+.notice { position: relative; box-sizing: border-box; display: block; width: max-content; max-width: var(--size-width); padding: var(--space-notice-y) var(--space-notice-x); background: var(--color-notice-surface); -webkit-backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); backdrop-filter: blur(var(--color-surface-blur)) saturate(var(--color-surface-saturate)); border-radius: var(--radius-notice); box-shadow: var(--shadow-notice), var(--shadow-inset); }
 .notice::after { border: var(--border-notice) solid var(--color-border); }
 .row { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-row-gap); min-width: 0; padding: var(--space-row-pad-y) var(--space-row-pad-x); margin: calc(var(--space-row-pad-y) * -1) calc(var(--space-row-pad-x) * -1); border-radius: var(--radius-row); }
 .row.hover { background: var(--color-row-hover); }
@@ -175,7 +175,7 @@ ${client}
         const f = res[`font.family.${val.familyKey}`]
         Object.assign(v, { [`${name}-family`]: f.primary === 'system' ? `var(--font-fb-${f.fallback})` : `"${f.primary}", var(--font-fb-${f.fallback})`, [`${name}-size`]: px(val.size), [`${name}-weight`]: String(val.weight), [`${name}-style`]: val.italic ? 'italic' : 'normal', [`${name}-lh`]: String(val.lineHeight), [`${name}-tracking`]: px(val.tracking), [`${name}-color`]: val.color })
       } else if (k.startsWith('shadow.')) {
-        v[name] = val.length ? val.map(l => `${px(l.x)} ${px(l.y)} ${px(l.blur)} ${px(l.spread)} ${l.color}`).join(', ') : '0 0 0 0 transparent'
+        v[name] = val.length ? val.map(l => `${k === 'shadow.inset' ? 'inset ' : ''}${px(l.x)} ${px(l.y)} ${px(l.blur)} ${px(l.spread)} ${l.color}`).join(', ') : '0 0 0 0 transparent'
       } else if (k.startsWith('component.limits.')) { if (typeof val === 'number') v[name] = String(val) }
       else if (typeof val === 'number') v[name] = k === 'color.suggestion-opacity' ? String(val) : px(val)
       else v[name] = String(val)

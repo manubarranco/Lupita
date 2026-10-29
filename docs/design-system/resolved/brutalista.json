@@ -132,7 +132,8 @@
    "swatchBorder": "#000000",
    "rowHover": "#C4A1FF",
    "shadow": "#000000",
-   "shadowEdge": "#000000"
+   "shadowEdge": "#000000",
+   "innerGlow": "#00000000"
   },
   "surfaceBlur": 0,
   "suggestionOpacity": 0.8,
@@ -185,7 +186,8 @@
      "spread": 0,
      "color": "#000000"
     }
-   ]
+   ],
+   "inset": []
   }
  },
  "dark": {
@@ -304,7 +306,8 @@
    "swatchBorder": "#000000",
    "rowHover": "#C4A1FF",
    "shadow": "#C4A1FF",
-   "shadowEdge": "#C4A1FF"
+   "shadowEdge": "#C4A1FF",
+   "innerGlow": "#00000000"
   },
   "surfaceBlur": 0,
   "suggestionOpacity": 0.8,
@@ -357,7 +360,8 @@
      "spread": 0,
      "color": "#C4A1FF"
     }
-   ]
+   ],
+   "inset": []
   }
  }
 }

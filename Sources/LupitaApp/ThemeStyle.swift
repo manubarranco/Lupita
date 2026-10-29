@@ -82,6 +82,13 @@ extension View {
                     shape.fill(Color(rgba: fill))
                 }
             }
+            .overlay {   // an inner halo: a blurred stroke on the edge, kept inside the shape
+                ZStack {
+                    ForEach(Array(theme.insetShadow.enumerated()), id: \.offset) { _, layer in
+                        shape.stroke(Color(rgba: layer.color), lineWidth: max(layer.blur, 1)).blur(radius: layer.blur / 2).clipShape(shape)
+                    }
+                }.allowsHitTesting(false)
+            }
             .overlay {
                 if borderWidth > 0 { shape.strokeBorder(Color(rgba: theme.colors.border), lineWidth: borderWidth) }
             }

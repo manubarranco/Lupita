@@ -33,7 +33,7 @@ function modeDoc(t, mode) {
     radius: Object.fromEntries(Object.keys(base.semantic.radius).map(k => [k, m[`radius.${k}`]])),
     border: Object.fromEntries(Object.keys(base.semantic.border).map(k => [k, m[`border.${k}`]])),
     space: Object.fromEntries(SPACE.map(k => [camel(k), m[`space.${k}`]])),
-    shadow: { container: m['shadow.container'], notice: m['shadow.notice'] },
+    shadow: { container: m['shadow.container'], notice: m['shadow.notice'], inset: m['shadow.inset'] },
   }
   return o
 }

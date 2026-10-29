@@ -121,7 +121,7 @@
   "color": {
    "surface": "#FFFFFF40",
    "noticeSurface": "#FFFFFF40",
-   "border": "#FFFFFFE6",
+   "border": "#00000024",
    "textPrimary": "#0B1B2E",
    "textSecondary": "#2F4259",
    "textAccent": "#0A3FA8",
@@ -132,7 +132,8 @@
    "swatchBorder": "#0B1B2EB3",
    "rowHover": "#0A3FA81A",
    "shadow": "#1B2A4A40",
-   "shadowEdge": "#1B2A4A33"
+   "shadowEdge": "#1B2A4A33",
+   "innerGlow": "#00000000"
   },
   "surfaceBlur": 40,
   "suggestionOpacity": 0.72,
@@ -199,7 +200,8 @@
      "spread": 0,
      "color": "#1B2A4A33"
     }
-   ]
+   ],
+   "inset": []
   }
  },
  "dark": {
@@ -307,7 +309,7 @@
   "color": {
    "surface": "#141A2C59",
    "noticeSurface": "#141A2C59",
-   "border": "#FFFFFF3D",
+   "border": "#FFFFFF29",
    "textPrimary": "#F5F8FF",
    "textSecondary": "#CBD6EC",
    "textAccent": "#9EC1FF",
@@ -318,7 +320,8 @@
    "swatchBorder": "#FFFFFF80",
    "rowHover": "#9EC1FF24",
    "shadow": "#00000080",
-   "shadowEdge": "#00000040"
+   "shadowEdge": "#00000040",
+   "innerGlow": "#00000000"
   },
   "surfaceBlur": 40,
   "suggestionOpacity": 0.72,
@@ -385,7 +388,8 @@
      "spread": 0,
      "color": "#00000040"
     }
-   ]
+   ],
+   "inset": []
   }
  }
 }

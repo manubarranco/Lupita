@@ -11,7 +11,13 @@ final class TooltipPanel {
     /// Called when a shown tooltip or notice goes away, whatever closed it.
     var onClose: (() -> Void)?
     /// Where the tooltip or notice is on screen, while it is shown.
-    var frame: NSRect? { panel?.frame }
+    var frame: NSRect? {
+        guard let f = panel?.frame else { return nil }
+        let i = shadowInsets
+        return NSRect(x: f.minX + i.left, y: f.minY + i.bottom, width: f.width - i.left - i.right, height: f.height - i.top - i.bottom)
+    }
+    /// The room the shadow takes around the visible box; the panel is the box plus this.
+    private var shadowInsets = NSEdgeInsets()
     /// The tooltip's own window number, so a lookup on top of it can read it.
     var windowID: CGWindowID? { panel.map { CGWindowID($0.windowNumber) } }
     /// The answer on screen, if it is a tooltip (not a notice).
@@ -67,6 +73,7 @@ final class TooltipPanel {
         panel.hasShadow = false
         panel.becomesKeyOnlyIfNeeded = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        shadowInsets = NSEdgeInsets(top: insets.top, left: insets.leading, bottom: insets.bottom, right: insets.trailing)
         panel.setFrameOrigin(origin(for: size, insets: insets, near: mouse))
         panel.orderFrontRegardless()
         self.panel = panel

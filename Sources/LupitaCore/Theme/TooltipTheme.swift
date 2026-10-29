@@ -101,7 +101,7 @@ struct ThemeDocument: Decodable {
     struct Space: Decodable {
         let padding, blockGap, rangeGap, rangeLineGap, entryGap, inlineGap, rowGap, nameGap, swatchGap, swatchInnerGap, badgeX, badgeY, noticeX, noticeY, rowPadX, rowPadY, metaGap: Double
     }
-    struct Shadow: Decodable { let container, notice: [ShadowLayer] }
+    struct Shadow: Decodable { let container, notice, inset: [ShadowLayer] }
     struct Mode: Decodable {
         let text: [String: Text]
         let color: Colors
@@ -158,6 +158,8 @@ public struct TooltipTheme: Equatable, Sendable {
     public let suggestionOpacity: Double
     public let containerShadow: [ShadowLayer]
     public let noticeShadow: [ShadowLayer]
+    /// Light drawn inside the edge (a halo that points inward); empty for most themes.
+    public let insetShadow: [ShadowLayer]
     private let styles: [TextRole: TextStyle]
 
     public func text(_ role: TextRole) -> TextStyle { styles[role]! }
@@ -244,6 +246,6 @@ public struct TooltipTheme: Equatable, Sendable {
             limits: Limits(titleLines: l.titleLines, rangeTitleLines: l.rangeTitleLines, idLines: l.idLines, descriptionLines: l.descriptionLines,
                            locationLines: l.locationLines, maxRows: l.maxRows),
             surfaceBlur: blur, suggestionOpacity: m.suggestionOpacity,
-            containerShadow: m.shadow.container, noticeShadow: m.shadow.notice, styles: styles)
+            containerShadow: m.shadow.container, noticeShadow: m.shadow.notice, insetShadow: m.shadow.inset, styles: styles)
     }
 }

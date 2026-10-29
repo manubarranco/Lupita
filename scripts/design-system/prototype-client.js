@@ -30,7 +30,7 @@
         v[name + '-tracking'] = px(val.tracking)
         v[name + '-color'] = val.color
       } else if (k.indexOf('shadow.') === 0) {
-        v[name] = val.length ? val.map(function (l) { return px(l.x) + ' ' + px(l.y) + ' ' + px(l.blur) + ' ' + px(l.spread) + ' ' + l.color }).join(', ') : '0 0 0 0 transparent'
+        v[name] = val.length ? val.map(function (l) { return (k === 'shadow.inset' ? 'inset ' : '') + px(l.x) + ' ' + px(l.y) + ' ' + px(l.blur) + ' ' + px(l.spread) + ' ' + l.color }).join(', ') : '0 0 0 0 transparent'
       } else if (k.indexOf('component.limits.') === 0) {
         if (typeof val === 'number') v[name] = String(val)
       } else if (typeof val === 'number') {

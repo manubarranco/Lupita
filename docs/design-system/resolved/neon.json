@@ -132,7 +132,8 @@
    "swatchBorder": "#FF6EC7CC",
    "rowHover": "#FF4FB01F",
    "shadow": "#2A0A2266",
-   "shadowEdge": "#FF3EA5F2"
+   "shadowEdge": "#FF3EA5F2",
+   "innerGlow": "#FF4FB04D"
   },
   "surfaceBlur": 24,
   "suggestionOpacity": 0.7,
@@ -198,6 +199,15 @@
      "blur": 16,
      "spread": 1,
      "color": "#FF3EA5F2"
+    }
+   ],
+   "inset": [
+    {
+     "x": 0,
+     "y": 0,
+     "blur": 14,
+     "spread": 0,
+     "color": "#FF4FB04D"
     }
    ]
   }
@@ -318,7 +328,8 @@
    "swatchBorder": "#FF6EC7CC",
    "rowHover": "#FF4FB01F",
    "shadow": "#FF4FB03D",
-   "shadowEdge": "#FF4FB0B3"
+   "shadowEdge": "#FF4FB0B3",
+   "innerGlow": "#FF4FB04D"
   },
   "surfaceBlur": 24,
   "suggestionOpacity": 0.7,
@@ -384,6 +395,15 @@
      "blur": 16,
      "spread": 1,
      "color": "#FF4FB0B3"
+    }
+   ],
+   "inset": [
+    {
+     "x": 0,
+     "y": 0,
+     "blur": 14,
+     "spread": 0,
+     "color": "#FF4FB04D"
     }
    ]
   }

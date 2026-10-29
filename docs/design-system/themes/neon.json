@@ -55,9 +55,20 @@
         "neon-shadow-light": "#2A0A2266",
         "neon-shadow-dark": "#FF4FB03D",
         "neon-shadow-edge-light": "#FF3EA5F2",
-        "neon-shadow-edge-dark": "#FF4FB0B3"
+        "neon-shadow-edge-dark": "#FF4FB0B3",
+        "neon-inner-glow-light": "#FF4FB04D",
+        "neon-inner-glow-dark": "#FF4FB04D"
       },
       "shadow": {
+        "glowIn": [
+          {
+            "x": 0,
+            "y": 0,
+            "blur": 14,
+            "spread": 0,
+            "color": "{color.inner-glow}"
+          }
+        ],
         "glow": [
           {
             "x": 0,
@@ -169,11 +180,16 @@
         "suggestion-opacity": {
           "light": 0.7,
           "dark": 0.7
+        },
+        "inner-glow": {
+          "light": "{palette.neon-inner-glow-light}",
+          "dark": "{palette.neon-inner-glow-dark}"
         }
       },
       "shadow": {
         "container": "{shadow.glow}",
-        "notice": "{shadow.glow}"
+        "notice": "{shadow.glow}",
+        "inset": "{shadow.glowIn}"
       },
       "radius": {
         "container": "{radius.xl}",
