@@ -2,7 +2,9 @@
 
 # Lupita
 
-**Lupita te explica las referencias que usan los agentes de IA, justo donde las lees.**
+**Tu agente dice `D23`, `L04`, `E2-S4`. Lupita te dice qué significan.**
+
+Apunta a cualquier referencia, en cualquier app, pulsa un atajo y lee su definición en tus repos.
 
 [Read in English](README.md)
 
@@ -15,7 +17,7 @@ contigo se olvidan de que tú no tienes su contexto ni su memoria de trabajo, y 
 Lupita es una app de la barra de menús de macOS que busca esas referencias en tus repos, igual
 que hacen tus agentes, y te las explica en el sitio.
 
-![Demo de Lupita: al señalar D003 en un chat con un agente aparece su definición](docs/demo.gif)
+![Demo de Lupita: al apuntar a D003 en un chat con un agente aparece su definición](docs/demo.gif)
 
 **[⬇ Descarga Lupita para macOS](https://github.com/manubarranco/Lupita/releases/latest/download/Lupita.zip)**
 

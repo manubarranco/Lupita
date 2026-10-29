@@ -2,7 +2,9 @@
 
 # Lupita
 
-**Lupita explains the references AI agents use, right where you read them.**
+**Your agent says `D23`, `L04`, `E2-S4`. Lupita tells you what they mean.**
+
+Point at any reference, in any app, press a shortcut, and read its definition from your repos.
 
 [Leer en español](README.es.md)
 

@@ -89,12 +89,12 @@ cambia, así que un ID escrito hace unos segundos se encuentra igualmente.
 
 ### Todo lo que explica Lupita
 
-Commits, ramas, archivos y el resto se consultan en el momento en que los señalas, así que nunca están desactualizados.
+Commits, ramas, archivos y el resto se consultan en el momento en que los apuntas, así que nunca están desactualizados.
 
 <details>
 <summary>Los 13 tipos de referencia, con lo que muestra el tooltip</summary>
 
-| Señalas | El tooltip muestra |
+| Apuntas a | El tooltip muestra |
 |---|---|
 | Un nombre de repo (`atlas`) | El título y la primera línea de su README, la rama actual, el último commit y los cambios sin commitear |
 | Un commit (`e455cf7`) | Su mensaje, la fecha y si está en `main`. Clic: el commit en GitHub |
