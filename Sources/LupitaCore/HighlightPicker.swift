@@ -103,29 +103,51 @@ public enum HighlightPicker {
         return marks + brokenAcrossLines(all, resolver: resolver, words: words) + wordFormsAcrossLines(all, resolver: resolver)
     }
 
+    /// A row cut into the stretches of text that sit side by side (a sidebar, the chat, a panel): a gap wider than
+    /// three line heights starts a new one.
+    static func runs(of row: [OCRWord]) -> [[OCRWord]] {
+        var out: [[OCRWord]] = []
+        for word in row {
+            if let last = out.last?.last, word.box.minX - last.box.maxX <= word.box.height * 3 { out[out.count - 1].append(word) }
+            else { out.append([word]) }
+        }
+        return out
+    }
+
     /// `Requirement` at the end of a line and `3` at the start of the next: one solid mark on each half when the
-    /// two make a numbered form with a word that a repo defines. Only between rows right below each other.
+    /// two make a numbered form with a word that a repo defines. Only between stretches right below each other
+    /// that start at the same column (the rows also hold the sidebar and whatever else is on the same screen line).
     static func wordFormsAcrossLines(_ rows: [[OCRWord]], resolver: Resolver) -> [Mark] {
         var marks: [Mark] = []
-        for (row, next) in zip(rows, rows.dropFirst()) {
-            guard let end = row.last, let start = next.first,
-                  start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
-            var found = false
-            for tail in 1...min(2, row.count) where !found {
-                for head in 1...min(2, next.count) where tail + head <= 3 && !found {
-                    let tailWords = Array(row.suffix(tail)), headWords = Array(next.prefix(head))
-                    // Words that end a sentence or a phrase do not run on into the next line.
-                    if tailWords.dropLast().contains(where: closes) || closes(tailWords.last!) || headWords.dropLast().contains(where: closes) { continue }
-                    let cleaned = (tailWords + headWords).map { clean($0.text) }
-                    guard !cleaned.contains(where: \.isEmpty), cleaned[0].first?.isUppercase == true,
-                          resolver.resolveWordID(cleaned.joined(separator: " ")) != nil else { continue }
-                    marks.append(Mark(box: trimmed(ArraySlice(tailWords)), kind: .id))
-                    marks.append(Mark(box: trimmed(ArraySlice(headWords)), kind: .id))
-                    found = true
+        for (row, nextRow) in zip(rows, rows.dropFirst()) {
+            for run in runs(of: row) {
+                guard let end = run.last, let first = run.first else { continue }
+                for next in runs(of: nextRow) {
+                    guard let start = next.first, abs(start.box.minX - first.box.minX) <= end.box.height * 3,
+                          start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
+                    if let halves = wordFormHalves(tail: run, head: next, resolver: resolver) {
+                        marks.append(Mark(box: trimmed(ArraySlice(halves.0)), kind: .id))
+                        marks.append(Mark(box: trimmed(ArraySlice(halves.1)), kind: .id))
+                    }
                 }
             }
         }
         return marks
+    }
+
+    private static func wordFormHalves(tail: [OCRWord], head: [OCRWord], resolver: Resolver) -> ([OCRWord], [OCRWord])? {
+        for t in 1...min(2, tail.count) {
+            for h in 1...min(2, head.count) where t + h <= 3 {
+                let tailWords = Array(tail.suffix(t)), headWords = Array(head.prefix(h))
+                // Words that end a sentence or a phrase do not run on into the next line.
+                if tailWords.contains(where: closes) || headWords.dropLast().contains(where: closes) { continue }
+                let cleaned = (tailWords + headWords).map { clean($0.text) }
+                guard !cleaned.contains(where: \.isEmpty), cleaned[0].first?.isUppercase == true,
+                      resolver.resolveWordID(cleaned.joined(separator: " ")) != nil else { continue }
+                return (tailWords, headWords)
+            }
+        }
+        return nil
     }
 
     /// A word split at the end of a line with a hyphen (`fast-` / `forward`): both halves are marked when the

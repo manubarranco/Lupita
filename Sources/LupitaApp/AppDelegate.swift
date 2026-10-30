@@ -120,7 +120,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if Debug.isOn {
                 // Why a form like `(Task 2.3,` is underlined as a bare term: the exact words and boxes OCR gave for its row.
                 for row in HighlightPicker.rows(of: read.words) {
-                    for (i, w) in row.enumerated() where i + 1 < row.count && w.text.contains("ask") && row[i + 1].text.contains(where: \.isNumber) {
+                    for (i, w) in row.enumerated() where (w.text.contains("ask") || w.text.contains("Requirement")) && (i + 1 == row.count || row[i + 1].text.contains(where: \.isNumber)) {
                         VocabularyLog.append(["highlight-row", row.map { "«\($0.text)» \(Int($0.box.minX))-\(Int($0.box.maxX))" }.joined(separator: " ")])
                     }
                 }

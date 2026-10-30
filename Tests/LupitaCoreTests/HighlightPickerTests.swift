@@ -269,14 +269,28 @@ final class Collected: @unchecked Sendable {
         index.rank()
         let r = Resolver(index: index)
         func word(_ t: String, _ x: CGFloat, _ y: CGFloat) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: 60, height: 12)) }
-        let broken = [word("Covers", 0, 0), word("Requirement", 100, 0), word("3,", 0, 14), word("and", 70, 14)]
+        let broken = [word("Covers", 0, 0), word("Requirement", 65, 0), word("3,", 0, 14), word("and", 65, 14)]
         let marks = HighlightPicker.classified(words: broken, resolver: r)
         #expect(marks.count == 2 && marks.allSatisfy { $0.kind == .id })
         #expect(Set(marks.map { $0.box.minY }) == [0, 14])
         // A sentence end between the lines is not a form.
-        let ended = [word("Covers", 0, 0), word("Requirement.", 100, 0), word("3", 0, 14)]
+        let ended = [word("Covers", 0, 0), word("Requirement.", 65, 0), word("3", 0, 14)]
         #expect(HighlightPicker.classified(words: ended, resolver: r).isEmpty)
-        let group = [word("See", 0, 0), word("Task", 100, 0), word("Group", 170, 0), word("2", 0, 14)]
+        let group = [word("See", 0, 0), word("Task", 65, 0), word("Group", 130, 0), word("2", 0, 14)]
         #expect(HighlightPicker.classified(words: group, resolver: r).count == 2)
+    }
+
+    @Test func aBrokenFormIsFoundWithASidebarOnTheSameScreenLine() {
+        var index = RefIndex()
+        index.add(text: "### Requirement 3: Login\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        func word(_ t: String, _ x: CGFloat, _ y: CGFloat) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: 60, height: 12)) }
+        // The sidebar's words share each screen line with the chat's words.
+        let words = [word("Lupita", 17, 0), word("Covers", 401, 0), word("Requirement", 470, 0), word("Contexto", 1200, 0),
+                     word("Notes", 17, 14), word("3,", 403, 14), word("and", 470, 14), word("44", 1382, 14)]
+        let marks = HighlightPicker.classified(words: words, resolver: r)
+        #expect(marks.count == 2 && marks.allSatisfy { $0.kind == .id })
+        #expect(Set(marks.map { $0.box.minX }) == [470, 403])
     }
 }
