@@ -262,4 +262,21 @@ final class Collected: @unchecked Sendable {
         #expect(marks.map(\.kind) == [.id])
         #expect(marks.first?.box.minX == 100)
     }
+
+    @Test func aWordFormBrokenAcrossTwoLinesIsMarkedOnBothHalves() {
+        var index = RefIndex()
+        index.add(text: "### Requirement 3: Login\n### Task Group 2: Export\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        func word(_ t: String, _ x: CGFloat, _ y: CGFloat) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: 60, height: 12)) }
+        let broken = [word("Covers", 0, 0), word("Requirement", 100, 0), word("3,", 0, 14), word("and", 70, 14)]
+        let marks = HighlightPicker.classified(words: broken, resolver: r)
+        #expect(marks.count == 2 && marks.allSatisfy { $0.kind == .id })
+        #expect(Set(marks.map { $0.box.minY }) == [0, 14])
+        // A sentence end between the lines is not a form.
+        let ended = [word("Covers", 0, 0), word("Requirement.", 100, 0), word("3", 0, 14)]
+        #expect(HighlightPicker.classified(words: ended, resolver: r).isEmpty)
+        let group = [word("See", 0, 0), word("Task", 100, 0), word("Group", 170, 0), word("2", 0, 14)]
+        #expect(HighlightPicker.classified(words: group, resolver: r).count == 2)
+    }
 }

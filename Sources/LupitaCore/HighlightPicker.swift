@@ -99,7 +99,33 @@ public enum HighlightPicker {
                 }
             }
         }
-        return marks + brokenAcrossLines(rows(of: words), resolver: resolver, words: words)
+        let all = rows(of: words)
+        return marks + brokenAcrossLines(all, resolver: resolver, words: words) + wordFormsAcrossLines(all, resolver: resolver)
+    }
+
+    /// `Requirement` at the end of a line and `3` at the start of the next: one solid mark on each half when the
+    /// two make a numbered form with a word that a repo defines. Only between rows right below each other.
+    static func wordFormsAcrossLines(_ rows: [[OCRWord]], resolver: Resolver) -> [Mark] {
+        var marks: [Mark] = []
+        for (row, next) in zip(rows, rows.dropFirst()) {
+            guard let end = row.last, let start = next.first,
+                  start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
+            var found = false
+            for tail in 1...min(2, row.count) where !found {
+                for head in 1...min(2, next.count) where tail + head <= 3 && !found {
+                    let tailWords = Array(row.suffix(tail)), headWords = Array(next.prefix(head))
+                    // Words that end a sentence or a phrase do not run on into the next line.
+                    if tailWords.dropLast().contains(where: closes) || closes(tailWords.last!) || headWords.dropLast().contains(where: closes) { continue }
+                    let cleaned = (tailWords + headWords).map { clean($0.text) }
+                    guard !cleaned.contains(where: \.isEmpty), cleaned[0].first?.isUppercase == true,
+                          resolver.resolveWordID(cleaned.joined(separator: " ")) != nil else { continue }
+                    marks.append(Mark(box: trimmed(ArraySlice(tailWords)), kind: .id))
+                    marks.append(Mark(box: trimmed(ArraySlice(headWords)), kind: .id))
+                    found = true
+                }
+            }
+        }
+        return marks
     }
 
     /// A word split at the end of a line with a hyphen (`fast-` / `forward`): both halves are marked when the
