@@ -133,7 +133,7 @@ public enum HighlightPicker {
     static let leading = CharacterSet(charactersIn: "([{\"'`*«“‘")
 
     /// Words on the same line, left to right.
-    static func rows(of words: [OCRWord]) -> [[OCRWord]] {
+    public static func rows(of words: [OCRWord]) -> [[OCRWord]] {
         var rows: [[OCRWord]] = []
         for word in words.sorted(by: { $0.box.midY < $1.box.midY }) {
             if let first = rows.last?.first, abs(word.box.midY - first.box.midY) <= first.box.height / 2 {

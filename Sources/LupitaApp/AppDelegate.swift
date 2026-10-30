@@ -117,6 +117,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self, generation == holdGeneration, let read else { return }
             let marks = HighlightPicker.classified(words: read.words, resolver: resolver)
             windowRead = read
+            if Debug.isOn {
+                // Why a form like `(Task 2.3,` is underlined as a bare term: the exact words and boxes OCR gave for its row.
+                for row in HighlightPicker.rows(of: read.words) {
+                    for (i, w) in row.enumerated() where i + 1 < row.count && w.text.contains("ask") && row[i + 1].text.contains(where: \.isNumber) {
+                        VocabularyLog.append(["highlight-row", row.map { "«\($0.text)» \(Int($0.box.minX))-\(Int($0.box.maxX))" }.joined(separator: " ")])
+                    }
+                }
+            }
             highlight.show(marks.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: read.words) ?? read.isDark, $0.kind) })
             watchForChanges()
             showSymbols(generation, read: read, marks: marks, resolver: resolver)
@@ -188,14 +196,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 show(result, at: mouse, method: (words.isEmpty ? "none" : "ocr") + "<tooltip>",
                      start: start, context: context)
             }
-            return
-        }
-        // The tooltip of the last look-up is still on screen: Accessibility would answer with its text («Requirement 3»)
-        // for a point near it, and OCR would read it as part of the window. Take it away, give the screen a moment, and
-        // look up again.
-        if tooltip.resolution != nil {
-            tooltip.close()
-            Task { try? await Task.sleep(for: .milliseconds(90)); lookUp() }
             return
         }
         let context = ActiveContext.at(point, resolver: resolver)
