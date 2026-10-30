@@ -158,6 +158,9 @@ public enum IDGrammar {
             while end < n, isDigit(ns.character(at: end)), end - (i + 1) < 7 { end += 1 }
             let digits = end - (i + 1)
             guard digits <= 6 else { continue }
+            // A tracker's numbers do not start with a zero, and a long word with a short number is a label of the
+            // document (`NOTIFY-3`, `BLOCKING-4`, `ACCEPT-01`), not a key: the keys in git have three or more digits.
+            if ns.character(at: i + 1) == 0x30 || (letters >= 6 && digits < 3) { continue }
             if end < n {
                 let after = ns.character(at: end)
                 if isWordish(after) { continue }

@@ -163,7 +163,7 @@ import Testing
     // MARK: R4, tracker keys
 
     @Test func trackerKeysLongerThanThePrefixGrammarAreRecognised() {
-        #expect(Self.keys("fixes PLAT-443341 and ACME-527, see LONGPREFIX-12") == ["PLAT443341", "ACME527", "LONGPREFIX12"])
+        #expect(Self.keys("fixes PLAT-443341 and ACME-527, see LONGPREFIX-1234") == ["PLAT443341", "ACME527", "LONGPREFIX1234"])
         #expect(Self.keys("(PLAT-443341)") == ["PLAT443341"])
         #expect(IDGrammar.parse("PLAT-443341")?.display == "PLAT-443341")
     }
@@ -176,6 +176,13 @@ import Testing
         #expect(Self.keys("GPT-40000 and SHA-256000 and ISO-8601000 and HTTP-200000").isEmpty)
         #expect(!IDGrammar.isTrackerKey("R1-4") && !IDGrammar.isTrackerKey("PLAT-1234567") && !IDGrammar.isTrackerKey("GPT-4"))
         #expect(IDGrammar.isTrackerKey("PLAT-443341") && IDGrammar.isTrackerKey("AB-1"))
+    }
+
+    @Test func aLongWordWithAShortNumberOrAZeroIsALabelNotAKey() {
+        #expect(Self.keys("NOTIFY-3 and BLOCKING-4 and ACCEPT-01 and ASSUMPTION-001 and PLAT-0443341").isEmpty)
+        #expect(Self.keys("INFRENG-812 and HADOOP-19661 and ACME-52111") == ["INFRENG812", "HADOOP19661", "ACME52111"])
+        // The short prefixes were already read before this batch, and still are.
+        #expect(Self.keys("DP-1 and FLINK-1") == ["DP1", "FLINK1"])
     }
 
     @Test func existingShortFormsKeepTheirKeys() {
