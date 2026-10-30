@@ -205,6 +205,12 @@ enum TextUnderCursor {
               let frame = frame(of: element), frame.width > 0
         else { return nil }
         let length = (text as NSString).length
+        if Debug.isOn {
+            VocabularyLog.append(["static-frame", "frame=\(frame)", "point=\(point)", "inside=\(frame.insetBy(dx: -3, dy: -3).contains(point))", "text=“\(text.prefix(40))”"])
+        }
+        // Electron can answer a hit test with the neighbouring element right after the screen changed: the element
+        // must be where the point is, or OCR reads what is there.
+        guard frame.insetBy(dx: -3, dy: -3).contains(point) else { return nil }
         if let offset = characterIndex(in: element, at: point, length: length) {
             return line(in: text, offset: offset)
         }
