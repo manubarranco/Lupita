@@ -106,7 +106,7 @@ public struct Resolver: Sendable {
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
         if let id = IDGrammar.parse(query) {
             let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
-            if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath) }
+            if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
@@ -167,7 +167,7 @@ public struct Resolver: Sendable {
         let repo = named ?? preferredRepo
         let (key, defs) = scopedDefinitions(for: id, preferredRepo: repo, fromPath: named == nil || named == preferredRepo ? fromPath : nil)
         guard !defs.isEmpty else { return nil }
-        return result(trimmed, .exact, key: key, defs, repo, named == nil || named == preferredRepo ? fromPath : nil)
+        return result(trimmed, .exact, key: key, defs, repo, named == nil || named == preferredRepo ? fromPath : nil, ownFileFirst: true)
     }
 
     /// The definitions a mention of `id` may take, and the key they are under. Forms with a scope take
@@ -195,10 +195,19 @@ public struct Resolver: Sendable {
             } else {
                 kept = own.count == 1 ? own : []
             }
-            if !kept.isEmpty { return (k, kept) }
+            // A task is defined by its line in `tasks.md`; the headings of reports about it come after.
+            if !kept.isEmpty { return (k, k.hasPrefix("TASK ") ? kept.filter(Self.inTasksFile) + kept.filter { !Self.inTasksFile($0) } : kept) }
             key = IDGrammar.parentKey(of: k)
         }
         return (id.key, [])
+    }
+
+    static func inTasksFile(_ d: Definition) -> Bool { d.path.split(separator: "/").last?.lowercased() == "tasks.md" }
+
+    /// What the tooltip lists for `id`, in order: scope, then the reader's own file, live before archived, nearest folder.
+    public func shownDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> [Definition] {
+        let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+        return defs.isEmpty ? [] : result(id.display, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none).definitions
     }
 
     /// Folders of framework files that are not the project's own (BMAD ships examples under these).
@@ -306,7 +315,7 @@ public struct Resolver: Sendable {
     /// folder nearest to `fromPath`. Weak definitions from other repos are dropped: a `## P1`
     /// section elsewhere says nothing about a `P1` here. `defs` is already ranked.
     func result(_ query: String, _ kind: Resolution.Kind, key: String, _ defs: [Definition],
-                        _ repo: String?, _ fromPath: String?) -> Resolution {
+                        _ repo: String?, _ fromPath: String?, ownFileFirst: Bool = false) -> Resolution {
         func isPreferred(_ d: Definition) -> Bool { repo.map { d.repo.caseInsensitiveCompare($0) == .orderedSame } ?? false }
         /// Depth of the definition's folder when it is the reader's folder or one of its parents.
         func nearness(_ d: Definition) -> Int {
@@ -318,9 +327,11 @@ public struct Resolver: Sendable {
         // A closed change (`openspec/changes/archive`) loses to a live definition, unless the reader is in the archive too.
         let readingArchive = fromPath?.split(separator: "/").contains("archive") ?? false
         func archived(_ d: Definition) -> Int { d.isArchived && !readingArchive ? 1 : 0 }
+        // The reader's own file defines first: a plan that heads `### Task 2` is not about the `Task 2` of its neighbour.
+        func ownFile(_ d: Definition) -> Int { ownFileFirst && isPreferred(d) && d.path == fromPath ? 0 : 1 }
         let ordered = candidates.enumerated().sorted { a, b in
-            let ka = (a.element.rule.isWeak ? 1 : 0, isPreferred(a.element) ? 0 : 1, archived(a.element), -nearness(a.element), a.offset)
-            let kb = (b.element.rule.isWeak ? 1 : 0, isPreferred(b.element) ? 0 : 1, archived(b.element), -nearness(b.element), b.offset)
+            let ka = (a.element.rule.isWeak ? 1 : 0, isPreferred(a.element) ? 0 : 1, ownFile(a.element), archived(a.element), -nearness(a.element), a.offset)
+            let kb = (b.element.rule.isWeak ? 1 : 0, isPreferred(b.element) ? 0 : 1, ownFile(b.element), archived(b.element), -nearness(b.element), b.offset)
             return ka < kb
         }.map(\.element)
         guard !ordered.isEmpty else {

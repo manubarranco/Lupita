@@ -53,17 +53,17 @@ public struct DefinitionHit: Equatable, Sendable {
 public enum DefinitionRules {
     // `## D23 — Title`, `### **Q07**: Title`. The ID must be the first token of the heading.
     static let heading = try! NSRegularExpression(
-        pattern: #"^#{1,6}\s+\**\s*([^\s*:—–·|),.]+)\**(?:\s*[—–:\-.·|)]\s*|\s+|$)(.*)$"#)
+        pattern: #"^#{1,6}\s+\**\s*((?:[^\s*:—–·|),.]|\.(?=\d))+)\**(?:\s*[—–:\-.·|)]\s*|\s+|$)(.*)$"#)
     // `- **Q07**: text`, `**Q07:** text`, `Q07: text`, `1. D3 — text`. Bold must close right after the ID.
     static let listOrColon = try! NSRegularExpression(
-        pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?(\*\*|__)?([A-Za-z0-9\-]+?)(?::\1|\1\s*[:—–]|\s*[:—–](?=\s))\s*(.*)$"#)
+        pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?(\*\*|__)?([A-Za-z0-9\-.]+?)(?::\1|\1\s*[:—–]|\s*[:—–](?=\s))\s*(.*)$"#)
     // `| Q07 | Title | … |`
     static let tableRow = try! NSRegularExpression(
-        pattern: #"^\s*\|\s*\**([A-Za-z0-9\-]+?)\**\s*\|\s*([^|]*)\|"#)
+        pattern: #"^\s*\|\s*\**([A-Za-z0-9\-.]+?)\**\s*\|\s*([^|]*)\|"#)
     // `| **E8-S6 Regalo de monedas [Could]** |`, `| E10-S2 ✅ Historial |`. Bold, if any, wraps
     // ID and title together: `| **D008** (aside) |` is a mention.
     static let tableTitledCell = try! NSRegularExpression(
-        pattern: #"^\s*\|\s*(?:\*\*)?([A-Za-z0-9\-]+?)\s+([^|]+?)\s*\|"#)
+        pattern: #"^\s*\|\s*(?:\*\*)?([A-Za-z0-9\-.]+?)\s+([^|]+?)\s*\|"#)
     // `- [x] T001 [P] [US1] Crear modelo de Foo` (spec-kit tasks): the ID is the first token after
     // the box; the bracketed tags after it are not part of the title.
     static let task = try! NSRegularExpression(
@@ -72,9 +72,10 @@ public enum DefinitionRules {
     static let userStory = try! NSRegularExpression(
         pattern: #"^#{1,6}\s+User Story\s+(\d{1,4})\s*[-—–:·]\s*(.*?)\s*(?:\(Priority:\s*P\d+\))?\s*$"#)
     // `### Requirement 3: Title`, `## Epic 2 - Title`, `#### Task Group 1`: a heading that starts with a word and
-    // a number defines that form. The title may be empty: the heading is the definition.
+    // a number defines that form. The title may be empty: the heading is the definition. `Task 2.FIX` is another
+    // thing and `Requirements 12.1-12.6` a range: neither defines `Task 2` or `Requirement 12.1`.
     static let wordHeading = try! NSRegularExpression(
-        pattern: #"^#{1,6}\s+\**\s*(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d]|\.\d)\**\s*(?:[:—–\-.·|)]\s*|\s+|$)(.*)$"#)
+        pattern: #"^#{1,6}\s+\**\s*(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d]|\.\d|[-–]\d)\**\s*(?:(?:[:—–\-·|)]|\.(?=\s|$))\s*|\s+|$)(.*)$"#)
     // `- [ ] 1.1 Create the table`, `- [x]* 2. Wire it`: a task of a `tasks.md`.
     static let taskLine = try! NSRegularExpression(
         pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?\s+(.+)$"#)
