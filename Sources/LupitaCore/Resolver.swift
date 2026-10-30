@@ -107,6 +107,10 @@ public struct Resolver: Sendable {
         if let id = IDGrammar.parse(query) ?? Self.inheritedID(query, context: context) {
             let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
             if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
+            // A tracker key no file defines: the commit that cites it, if the window's repo has one.
+            if let commit = trackerCommit(for: id, preferredRepo: preferredRepo) {
+                return Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+            }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
@@ -155,6 +159,15 @@ public struct Resolver: Sendable {
                               mentions: index.mentions[id.key], alternatives: [])
         }
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
+    }
+
+    /// The latest commit (or branch) of the window's repo that names the tracker key `id`, or nil: no repo, no
+    /// commit, or a key that is not shaped like one. A definition in a `.md` always wins over this.
+    public func trackerCommit(for id: RefID, preferredRepo: String?) -> Definition? {
+        guard let preferredRepo, IDGrammar.isTrackerKey(id.display),
+              let repo = index.repos.first(where: { $0.name.caseInsensitiveCompare(preferredRepo) == .orderedSame })
+        else { return nil }
+        return RepoRefs.commitCiting(id.display, repo: repo)
     }
 
     /// A bare number that ends a list with an omitted prefix (`PU-02, 03 y 26` with the pointer on `03`): the ID it

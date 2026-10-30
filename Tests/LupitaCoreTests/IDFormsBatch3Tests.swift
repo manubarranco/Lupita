@@ -159,4 +159,100 @@ import Testing
         let r = Self.resolver(["a/design.md": "### Property 1: From heading\n\n**Property 1: From bold**"])
         #expect(Self.shown(r, "Property 1", from: "a/design.md").first?.title == "From heading")
     }
+
+    // MARK: R4, tracker keys
+
+    @Test func trackerKeysLongerThanThePrefixGrammarAreRecognised() {
+        #expect(Self.keys("fixes PLAT-443341 and ACME-527, see LONGPREFIX-12") == ["PLAT443341", "ACME527", "LONGPREFIX12"])
+        #expect(Self.keys("(PLAT-443341)") == ["PLAT443341"])
+        #expect(IDGrammar.parse("PLAT-443341")?.display == "PLAT-443341")
+    }
+
+    @Test func datesVersionsPercentsAndPrefixesWithDigitsAreNotKeys() {
+        // What the prefix grammar already read stays as it was (`CVE-2024`, `R1`); the new shapes leave these alone.
+        #expect(Self.keys("ABCDEF-2026-10-20 and LICENSE-2.0 and 50%PLATFORM-4433 and 100%-PLATFORM-1234").isEmpty)
+        #expect(Self.keys("plat-4433 and PLAT-1234567 and PLATFORM-4433-b and PLATFORM-44.3").isEmpty)
+        #expect(Self.keys("S3-12345") == ["S3"])
+        #expect(Self.keys("GPT-40000 and SHA-256000 and ISO-8601000 and HTTP-200000").isEmpty)
+        #expect(!IDGrammar.isTrackerKey("R1-4") && !IDGrammar.isTrackerKey("PLAT-1234567") && !IDGrammar.isTrackerKey("GPT-4"))
+        #expect(IDGrammar.isTrackerKey("PLAT-443341") && IDGrammar.isTrackerKey("AB-1"))
+    }
+
+    @Test func existingShortFormsKeepTheirKeys() {
+        #expect(Self.keys("BUG-01, D23, ADR-004, E2-S3b") == ["BUG01", "D23", "ADR004", "E2-S3b"])
+    }
+}
+
+@Suite(.serialized) struct TrackerKeyCommitTests {
+    let root: URL
+    let repo: Repo
+
+    init() throws {
+        root = FileManager.default.temporaryDirectory.appendingPathComponent("lupita-keys-\(UUID().uuidString)")
+        let dir = root.appendingPathComponent("atlas")
+        try FileManager.default.createDirectory(at: dir.appendingPathComponent("docs"), withIntermediateDirectories: true)
+        try "- **ACME-527**: Defined in a file\n".write(to: dir.appendingPathComponent("docs/keys.md"), atomically: true, encoding: .utf8)
+        repo = Repo(name: "atlas", path: RepoDiscovery.realPath(dir.path))
+        if Git.executable != nil {
+            git("init", "-q", "-b", "main")
+            git("add", ".")
+            git("commit", "-q", "-m", "PLAT-443341: first attempt")
+            try "x\n".write(to: dir.appendingPathComponent("a.md"), atomically: true, encoding: .utf8)
+            git("add", ".")
+            git("commit", "-q", "-m", "fix crash on save (PLAT-443341)", "-m", "Body text")
+            try "y\n".write(to: dir.appendingPathComponent("b.md"), atomically: true, encoding: .utf8)
+            git("add", ".")
+            git("commit", "-q", "-m", "ACME-527 is also in a commit")
+            try "z\n".write(to: dir.appendingPathComponent("c.md"), atomically: true, encoding: .utf8)
+            git("add", ".")
+            git("commit", "-q", "-m", "mentions PLAT-4433412 only")
+            git("branch", "feature/PLAT-99887-new-thing")
+        }
+    }
+
+    @discardableResult
+    func git(_ args: String...) -> String? {
+        Git.output(repo.path, ["-c", "user.name=T", "-c", "user.email=t@example.com"] + args)
+    }
+
+    func resolver() -> Resolver {
+        var index = RefIndex()
+        index.repos = [repo]
+        index.add(text: "- **ACME-527**: Defined in a file\n", fileName: "keys.md", repo: "atlas", relativePath: "docs/keys.md", absolutePath: repo.path + "/docs/keys.md")
+        index.rank()
+        return Resolver(index: index)
+    }
+
+    @Test func aKeyNoFileDefinesShowsTheLatestCommitThatCitesIt() {
+        guard Git.executable != nil else { return }
+        let r = resolver().resolve("PLAT-443341", preferredRepo: "atlas")
+        #expect(r.definitions.first?.rule == .commit)
+        #expect(r.definitions.first?.title == "fix crash on save (PLAT-443341)")
+        #expect(r.definitions.first?.summary.contains(" · ") == true)
+        #expect(r.definitions.first?.repo == "atlas")
+    }
+
+    @Test func aDefinitionInAFileBeatsTheCommit() {
+        guard Git.executable != nil else { return }
+        let r = resolver().resolve("ACME-527", preferredRepo: "atlas")
+        #expect(r.definitions.first?.rule == .listOrColon)
+    }
+
+    @Test func aLongerNumberIsAnotherKeyAndNoRepoMeansNothing() {
+        guard Git.executable != nil else { return }
+        #expect(resolver().resolve("PLAT-44334", preferredRepo: "atlas").definitions.isEmpty)
+        #expect(resolver().resolve("PLAT-443341", preferredRepo: nil).definitions.isEmpty)
+        #expect(resolver().resolve("PLAT-443341", preferredRepo: "other").definitions.isEmpty)
+    }
+
+    @Test func aBranchNamedAfterTheKeyIsShownWhenNoCommitCitesIt() {
+        guard Git.executable != nil else { return }
+        let r = resolver().resolve("PLAT-99887", preferredRepo: "atlas")
+        #expect(r.definitions.first?.rule == .branch)
+    }
+
+    @Test func standardsAreNotLookedUpInGit() {
+        guard Git.executable != nil else { return }
+        #expect(resolver().trackerCommit(for: RefID(display: "GPT-4", key: "GPT4", prefix: "GPT"), preferredRepo: "atlas") == nil)
+    }
 }

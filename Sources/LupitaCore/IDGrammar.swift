@@ -111,8 +111,39 @@ public enum IDGrammar {
                 found += inheritedTokens(in: ns, prefix: prefix, number: number, after: range)
             }
         }
+        found += trackerTokens(in: text, ns: ns, existing: found)
         found += wordTokens(in: text)
         return found.sorted { $0.range.location < $1.range.location }
+    }
+
+    /// A tracker key as Jira or Linear write it, `PLAT-443341`, `ACME-527`: 2 to 10 letters, a hyphen and up to six
+    /// digits, with no other hyphenated part after it (`ABC-2026-10-20` is a date), no `.N` (`LIC-2.0`) and no `%`
+    /// before it. A prefix with digits (`R1-4`) is not a key.
+    static let trackerRegex = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9_%\-])([A-Z]{2,10})-(\d{1,6})(?![A-Za-z0-9_]|-[A-Za-z0-9]|\.\d)"#
+    )
+
+    /// Prefixes that are standards, products or licences, not trackers.
+    static let notTrackers: Set<String> = ["GPT", "SHA", "CVE", "UTF", "ISO", "HTTP", "TLS", "RFC", "AES", "RSA", "MD", "IPV", "BSD"]
+
+    /// `PLAT-4433` as the tracker key it is when written with a hyphen, or false.
+    public static func isTrackerKey(_ display: String) -> Bool {
+        guard let m = trackerRegex.firstMatch(in: display, range: NSRange(location: 0, length: (display as NSString).length)),
+              m.range.length == (display as NSString).length else { return false }
+        return !notTrackers.contains((display as NSString).substring(with: m.range(at: 1))) && !stoplist.contains((display as NSString).substring(with: m.range(at: 1)))
+    }
+
+    /// Keys the prefix grammar does not read (a prefix over five letters or a number over four digits).
+    private static func trackerTokens(in text: String, ns: NSString, existing: [(id: RefID, range: NSRange)]) -> [(id: RefID, range: NSRange)] {
+        guard text.contains("-") else { return [] }
+        var out: [(id: RefID, range: NSRange)] = []
+        for m in trackerRegex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+            let prefix = ns.substring(with: m.range(at: 1))
+            guard !notTrackers.contains(prefix), !stoplist.contains(prefix),
+                  !existing.contains(where: { NSIntersectionRange($0.range, m.range).length > 0 }) else { continue }
+            out.append((RefID(display: ns.substring(with: m.range), key: prefix + ns.substring(with: m.range(at: 2)), prefix: prefix), m.range))
+        }
+        return out
     }
 
     /// What follows an ID in a list that omits the prefix: `PU-02, 03 y 26`, `FR-004/006`.
