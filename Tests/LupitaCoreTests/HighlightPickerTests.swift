@@ -247,4 +247,19 @@ final class Collected: @unchecked Sendable {
             #expect(marks.filter { $0.kind == .id }.count == 2, "\(texts) → \(marks)")
         }
     }
+
+    @Test func aLoneParenthesisBeforeAGlossaryWordDoesNotHideTheForm() {
+        var index = RefIndex()
+        index.add(text: "### Task 2.3: Export\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.add(text: "- **Task** — a unit of work\n", fileName: "glossary.md", repo: "r", relativePath: "glossary.md", absolutePath: "/r/glossary.md")
+        index.rank()
+        let r = Resolver(index: index)
+        #expect(r.resolveTerm("Task") != nil)
+        let words = ["con", "(", "Task", "2.3)", "suelto"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 50, y: 0, width: 45, height: 12))
+        }
+        let marks = HighlightPicker.classified(words: words, resolver: r)
+        #expect(marks.map(\.kind) == [.id])
+        #expect(marks.first?.box.minX == 100)
+    }
 }

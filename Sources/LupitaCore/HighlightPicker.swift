@@ -174,7 +174,11 @@ public enum HighlightPicker {
             if slice.dropLast().contains(where: closes) { continue }
             let gapLimit = (slice.first?.box.height ?? 0) * 1.5
             if zip(slice, slice.dropFirst()).contains(where: { $1.box.minX - $0.box.maxX > gapLimit }) { continue }
-            let phrase = slice.map { clean($0.text) }.joined(separator: " ")
+            let cleaned = slice.map { clean($0.text) }
+            // A word that cleans to nothing (a lone `(` or `**`) is no part of a phrase: `( Task` is not the term `Task`
+            // starting one word early, which also hid the `Task 2.3` that follows.
+            if cleaned.contains(where: \.isEmpty) { continue }
+            let phrase = cleaned.joined(separator: " ")
             if resolver.resolveTerm(phrase) != nil { return length }
             // `npm run build`: a script that exists in a repo's package.json, or a known package command.
             let parts = phrase.split(separator: " ")
