@@ -220,4 +220,18 @@ final class Collected: @unchecked Sendable {
         }
         #expect(HighlightPicker.phraseLength(row, at: 0, resolver: r, block: "") == nil)
     }
+
+    @Test func aWordFormIsOneSolidMark() {
+        var index = RefIndex()
+        index.add(text: "### Task Group 2: Export\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        let words = ["See", "Task", "Group", "2,", "and", "Task", "9"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 50, y: 0, width: 45, height: 12))
+        }
+        let marks = HighlightPicker.classified(words: words, resolver: r)
+        #expect(marks.filter { $0.kind == .id }.count == 1)
+        #expect(marks.first { $0.kind == .id }?.box.minX == 50)
+        #expect(marks.first { $0.kind == .id }?.box.maxX ?? 0 > 150)
+    }
 }

@@ -83,6 +83,10 @@ public enum HighlightPicker {
                     // In a code font OCR reads `localhost:8130` as two words, `localhost:` and `8130`.
                     marks.append(Mark(box: trimmed(row[i...i + 1]), kind: .term))
                     i += 2
+                } else if let length = wordIDLength(row, at: i, resolver: resolver) {
+                    // `Task 2.3`, `Requirement 3`: one solid mark for the word and its number.
+                    marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .id))
+                    i += length
                 } else if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
                     marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .term))
                     i += length
@@ -147,6 +151,19 @@ public enum HighlightPicker {
 
     static func closes(_ word: OCRWord) -> Bool {
         word.text.unicodeScalars.last.map(CharacterSet(charactersIn: ".,;:!?…").contains) ?? false
+    }
+
+    /// 3 to 2 words from `i` that are a numbered form with a word (`Task Group 2`, `Requirement 3`) some repo defines.
+    static func wordIDLength(_ row: [OCRWord], at i: Int, resolver: Resolver) -> Int? {
+        for length in stride(from: 3, through: 2, by: -1) where i + length <= row.count {
+            let slice = row[i..<i + length]
+            if slice.dropLast().contains(where: closes) { continue }
+            let gapLimit = (slice.first?.box.height ?? 0) * 1.5
+            if zip(slice, slice.dropFirst()).contains(where: { $1.box.minX - $0.box.maxX > gapLimit }) { continue }
+            guard let first = slice.first, clean(first.text).first?.isUppercase == true else { continue }
+            if resolver.resolveWordID(slice.map { clean($0.text) }.joined(separator: " ")) != nil { return length }
+        }
+        return nil
     }
 
     /// 4 to 2 words from `i` that name a glossary term or a dictionary command, longest first.
