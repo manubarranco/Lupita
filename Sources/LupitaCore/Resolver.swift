@@ -104,7 +104,7 @@ public struct Resolver: Sendable {
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        if let id = IDGrammar.parse(query) {
+        if let id = IDGrammar.parse(query) ?? Self.inheritedID(query, context: context) {
             let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
             if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
         }
@@ -155,6 +155,16 @@ public struct Resolver: Sendable {
                               mentions: index.mentions[id.key], alternatives: [])
         }
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
+    }
+
+    /// A bare number that ends a list with an omitted prefix (`PU-02, 03 y 26` with the pointer on `03`): the ID it
+    /// inherits, read from the text before it, or nil.
+    static func inheritedID(_ word: String, context: String?) -> RefID? {
+        guard let context, word.count >= 1, word.count <= 4, word.allSatisfy(\.isASCII), word.allSatisfy(\.isNumber) else { return nil }
+        let text = context + (context.last?.isWhitespace ?? true ? "" : " ") + word
+        guard let last = IDGrammar.tokens(in: text).last, last.id.scope == .folder, last.id.display == word,
+              last.range.location + last.range.length == (text as NSString).length else { return nil }
+        return last.id
     }
 
     /// A numbered form with a word (`Requirement 3`, `Task Group 2`) for `phrase`, or nil. Public so the picker

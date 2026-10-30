@@ -84,9 +84,10 @@ public enum IDGrammar {
     public static func tokens(in text: String) -> [(id: RefID, range: NSRange)] {
         let ns = text as NSString
         let whole = NSRange(location: 0, length: ns.length)
-        var found: [(id: RefID, range: NSRange)] = tokenRegex.matches(in: text, range: whole).compactMap { m in
+        var found: [(id: RefID, range: NSRange)] = []
+        for m in tokenRegex.matches(in: text, range: whole) {
             let prefix = ns.substring(with: m.range(at: 1))
-            guard !stoplist.contains(prefix) else { return nil }
+            guard !stoplist.contains(prefix) else { continue }
             let hyphen = ns.substring(with: m.range(at: 2))
             let number = ns.substring(with: m.range(at: 3))
             let letter = ns.substring(with: m.range(at: 4))
@@ -104,11 +105,42 @@ public enum IDGrammar {
                 }
             }
             let key = prefix + number + letter + compound + suffix
-            guard !noise.contains(key) else { return nil }
-            return (RefID(display: ns.substring(with: range), key: key, prefix: prefix), range)
+            guard !noise.contains(key) else { continue }
+            found.append((RefID(display: ns.substring(with: range), key: key, prefix: prefix), range))
+            if letter.isEmpty, compound.isEmpty, suffix.isEmpty, range.length == m.range.length {
+                found += inheritedTokens(in: ns, prefix: prefix, number: number, after: range)
+            }
         }
         found += wordTokens(in: text)
         return found.sorted { $0.range.location < $1.range.location }
+    }
+
+    /// What follows an ID in a list that omits the prefix: `PU-02, 03 y 26`, `FR-004/006`.
+    static let listContinuation = try! NSRegularExpression(
+        pattern: #"(?:\s*,\s*(?:(?:y|and|&)\s+)?|\s*/\s*|\s+(?:y|and)\s+|\s*&\s*)(\d{1,4})(?![A-Za-z0-9_\-]|\.\d)"#
+    )
+
+    /// The numbers that follow `prefix number` in a list take its prefix when they have the same width and the
+    /// separator is `,`, `/`, `y`, `and` or `&`. A lone digit needs two of them (`C5, 1` is not a list), and `L120, 121`
+    /// are lines. They are scoped to a folder like the forms with a word: a bare number is only an ID where it is defined.
+    private static func inheritedTokens(in ns: NSString, prefix: String, number: String, after: NSRange) -> [(id: RefID, range: NSRange)] {
+        let end = after.location + after.length
+        guard end < ns.length else { return [] }
+        let next = ns.character(at: end)
+        guard next == 0x2C || next == 0x2F || next == 0x26 || next == 0x20 else { return [] }
+        if prefix == "L", number.first != "0" { return [] }
+        let before = ns.substring(to: after.location).lowercased()
+        if before.range(of: #"(?:lines?|l[ií]neas?|ln\.?|l\.|:)\s*$"#, options: .regularExpression) != nil { return [] }
+        var out: [(id: RefID, range: NSRange)] = []
+        var cursor = end
+        while cursor < ns.length,
+              let m = listContinuation.firstMatch(in: ns as String, options: .anchored, range: NSRange(location: cursor, length: ns.length - cursor)) {
+            let digits = ns.substring(with: m.range(at: 1))
+            guard digits.count == number.count else { break }
+            out.append((RefID(display: digits, key: prefix + digits, prefix: prefix, scope: .folder), m.range(at: 1)))
+            cursor = m.range.location + m.range.length
+        }
+        return number.count == 1 && out.count < 2 ? [] : out
     }
 
     /// The forms with a word or a position instead of a prefix: `Requirement 3`, `- [ ] 1.1`, `2-3-slug`.

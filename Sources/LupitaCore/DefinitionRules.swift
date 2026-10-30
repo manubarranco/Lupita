@@ -168,10 +168,10 @@ public enum DefinitionRules {
         return DefinitionHit(id: first.id, rule: .fileName, line: -1, title: title)
     }
 
-    static let adrFolders: Set<String> = ["adr", "adrs", "decisions"]
-    static let adrFile = try! NSRegularExpression(pattern: #"^(\d{1,4})-([A-Za-z0-9].*)\.md$"#)
+    static let adrFolders: Set<String> = ["adr", "adrs", "decisions", "architecture-decisions"]
+    static let adrFile = try! NSRegularExpression(pattern: #"^(?:[Aa][Dd][Rr]-?)?(\d{1,4})-([A-Za-z0-9].*)\.md$"#)
 
-    /// `docs/adr/0007-use-foo.md` defines `ADR-0007`, written with the digits the file has. A numbered file
+    /// `docs/adr/0007-use-foo.md` (or `adr007-use-foo.md`) defines `ADR-0007`, written with the digits the file has. A numbered file
     /// anywhere else is not an ADR.
     static func adrFileDefinition(_ fileName: String, folder: String) -> DefinitionHit? {
         guard adrFolders.contains(folder.lowercased()), let m = match(adrFile, fileName) else { return nil }
