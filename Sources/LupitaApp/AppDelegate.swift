@@ -118,11 +118,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let marks = HighlightPicker.classified(words: read.words, resolver: resolver)
             windowRead = read
             if Debug.isOn {
-                // Why a form like `(Task 2.3,` is underlined as a bare term: the exact words and boxes OCR gave for its row.
-                for row in HighlightPicker.rows(of: read.words) {
-                    for (i, w) in row.enumerated() where (w.text.contains("ask") || w.text.contains("Requirement")) && (i + 1 == row.count || row[i + 1].text.contains(where: \.isNumber)) {
-                        VocabularyLog.append(["highlight-row", row.map { "«\($0.text)» \(Int($0.box.minX))-\(Int($0.box.maxX))" }.joined(separator: " ")])
-                    }
+                // Why a form like `(Task 2.3,` or `Requirement` / `3` is not underlined: what OCR gave for its rows (and the
+                // row below) and which marks came out over those words.
+                let rows = HighlightPicker.rows(of: read.words)
+                for (n, row) in rows.enumerated() where row.contains(where: { $0.text.contains("ask") || $0.text.contains("Requirement") }) {
+                    func show(_ r: [OCRWord]) -> String { r.map { "«\($0.text)» \(Int($0.box.minX))-\(Int($0.box.maxX))" }.joined(separator: " ") }
+                    let hit = marks.filter { m in row.contains { $0.box.intersects(m.box) } }.map { "\($0.kind) \(Int($0.box.minX))-\(Int($0.box.maxX))" }
+                    VocabularyLog.append(["highlight-row", "y=\(Int(row[0].box.minY))", show(row), "marks=\(hit)",
+                                          "next=" + (n + 1 < rows.count ? "y=\(Int(rows[n + 1][0].box.minY)) " + show(rows[n + 1]) : "-")])
                 }
             }
             highlight.show(marks.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: read.words) ?? read.isDark, $0.kind) })
