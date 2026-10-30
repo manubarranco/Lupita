@@ -121,4 +121,42 @@ import Testing
         #expect(r.resolve("03", preferredRepo: "r", context: "chapter ", fromPath: "docs/a.md").definitions.isEmpty)
         #expect(r.resolve("03", preferredRepo: "r", context: nil, fromPath: "docs/a.md").definitions.isEmpty)
     }
+
+    // MARK: Property N in bold
+
+    @Test func boldPropertyWithATitleDefinesTheProperty() {
+        let r = Self.resolver([
+            "specs/a/design.md": "# Design\n\n**Property 1: Nesting token count**\n\nFor any input, it holds.",
+            "specs/a/tasks.md": "- [ ] 1.1 Write the test\n  - **Property 1: Cited, not defined**",
+            "specs/a/requirements.md": "Validates Property 1.",
+        ])
+        let defs = Self.shown(r, "Property 1", from: "specs/a/requirements.md")
+        #expect(defs.map(\.path) == ["specs/a/design.md"])
+        #expect(defs.first?.title == "Nesting token count")
+        #expect(defs.first?.line == 3)
+    }
+
+    @Test func boldPropertyWithoutATitleOrInTheMiddleOfAnythingIsNotADefinition() {
+        for text in ["**Property 1**", "**Property 1:**", "see **Property 1: Title** here", "- **Property 1: Title**", "  **Property 1: Title**",
+                     "**Property one: Title**", "**Property 1.2: Title**", "Property 1: Title"] {
+            #expect(DefinitionRules.lineDefinition(text) == nil, "\(text)")
+        }
+        #expect(DefinitionRules.lineDefinition("**Property 12: A title.** For any x")?.id.key == "PROPERTY 12")
+    }
+
+    @Test func boldPropertyIsScopedByFolder() {
+        let r = Self.resolver([
+            "specs/a/design.md": "**Property 1: Of spec a**",
+            "specs/b/design.md": "**Property 1: Of spec b**",
+            "specs/b/requirements.md": "Property 1",
+            "specs/c/requirements.md": "Property 1",
+        ])
+        #expect(Self.shown(r, "Property 1", from: "specs/b/requirements.md").map(\.path) == ["specs/b/design.md"])
+        #expect(Self.shown(r, "Property 1", from: "specs/c/requirements.md").isEmpty)
+    }
+
+    @Test func headingPropertyStillBeatsTheBoldOne() {
+        let r = Self.resolver(["a/design.md": "### Property 1: From heading\n\n**Property 1: From bold**"])
+        #expect(Self.shown(r, "Property 1", from: "a/design.md").first?.title == "From heading")
+    }
 }

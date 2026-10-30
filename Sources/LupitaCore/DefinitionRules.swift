@@ -76,6 +76,10 @@ public enum DefinitionRules {
     // thing and `Requirements 12.1-12.6` a range: neither defines `Task 2` or `Requirement 12.1`.
     static let wordHeading = try! NSRegularExpression(
         pattern: #"^#{1,6}\s+\**\s*(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d]|\.\d|[-–]\d)\**\s*(?:(?:[:—–\-·|)]|\.(?=\s|$))\s*|\s+|$)(.*)$"#)
+    // `**Property 1: Title**` at the start of a line (Kiro's design.md) defines `Property 1`. Without a title, in the
+    // middle of a sentence or as a list item (the sub-bullets of a `tasks.md` cite the property) it is a mention.
+    static let boldProperty = try! NSRegularExpression(
+        pattern: #"^\*\*(Propert(?:y|ies)) (\d{1,3}):\s+(\S[^*]*?)\*\*"#)
     // `- [ ] 1.1 Create the table`, `- [x]* 2. Wire it`: a task of a `tasks.md`.
     static let taskLine = try! NSRegularExpression(
         pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?\s+(.+)$"#)
@@ -127,6 +131,9 @@ public enum DefinitionRules {
             }
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
+        }
+        if line.hasPrefix("**Propert"), let m = match(boldProperty, line), let id = IDGrammar.parse(m[1] + " " + m[2]) {
+            return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[3]))
         }
         if let m = match(tableRow, line) {
             guard let id = IDGrammar.parse(m[1]), !isSeparatorRow(line) else { return nil }
