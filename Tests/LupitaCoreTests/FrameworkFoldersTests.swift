@@ -66,4 +66,11 @@ import Testing
         let repo = try Self.makeRepo([".kiro/inner/.git/HEAD", ".kiro/inner/a.md", ".kiro/b.md"])
         #expect(Self.found(repo) == [".kiro/b.md"])
     }
+
+    @Test func aRepoUnderTwoRootsIsFoundOnce() throws {
+        let repo = try Self.makeRepo(["a.md"])
+        let parent = (repo.path as NSString).deletingLastPathComponent
+        let found = RepoDiscovery.repos(under: [parent, repo.path])
+        #expect(found.count == 1)
+    }
 }
