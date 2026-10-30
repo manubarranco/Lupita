@@ -210,4 +210,14 @@ final class Collected: @unchecked Sendable {
     private var all: [HighlightPicker.Mark] = []
     func add(_ m: [HighlightPicker.Mark]) { lock.lock(); all += m; lock.unlock() }
     var marks: [HighlightPicker.Mark] { lock.lock(); defer { lock.unlock() }; return all }
+
+    @Test func aPhraseWithAWordThatCleansToNothingDoesNotCrash() {
+        var index = RefIndex()
+        index.repos = []
+        let r = Resolver(index: index)
+        let row = ["npm", "**"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 40, y: 0, width: 30, height: 12))
+        }
+        #expect(HighlightPicker.phraseLength(row, at: 0, resolver: r, block: "") == nil)
+    }
 }

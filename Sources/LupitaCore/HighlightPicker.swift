@@ -161,6 +161,8 @@ public enum HighlightPicker {
             if resolver.resolveTerm(phrase) != nil { return length }
             // `npm run build`: a script that exists in a repo's package.json, or a known package command.
             let parts = phrase.split(separator: " ")
+            // A word that cleans to nothing (a lone `-` or `|`) leaves fewer parts than words.
+            guard parts.count == length else { continue }
             if CodeDictionaries.managers.contains(parts[0].lowercased()), length == (["run", "run-script"].contains(parts[1]) ? 3 : 2),
                CodeRefs.Commands.resolve(CodeRefs.Text(text: phrase, codeMarked: false, before: ""), repos: resolver.index.repos, preferredRepo: nil) != nil {
                 return length
