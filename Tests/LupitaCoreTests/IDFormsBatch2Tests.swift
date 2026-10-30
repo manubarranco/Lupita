@@ -140,6 +140,16 @@ import Testing
         #expect(index.mentions["TASK 1.1"]?.count == 1)
     }
 
+    @Test func wordFormMentionsAreKeptOnlyWhereTheRepoDefinesThem() {
+        var index = RefIndex()
+        index.add(text: "Epic 2 and Task 9 and D4\n", fileName: "a.md", repo: "x", relativePath: "a.md", absolutePath: "/x/a.md")
+        index.add(text: "## Epic 2: Pay\nEpic 2 again\n", fileName: "b.md", repo: "y", relativePath: "b.md", absolutePath: "/y/b.md")
+        index.rank()
+        #expect(index.mentions["EPIC 2"]?.files == ["y/b.md"])
+        #expect(index.mentions["TASK 9"] == nil)
+        #expect(index.mentions["D4"]?.files == ["x/a.md"])
+    }
+
     @Test func tasksFileBeatsAReportHeading() {
         let r = Self.resolver([
             "s/tasks.md": "- [ ] 3.3 Name the tokens\n",

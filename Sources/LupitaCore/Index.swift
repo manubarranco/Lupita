@@ -179,6 +179,7 @@ public struct RefIndex: Codable, Sendable {
             for d in defs { density[densityKey(d), default: 0] += 1 }
         }
         rankTerms()
+        pruneWordFormMentions()
         for (key, defs) in definitions {
             definitions[key] = defs.sorted {
                 if $0.isArchived != $1.isArchived { return !$0.isArchived }
@@ -187,6 +188,17 @@ public struct RefIndex: Codable, Sendable {
                 if a != b { return a > b }
                 return ($0.repo, $0.path, $0.line) < ($1.repo, $1.path, $1.line)
             }
+        }
+    }
+
+    /// `Task 3` and `Epic 2` are written in every document and mean something only where the same repo defines
+    /// them: mentions of a form with a word that no file of the mentioning repo defines are dropped.
+    private mutating func pruneWordFormMentions() {
+        for key in Array(mentions.keys) where key.contains(" ") {
+            let repos = Set((definitions[key] ?? []).map(\.repo))
+            var m = mentions[key]!
+            m.byFile = m.byFile.filter { file, _ in file.firstIndex(of: "/").map { repos.contains(String(file[..<$0])) } ?? false }
+            mentions[key] = m.byFile.isEmpty ? nil : m
         }
     }
 
