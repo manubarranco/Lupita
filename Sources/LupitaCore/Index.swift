@@ -17,6 +17,9 @@ public struct Definition: Codable, Hashable, Sendable {
     public var openURL: String? = nil
     /// Colour samples to paint next to a CSS token or hex colour (D29), one per theme.
     public var colors: [ColorSample]? = nil
+
+    /// Defined in a closed change of OpenSpec (`openspec/changes/archive`): a live definition of the same ID is preferred.
+    public var isArchived: Bool { path.split(separator: "/").dropLast().contains("archive") }
 }
 
 /// A colour to draw: `hex` is `#RRGGBB` (or `#RRGGBBAA`); `label` says which theme it is for (`light`, `dark`) or is empty.
@@ -176,13 +179,29 @@ public struct RefIndex: Codable, Sendable {
             for d in defs { density[densityKey(d), default: 0] += 1 }
         }
         rankTerms()
+        pruneWordFormMentions()
         for (key, defs) in definitions {
             definitions[key] = defs.sorted {
+                if $0.isArchived != $1.isArchived { return !$0.isArchived }
                 if $0.rule.weight != $1.rule.weight { return $0.rule.weight > $1.rule.weight }
                 let a = density[densityKey($0)] ?? 0, b = density[densityKey($1)] ?? 0
                 if a != b { return a > b }
                 return ($0.repo, $0.path, $0.line) < ($1.repo, $1.path, $1.line)
             }
+        }
+    }
+
+    /// `Task 3` and `Epic 2` are written in every document and mean something only where the same repo defines
+    /// them: mentions of a form with a word that no file of the mentioning repo defines are dropped.
+    private mutating func pruneWordFormMentions() {
+        for key in Array(mentions.keys) where key.contains(" ") {
+            // `Requirement 3.1` shows `Requirement 3`: its mentions count wherever a parent form is defined.
+            var repos = Set<String>()
+            var k: String? = key
+            while let current = k { repos.formUnion((definitions[current] ?? []).map(\.repo)); k = IDGrammar.parentKey(of: current) }
+            var m = mentions[key]!
+            m.byFile = m.byFile.filter { file, _ in file.firstIndex(of: "/").map { repos.contains(String(file[..<$0])) } ?? false }
+            mentions[key] = m.byFile.isEmpty ? nil : m
         }
     }
 

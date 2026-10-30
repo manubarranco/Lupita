@@ -39,6 +39,9 @@ public enum RepoDiscovery {
                 found.append(Repo(name: url.lastPathComponent, path: url.path))
             }
         }
+        // A repo reachable from two roots (`~/Repos` and `~/Repos/app`) is one repo: indexed twice, every definition showed twice.
+        var seen = Set<String>()
+        found = found.filter { seen.insert(realPath($0.path)).inserted }
         return excluding.isEmpty ? found : found.filter { !excluding.contains($0.path) }
     }
 

@@ -53,17 +53,17 @@ public struct DefinitionHit: Equatable, Sendable {
 public enum DefinitionRules {
     // `## D23 — Title`, `### **Q07**: Title`. The ID must be the first token of the heading.
     static let heading = try! NSRegularExpression(
-        pattern: #"^#{1,6}\s+\**\s*([^\s*:—–·|),.]+)\**(?:\s*[—–:\-.·|)]\s*|\s+|$)(.*)$"#)
+        pattern: #"^#{1,6}\s+\**\s*((?:[^\s*:—–·|),.]|\.(?=\d))+)\**(?:\s*[—–:\-.·|)]\s*|\s+|$)(.*)$"#)
     // `- **Q07**: text`, `**Q07:** text`, `Q07: text`, `1. D3 — text`. Bold must close right after the ID.
     static let listOrColon = try! NSRegularExpression(
-        pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?(\*\*|__)?([A-Za-z0-9\-]+?)(?::\1|\1\s*[:—–]|\s*[:—–](?=\s))\s*(.*)$"#)
+        pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?(\*\*|__)?([A-Za-z0-9\-.]+?)(?::\1|\1\s*[:—–]|\s*[:—–](?=\s))\s*(.*)$"#)
     // `| Q07 | Title | … |`
     static let tableRow = try! NSRegularExpression(
-        pattern: #"^\s*\|\s*\**([A-Za-z0-9\-]+?)\**\s*\|\s*([^|]*)\|"#)
+        pattern: #"^\s*\|\s*\**([A-Za-z0-9\-.]+?)\**\s*\|\s*([^|]*)\|"#)
     // `| **E8-S6 Regalo de monedas [Could]** |`, `| E10-S2 ✅ Historial |`. Bold, if any, wraps
     // ID and title together: `| **D008** (aside) |` is a mention.
     static let tableTitledCell = try! NSRegularExpression(
-        pattern: #"^\s*\|\s*(?:\*\*)?([A-Za-z0-9\-]+?)\s+([^|]+?)\s*\|"#)
+        pattern: #"^\s*\|\s*(?:\*\*)?([A-Za-z0-9\-.]+?)\s+([^|]+?)\s*\|"#)
     // `- [x] T001 [P] [US1] Crear modelo de Foo` (spec-kit tasks): the ID is the first token after
     // the box; the bracketed tags after it are not part of the title.
     static let task = try! NSRegularExpression(
@@ -71,6 +71,14 @@ public enum DefinitionRules {
     // `### User Story 1 - Crear Foo (Priority: P1)` (spec-kit) defines `US1`, which tasks and plans cite.
     static let userStory = try! NSRegularExpression(
         pattern: #"^#{1,6}\s+User Story\s+(\d{1,4})\s*[-—–:·]\s*(.*?)\s*(?:\(Priority:\s*P\d+\))?\s*$"#)
+    // `### Requirement 3: Title`, `## Epic 2 - Title`, `#### Task Group 1`: a heading that starts with a word and
+    // a number defines that form. The title may be empty: the heading is the definition. `Task 2.FIX` is another
+    // thing and `Requirements 12.1-12.6` a range: neither defines `Task 2` or `Requirement 12.1`.
+    static let wordHeading = try! NSRegularExpression(
+        pattern: #"^#{1,6}\s+\**\s*(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d]|\.\d|[-–]\d)\**\s*(?:(?:[:—–\-·|)]|\.(?=\s|$))\s*|\s+|$)(.*)$"#)
+    // `- [ ] 1.1 Create the table`, `- [x]* 2. Wire it`: a task of a `tasks.md`.
+    static let taskLine = try! NSRegularExpression(
+        pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?\s+(.+)$"#)
     static let frontmatterID = try! NSRegularExpression(
         pattern: #"^id:\s*["']?([A-Za-z0-9\-]+)["']?\s*$"#)
     static let leadingDate = try! NSRegularExpression(
@@ -80,6 +88,7 @@ public enum DefinitionRules {
     public static func definitions(fileName: String, lines: [String]) -> [DefinitionHit] {
         var hits: [DefinitionHit] = []
         if let hit = fileNameDefinition(fileName) { hits.append(hit) }
+        let isTasksFile = fileName.lowercased() == "tasks.md"
 
         var inFence = false
         var inFrontmatter = lines.first?.trimmingCharacters(in: .whitespaces) == "---"
@@ -95,10 +104,13 @@ public enum DefinitionRules {
             if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") { inFence.toggle(); continue }
             if inFence { continue }
             if let hit = lineDefinition(line, index: i) { hits.append(hit) }
+            else if isTasksFile, let hit = taskDefinition(line, index: i) { hits.append(hit) }
         }
         let headingCounts = Dictionary(grouping: hits.filter { $0.rule == .heading }, by: \.id.key).mapValues(\.count)
         return hits.map { hit in
-            guard hit.rule == .heading, hit.title.isEmpty || headingCounts[hit.id.key, default: 0] > 1 else { return hit }
+            // `### Requirement 3` with no title is still where requirement 3 is defined.
+            let titleless = hit.title.isEmpty && hit.id.scope == .none
+            guard hit.rule == .heading, titleless || headingCounts[hit.id.key, default: 0] > 1 else { return hit }
             return DefinitionHit(id: hit.id, rule: .section, line: hit.line, title: hit.title)
         }
     }
@@ -108,6 +120,9 @@ public enum DefinitionRules {
         if line.hasPrefix("#") {
             if let m = match(userStory, line), let id = IDGrammar.parse("US" + m[1]) {
                 return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
+            }
+            if let m = match(wordHeading, line), let id = IDGrammar.parse(m[1] + " " + m[2]) {
+                return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[3]))
             }
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
@@ -132,10 +147,19 @@ public enum DefinitionRules {
         return nil
     }
 
-    /// `Q07-title.md`, `D23.md`, `E2-S3b-voice-input.md`.
+    /// `- [ ] 1.1 Create the table` in a `tasks.md`: defines `Task 1.1`.
+    static func taskDefinition(_ line: String, index: Int) -> DefinitionHit? {
+        guard let m = match(taskLine, line), let id = IDGrammar.parse("Task " + m[1]) else { return nil }
+        return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[2]))
+    }
+
+    /// `Q07-title.md`, `D23.md`, `E2-S3b-voice-input.md`. A file called `STORY-2.1-HANDOFF-REPORT.md` is a report
+    /// about a story, not the story: IDs with a `.N` suffix are not defined by file names.
     public static func fileNameDefinition(_ fileName: String) -> DefinitionHit? {
         let base = (fileName as NSString).deletingPathExtension
-        guard let first = IDGrammar.tokens(in: base).first, first.range.location == 0 else { return nil }
+        guard let first = IDGrammar.tokens(in: base).first, first.range.location == 0, first.id.scope == .none,
+              !first.id.key.contains(".")
+        else { return nil }
         let rest = (base as NSString).substring(from: first.range.length)
         guard rest.isEmpty || rest.hasPrefix("-") || rest.hasPrefix("_") || rest.hasPrefix(" ") else { return nil }
         let title = rest.trimmingCharacters(in: CharacterSet(charactersIn: "-_ "))

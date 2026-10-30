@@ -210,4 +210,87 @@ final class Collected: @unchecked Sendable {
     private var all: [HighlightPicker.Mark] = []
     func add(_ m: [HighlightPicker.Mark]) { lock.lock(); all += m; lock.unlock() }
     var marks: [HighlightPicker.Mark] { lock.lock(); defer { lock.unlock() }; return all }
+
+    @Test func aPhraseWithAWordThatCleansToNothingDoesNotCrash() {
+        var index = RefIndex()
+        index.repos = []
+        let r = Resolver(index: index)
+        let row = ["npm", "**"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 40, y: 0, width: 30, height: 12))
+        }
+        #expect(HighlightPicker.phraseLength(row, at: 0, resolver: r, block: "") == nil)
+    }
+
+    @Test func aWordFormIsOneSolidMark() {
+        var index = RefIndex()
+        index.add(text: "### Task Group 2: Export\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        let words = ["See", "Task", "Group", "2,", "and", "Task", "9"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 50, y: 0, width: 45, height: 12))
+        }
+        let marks = HighlightPicker.classified(words: words, resolver: r)
+        #expect(marks.filter { $0.kind == .id }.count == 1)
+        #expect(marks.first { $0.kind == .id }?.box.minX == 50)
+        #expect(marks.first { $0.kind == .id }?.box.maxX ?? 0 > 150)
+    }
+
+    @Test func aWordFormInParenthesesIsOneSolidMark() {
+        var index = RefIndex()
+        index.add(text: "### Task 2.3: Export\n### Requirement 3: Login\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        for texts in [["Done", "(Task", "2.3)", "Requirement", "3"], ["Done", "(", "Task", "2.3)", "Requirement", "3"],
+                      ["Done", "(Task", "2.3", ")", "Requirement", "3"], ["Requirement", "3", "(Task", "2.3)"], ["(Task", "2.3,", "Requirement", "3,"]] {
+            let words = texts.enumerated().map { OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 50, y: 0, width: 45, height: 12)) }
+            let marks = HighlightPicker.classified(words: words, resolver: r)
+            #expect(marks.filter { $0.kind == .id }.count == 2, "\(texts) → \(marks)")
+        }
+    }
+
+    @Test func aLoneParenthesisBeforeAGlossaryWordDoesNotHideTheForm() {
+        var index = RefIndex()
+        index.add(text: "### Task 2.3: Export\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.add(text: "- **Task** — a unit of work\n", fileName: "glossary.md", repo: "r", relativePath: "glossary.md", absolutePath: "/r/glossary.md")
+        index.rank()
+        let r = Resolver(index: index)
+        #expect(r.resolveTerm("Task") != nil)
+        let words = ["con", "(", "Task", "2.3)", "suelto"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 50, y: 0, width: 45, height: 12))
+        }
+        let marks = HighlightPicker.classified(words: words, resolver: r)
+        #expect(marks.map(\.kind) == [.id])
+        #expect(marks.first?.box.minX == 100)
+    }
+
+    @Test func aWordFormBrokenAcrossTwoLinesIsMarkedOnBothHalves() {
+        var index = RefIndex()
+        index.add(text: "### Requirement 3: Login\n### Task Group 2: Export\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        func word(_ t: String, _ x: CGFloat, _ y: CGFloat) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: 60, height: 12)) }
+        let broken = [word("Covers", 0, 0), word("Requirement", 65, 0), word("3,", 0, 14), word("and", 65, 14)]
+        let marks = HighlightPicker.classified(words: broken, resolver: r)
+        #expect(marks.count == 2 && marks.allSatisfy { $0.kind == .id })
+        #expect(Set(marks.map { $0.box.minY }) == [0, 14])
+        // A sentence end between the lines is not a form.
+        let ended = [word("Covers", 0, 0), word("Requirement.", 65, 0), word("3", 0, 14)]
+        #expect(HighlightPicker.classified(words: ended, resolver: r).isEmpty)
+        let group = [word("See", 0, 0), word("Task", 65, 0), word("Group", 130, 0), word("2", 0, 14)]
+        #expect(HighlightPicker.classified(words: group, resolver: r).count == 2)
+    }
+
+    @Test func aBrokenFormIsFoundWithASidebarOnTheSameScreenLine() {
+        var index = RefIndex()
+        index.add(text: "### Requirement 3: Login\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        func word(_ t: String, _ x: CGFloat, _ y: CGFloat) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: 60, height: 12)) }
+        // The sidebar's words share each screen line with the chat's words.
+        let words = [word("Lupita", 17, 0), word("Covers", 401, 0), word("Requirement", 470, 0), word("Contexto", 1200, 0),
+                     word("Notes", 17, 14), word("3,", 403, 14), word("and", 470, 14), word("44", 1382, 14)]
+        let marks = HighlightPicker.classified(words: words, resolver: r)
+        #expect(marks.count == 2 && marks.allSatisfy { $0.kind == .id })
+        #expect(Set(marks.map { $0.box.minX }) == [470, 403])
+    }
 }

@@ -83,6 +83,10 @@ public enum HighlightPicker {
                     // In a code font OCR reads `localhost:8130` as two words, `localhost:` and `8130`.
                     marks.append(Mark(box: trimmed(row[i...i + 1]), kind: .term))
                     i += 2
+                } else if let length = wordIDLength(row, at: i, resolver: resolver) {
+                    // `Task 2.3`, `Requirement 3`: one solid mark for the word and its number.
+                    marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .id))
+                    i += length
                 } else if let length = phraseLength(row, at: i, resolver: resolver, block: block) {
                     marks.append(Mark(box: trimmed(row[i..<i + length]), kind: .term))
                     i += length
@@ -95,7 +99,55 @@ public enum HighlightPicker {
                 }
             }
         }
-        return marks + brokenAcrossLines(rows(of: words), resolver: resolver, words: words)
+        let all = rows(of: words)
+        return marks + brokenAcrossLines(all, resolver: resolver, words: words) + wordFormsAcrossLines(all, resolver: resolver)
+    }
+
+    /// A row cut into the stretches of text that sit side by side (a sidebar, the chat, a panel): a gap wider than
+    /// three line heights starts a new one.
+    static func runs(of row: [OCRWord]) -> [[OCRWord]] {
+        var out: [[OCRWord]] = []
+        for word in row {
+            if let last = out.last?.last, word.box.minX - last.box.maxX <= word.box.height * 3 { out[out.count - 1].append(word) }
+            else { out.append([word]) }
+        }
+        return out
+    }
+
+    /// `Requirement` at the end of a line and `3` at the start of the next: one solid mark on each half when the
+    /// two make a numbered form with a word that a repo defines. Only between stretches right below each other
+    /// that start at the same column (the rows also hold the sidebar and whatever else is on the same screen line).
+    static func wordFormsAcrossLines(_ rows: [[OCRWord]], resolver: Resolver) -> [Mark] {
+        var marks: [Mark] = []
+        for (row, nextRow) in zip(rows, rows.dropFirst()) {
+            for run in runs(of: row) {
+                guard let end = run.last, let first = run.first else { continue }
+                for next in runs(of: nextRow) {
+                    guard let start = next.first, abs(start.box.minX - first.box.minX) <= end.box.height * 3,
+                          start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
+                    if let halves = wordFormHalves(tail: run, head: next, resolver: resolver) {
+                        marks.append(Mark(box: trimmed(ArraySlice(halves.0)), kind: .id))
+                        marks.append(Mark(box: trimmed(ArraySlice(halves.1)), kind: .id))
+                    }
+                }
+            }
+        }
+        return marks
+    }
+
+    private static func wordFormHalves(tail: [OCRWord], head: [OCRWord], resolver: Resolver) -> ([OCRWord], [OCRWord])? {
+        for t in 1...min(2, tail.count) {
+            for h in 1...min(2, head.count) where t + h <= 3 {
+                let tailWords = Array(tail.suffix(t)), headWords = Array(head.prefix(h))
+                // Words that end a sentence or a phrase do not run on into the next line.
+                if tailWords.contains(where: closes) || headWords.dropLast().contains(where: closes) { continue }
+                let cleaned = (tailWords + headWords).map { clean($0.text) }
+                guard !cleaned.contains(where: \.isEmpty), cleaned[0].first?.isUppercase == true,
+                      resolver.resolveWordID(cleaned.joined(separator: " ")) != nil else { continue }
+                return (tailWords, headWords)
+            }
+        }
+        return nil
     }
 
     /// A word split at the end of a line with a hyphen (`fast-` / `forward`): both halves are marked when the
@@ -129,7 +181,7 @@ public enum HighlightPicker {
     static let leading = CharacterSet(charactersIn: "([{\"'`*«“‘")
 
     /// Words on the same line, left to right.
-    static func rows(of words: [OCRWord]) -> [[OCRWord]] {
+    public static func rows(of words: [OCRWord]) -> [[OCRWord]] {
         var rows: [[OCRWord]] = []
         for word in words.sorted(by: { $0.box.midY < $1.box.midY }) {
             if let first = rows.last?.first, abs(word.box.midY - first.box.midY) <= first.box.height / 2 {
@@ -149,6 +201,19 @@ public enum HighlightPicker {
         word.text.unicodeScalars.last.map(CharacterSet(charactersIn: ".,;:!?…").contains) ?? false
     }
 
+    /// 3 to 2 words from `i` that are a numbered form with a word (`Task Group 2`, `Requirement 3`) some repo defines.
+    static func wordIDLength(_ row: [OCRWord], at i: Int, resolver: Resolver) -> Int? {
+        for length in stride(from: 3, through: 2, by: -1) where i + length <= row.count {
+            let slice = row[i..<i + length]
+            if slice.dropLast().contains(where: closes) { continue }
+            let gapLimit = (slice.first?.box.height ?? 0) * 1.5
+            if zip(slice, slice.dropFirst()).contains(where: { $1.box.minX - $0.box.maxX > gapLimit }) { continue }
+            guard let first = slice.first, clean(first.text).first?.isUppercase == true else { continue }
+            if resolver.resolveWordID(slice.map { clean($0.text) }.joined(separator: " ")) != nil { return length }
+        }
+        return nil
+    }
+
     /// 4 to 2 words from `i` that name a glossary term or a dictionary command, longest first.
     static func phraseLength(_ row: [OCRWord], at i: Int, resolver: Resolver, block: String) -> Int? {
         for length in stride(from: 4, through: 2, by: -1) where i + length <= row.count {
@@ -157,10 +222,16 @@ public enum HighlightPicker {
             if slice.dropLast().contains(where: closes) { continue }
             let gapLimit = (slice.first?.box.height ?? 0) * 1.5
             if zip(slice, slice.dropFirst()).contains(where: { $1.box.minX - $0.box.maxX > gapLimit }) { continue }
-            let phrase = slice.map { clean($0.text) }.joined(separator: " ")
+            let cleaned = slice.map { clean($0.text) }
+            // A word that cleans to nothing (a lone `(` or `**`) is no part of a phrase: `( Task` is not the term `Task`
+            // starting one word early, which also hid the `Task 2.3` that follows.
+            if cleaned.contains(where: \.isEmpty) { continue }
+            let phrase = cleaned.joined(separator: " ")
             if resolver.resolveTerm(phrase) != nil { return length }
             // `npm run build`: a script that exists in a repo's package.json, or a known package command.
             let parts = phrase.split(separator: " ")
+            // A word that cleans to nothing (a lone `-` or `|`) leaves fewer parts than words.
+            guard parts.count == length else { continue }
             if CodeDictionaries.managers.contains(parts[0].lowercased()), length == (["run", "run-script"].contains(parts[1]) ? 3 : 2),
                CodeRefs.Commands.resolve(CodeRefs.Text(text: phrase, codeMarked: false, before: ""), repos: resolver.index.repos, preferredRepo: nil) != nil {
                 return length

@@ -104,8 +104,9 @@ public struct Resolver: Sendable {
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        if let id = IDGrammar.parse(query), let defs = index.definitions[id.key] {
-            return result(query, .exact, key: id.key, defs, preferredRepo, fromPath)
+        if let id = IDGrammar.parse(query) {
+            let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+            if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
@@ -154,6 +155,76 @@ public struct Resolver: Sendable {
                               mentions: index.mentions[id.key], alternatives: [])
         }
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
+    }
+
+    /// A numbered form with a word (`Requirement 3`, `Task Group 2`) for `phrase`, or nil. Public so the picker
+    /// can try windows of words.
+    public func resolveWordID(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
+                              fromPath: String? = nil) -> Resolution? {
+        let trimmed = Self.latinize(phrase.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
+        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none else { return nil }
+        let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
+        let repo = named ?? preferredRepo
+        let (key, defs) = scopedDefinitions(for: id, preferredRepo: repo, fromPath: named == nil || named == preferredRepo ? fromPath : nil)
+        guard !defs.isEmpty else { return nil }
+        return result(trimmed, .exact, key: key, defs, repo, named == nil || named == preferredRepo ? fromPath : nil, ownFileFirst: true)
+    }
+
+    /// The definitions a mention of `id` may take, and the key they are under. Forms with a scope take
+    /// them from the mention's own repo and, with the file known, only from its folder or above (`.folder`) or from
+    /// its first-level folder (`.topFolder`); with no file, all of the repo's, each with its file. A cited
+    /// criterion (`Requirement 3.1`) falls back to the form one level up. Other forms: every definition.
+    public func scopedDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> (key: String, defs: [Definition]) {
+        if id.scope == .none {
+            var key: String? = id.key
+            while let k = key {
+                if let defs = index.definitions[k], !defs.isEmpty { return (k, defs) }
+                key = IDGrammar.parentKey(of: k)
+            }
+            return (id.key, [])
+        }
+        var key: String? = id.key
+        while let k = key {
+            let own = (index.definitions[k] ?? []).filter { d in
+                guard let preferredRepo else { return true }
+                return d.repo.caseInsensitiveCompare(preferredRepo) == .orderedSame
+            }
+            let kept: [Definition]
+            if let fromPath {
+                kept = own.filter { Self.reaches($0.path, from: fromPath, scope: id.scope) }
+            } else {
+                // The window does not say which file it shows: every definition of the repo is listed, each with
+                // its file, instead of picking one that may belong to another spec.
+                kept = own
+            }
+            // A task is defined by its line in `tasks.md`; the headings of reports about it come after.
+            if !kept.isEmpty { return (k, k.hasPrefix("TASK ") ? kept.filter(Self.inTasksFile) + kept.filter { !Self.inTasksFile($0) } : kept) }
+            key = IDGrammar.parentKey(of: k)
+        }
+        return (id.key, [])
+    }
+
+    static func inTasksFile(_ d: Definition) -> Bool { d.path.split(separator: "/").last?.lowercased() == "tasks.md" }
+
+    /// What the tooltip lists for `id`, in order: scope, then the reader's own file, live before archived, nearest folder.
+    public func shownDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> [Definition] {
+        let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+        return defs.isEmpty ? [] : result(id.display, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none).definitions
+    }
+
+    /// Folders of framework files that are not the project's own (BMAD ships examples under these).
+    static let frameworkFolders: Set<String> = ["bmad", "_bmad", "skills"]
+
+    static func reaches(_ definitionPath: String, from mentionPath: String, scope: IDScope) -> Bool {
+        let theirs = definitionPath.split(separator: "/").dropLast(), mine = mentionPath.split(separator: "/").dropLast()
+        switch scope {
+        case .none: return true
+        case .folder:
+            return theirs.count <= mine.count && zip(mine, theirs).allSatisfy { $0 == $1 }
+        case .topFolder:
+            guard theirs.first == mine.first else { return false }
+            return frameworkFolders.isDisjoint(with: theirs.map(String.init)) && frameworkFolders.isDisjoint(with: mine.map(String.init))
+        }
     }
 
     /// A glossary term for `phrase` (one to four words), or nil. The repo of the window comes first;
@@ -246,7 +317,7 @@ public struct Resolver: Sendable {
     /// folder nearest to `fromPath`. Weak definitions from other repos are dropped: a `## P1`
     /// section elsewhere says nothing about a `P1` here. `defs` is already ranked.
     func result(_ query: String, _ kind: Resolution.Kind, key: String, _ defs: [Definition],
-                        _ repo: String?, _ fromPath: String?) -> Resolution {
+                        _ repo: String?, _ fromPath: String?, ownFileFirst: Bool = false) -> Resolution {
         func isPreferred(_ d: Definition) -> Bool { repo.map { d.repo.caseInsensitiveCompare($0) == .orderedSame } ?? false }
         /// Depth of the definition's folder when it is the reader's folder or one of its parents.
         func nearness(_ d: Definition) -> Int {
@@ -255,10 +326,19 @@ public struct Resolver: Sendable {
             return theirs.count <= mine.count && zip(mine, theirs).allSatisfy({ $0 == $1 }) ? theirs.count : 0
         }
         let candidates = repo == nil ? defs : defs.filter { !$0.rule.isWeak || isPreferred($0) }
+        // A closed change (`openspec/changes/archive`) loses to a live definition, unless the reader is in the archive too.
+        let readingArchive = fromPath?.split(separator: "/").contains("archive") ?? false
+        func archived(_ d: Definition) -> Int { d.isArchived && !readingArchive ? 1 : 0 }
+        // The reader's own file defines first: a plan that heads `### Task 2` is not about the `Task 2` of its neighbour.
+        func ownFile(_ d: Definition) -> Int { ownFileFirst && isPreferred(d) && d.path == fromPath ? 0 : 1 }
+        // A task's own line in `tasks.md` beats the headings of reports about it, even from a nearer folder.
+        func tasksLine(_ d: Definition) -> Int { key.hasPrefix("TASK ") && Self.inTasksFile(d) ? 0 : 1 }
         let ordered = candidates.enumerated().sorted { a, b in
-            let ka = (a.element.rule.isWeak ? 1 : 0, isPreferred(a.element) ? 0 : 1, -nearness(a.element), a.offset)
-            let kb = (b.element.rule.isWeak ? 1 : 0, isPreferred(b.element) ? 0 : 1, -nearness(b.element), b.offset)
-            return ka < kb
+            func rank(_ x: (offset: Int, element: Definition)) -> [Int] {
+                [x.element.rule.isWeak ? 1 : 0, isPreferred(x.element) ? 0 : 1, ownFile(x.element), tasksLine(x.element),
+                 archived(x.element), -nearness(x.element), x.offset]
+            }
+            return rank(a).lexicographicallyPrecedes(rank(b))
         }.map(\.element)
         guard !ordered.isEmpty else {
             return Resolution(query: query, kind: .undefined, key: key, definitions: [],

@@ -205,9 +205,19 @@ enum TextUnderCursor {
               let frame = frame(of: element), frame.width > 0
         else { return nil }
         let length = (text as NSString).length
-        if let offset = characterIndex(in: element, at: point, length: length) {
-            return line(in: text, offset: offset)
+        if Debug.isOn {
+            VocabularyLog.append(["static-frame", "frame=\(frame)", "point=\(point)", "inside=\(frame.insetBy(dx: -3, dy: -3).contains(point))", "text=“\(text.prefix(40))”"])
         }
+        if hasCharacterBounds(element) {
+            if let offset = characterIndex(in: element, at: point, length: length) {
+                return line(in: text, offset: offset)
+            }
+            // The element gives the bounds of its characters and none is under the point: Chromium answered with the
+            // last element it found, whose box (an inline code that wraps covers both lines) still holds the point.
+            // The text under the point is in a sibling: look for it there.
+            return sibling(of: element, at: point)
+        }
+        guard frame.insetBy(dx: -3, dy: -3).contains(point) else { return nil }
         guard !text.contains("\n"), frame.height < 32 else { return nil }  // let OCR read it
         let fraction = min(max((point.x - frame.minX) / frame.width, 0), 1)
         return Hit(line: text, offset: Int(fraction * CGFloat(length)))
@@ -216,30 +226,48 @@ enum TextUnderCursor {
     /// Index of the character under `point`, searching in reading order (line by line, then
     /// left to right). Nil when the element does not report character bounds.
     static func characterIndex(in element: AXUIElement, at point: CGPoint, length: Int) -> Int? {
-        func bounds(_ i: Int) -> CGRect? {
-            var range = CFRange(location: i, length: 1)
-            guard let value = AXValueCreate(.cfRange, &range),
-                  let result: AXValue = parameterized(element, kAXBoundsForRangeParameterizedAttribute, value)
+        CharacterHit.index(at: point, length: length) { characterBounds(element, $0) }
+    }
+
+    private static func characterBounds(_ element: AXUIElement, _ i: Int) -> CGRect? {
+        var range = CFRange(location: i, length: 1)
+        guard let value = AXValueCreate(.cfRange, &range),
+              let result: AXValue = parameterized(element, kAXBoundsForRangeParameterizedAttribute, value)
+        else { return nil }
+        var rect = CGRect.zero
+        guard AXValueGetValue(result, .cgRect, &rect), rect.height > 0 else { return nil }
+        return rect
+    }
+
+    private static func hasCharacterBounds(_ element: AXUIElement) -> Bool { characterBounds(element, 0) != nil }
+
+    /// The static text near `element` (under its parent, grandparent or great-grandparent) with a character under
+    /// `point`. Bounded: a paragraph has a few dozen nodes, a cap keeps a huge page from stalling the look-up.
+    private static func sibling(of element: AXUIElement, at point: CGPoint) -> Hit? {
+        var visited = 0
+        func search(_ node: AXUIElement, depth: Int) -> Hit? {
+            visited += 1
+            guard visited < 400, let nodeFrame = frame(of: node), nodeFrame.insetBy(dx: -CharacterHit.slack, dy: -3).contains(point)
             else { return nil }
-            var rect = CGRect.zero
-            guard AXValueGetValue(result, .cgRect, &rect), rect.height > 0 else { return nil }
-            return rect
-        }
-        guard length > 0, bounds(0) != nil else { return nil }
-        var low = 0, high = length - 1
-        while low <= high {
-            let mid = (low + high) / 2
-            guard let b = bounds(mid) else { return nil }
-            let sameLine = b.minY <= point.y && point.y < b.maxY
-            if b.maxY <= point.y || (sameLine && b.maxX <= point.x) {
-                low = mid + 1
-            } else if b.minY > point.y || (sameLine && b.minX > point.x) {
-                high = mid - 1
-            } else {
-                return mid
+            if (attribute(node, kAXRoleAttribute) as String?) == kAXStaticTextRole, !CFEqual(node, element),
+               let text: String = attribute(node, kAXValueAttribute), !text.isEmpty, text.count < 5000,
+               let offset = characterIndex(in: node, at: point, length: (text as NSString).length) {
+                return line(in: text, offset: offset)
             }
+            guard depth < 6, let children: [AXUIElement] = attribute(node, kAXChildrenAttribute) else { return nil }
+            for child in children { if let hit = search(child, depth: depth + 1) { return hit } }
+            return nil
         }
-        return min(low, length - 1)  // between two characters: the following one
+        var ancestor: AXUIElement? = attribute(element, kAXParentAttribute)
+        for _ in 0..<3 {
+            guard let node = ancestor else { break }
+            if let hit = search(node, depth: 0) {
+                if Debug.isOn { VocabularyLog.append(["static-sibling", "point=\(point)", "line=“\(hit.line.prefix(40))”"]) }
+                return hit
+            }
+            ancestor = attribute(node, kAXParentAttribute)
+        }
+        return nil
     }
 
     private static func line(in text: String, offset: Int) -> Hit {

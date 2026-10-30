@@ -14,6 +14,19 @@ public struct RefID: Hashable, Codable, Sendable {
     public let key: String
     /// Uppercase prefix (`ADR`).
     public let prefix: String
+    /// Where a definition has to live to count for this mention. `.none` for every form that has
+    /// a prefix and a number of its own (`D23`, `ADR-004`).
+    public var scope: IDScope = .none
+}
+
+/// How far a definition reaches. Forms with a word and a number (`Requirement 3`, `Task 1.1`) are
+/// reused in every spec of a repo, so a mention only takes a definition from its own folder or above.
+public enum IDScope: String, Codable, Sendable {
+    case none
+    /// The definition's folder is the mention's folder or one above it.
+    case folder
+    /// The definition is in the same first-level folder as the mention, and neither is a framework's own file.
+    case topFolder
 }
 
 public enum IDGrammar {
@@ -28,24 +41,102 @@ public enum IDGrammar {
         ["HS", "RS", "PS"].flatMap { p in ["256", "384", "512"].map { p + $0 } }
             + ["AES128", "AES192", "AES256", "S256", "K8s", "DB2"])
 
+    /// The last group is a `.N` suffix (`REQ-3.1`): kept only after a hyphen and when no further `.N` follows
+    /// (`REL-0.9.1` is a version), see `tokens(in:)`.
     static let tokenRegex = try! NSRegularExpression(
-        pattern: #"(?<![A-Za-z0-9_\-])([A-Z]{1,5})(-?)(\d{1,4})([a-z]?)((?:-[A-Z]{1,3}\d{1,4}[a-z]?)*)(?![A-Za-z0-9_])"#
+        pattern: #"(?<![A-Za-z0-9_\-])([A-Z]{1,5})(-?)(\d{1,4})([a-z]?)((?:-[A-Z]{1,3}\d{1,4}[a-z]?)*)(\.\d{1,3})?(?![A-Za-z0-9_])"#
     )
+
+    /// A word and a number: `Requirement 3`, `Story 2.3`, `Epic 2`, `Property 7`, `Decision 4`, `Task Group 2`,
+    /// `Task 1.1`, `Subtask 5.2`. Groups: word, number (up to three parts).
+    static let wordRegex = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9_\-])(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d_]|\.[A-Za-z0-9])(?![A-Za-z_])"#
+    )
+
+    /// A task in a checklist, `- [ ] 1.1 Create the table` or `- [x]* 2. Wire it`: the number alone is the token.
+    static let taskLineRegex = try! NSRegularExpression(
+        pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?(?=\s|$)"#
+    )
+
+    /// BMAD's key of a story, `2-3-user-login` (epic 2, story 3). `3-3a-slug` is another story than 3.3 and has no key here.
+    static let storyKeyRegex = try! NSRegularExpression(
+        pattern: #"(?<![\w.\-])(\d{1,2})-(\d{1,2})-[a-z][a-z0-9\-]*"#
+    )
+
+    /// The word of a numbered form → the word in its key. A subtask is a task.
+    static let wordKeys: [String: String] = [
+        "Requirement": "REQUIREMENT", "Requirements": "REQUIREMENT", "Story": "STORY", "Epic": "EPIC", "Epics": "EPIC",
+        "Property": "PROPERTY", "Properties": "PROPERTY", "Decision": "DECISION", "Task Group": "TASK GROUP",
+        "Subtask": "TASK", "Task": "TASK",
+    ]
 
     /// All IDs in `text`, with their UTF-16 ranges.
     public static func tokens(in text: String) -> [(id: RefID, range: NSRange)] {
         let ns = text as NSString
-        return tokenRegex.matches(in: text, range: NSRange(location: 0, length: ns.length)).compactMap { m in
+        let whole = NSRange(location: 0, length: ns.length)
+        var found: [(id: RefID, range: NSRange)] = tokenRegex.matches(in: text, range: whole).compactMap { m in
             let prefix = ns.substring(with: m.range(at: 1))
             guard !stoplist.contains(prefix) else { return nil }
+            let hyphen = ns.substring(with: m.range(at: 2))
             let number = ns.substring(with: m.range(at: 3))
             let letter = ns.substring(with: m.range(at: 4))
             let compound = ns.substring(with: m.range(at: 5))
-            let key = prefix + number + letter + compound
+            var range = m.range
+            var suffix = ""
+            if m.range(at: 6).location != NSNotFound {
+                let after = m.range.location + m.range.length
+                let versionLike = after + 1 < ns.length && ns.character(at: after) == 0x2E
+                    && (0x30...0x39).contains(ns.character(at: after + 1))
+                if !hyphen.isEmpty, letter.isEmpty, compound.isEmpty, !versionLike {
+                    suffix = ns.substring(with: m.range(at: 6))
+                } else {
+                    range.length -= m.range(at: 6).length
+                }
+            }
+            let key = prefix + number + letter + compound + suffix
             guard !noise.contains(key) else { return nil }
-            let id = RefID(display: ns.substring(with: m.range), key: key, prefix: prefix)
-            return (id, m.range)
+            return (RefID(display: ns.substring(with: range), key: key, prefix: prefix), range)
         }
+        found += wordTokens(in: text)
+        return found.sorted { $0.range.location < $1.range.location }
+    }
+
+    /// The forms with a word or a position instead of a prefix: `Requirement 3`, `- [ ] 1.1`, `2-3-slug`.
+    private static func wordTokens(in text: String) -> [(id: RefID, range: NSRange)] {
+        let ns = text as NSString
+        let whole = NSRange(location: 0, length: ns.length)
+        var out: [(id: RefID, range: NSRange)] = []
+        for m in wordRegex.matches(in: text, range: whole) {
+            let word = ns.substring(with: m.range(at: 1))
+            guard let key = wordKeys[word] else { continue }
+            let id = RefID(display: ns.substring(with: m.range), key: key + " " + ns.substring(with: m.range(at: 2)),
+                           prefix: key, scope: .folder)
+            out.append((id, m.range))
+        }
+        if let m = taskLineRegex.firstMatch(in: text, range: whole) {
+            let number = ns.substring(with: m.range(at: 1))
+            out.append((RefID(display: number, key: "TASK " + number, prefix: "TASK", scope: .folder), m.range(at: 1)))
+        }
+        for m in storyKeyRegex.matches(in: text, range: whole) {
+            let key = "STORY " + ns.substring(with: m.range(at: 1)) + "." + ns.substring(with: m.range(at: 2))
+            out.append((RefID(display: ns.substring(with: m.range), key: key, prefix: "STORY", scope: .topFolder), m.range))
+        }
+        return out
+    }
+
+    static let suffixedKey = try! NSRegularExpression(pattern: #"^([A-Z]{1,5}\d{1,4})\.\d{1,3}$"#)
+
+    /// `Requirement 3.1` cites a criterion of requirement 3; `Task 1.1.2`, a part of task 1.1; `FR-1.2` was read
+    /// as `FR-1` before the `.N` suffix existed, and still shows it when nothing defines `FR-1.2`. The key one
+    /// level up, or nil when there is none.
+    public static func parentKey(of key: String) -> String? {
+        if let m = suffixedKey.firstMatch(in: key, range: NSRange(location: 0, length: (key as NSString).length)) {
+            return (key as NSString).substring(with: m.range(at: 1))
+        }
+        guard key.hasPrefix("REQUIREMENT ") || key.hasPrefix("STORY ") || key.hasPrefix("TASK "),
+              let dot = key.lastIndex(of: "."), key.filter({ $0 == "." }).count >= (key.hasPrefix("REQUIREMENT ") ? 1 : 2)
+        else { return nil }
+        return String(key[..<dot])
     }
 
     /// Parses `text` as a single ID (whole string, surrounding punctuation trimmed).
