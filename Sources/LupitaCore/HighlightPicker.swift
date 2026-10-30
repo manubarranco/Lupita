@@ -276,7 +276,7 @@ public enum HighlightPicker {
     private static func known(_ word: String, resolver: Resolver, block: String, marked: Bool, before: String) -> Kind? {
         guard word.count >= 2 else { return nil }
         let repos = resolver.index.repos
-        if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return .id }
+        if let id = IDGrammar.parse(word), IDGrammar.adrAliases(of: id.key).contains(where: { resolver.index.definitions[$0] != nil }) { return .id }
         if resolver.rangeList(word) != nil { return .id }
         // A repo name points at a place, like an ID. A plain lowercase name (`app`, `nib`) needs its exact case, so
         // it does not mark every «app»; any other (`LiOS`, `vector-ui-studio`) any case, as OCR reads `LiOS` as `LioS`.

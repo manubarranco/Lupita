@@ -85,9 +85,10 @@ public enum DefinitionRules {
         pattern: #"^\(?\d{4}-\d{2}-\d{2}\)?\s*[—–:\-·|]?\s*"#)
 
     /// All definitions in a markdown file. Fenced code blocks are ignored (templates live there).
-    public static func definitions(fileName: String, lines: [String]) -> [DefinitionHit] {
+    /// `folder` is the name of the folder the file is in: a numbered file in `adr/` defines an ADR.
+    public static func definitions(fileName: String, lines: [String], folder: String = "") -> [DefinitionHit] {
         var hits: [DefinitionHit] = []
-        if let hit = fileNameDefinition(fileName) { hits.append(hit) }
+        if let hit = fileNameDefinition(fileName) ?? adrFileDefinition(fileName, folder: folder) { hits.append(hit) }
         let isTasksFile = fileName.lowercased() == "tasks.md"
 
         var inFence = false
@@ -165,6 +166,17 @@ public enum DefinitionRules {
         let title = rest.trimmingCharacters(in: CharacterSet(charactersIn: "-_ "))
             .replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
         return DefinitionHit(id: first.id, rule: .fileName, line: -1, title: title)
+    }
+
+    static let adrFolders: Set<String> = ["adr", "adrs", "decisions"]
+    static let adrFile = try! NSRegularExpression(pattern: #"^(\d{1,4})-([A-Za-z0-9].*)\.md$"#)
+
+    /// `docs/adr/0007-use-foo.md` defines `ADR-0007`, written with the digits the file has. A numbered file
+    /// anywhere else is not an ADR.
+    static func adrFileDefinition(_ fileName: String, folder: String) -> DefinitionHit? {
+        guard adrFolders.contains(folder.lowercased()), let m = match(adrFile, fileName) else { return nil }
+        let title = m[2].replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
+        return DefinitionHit(id: RefID(display: "ADR-" + m[1], key: "ADR" + m[1], prefix: "ADR"), rule: .fileName, line: -1, title: title)
     }
 
     static func cleanTitle(_ raw: String) -> String {

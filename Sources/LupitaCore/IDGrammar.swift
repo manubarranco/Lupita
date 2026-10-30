@@ -63,6 +63,16 @@ public enum IDGrammar {
         pattern: #"(?<![\w.\-])(\d{1,2})-(\d{1,2})-[a-z][a-z0-9\-]*"#
     )
 
+    /// An ADR written with a space, `ADR 7`: the key is the one of `ADR7`. `ADR-0007` and `ADR007` are read by the prefix grammar.
+    static let adrWordRegex = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9_\-])ADR (\d{1,4})(?![A-Za-z0-9_]|\.\d)"#
+    )
+
+    /// The name of an ADR file as it is cited, `0007-use-foo.md`: the key is the one of `ADR0007`.
+    static let adrFileRegex = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9_\-])(\d{4})-[A-Za-z0-9][A-Za-z0-9_\-]*\.md(?![A-Za-z0-9_])"#
+    )
+
     /// The word of a numbered form → the word in its key. A subtask is a task.
     static let wordKeys: [String: String] = [
         "Requirement": "REQUIREMENT", "Requirements": "REQUIREMENT", "Story": "STORY", "Epic": "EPIC", "Epics": "EPIC",
@@ -117,9 +127,33 @@ public enum IDGrammar {
             let number = ns.substring(with: m.range(at: 1))
             out.append((RefID(display: number, key: "TASK " + number, prefix: "TASK", scope: .folder), m.range(at: 1)))
         }
+        for m in adrWordRegex.matches(in: text, range: whole) {
+            let number = ns.substring(with: m.range(at: 1))
+            out.append((RefID(display: ns.substring(with: m.range), key: "ADR" + number, prefix: "ADR"), m.range))
+        }
+        for m in adrFileRegex.matches(in: text, range: whole) {
+            let number = ns.substring(with: m.range(at: 1))
+            out.append((RefID(display: ns.substring(with: m.range), key: "ADR" + number, prefix: "ADR"), m.range))
+        }
         for m in storyKeyRegex.matches(in: text, range: whole) {
             let key = "STORY " + ns.substring(with: m.range(at: 1)) + "." + ns.substring(with: m.range(at: 2))
             out.append((RefID(display: ns.substring(with: m.range), key: key, prefix: "STORY", scope: .topFolder), m.range))
+        }
+        return out
+    }
+
+    static let adrKey = try! NSRegularExpression(pattern: #"^ADR(\d{1,4})$"#)
+
+    /// Every way a repo writes the same ADR number (`ADR7`, `ADR07`, `ADR007`, `ADR0007`), the key itself first.
+    /// An ADR is cited as `ADR-0007`, `ADR007` or `ADR 7` and defined by `0007-use-foo.md` or a heading with
+    /// another padding: the number is what they share.
+    public static func adrAliases(of key: String) -> [String] {
+        guard let m = adrKey.firstMatch(in: key, range: NSRange(location: 0, length: (key as NSString).length)),
+              let n = Int((key as NSString).substring(with: m.range(at: 1))) else { return [key] }
+        var out = [key]
+        for width in 1...4 {
+            let alias = "ADR" + String(repeating: "0", count: max(0, width - String(n).count)) + String(n)
+            if !out.contains(alias) { out.append(alias) }
         }
         return out
     }

@@ -162,7 +162,7 @@ public struct Resolver: Sendable {
     public func resolveWordID(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
                               fromPath: String? = nil) -> Resolution? {
         let trimmed = Self.latinize(phrase.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none else { return nil }
+        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none || id.prefix == "ADR" else { return nil }
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let repo = named ?? preferredRepo
         let (key, defs) = scopedDefinitions(for: id, preferredRepo: repo, fromPath: named == nil || named == preferredRepo ? fromPath : nil)
@@ -176,6 +176,14 @@ public struct Resolver: Sendable {
     /// criterion (`Requirement 3.1`) falls back to the form one level up. Other forms: every definition.
     public func scopedDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> (key: String, defs: [Definition]) {
         if id.scope == .none {
+            // The same ADR written with another padding is the same ADR.
+            let aliases = IDGrammar.adrAliases(of: id.key)
+            if aliases.count > 1 {
+                let found = aliases.flatMap { index.definitions[$0] ?? [] }
+                if !found.isEmpty {
+                    return (aliases.first { !(index.definitions[$0] ?? []).isEmpty } ?? id.key, found)
+                }
+            }
             var key: String? = id.key
             while let k = key {
                 if let defs = index.definitions[k], !defs.isEmpty { return (k, defs) }
