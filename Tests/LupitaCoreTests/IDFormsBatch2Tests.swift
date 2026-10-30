@@ -33,6 +33,7 @@ import Testing
     @Test func wordAndNumberNeedTheWordAndTheNumber() {
         #expect(Self.keys("Requirement three, requirement 3, Epic, the Story of 2 users, Task 3rd, Epic 2x").isEmpty)
         #expect(Self.keys("version Task 1.2.3.4 and Story 2.3.4.5").isEmpty)
+        #expect(Self.keys("Task 3.FIX.4 and Task 3.x and Task 3_1").isEmpty)
         #expect(Self.keys("MyRequirement 3 and Subepic 2").isEmpty)
     }
 
@@ -151,7 +152,7 @@ import Testing
     // MARK: R2, a suffix after the number
 
     @Test func aSuffixAfterAHyphenIsPartOfTheID() {
-        #expect(Self.keys("REQ-3.1 and AC-3.12, STORY-2.3.") == ["REQ3.1", "AC3.12", "STORY 2.3"])
+        #expect(Self.keys("REQ-3.1 and AC-3.12, STORY-2.3.") == ["REQ3.1", "AC3.12", "STORY2.3"])
         #expect(IDGrammar.tokens(in: "see REQ-3.1 now").first.map { ("see REQ-3.1 now" as NSString).substring(with: $0.range) } == "REQ-3.1")
     }
 
@@ -169,15 +170,20 @@ import Testing
         #expect(Self.shown(r, "REQ-3.2", from: "b.md").isEmpty)
     }
 
-    @Test func storyWithASuffixIsTheStoryOfItsHeading() {
-        let r = Self.resolver(["e/epics.md": "### Story 2.3: Login\n", "e/s.md": "Blocked by STORY-2.3.\n"])
-        #expect(Self.shown(r, "STORY-2.3", from: "e/s.md").first?.title == "Login")
+    @Test func storyWithASuffixIsNotTheHeadingStory() {
+        // `docs/STORY-2.3-REPORT.md` names a file, not the story that `### Story 2.3` heads: it takes no definition from it.
+        let r = Self.resolver(["e/epics.md": "### Story 2.3: Login\n", "e/s.md": "Blocked by STORY-2.3.\n", "e/t.md": "### STORY-2.3 Own\n"])
+        #expect(Self.keys("Blocked by STORY-2.3.") == ["STORY2.3"])
+        #expect(Self.shown(r, "STORY-2.3", from: "e/s.md").first?.title == "Own")
+        #expect(Self.shown(Self.resolver(["e/epics.md": "### Story 2.3: Login\n"]), "STORY-2.3", from: "e/s.md").isEmpty)
     }
 
     // MARK: R13, the key of a BMAD story
 
     @Test func aStoryKeyIsRecognised() {
-        #expect(Self.keys("see 2-3-user-login and 10-1a-setup-db.") == ["STORY 2.3", "STORY 10.1"])
+        #expect(Self.keys("see 2-3-user-login and 10-1-setup-db.") == ["STORY 2.3", "STORY 10.1"])
+        // `3-3a-…` is another story than 3.3.
+        #expect(Self.keys("see 3-3a-custom-upload").isEmpty)
         #expect(IDGrammar.tokens(in: "see 2-3-user-login.md").first.map { ("see 2-3-user-login.md" as NSString).substring(with: $0.range) } == "2-3-user-login")
         #expect(Self.keys("2026-10-30-notes, v2-3-x, 2-3, 2-3-4, 2-3-.md").isEmpty)
         #expect(IDGrammar.tokens(in: "2-3-user-login").first?.id.scope == .topFolder)

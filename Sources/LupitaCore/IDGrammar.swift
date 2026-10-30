@@ -50,7 +50,7 @@ public enum IDGrammar {
     /// A word and a number: `Requirement 3`, `Story 2.3`, `Epic 2`, `Property 7`, `Decision 4`, `Task Group 2`,
     /// `Task 1.1`, `Subtask 5.2`. Groups: word, number (up to three parts).
     static let wordRegex = try! NSRegularExpression(
-        pattern: #"(?<![A-Za-z0-9_\-])(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d]|\.\d)(?![A-Za-z_])"#
+        pattern: #"(?<![A-Za-z0-9_\-])(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d_]|\.[A-Za-z0-9])(?![A-Za-z_])"#
     )
 
     /// A task in a checklist, `- [ ] 1.1 Create the table` or `- [x]* 2. Wire it`: the number alone is the token.
@@ -58,12 +58,12 @@ public enum IDGrammar {
         pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?(?=\s|$)"#
     )
 
-    /// BMAD's key of a story, `2-3-user-login` (epic 2, story 3).
+    /// BMAD's key of a story, `2-3-user-login` (epic 2, story 3). `3-3a-slug` is another story than 3.3 and has no key here.
     static let storyKeyRegex = try! NSRegularExpression(
-        pattern: #"(?<![\w.\-])(\d{1,2})-(\d{1,2})[a-z]?-[a-z][a-z0-9\-]*"#
+        pattern: #"(?<![\w.\-])(\d{1,2})-(\d{1,2})-[a-z][a-z0-9\-]*"#
     )
 
-    /// The word of a numbered form → the word in its key. A subtask is a task, a story named `STORY-2.3` is a story.
+    /// The word of a numbered form → the word in its key. A subtask is a task.
     static let wordKeys: [String: String] = [
         "Requirement": "REQUIREMENT", "Requirements": "REQUIREMENT", "Story": "STORY", "Epic": "EPIC", "Epics": "EPIC",
         "Property": "PROPERTY", "Properties": "PROPERTY", "Decision": "DECISION", "Task Group": "TASK GROUP",
@@ -95,10 +95,6 @@ public enum IDGrammar {
             }
             let key = prefix + number + letter + compound + suffix
             guard !noise.contains(key) else { return nil }
-            // `STORY-2.3` is the story that `Story 2.3` heads: one key, scoped like it.
-            if prefix == "STORY", !suffix.isEmpty {
-                return (RefID(display: ns.substring(with: range), key: "STORY " + number + suffix, prefix: prefix, scope: .folder), range)
-            }
             return (RefID(display: ns.substring(with: range), key: key, prefix: prefix), range)
         }
         found += wordTokens(in: text)
