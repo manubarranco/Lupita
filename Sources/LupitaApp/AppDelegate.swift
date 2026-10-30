@@ -190,10 +190,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
             return
         }
-        // The tooltip of the last look-up is still on screen: its text («Requirement 3») would be read as if it
-        // were part of the window. Take it away before reading.
-        let hadTooltip = tooltip.resolution != nil
-        if hadTooltip { tooltip.close() }
+        // The tooltip of the last look-up is still on screen: Accessibility would answer with its text («Requirement 3»)
+        // for a point near it, and OCR would read it as part of the window. Take it away, give the screen a moment, and
+        // look up again.
+        if tooltip.resolution != nil {
+            tooltip.close()
+            Task { try? await Task.sleep(for: .milliseconds(90)); lookUp() }
+            return
+        }
         let context = ActiveContext.at(point, resolver: resolver)
 
         var ax = TextUnderCursor.viaAccessibility(at: point)
@@ -226,7 +230,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         inFlight = true
         Task {
             defer { inFlight = false }
-            if hadTooltip { try? await Task.sleep(for: .milliseconds(80)) }  // the window leaves the screen
             let words = if let reused { reused } else { (try? await OCR.words(around: point)) ?? [] }
             let result = CandidatePicker.pick(words: words, cursor: point, resolver: resolver,
                                               preferredRepo: context.repo, fromPath: context.path)
