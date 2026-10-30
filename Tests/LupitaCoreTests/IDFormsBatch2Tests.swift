@@ -64,12 +64,13 @@ import Testing
         #expect(Self.shown(r, "Epic 2", from: "src/notes.md").isEmpty)
     }
 
-    @Test func withNoReaderFileOnlyAUniqueDefinitionCounts() {
+    @Test func withNoReaderFileEveryDefinitionOfTheRepoIsListed() {
         let one = Self.resolver(["a/epics.md": "## Epic 2: Payments\n"])
         let id = IDGrammar.parse("Epic 2")!
         #expect(one.shownDefinitions(for: id, preferredRepo: "r", fromPath: nil).count == 1)
         let two = Self.resolver(["a/epics.md": "## Epic 2: Payments\n", "b/epics.md": "## Epic 2: Search\n"])
-        #expect(two.shownDefinitions(for: id, preferredRepo: "r", fromPath: nil).isEmpty)
+        #expect(two.shownDefinitions(for: id, preferredRepo: "r", fromPath: nil).map(\.path).sorted() == ["a/epics.md", "b/epics.md"])
+        #expect(two.resolveWordID("Epic 2", preferredRepo: "r", fromPath: nil)?.definitions.count == 2)
     }
 
     @Test func aCitedCriterionShowsItsRequirement() {

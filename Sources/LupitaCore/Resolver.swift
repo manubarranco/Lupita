@@ -172,7 +172,7 @@ public struct Resolver: Sendable {
 
     /// The definitions a mention of `id` may take, and the key they are under. Forms with a scope take
     /// them from the mention's own repo and, with the file known, only from its folder or above (`.folder`) or from
-    /// its first-level folder (`.topFolder`); with no file, only when the repo defines the form once. A cited
+    /// its first-level folder (`.topFolder`); with no file, all of the repo's, each with its file. A cited
     /// criterion (`Requirement 3.1`) falls back to the form one level up. Other forms: every definition.
     public func scopedDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> (key: String, defs: [Definition]) {
         if id.scope == .none {
@@ -193,7 +193,9 @@ public struct Resolver: Sendable {
             if let fromPath {
                 kept = own.filter { Self.reaches($0.path, from: fromPath, scope: id.scope) }
             } else {
-                kept = own.count == 1 ? own : []
+                // The window does not say which file it shows: every definition of the repo is listed, each with
+                // its file, instead of picking one that may belong to another spec.
+                kept = own
             }
             // A task is defined by its line in `tasks.md`; the headings of reports about it come after.
             if !kept.isEmpty { return (k, k.hasPrefix("TASK ") ? kept.filter(Self.inTasksFile) + kept.filter { !Self.inTasksFile($0) } : kept) }
