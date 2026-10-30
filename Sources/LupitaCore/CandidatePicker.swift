@@ -124,6 +124,10 @@ public enum CandidatePicker {
                 guard start >= 0, end < words.count else { continue }
                 if (start..<end).contains(where: closes) { continue }
                 let phrase = words[start...end].joined(separator: " ")
+                // A word and a number: `Requirement 3`, `Task Group 2`.
+                if let r = resolver.resolveWordID(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
+                    return r
+                }
                 if let r = resolver.resolveTerm(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
                     return r
                 }

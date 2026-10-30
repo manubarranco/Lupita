@@ -104,8 +104,9 @@ public struct Resolver: Sendable {
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        if let id = IDGrammar.parse(query), let defs = index.definitions[id.key] {
-            return result(query, .exact, key: id.key, defs, preferredRepo, fromPath)
+        if let id = IDGrammar.parse(query) {
+            let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+            if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath) }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
@@ -154,6 +155,65 @@ public struct Resolver: Sendable {
                               mentions: index.mentions[id.key], alternatives: [])
         }
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
+    }
+
+    /// A numbered form with a word (`Requirement 3`, `Task Group 2`) for `phrase`, or nil. Public so the picker
+    /// can try windows of words.
+    public func resolveWordID(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
+                              fromPath: String? = nil) -> Resolution? {
+        let trimmed = Self.latinize(phrase.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
+        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none else { return nil }
+        let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
+        let repo = named ?? preferredRepo
+        let (key, defs) = scopedDefinitions(for: id, preferredRepo: repo, fromPath: named == nil || named == preferredRepo ? fromPath : nil)
+        guard !defs.isEmpty else { return nil }
+        return result(trimmed, .exact, key: key, defs, repo, named == nil || named == preferredRepo ? fromPath : nil)
+    }
+
+    /// The definitions a mention of `id` may take, and the key they are under. Forms with a scope take
+    /// them from the mention's own repo and, with the file known, only from its folder or above (`.folder`) or from
+    /// its first-level folder (`.topFolder`); with no file, only when the repo defines the form once. A cited
+    /// criterion (`Requirement 3.1`) falls back to the form one level up. Other forms: every definition.
+    public func scopedDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> (key: String, defs: [Definition]) {
+        if id.scope == .none {
+            var key: String? = id.key
+            while let k = key {
+                if let defs = index.definitions[k], !defs.isEmpty { return (k, defs) }
+                key = IDGrammar.parentKey(of: k)
+            }
+            return (id.key, [])
+        }
+        var key: String? = id.key
+        while let k = key {
+            let own = (index.definitions[k] ?? []).filter { d in
+                guard let preferredRepo else { return true }
+                return d.repo.caseInsensitiveCompare(preferredRepo) == .orderedSame
+            }
+            let kept: [Definition]
+            if let fromPath {
+                kept = own.filter { Self.reaches($0.path, from: fromPath, scope: id.scope) }
+            } else {
+                kept = own.count == 1 ? own : []
+            }
+            if !kept.isEmpty { return (k, kept) }
+            key = IDGrammar.parentKey(of: k)
+        }
+        return (id.key, [])
+    }
+
+    /// Folders of framework files that are not the project's own (BMAD ships examples under these).
+    static let frameworkFolders: Set<String> = ["bmad", "_bmad", "skills"]
+
+    static func reaches(_ definitionPath: String, from mentionPath: String, scope: IDScope) -> Bool {
+        let theirs = definitionPath.split(separator: "/").dropLast(), mine = mentionPath.split(separator: "/").dropLast()
+        switch scope {
+        case .none: return true
+        case .folder:
+            return theirs.count <= mine.count && zip(mine, theirs).allSatisfy { $0 == $1 }
+        case .topFolder:
+            guard theirs.first == mine.first else { return false }
+            return frameworkFolders.isDisjoint(with: theirs.map(String.init)) && frameworkFolders.isDisjoint(with: mine.map(String.init))
+        }
     }
 
     /// A glossary term for `phrase` (one to four words), or nil. The repo of the window comes first;
@@ -255,9 +315,12 @@ public struct Resolver: Sendable {
             return theirs.count <= mine.count && zip(mine, theirs).allSatisfy({ $0 == $1 }) ? theirs.count : 0
         }
         let candidates = repo == nil ? defs : defs.filter { !$0.rule.isWeak || isPreferred($0) }
+        // A closed change (`openspec/changes/archive`) loses to a live definition, unless the reader is in the archive too.
+        let readingArchive = fromPath?.split(separator: "/").contains("archive") ?? false
+        func archived(_ d: Definition) -> Int { d.isArchived && !readingArchive ? 1 : 0 }
         let ordered = candidates.enumerated().sorted { a, b in
-            let ka = (a.element.rule.isWeak ? 1 : 0, isPreferred(a.element) ? 0 : 1, -nearness(a.element), a.offset)
-            let kb = (b.element.rule.isWeak ? 1 : 0, isPreferred(b.element) ? 0 : 1, -nearness(b.element), b.offset)
+            let ka = (a.element.rule.isWeak ? 1 : 0, isPreferred(a.element) ? 0 : 1, archived(a.element), -nearness(a.element), a.offset)
+            let kb = (b.element.rule.isWeak ? 1 : 0, isPreferred(b.element) ? 0 : 1, archived(b.element), -nearness(b.element), b.offset)
             return ka < kb
         }.map(\.element)
         guard !ordered.isEmpty else {

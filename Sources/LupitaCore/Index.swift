@@ -17,6 +17,9 @@ public struct Definition: Codable, Hashable, Sendable {
     public var openURL: String? = nil
     /// Colour samples to paint next to a CSS token or hex colour (D29), one per theme.
     public var colors: [ColorSample]? = nil
+
+    /// Defined in a closed change of OpenSpec (`openspec/changes/archive`): a live definition of the same ID is preferred.
+    public var isArchived: Bool { path.split(separator: "/").dropLast().contains("archive") }
 }
 
 /// A colour to draw: `hex` is `#RRGGBB` (or `#RRGGBBAA`); `label` says which theme it is for (`light`, `dark`) or is empty.
@@ -178,6 +181,7 @@ public struct RefIndex: Codable, Sendable {
         rankTerms()
         for (key, defs) in definitions {
             definitions[key] = defs.sorted {
+                if $0.isArchived != $1.isArchived { return !$0.isArchived }
                 if $0.rule.weight != $1.rule.weight { return $0.rule.weight > $1.rule.weight }
                 let a = density[densityKey($0)] ?? 0, b = density[densityKey($1)] ?? 0
                 if a != b { return a > b }
