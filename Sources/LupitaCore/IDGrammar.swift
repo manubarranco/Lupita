@@ -133,15 +133,44 @@ public enum IDGrammar {
         return !notTrackers.contains((display as NSString).substring(with: m.range(at: 1))) && !stoplist.contains((display as NSString).substring(with: m.range(at: 1)))
     }
 
-    /// Keys the prefix grammar does not read (a prefix over five letters or a number over four digits).
+    /// Keys the prefix grammar does not read (a prefix over five letters or a number over four digits). A hand-written
+    /// scan: every line of every file goes through here at indexing time, and a regular expression on each was too slow.
     private static func trackerTokens(in text: String, ns: NSString, existing: [(id: RefID, range: NSRange)]) -> [(id: RefID, range: NSRange)] {
-        guard text.contains("-") else { return [] }
+        let n = ns.length
+        guard n >= 4 else { return [] }
+        func isUpper(_ c: unichar) -> Bool { c >= 0x41 && c <= 0x5A }
+        func isDigit(_ c: unichar) -> Bool { c >= 0x30 && c <= 0x39 }
+        func isWordish(_ c: unichar) -> Bool { isUpper(c) || isDigit(c) || (c >= 0x61 && c <= 0x7A) || c == 0x5F }
         var out: [(id: RefID, range: NSRange)] = []
-        for m in trackerRegex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
-            let prefix = ns.substring(with: m.range(at: 1))
+        var i = 1
+        while i < n - 1 {
+            defer { i += 1 }
+            guard ns.character(at: i) == 0x2D, isUpper(ns.character(at: i - 1)), isDigit(ns.character(at: i + 1)) else { continue }
+            var start = i
+            while start > 0, isUpper(ns.character(at: start - 1)), i - start < 11 { start -= 1 }
+            let letters = i - start
+            guard letters >= 2, letters <= 10 else { continue }
+            if start > 0 {
+                let before = ns.character(at: start - 1)
+                if isWordish(before) || before == 0x25 || before == 0x2D { continue }
+            }
+            var end = i + 1
+            while end < n, isDigit(ns.character(at: end)), end - (i + 1) < 7 { end += 1 }
+            let digits = end - (i + 1)
+            guard digits <= 6 else { continue }
+            if end < n {
+                let after = ns.character(at: end)
+                if isWordish(after) { continue }
+                if after == 0x2D, end + 1 < n, isWordish(ns.character(at: end + 1)) { continue }
+                if after == 0x2E, end + 1 < n, isDigit(ns.character(at: end + 1)) { continue }
+            }
+            let range = NSRange(location: start, length: end - start)
+            let prefix = ns.substring(with: NSRange(location: start, length: letters))
             guard !notTrackers.contains(prefix), !stoplist.contains(prefix),
-                  !existing.contains(where: { NSIntersectionRange($0.range, m.range).length > 0 }) else { continue }
-            out.append((RefID(display: ns.substring(with: m.range), key: prefix + ns.substring(with: m.range(at: 2)), prefix: prefix), m.range))
+                  !existing.contains(where: { NSIntersectionRange($0.range, range).length > 0 }) else { continue }
+            out.append((RefID(display: ns.substring(with: range), key: prefix + ns.substring(with: NSRange(location: i + 1, length: digits)),
+                              prefix: prefix), range))
+            i = end
         }
         return out
     }
@@ -160,6 +189,8 @@ public enum IDGrammar {
         let next = ns.character(at: end)
         guard next == 0x2C || next == 0x2F || next == 0x26 || next == 0x20 else { return [] }
         if prefix == "L", number.first != "0" { return [] }
+        guard listContinuation.firstMatch(in: ns as String, options: .anchored, range: NSRange(location: end, length: ns.length - end)) != nil
+        else { return [] }
         let before = ns.substring(to: after.location).lowercased()
         if before.range(of: #"(?:lines?|l[ií]neas?|ln\.?|l\.|:)\s*$"#, options: .regularExpression) != nil { return [] }
         var out: [(id: RefID, range: NSRange)] = []
@@ -190,11 +221,11 @@ public enum IDGrammar {
             let number = ns.substring(with: m.range(at: 1))
             out.append((RefID(display: number, key: "TASK " + number, prefix: "TASK", scope: .folder), m.range(at: 1)))
         }
-        for m in adrWordRegex.matches(in: text, range: whole) {
+        for m in (ns.range(of: "ADR ").location == NSNotFound ? [] : adrWordRegex.matches(in: text, range: whole)) {
             let number = ns.substring(with: m.range(at: 1))
             out.append((RefID(display: ns.substring(with: m.range), key: "ADR" + number, prefix: "ADR"), m.range))
         }
-        for m in adrFileRegex.matches(in: text, range: whole) {
+        for m in (ns.range(of: ".md").location == NSNotFound ? [] : adrFileRegex.matches(in: text, range: whole)) {
             let number = ns.substring(with: m.range(at: 1))
             out.append((RefID(display: ns.substring(with: m.range), key: "ADR" + number, prefix: "ADR"), m.range))
         }

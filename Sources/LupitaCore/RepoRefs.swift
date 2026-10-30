@@ -124,12 +124,9 @@ public enum RepoRefs {
         if let out = Git.output(repo.path, args, timeout: keySearchTimeout)?.trimmingCharacters(in: .newlines), !out.isEmpty {
             let f = out.components(separatedBy: "\u{1f}")
             if f.count == 4 {
-                var d = Definition(id: key, key: f[0], repo: repo.name, path: "", line: 0, rule: .commit, title: f[1],
-                                   summary: "\(f[2]) · \(f[3])", absolutePath: repo.path)
-                if !(Git.lines(repo.path, ["branch", "-r", "--contains", f[0]], timeout: keySearchTimeout) ?? []).isEmpty {
-                    d.openURL = Git.webURL(repo.path).map { "\($0)/commit/\(f[0])" }
-                }
-                return d
+                // No link to the hosting site: knowing whether the commit was pushed means walking the whole history.
+                return Definition(id: key, key: f[0], repo: repo.name, path: "", line: 0, rule: .commit, title: f[1],
+                                  summary: "\(f[2]) · \(f[3])", absolutePath: repo.path)
             }
         }
         if let branch = Git.lines(repo.path, ["branch", "-a", "--list", "*\(key)*", "--format=%(refname:short)"], timeout: keySearchTimeout)?.first {
