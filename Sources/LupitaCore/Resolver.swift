@@ -329,10 +329,14 @@ public struct Resolver: Sendable {
         func archived(_ d: Definition) -> Int { d.isArchived && !readingArchive ? 1 : 0 }
         // The reader's own file defines first: a plan that heads `### Task 2` is not about the `Task 2` of its neighbour.
         func ownFile(_ d: Definition) -> Int { ownFileFirst && isPreferred(d) && d.path == fromPath ? 0 : 1 }
+        // A task's own line in `tasks.md` beats the headings of reports about it, even from a nearer folder.
+        func tasksLine(_ d: Definition) -> Int { key.hasPrefix("TASK ") && Self.inTasksFile(d) ? 0 : 1 }
         let ordered = candidates.enumerated().sorted { a, b in
-            let ka = (a.element.rule.isWeak ? 1 : 0, isPreferred(a.element) ? 0 : 1, ownFile(a.element), archived(a.element), -nearness(a.element), a.offset)
-            let kb = (b.element.rule.isWeak ? 1 : 0, isPreferred(b.element) ? 0 : 1, ownFile(b.element), archived(b.element), -nearness(b.element), b.offset)
-            return ka < kb
+            func rank(_ x: (offset: Int, element: Definition)) -> [Int] {
+                [x.element.rule.isWeak ? 1 : 0, isPreferred(x.element) ? 0 : 1, ownFile(x.element), tasksLine(x.element),
+                 archived(x.element), -nearness(x.element), x.offset]
+            }
+            return rank(a).lexicographicallyPrecedes(rank(b))
         }.map(\.element)
         guard !ordered.isEmpty else {
             return Resolution(query: query, kind: .undefined, key: key, definitions: [],

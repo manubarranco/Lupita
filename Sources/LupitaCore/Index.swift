@@ -195,7 +195,10 @@ public struct RefIndex: Codable, Sendable {
     /// them: mentions of a form with a word that no file of the mentioning repo defines are dropped.
     private mutating func pruneWordFormMentions() {
         for key in Array(mentions.keys) where key.contains(" ") {
-            let repos = Set((definitions[key] ?? []).map(\.repo))
+            // `Requirement 3.1` shows `Requirement 3`: its mentions count wherever a parent form is defined.
+            var repos = Set<String>()
+            var k: String? = key
+            while let current = k { repos.formUnion((definitions[current] ?? []).map(\.repo)); k = IDGrammar.parentKey(of: current) }
             var m = mentions[key]!
             m.byFile = m.byFile.filter { file, _ in file.firstIndex(of: "/").map { repos.contains(String(file[..<$0])) } ?? false }
             mentions[key] = m.byFile.isEmpty ? nil : m

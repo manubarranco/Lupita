@@ -150,6 +150,23 @@ import Testing
         #expect(index.mentions["D4"]?.files == ["x/a.md"])
     }
 
+    @Test func tasksFileBeatsAReportHeadingFromANearerFolder() {
+        let r = Self.resolver([
+            "s/tasks.md": "- [ ] 3.3 Name the tokens\n",
+            "s/completion/report.md": "## Task 3.3 — Review\n",
+            "s/completion/other.md": "Task 3.3 says to name them.\n",
+        ])
+        #expect(Self.shown(r, "Task 3.3", from: "s/completion/other.md").first?.path == "s/tasks.md")
+    }
+
+    @Test func aCitedCriterionKeepsItsMentions() {
+        var index = RefIndex()
+        index.add(text: "### Requirement 3: Login\n", fileName: "r.md", repo: "x", relativePath: "r.md", absolutePath: "/x/r.md")
+        index.add(text: "Covers Requirement 3.1\n", fileName: "d.md", repo: "x", relativePath: "d.md", absolutePath: "/x/d.md")
+        index.rank()
+        #expect(index.mentions["REQUIREMENT 3.1"]?.files == ["x/d.md"])
+    }
+
     @Test func tasksFileBeatsAReportHeading() {
         let r = Self.resolver([
             "s/tasks.md": "- [ ] 3.3 Name the tokens\n",
