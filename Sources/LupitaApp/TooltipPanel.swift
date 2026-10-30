@@ -99,15 +99,23 @@ final class TooltipPanel {
         }
     }
 
-    /// Below-right of the cursor, kept inside the screen. The visible box (the panel minus the shadow margin) goes where
-    /// it always went; the panel is placed so that its margin hangs around the box.
-    private func origin(for size: NSSize, insets: EdgeInsets, near mouse: NSPoint) -> NSPoint {
+    /// Below-right of the cursor when the box fits there; else above it; else on the side with more room. Always
+    /// clamped inside the screen, so a tall box near an edge shows whole instead of leaving through the top or bottom.
+    /// The visible box (the panel minus the shadow margin) goes where it always went; the panel is placed so that its
+    /// margin hangs around the box.
+    func origin(for size: NSSize, insets: EdgeInsets, near mouse: NSPoint) -> NSPoint {
         let screen = NSScreen.screens.first { $0.frame.contains(mouse) } ?? NSScreen.main
-        let bounds = screen?.visibleFrame ?? .infinite
+        let bounds = (screen?.visibleFrame ?? .infinite).insetBy(dx: 8, dy: 8)
         let box = NSSize(width: size.width - insets.leading - insets.trailing, height: size.height - insets.top - insets.bottom)
+        let below = mouse.y - 18 - bounds.minY, above = bounds.maxY - (mouse.y + 18)
         var origin = NSPoint(x: mouse.x + 12, y: mouse.y - 18 - box.height)
-        if origin.x + box.width > bounds.maxX { origin.x = bounds.maxX - box.width - 8 }
-        if origin.y < bounds.minY { origin.y = mouse.y + 18 }
+        if box.height > below {
+            origin.y = (box.height <= above || above > below) ? mouse.y + 18 : origin.y
+        }
+        origin.x = min(origin.x, bounds.maxX - box.width)
+        origin.x = max(origin.x, bounds.minX)
+        origin.y = min(origin.y, bounds.maxY - box.height)
+        origin.y = max(origin.y, bounds.minY)
         return NSPoint(x: origin.x - insets.leading, y: origin.y - insets.bottom)
     }
 }
