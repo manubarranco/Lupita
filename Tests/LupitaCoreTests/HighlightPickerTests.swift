@@ -234,4 +234,17 @@ final class Collected: @unchecked Sendable {
         #expect(marks.first { $0.kind == .id }?.box.minX == 50)
         #expect(marks.first { $0.kind == .id }?.box.maxX ?? 0 > 150)
     }
+
+    @Test func aWordFormInParenthesesIsOneSolidMark() {
+        var index = RefIndex()
+        index.add(text: "### Task 2.3: Export\n### Requirement 3: Login\n", fileName: "a.md", repo: "r", relativePath: "a.md", absolutePath: "/r/a.md")
+        index.rank()
+        let r = Resolver(index: index)
+        for texts in [["Done", "(Task", "2.3)", "Requirement", "3"], ["Done", "(", "Task", "2.3)", "Requirement", "3"],
+                      ["Done", "(Task", "2.3", ")", "Requirement", "3"], ["Requirement", "3", "(Task", "2.3)"], ["(Task", "2.3,", "Requirement", "3,"]] {
+            let words = texts.enumerated().map { OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 50, y: 0, width: 45, height: 12)) }
+            let marks = HighlightPicker.classified(words: words, resolver: r)
+            #expect(marks.filter { $0.kind == .id }.count == 2, "\(texts) → \(marks)")
+        }
+    }
 }
