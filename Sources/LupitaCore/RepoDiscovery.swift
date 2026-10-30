@@ -13,6 +13,19 @@ public enum RepoDiscovery {
         "archive", "archived", "vendor",
     ]
 
+    /// Hidden folders of spec frameworks that are indexed anyway (D043). A closed list: every
+    /// other hidden folder (`.git`, caches, editors) is still skipped.
+    public static let frameworkHiddenDirs: Set<String> = [".kiro", ".taskmaster", ".specify"]
+
+    /// Whether the walk enters folder `name` found under `parents` (folder names from the repo
+    /// root down to its parent). `archive` is entered only as `openspec/changes/archive`, where
+    /// OpenSpec keeps closed changes; elsewhere it stays skipped. Does not apply to the root.
+    static func entersDirectory(_ name: String, under parents: [String]) -> Bool {
+        if name == "archive" { return parents.suffix(2) == ["openspec", "changes"] }
+        if name.hasPrefix(".") { return frameworkHiddenDirs.contains(name) }
+        return !isSkipped(name)
+    }
+
     /// `excluding`: repo paths the user switched off; they are found but left out.
     public static func repos(under roots: [String], excluding: Set<String> = []) -> [Repo] {
         var found: [Repo] = []
@@ -77,7 +90,7 @@ public enum RepoDiscovery {
     /// Markdown files of a repo, without descending into nested repos or worktrees.
     public static func markdownFiles(in repo: Repo) -> [URL] {
         var files: [URL] = []
-        walkForMarkdown(URL(fileURLWithPath: repo.path), isRoot: true, into: &files)
+        walkForMarkdown(URL(fileURLWithPath: repo.path), parents: nil, into: &files)
         return files.sorted { $0.path < $1.path }
     }
 
@@ -93,17 +106,21 @@ public enum RepoDiscovery {
         for child in subdirectories(of: dir) { walkForRepos(child, into: &found) }
     }
 
-    private static func walkForMarkdown(_ dir: URL, isRoot: Bool, into files: inout [URL]) {
+    /// `parents`: folder names from the repo root down to `dir`'s parent; nil for the root itself.
+    private static func walkForMarkdown(_ dir: URL, parents: [String]?, into files: inout [URL]) {
         let fm = FileManager.default
-        if !isRoot, fm.fileExists(atPath: dir.appendingPathComponent(".git").path) { return }
+        if parents != nil, fm.fileExists(atPath: dir.appendingPathComponent(".git").path) { return }
+        // Hidden entries are listed: the closed list of framework folders lives among them.
         guard let items = try? fm.contentsOfDirectory(
-            at: dir, includingPropertiesForKeys: [.isDirectoryKey], options: [.skipsHiddenFiles]
+            at: dir, includingPropertiesForKeys: [.isDirectoryKey], options: []
         ) else { return }
         for item in items {
+            let name = item.lastPathComponent
             if (try? item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
-                guard !isSkipped(item.lastPathComponent) else { continue }
-                walkForMarkdown(item, isRoot: false, into: &files)
-            } else if item.pathExtension.lowercased() == "md" {
+                let chain = parents.map { $0 + [dir.lastPathComponent] } ?? []
+                guard entersDirectory(name, under: chain) else { continue }
+                walkForMarkdown(item, parents: chain, into: &files)
+            } else if !name.hasPrefix("."), item.pathExtension.lowercased() == "md" {
                 files.append(item)
             }
         }
@@ -119,11 +136,15 @@ public enum RepoDiscovery {
     }
 
     /// Whether a changed file would be indexed: a `.md` inside `repo`, not under a skipped
-    /// or hidden folder. Used by the file watcher to ignore noise.
+    /// or hidden folder (bar the closed list of D043). Used by the file watcher to ignore noise.
     public static func isIndexed(path: String, in repo: Repo) -> Bool {
         guard path.lowercased().hasSuffix(".md"), path.hasPrefix(repo.path + "/") else { return false }
-        let folders = path.dropFirst(repo.path.count + 1).split(separator: "/").dropLast()
-        return !folders.contains { $0.hasPrefix(".") || isSkipped(String($0)) }
+        let parts = path.dropFirst(repo.path.count + 1).split(separator: "/").map(String.init)
+        guard let file = parts.last, !file.hasPrefix(".") else { return false }
+        let folders = parts.dropLast()
+        return folders.enumerated().allSatisfy { i, name in
+            entersDirectory(name, under: Array(folders.prefix(i)))
+        }
     }
 
     static func isSkipped(_ name: String) -> Bool {
