@@ -156,6 +156,15 @@ import Testing
         #expect(IDGrammar.tokens(in: "see REQ-3.1 now").first.map { ("see REQ-3.1 now" as NSString).substring(with: $0.range) } == "REQ-3.1")
     }
 
+    @Test func aFileNamedLikeASuffixedIDDefinesNothing() {
+        let r = Self.resolver(["docs/STORY-2.1-HANDOFF-REPORT.md": "Report\n", "docs/AC-1.2-lockout.md": "x\n", "docs/b.md": "see STORY-2.1 and AC-1.2\n"])
+        #expect(Self.shown(r, "STORY-2.1", from: "docs/b.md").isEmpty)
+        #expect(Self.shown(r, "AC-1.2", from: "docs/b.md").isEmpty)
+        // The plain form keeps its file-name definition.
+        let plain = Self.resolver(["docs/D23-lockout.md": "x\n", "docs/b.md": "see D23\n"])
+        #expect(Self.shown(plain, "D23", from: "docs/b.md").first?.rule == .fileName)
+    }
+
     @Test func versionsKeepTheirOldReading() {
         #expect(Self.keys("REL-0.9.1") == ["REL0"])
         #expect(Self.keys("V5.1 and Python3.9 and D23.5") == ["V5", "D23"])

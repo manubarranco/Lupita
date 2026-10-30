@@ -153,10 +153,13 @@ public enum DefinitionRules {
         return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[2]))
     }
 
-    /// `Q07-title.md`, `D23.md`, `E2-S3b-voice-input.md`.
+    /// `Q07-title.md`, `D23.md`, `E2-S3b-voice-input.md`. A file called `STORY-2.1-HANDOFF-REPORT.md` is a report
+    /// about a story, not the story: IDs with a `.N` suffix are not defined by file names.
     public static func fileNameDefinition(_ fileName: String) -> DefinitionHit? {
         let base = (fileName as NSString).deletingPathExtension
-        guard let first = IDGrammar.tokens(in: base).first, first.range.location == 0, first.id.scope == .none else { return nil }
+        guard let first = IDGrammar.tokens(in: base).first, first.range.location == 0, first.id.scope == .none,
+              !first.id.key.contains(".")
+        else { return nil }
         let rest = (base as NSString).substring(from: first.range.length)
         guard rest.isEmpty || rest.hasPrefix("-") || rest.hasPrefix("_") || rest.hasPrefix(" ") else { return nil }
         let title = rest.trimmingCharacters(in: CharacterSet(charactersIn: "-_ "))
