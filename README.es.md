@@ -66,12 +66,6 @@ Aún no está notarizada por Apple, así que la primera vez macOS la bloqueará.
 Para actualizar, abre el menú de Lupita y elige **Buscar actualizaciones…**. Se instala en un clic y
 mantiene los permisos.
 
-## Ayuda a tus agentes a ser más claros
-
-Lupita funciona sin configurar nada. Pero si quieres que entienda todo lo que tus agentes creen a
-partir de ahora, pídeles que lo escriban en un formato que Lupita sepa leer. La ventana
-**Prepara tus repos…** te da el prompt y abre cada repo en tu editor, listo para pegar.
-
 ## Más detalles
 
 Todo lo que Lupita reconoce, cómo decide entre repos, sus límites y cómo compilarla desde el

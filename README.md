@@ -68,12 +68,6 @@ It isn't notarized by Apple yet, so macOS will block it the first time. To open 
 To update, open Lupita's menu and choose **Check for updates…**. It installs in one click and
 keeps its permissions.
 
-## Help your agents be clearer
-
-Lupita works with no setup. But if you want it to understand everything your agents create from
-now on, ask them to write it in a format Lupita can read. The **Prepare your repos…** window
-gives you the prompt and opens each repo in your editor, ready to paste.
-
 ## More details
 
 Everything Lupita recognises, how it picks between repos, its limits and how to build it from
