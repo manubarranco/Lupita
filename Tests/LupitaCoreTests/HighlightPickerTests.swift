@@ -39,6 +39,19 @@ import Testing
         #expect(marks.count == 4)
     }
 
+    /// The sidebar item `Cambios` sits 6 pt below `Hoy • FR-` and makes a row of its own between the two lines of the list.
+    @Test func aSidebarRowBetweenTheTwoLinesDoesNotHideTheList() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: "/x/atlas")]
+        index.add(text: "- **FR-001**: One\n- **FR-002**: Two\n- **FR-003**: Three\n", fileName: "fr.md", repo: "atlas", relativePath: "docs/fr.md", absolutePath: "/x/atlas/docs/fr.md")
+        index.rank()
+        let r = Resolver(index: index)
+        func at(_ x: CGFloat, _ y: CGFloat, _ t: String, w: CGFloat = 30) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: w, height: 14)) }
+        let words = [at(17, 365, "Hoy"), at(606, 365, "FR-"), at(1200, 371, "Cambios", w: 60),
+                     at(606, 384, "001,", w: 40), at(650, 384, "002,", w: 40), at(694, 384, "003", w: 30)]
+        #expect(HighlightPicker.marks(words: words, resolver: r).count == 4)
+    }
+
     @Test func marksIDsTermsAndCommands() {
         let marks = HighlightPicker.marks(words: Self.row("per D023 we use fast-forward and git stash"), resolver: Self.resolver())
         #expect(marks.count == 3)

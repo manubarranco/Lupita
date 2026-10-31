@@ -114,15 +114,21 @@ public enum HighlightPicker {
         return out
     }
 
+    /// The rows right below row `n`: the next few. A sidebar item sits a few points lower than the text beside it, so it can
+    /// make a row of its own between two lines of the same paragraph.
+    static func rowsBelow(_ rows: [[OCRWord]], _ n: Int) -> [[OCRWord]] {
+        Array(rows[min(n + 1, rows.count)..<min(n + 5, rows.count)])
+    }
+
     /// `Requirement` at the end of a line and `3` at the start of the next: one solid mark on each half when the
     /// two make a numbered form with a word that a repo defines. Only between stretches right below each other
     /// that start at the same column (the rows also hold the sidebar and whatever else is on the same screen line).
     static func wordFormsAcrossLines(_ rows: [[OCRWord]], resolver: Resolver) -> [Mark] {
         var marks: [Mark] = []
-        for (row, nextRow) in zip(rows, rows.dropFirst()) {
+        for (n, row) in rows.enumerated() {
             for run in runs(of: row) {
                 guard let end = run.last, let first = run.first else { continue }
-                for next in runs(of: nextRow) {
+                for next in rowsBelow(rows, n).flatMap({ runs(of: $0) }) {
                     guard let start = next.first, abs(start.box.minX - first.box.minX) <= end.box.height * 3,
                           start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
                     if let halves = wordFormHalves(tail: run, head: next, resolver: resolver) {
@@ -157,16 +163,16 @@ public enum HighlightPicker {
     /// the numbers that follow the first too.
     static func brokenAcrossLines(_ rows: [[OCRWord]], resolver: Resolver, words: [OCRWord]) -> [Mark] {
         var marks: [Mark] = []
-        for (row, nextRow) in zip(rows, rows.dropFirst()) {
+        for (n, row) in rows.enumerated() {
             var pairs: [(end: OCRWord, head: [OCRWord])] = []
             for run in runs(of: row) {
                 guard let end = run.last, let first = run.first else { continue }
-                for next in runs(of: nextRow) {
+                for next in rowsBelow(rows, n).flatMap({ runs(of: $0) }) {
                     guard let start = next.first, abs(start.box.minX - first.box.minX) <= end.box.height * 3 else { continue }
                     pairs.append((end, next))
                 }
             }
-            if let end = row.last, let next = nextRow.first { pairs.append((end, [next])) }
+            if let end = row.last, let next = rows.indices.contains(n + 1) ? rows[n + 1].first : nil { pairs.append((end, [next])) }
             var done = Set<CGFloat>()
             for (end, head) in pairs {
                 guard let start = head.first, end.text.hasSuffix("-"), !end.text.hasSuffix("--"),
