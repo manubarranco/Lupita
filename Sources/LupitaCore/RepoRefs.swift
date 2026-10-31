@@ -111,6 +111,32 @@ public enum RepoRefs {
         }
     }
 
+    // MARK: - Tracker keys
+
+    /// The longest a search of a repo's history for a tracker key may take.
+    static let keySearchTimeout: TimeInterval = 1
+
+    /// The latest commit (any branch) whose message names the tracker key `PLAT-443341`, or else a branch whose name
+    /// does: the only thing Lupita can say about a key that no `.md` defines. Looked up on demand, never indexed.
+    static func commitCiting(_ key: String, repo: Repo, timeout: TimeInterval = keySearchTimeout) -> Definition? {
+        let started = Date()
+        let escaped = NSRegularExpression.escapedPattern(for: key)
+        let args = ["log", "--all", "-1", "-E", "--grep=(^|[^A-Za-z0-9_-])\(escaped)($|[^A-Za-z0-9_])", "--format=%H%x1f%s%x1f%ad%x1f%h", "--date=short"]
+        if let out = Git.output(repo.path, args, timeout: max(0.05, timeout))?.trimmingCharacters(in: .newlines), !out.isEmpty {
+            let f = out.components(separatedBy: "\u{1f}")
+            if f.count == 4 {
+                // No link to the hosting site: knowing whether the commit was pushed means walking the whole history.
+                return Definition(id: key, key: f[0], repo: repo.name, path: "", line: 0, rule: .commit, title: f[1],
+                                  summary: "\(f[2]) · \(f[3])", absolutePath: repo.path)
+            }
+        }
+        // One second for the whole lookup: a search that already took long does not try the branches.
+        if Date().timeIntervalSince(started) < keySearchTimeout / 2, let branch = Git.lines(repo.path, ["branch", "-a", "--list", "*\(key)*", "--format=%(refname:short)"], timeout: keySearchTimeout)?.first {
+            return liveBranch(branch.hasPrefix("origin/") ? String(branch.dropFirst("origin/".count)) : branch, repo: repo)
+        }
+        return nil
+    }
+
     // MARK: - Branches
 
     static func branches(_ name: String, repos: [Repo]) -> [Definition] {
@@ -344,15 +370,15 @@ enum Git {
         return dir + "/usr/bin/git"
     }()
 
-    static func output(_ repo: String, _ args: [String]) -> String? {
+    static func output(_ repo: String, _ args: [String], timeout: TimeInterval? = nil) -> String? {
         guard let git = executable else { return nil }
-        return run(git, ["-C", repo] + args)
+        return run(git, ["-C", repo] + args, timeout: timeout)
     }
 
     static func succeeds(_ repo: String, _ args: [String]) -> Bool { output(repo, args) != nil }
 
-    static func lines(_ repo: String, _ args: [String]) -> [String]? {
-        output(repo, args).map { $0.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
+    static func lines(_ repo: String, _ args: [String], timeout: TimeInterval? = nil) -> [String]? {
+        output(repo, args, timeout: timeout).map { $0.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
     }
 
     /// One line split on the unit separator (`%x1f`).
@@ -376,7 +402,7 @@ enum Git {
     }
 
     /// stdout when the command exits 0, nil otherwise.
-    private static func run(_ executable: String, _ args: [String]) -> String? {
+    private static func run(_ executable: String, _ args: [String], timeout: TimeInterval? = nil) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = args
@@ -388,6 +414,9 @@ enum Git {
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
         do { try process.run() } catch { return nil }
+        if let timeout {
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { if process.isRunning { process.terminate() } }
+        }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
         return process.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : nil

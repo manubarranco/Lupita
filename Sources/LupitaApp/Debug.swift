@@ -5,6 +5,8 @@ import Foundation
 /// `defaults write com.manubarranco.lupita debugLog -bool true`.
 enum Debug {
     static var isOn: Bool { UserDefaults.standard.bool(forKey: "debugLog") }
+    /// The batch of ID forms this build carries; every line of the lookup log says it, so a log tells which version was running (L044).
+    static let batch = "batch=3 id-forms-batch-3"
 }
 
 /// Debug log of the git vocabulary's decisions (D42), only with `Debug.isOn`: one line per lookup in

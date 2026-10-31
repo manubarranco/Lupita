@@ -104,9 +104,19 @@ public struct Resolver: Sendable {
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        if let id = IDGrammar.parse(query) {
+        if let id = IDGrammar.parse(query) ?? Self.inheritedID(query, context: context, block: block) {
             let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
             if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
+            // A tracker key no file defines: the commit that cites it, if the window's repo has one.
+            if let commit = trackerCommit(for: id, preferredRepo: preferredRepo) {
+                return Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+            }
+            // The window's repo (or none) has no commit with it: the other repos, flagged, within one second in all.
+            if IDGrammar.isTrackerKey(id.display), let commit = trackerCommitElsewhere(for: id, except: preferredRepo) {
+                var r = Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+                r.fromOtherRepo = preferredRepo != nil
+                return r
+            }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
@@ -119,9 +129,13 @@ public struct Resolver: Sendable {
         let idShaped = IDGrammar.parse(query) != nil
         if !idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
 
+        // A word made only of digits (`002`) is a number, not an ID misread by OCR: no "did you mean D02". It is
+        // an ID only inside a list (`FR-001, 002`), which was tried above.
+        let digitsOnly = !query.isEmpty && query.allSatisfy { $0.isASCII && $0.isNumber }
+
         // Fewest substitutions first; stop at the first distance that yields any match.
         // An ID is short: trying every look-alike swap of a long word (`FontBuilder`) found nothing and cost ~0.5 s.
-        for distance in 1...Self.maxSubstitutions where query.count <= Self.maxCorrectableLength {
+        for distance in 1...Self.maxSubstitutions where query.count <= Self.maxCorrectableLength && !digitsOnly {
             let keys = Set(variants(of: query, substitutions: distance).compactMap { variant -> String? in
                 guard let key = IDGrammar.parse(variant)?.key, index.definitions[key] != nil else { return nil }
                 return key
@@ -138,7 +152,7 @@ public struct Resolver: Sendable {
 
         // Several look-alikes at once in the number part (`LOoz` → `L002`): read everything after
         // the prefix as digits. Only when exactly one real ID comes out.
-        let tailKeys = Set(numericTailReadings(of: query).compactMap { variant -> String? in
+        let tailKeys = Set((digitsOnly ? [] : numericTailReadings(of: query)).compactMap { variant -> String? in
             guard let key = IDGrammar.parse(variant)?.key, index.definitions[key] != nil else { return nil }
             return key
         })
@@ -157,12 +171,65 @@ public struct Resolver: Sendable {
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
     }
 
+    /// The latest commit (or branch) of the window's repo that names the tracker key `id`, or nil: no repo, no
+    /// commit, or a key that is not shaped like one. A definition in a `.md` always wins over this.
+    public func trackerCommit(for id: RefID, preferredRepo: String?) -> Definition? {
+        guard let preferredRepo, IDGrammar.isTrackerKey(id.display),
+              let repo = index.repos.first(where: { $0.name.caseInsensitiveCompare(preferredRepo) == .orderedSame })
+        else { return nil }
+        return RepoRefs.commitCiting(id.display, repo: repo)
+    }
+
+    /// Whether some repo has a commit (or branch) that names the tracker key: what the highlight needs to underline `PLAT-443341`.
+    /// A git search per word on every pass would be slow, so answers are kept for half a minute.
+    public func hasTrackerCommit(_ id: RefID, preferredRepo: String? = nil) -> Bool {
+        guard IDGrammar.isTrackerKey(id.display) else { return false }
+        return TrackerCache.answer(for: id.display) {
+            trackerCommit(for: id, preferredRepo: preferredRepo) != nil || trackerCommitElsewhere(for: id, except: preferredRepo) != nil
+        }
+    }
+
+    /// The commit of any other repo that names the key; the search of all of them shares one second.
+    func trackerCommitElsewhere(for id: RefID, except preferredRepo: String?) -> Definition? {
+        let deadline = Date().addingTimeInterval(RepoRefs.keySearchTimeout)
+        for repo in index.repos where repo.name.caseInsensitiveCompare(preferredRepo ?? "") != .orderedSame {
+            guard Date() < deadline else { return nil }
+            if let d = RepoRefs.commitCiting(id.display, repo: repo, timeout: deadline.timeIntervalSinceNow) { return d }
+        }
+        return nil
+    }
+
+    /// A bare number that ends a list with an omitted prefix (`PU-02, 03 y 26` with the pointer on `03`): the ID it
+    /// inherits, read from the text before it, or nil.
+    static func inheritedID(_ rawWord: String, context: String?, block: String? = nil) -> RefID? {
+        let word = IDGrammar.digitsBeforeJunk(rawWord) ?? rawWord
+        guard word.count >= 1, word.count <= 4, word.allSatisfy(\.isASCII), word.allSatisfy(\.isNumber) else { return nil }
+        func inherited(_ before: String) -> RefID? {
+            let text = before + (before.last?.isWhitespace ?? true ? "" : " ") + word
+            guard let last = IDGrammar.tokens(in: text).last, last.id.scope == .folder, last.id.display == word,
+                  last.range.location + last.range.length == (text as NSString).length else { return nil }
+            return last.id
+        }
+        if let context, let id = inherited(context) { return id }
+        // The list is broken across lines (`FR-` / `001, 002`): the text around the word, joined, still has its start.
+        guard let block else { return nil }
+        let joined = block.replacingOccurrences(of: #"-\s+(?=\d)"#, with: "-", options: .regularExpression)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+        var from = joined.startIndex
+        while let r = joined.range(of: word, range: from..<joined.endIndex) {
+            if r.lowerBound > joined.startIndex, joined[joined.index(before: r.lowerBound)] == " ",
+               let id = inherited(String(joined[..<r.lowerBound])) { return id }
+            from = r.upperBound
+        }
+        return nil
+    }
+
     /// A numbered form with a word (`Requirement 3`, `Task Group 2`) for `phrase`, or nil. Public so the picker
     /// can try windows of words.
     public func resolveWordID(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
                               fromPath: String? = nil) -> Resolution? {
         let trimmed = Self.latinize(phrase.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none else { return nil }
+        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none || id.prefix == "ADR" else { return nil }
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let repo = named ?? preferredRepo
         let (key, defs) = scopedDefinitions(for: id, preferredRepo: repo, fromPath: named == nil || named == preferredRepo ? fromPath : nil)
@@ -176,6 +243,14 @@ public struct Resolver: Sendable {
     /// criterion (`Requirement 3.1`) falls back to the form one level up. Other forms: every definition.
     public func scopedDefinitions(for id: RefID, preferredRepo: String?, fromPath: String?) -> (key: String, defs: [Definition]) {
         if id.scope == .none {
+            // The same ADR written with another padding is the same ADR.
+            let aliases = IDGrammar.adrAliases(of: id.key)
+            if aliases.count > 1 {
+                let found = aliases.flatMap { index.definitions[$0] ?? [] }
+                if !found.isEmpty {
+                    return (aliases.first { !(index.definitions[$0] ?? []).isEmpty } ?? id.key, found)
+                }
+            }
             var key: String? = id.key
             while let k = key {
                 if let defs = index.definitions[k], !defs.isEmpty { return (k, defs) }
@@ -359,5 +434,22 @@ public struct Resolver: Sendable {
             let after = r.upperBound == lower.endIndex ? " " : lower[r.upperBound]
             return !(before.isLetter || before.isNumber) && !(after.isLetter || after.isNumber)
         }
+    }
+}
+
+
+/// Answers of the tracker-key searches, so the highlight does not run git on every pass.
+enum TrackerCache {
+    nonisolated(unsafe) private static var answers: [String: (found: Bool, at: Date)] = [:]
+    private static let lock = NSLock()
+    static let lifetime: TimeInterval = 30
+
+    static func answer(for key: String, compute: () -> Bool) -> Bool {
+        lock.lock()
+        if let hit = answers[key], Date().timeIntervalSince(hit.at) < lifetime { lock.unlock(); return hit.found }
+        lock.unlock()
+        let found = compute()
+        lock.lock(); answers[key] = (found, Date()); lock.unlock()
+        return found
     }
 }

@@ -23,6 +23,35 @@ import Testing
         }
     }
 
+    /// `FR-` at the end of a line and `001, 002 y 003` on the next, with a sidebar word between on the same screen row:
+    /// the first half, the joined ID and the numbers that follow are all marked.
+    @Test func aListBrokenAcrossLinesIsMarkedWithItsNumbers() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: "/x/atlas")]
+        index.add(text: "- **FR-001**: One\n- **FR-002**: Two\n- **FR-003**: Three\n", fileName: "fr.md", repo: "atlas", relativePath: "docs/fr.md", absolutePath: "/x/atlas/docs/fr.md")
+        index.rank()
+        let r = Resolver(index: index)
+        // Row 1: a sidebar word far left, then the sentence ending in `FR-`. Row 2: another sidebar word, then the list.
+        let row1 = [OCRWord(text: "Hoy", box: CGRect(x: 0, y: 0, width: 30, height: 14))] + Self.row("una lista FR-", y: 0).map { OCRWord(text: $0.text, box: $0.box.offsetBy(dx: 300, dy: 0)) }
+        let row2 = [OCRWord(text: "Resultados", box: CGRect(x: 0, y: 20, width: 100, height: 14))] + Self.row("001, 002 y 003.", y: 20).map { OCRWord(text: $0.text, box: $0.box.offsetBy(dx: 300 + 40, dy: 0)) }
+        let marks = HighlightPicker.marks(words: row1 + row2, resolver: r)
+        // `FR-`, `001,`, `002` and `003.`
+        #expect(marks.count == 4)
+    }
+
+    /// The sidebar item `Cambios` sits 6 pt below `Hoy • FR-` and makes a row of its own between the two lines of the list.
+    @Test func aSidebarRowBetweenTheTwoLinesDoesNotHideTheList() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: "/x/atlas")]
+        index.add(text: "- **FR-001**: One\n- **FR-002**: Two\n- **FR-003**: Three\n", fileName: "fr.md", repo: "atlas", relativePath: "docs/fr.md", absolutePath: "/x/atlas/docs/fr.md")
+        index.rank()
+        let r = Resolver(index: index)
+        func at(_ x: CGFloat, _ y: CGFloat, _ t: String, w: CGFloat = 30) -> OCRWord { OCRWord(text: t, box: CGRect(x: x, y: y, width: w, height: 14)) }
+        let words = [at(17, 365, "Hoy"), at(606, 365, "FR-"), at(1200, 371, "Cambios", w: 60),
+                     at(606, 384, "001,", w: 40), at(650, 384, "002,", w: 40), at(694, 384, "003", w: 30)]
+        #expect(HighlightPicker.marks(words: words, resolver: r).count == 4)
+    }
+
     @Test func marksIDsTermsAndCommands() {
         let marks = HighlightPicker.marks(words: Self.row("per D023 we use fast-forward and git stash"), resolver: Self.resolver())
         #expect(marks.count == 3)

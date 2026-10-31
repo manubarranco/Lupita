@@ -76,6 +76,10 @@ public enum DefinitionRules {
     // thing and `Requirements 12.1-12.6` a range: neither defines `Task 2` or `Requirement 12.1`.
     static let wordHeading = try! NSRegularExpression(
         pattern: #"^#{1,6}\s+\**\s*(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d]|\.\d|[-–]\d)\**\s*(?:(?:[:—–\-·|)]|\.(?=\s|$))\s*|\s+|$)(.*)$"#)
+    // `**Property 1: Title**` at the start of a line (Kiro's design.md) defines `Property 1`. Without a title, in the
+    // middle of a sentence or as a list item (the sub-bullets of a `tasks.md` cite the property) it is a mention.
+    static let boldProperty = try! NSRegularExpression(
+        pattern: #"^\*\*(Propert(?:y|ies)) (\d{1,3}):\s+(\S[^*]*?)\*\*"#)
     // `- [ ] 1.1 Create the table`, `- [x]* 2. Wire it`: a task of a `tasks.md`.
     static let taskLine = try! NSRegularExpression(
         pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?\s+(.+)$"#)
@@ -85,9 +89,10 @@ public enum DefinitionRules {
         pattern: #"^\(?\d{4}-\d{2}-\d{2}\)?\s*[—–:\-·|]?\s*"#)
 
     /// All definitions in a markdown file. Fenced code blocks are ignored (templates live there).
-    public static func definitions(fileName: String, lines: [String]) -> [DefinitionHit] {
+    /// `folder` is the name of the folder the file is in: a numbered file in `adr/` defines an ADR.
+    public static func definitions(fileName: String, lines: [String], folder: String = "") -> [DefinitionHit] {
         var hits: [DefinitionHit] = []
-        if let hit = fileNameDefinition(fileName) { hits.append(hit) }
+        if let hit = fileNameDefinition(fileName) ?? adrFileDefinition(fileName, folder: folder) { hits.append(hit) }
         let isTasksFile = fileName.lowercased() == "tasks.md"
 
         var inFence = false
@@ -127,6 +132,9 @@ public enum DefinitionRules {
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
+        if line.hasPrefix("**Propert"), let m = match(boldProperty, line), let id = IDGrammar.parse(m[1] + " " + m[2]) {
+            return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[3]))
+        }
         if let m = match(tableRow, line) {
             guard let id = IDGrammar.parse(m[1]), !isSeparatorRow(line) else { return nil }
             return DefinitionHit(id: id, rule: .tableRow, line: index, title: cleanTitle(m[2]))
@@ -165,6 +173,19 @@ public enum DefinitionRules {
         let title = rest.trimmingCharacters(in: CharacterSet(charactersIn: "-_ "))
             .replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
         return DefinitionHit(id: first.id, rule: .fileName, line: -1, title: title)
+    }
+
+    // `2026-08-16-notes.md` is a dated note, not ADR 2026.
+    static let datedFile = try! NSRegularExpression(pattern: #"^\d{4}-\d{2}-\d{2}"#)
+    static let adrFolders: Set<String> = ["adr", "adrs", "decisions", "architecture-decisions"]
+    static let adrFile = try! NSRegularExpression(pattern: #"^(?:[Aa][Dd][Rr]-?)?(\d{1,4})-([A-Za-z0-9].*)\.md$"#)
+
+    /// `docs/adr/0007-use-foo.md` (or `adr007-use-foo.md`) defines `ADR-0007`, written with the digits the file has. A numbered file
+    /// anywhere else is not an ADR.
+    static func adrFileDefinition(_ fileName: String, folder: String) -> DefinitionHit? {
+        guard adrFolders.contains(folder.lowercased()), let m = match(adrFile, fileName), match(datedFile, fileName) == nil else { return nil }
+        let title = m[2].replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
+        return DefinitionHit(id: RefID(display: "ADR-" + m[1], key: "ADR" + m[1], prefix: "ADR"), rule: .fileName, line: -1, title: title)
     }
 
     static func cleanTitle(_ raw: String) -> String {

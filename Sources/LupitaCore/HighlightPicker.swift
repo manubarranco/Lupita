@@ -114,15 +114,21 @@ public enum HighlightPicker {
         return out
     }
 
+    /// The rows right below row `n`: the next few. A sidebar item sits a few points lower than the text beside it, so it can
+    /// make a row of its own between two lines of the same paragraph.
+    static func rowsBelow(_ rows: [[OCRWord]], _ n: Int) -> [[OCRWord]] {
+        Array(rows[min(n + 1, rows.count)..<min(n + 5, rows.count)])
+    }
+
     /// `Requirement` at the end of a line and `3` at the start of the next: one solid mark on each half when the
     /// two make a numbered form with a word that a repo defines. Only between stretches right below each other
     /// that start at the same column (the rows also hold the sidebar and whatever else is on the same screen line).
     static func wordFormsAcrossLines(_ rows: [[OCRWord]], resolver: Resolver) -> [Mark] {
         var marks: [Mark] = []
-        for (row, nextRow) in zip(rows, rows.dropFirst()) {
+        for (n, row) in rows.enumerated() {
             for run in runs(of: row) {
                 guard let end = run.last, let first = run.first else { continue }
-                for next in runs(of: nextRow) {
+                for next in rowsBelow(rows, n).flatMap({ runs(of: $0) }) {
                     guard let start = next.first, abs(start.box.minX - first.box.minX) <= end.box.height * 3,
                           start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
                     if let halves = wordFormHalves(tail: run, head: next, resolver: resolver) {
@@ -151,17 +157,43 @@ public enum HighlightPicker {
     }
 
     /// A word split at the end of a line with a hyphen (`fast-` / `forward`): both halves are marked when the
-    /// joined word is known (D51). Only between rows right below each other.
+    /// joined word is known (D51). Only between rows right below each other, and the stretch that continues it
+    /// starts where the stretch that ends in the hyphen starts (the row also holds a sidebar or a panel that
+    /// would otherwise be taken for the next word). A list that omits the prefix (`FR-` / `001, 002 y 003`) marks
+    /// the numbers that follow the first too.
     static func brokenAcrossLines(_ rows: [[OCRWord]], resolver: Resolver, words: [OCRWord]) -> [Mark] {
         var marks: [Mark] = []
-        for (row, next) in zip(rows, rows.dropFirst()) {
-            guard let end = row.last, let start = next.first, end.text.hasSuffix("-"), !end.text.hasSuffix("--"),
-                  start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY else { continue }
-            let joined = clean(end.text) + clean(start.text)
-            let block = nearbyText(of: end, in: words) + " " + nearbyText(of: start, in: words)
-            guard let kind = kind(of: joined, resolver: resolver, block: block, marked: end.codeStyled) else { continue }
-            marks.append(Mark(box: trimmed(row[(row.count - 1)...]), kind: kind))
-            marks.append(Mark(box: trimmed(next[0...0]), kind: kind))
+        for (n, row) in rows.enumerated() {
+            var pairs: [(end: OCRWord, head: [OCRWord])] = []
+            for run in runs(of: row) {
+                guard let end = run.last, let first = run.first else { continue }
+                for next in rowsBelow(rows, n).flatMap({ runs(of: $0) }) {
+                    guard let start = next.first, abs(start.box.minX - first.box.minX) <= end.box.height * 3 else { continue }
+                    pairs.append((end, next))
+                }
+            }
+            if let end = row.last, let next = rows.indices.contains(n + 1) ? rows[n + 1].first : nil { pairs.append((end, [next])) }
+            var done = Set<CGFloat>()
+            for (end, head) in pairs {
+                guard let start = head.first, end.text.hasSuffix("-"), !end.text.hasSuffix("--"),
+                      start.box.minY - end.box.maxY < end.box.height * 1.2, start.box.minY > end.box.minY,
+                      done.insert(end.box.minX).inserted else { continue }
+                let joined = clean(end.text) + clean(start.text)
+                let block = nearbyText(of: end, in: words) + " " + nearbyText(of: start, in: words)
+                guard let kind = kind(of: joined, resolver: resolver, block: block, marked: end.codeStyled) else { continue }
+                marks.append(Mark(box: trimmed([end][...]), kind: kind))
+                marks.append(Mark(box: trimmed(head[0...0]), kind: kind))
+                // `FR-` / `001, 002 y 003`: the numbers after the first inherit the prefix.
+                var written = end.text + head[0].text
+                for word in head.dropFirst() {
+                    let cleaned = clean(word.text)
+                    defer { written += " " + word.text }
+                    guard !cleaned.isEmpty, cleaned.allSatisfy({ $0.isASCII && $0.isNumber }) else { continue }
+                    if let id = Resolver.inheritedID(cleaned, context: written + " ", block: nil), resolver.index.definitions[id.key] != nil {
+                        marks.append(Mark(box: trimmed([word][...]), kind: .id))
+                    }
+                }
+            }
         }
         return marks
     }
@@ -194,7 +226,8 @@ public enum HighlightPicker {
     }
 
     static func clean(_ text: String) -> String {
-        Resolver.latinize(text).trimmingCharacters(in: leading).trimmingCharacters(in: trailing)
+        let cleaned = Resolver.latinize(text).trimmingCharacters(in: leading).trimmingCharacters(in: trailing)
+        return IDGrammar.digitsBeforeJunk(cleaned) ?? cleaned
     }
 
     static func closes(_ word: OCRWord) -> Bool {
@@ -276,7 +309,13 @@ public enum HighlightPicker {
     private static func known(_ word: String, resolver: Resolver, block: String, marked: Bool, before: String) -> Kind? {
         guard word.count >= 2 else { return nil }
         let repos = resolver.index.repos
-        if let id = IDGrammar.parse(word), resolver.index.definitions[id.key] != nil { return .id }
+        // `002` in `FR-001, 002`, even when the list wraps to the next line: an ID defined somewhere.
+        if IDGrammar.parse(word) == nil, let id = Resolver.inheritedID(word, context: before, block: block),
+           resolver.index.definitions[id.key] != nil { return .id }
+        // A tracker key no file defines is underlined when some repo has a commit that cites it.
+        if let id = IDGrammar.parse(word), IDGrammar.isTrackerKey(id.display), resolver.index.definitions[id.key] == nil,
+           resolver.hasTrackerCommit(id) { return .id }
+        if let id = IDGrammar.parse(word), IDGrammar.adrAliases(of: id.key).contains(where: { resolver.index.definitions[$0] != nil }) { return .id }
         if resolver.rangeList(word) != nil { return .id }
         // A repo name points at a place, like an ID. A plain lowercase name (`app`, `nib`) needs its exact case, so
         // it does not mark every «app»; any other (`LiOS`, `vector-ui-studio`) any case, as OCR reads `LiOS` as `LioS`.

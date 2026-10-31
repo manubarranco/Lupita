@@ -138,7 +138,8 @@ public struct RefIndex: Codable, Sendable {
     public mutating func add(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String) {
         markdownByName[fileName.lowercased(), default: []].append(repo + "/" + relativePath)
         let lines = text.components(separatedBy: .newlines)
-        let hits = DefinitionRules.definitions(fileName: fileName, lines: lines)
+        let hits = DefinitionRules.definitions(fileName: fileName, lines: lines,
+                                               folder: relativePath.split(separator: "/").dropLast().last.map(String.init) ?? "")
         var definedOnLine: [Int: String] = [:]
         for hit in hits {
             let (title, summary) = Snippet.build(for: hit, lines: lines)
