@@ -347,18 +347,18 @@ import Testing
 
 @Suite(.serialized) struct StringsTests {
     @Test func followsTheMacLanguage() {
-        let saved = S.language
-        defer { S.language = saved }
-        S.language = "es-ES"
-        #expect(S.notAReference == "No es una referencia conocida")
-        #expect(S.cited(1, files: 1) == "Citado 1 vez en 1 archivo")
-        #expect(S.updated(seconds: 90) == "Actualizado hace 1 min")
-        S.language = "en-GB"
-        #expect(S.notAReference == "Not a known reference")
-        #expect(S.cited(3, files: 2) == "Cited 3 times in 2 files")
-        #expect(S.didYouMean("D5", read: "DS") == "Did you mean D5?  (read: DS)")
-        S.language = "fr-FR"  // anything else falls back to English
-        #expect(S.quit == "Quit")
+        S.withLanguage("es-ES") {
+            #expect(S.notAReference == "No es una referencia conocida")
+            #expect(S.cited(1, files: 1) == "Citado 1 vez en 1 archivo")
+            #expect(S.updated(seconds: 90) == "Actualizado hace 1 min")
+        }
+        S.withLanguage("en-GB") {
+            #expect(S.notAReference == "Not a known reference")
+            #expect(S.cited(3, files: 2) == "Cited 3 times in 2 files")
+            #expect(S.didYouMean("D5", read: "DS") == "Did you mean D5?  (read: DS)")
+        }
+        // anything else falls back to English
+        S.withLanguage("fr-FR") { #expect(S.quit == "Quit") }
     }
 }
 

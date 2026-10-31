@@ -6,13 +6,24 @@ public enum S {
     public static let appName = "Lupita"
 
     /// The Mac's first preferred language; settable for tests.
-    nonisolated(unsafe) public static var language = Locale.preferredLanguages.first ?? "en"
+    nonisolated(unsafe) private static var systemLanguage = Locale.preferredLanguages.first ?? "en"
+    /// A language that holds only inside `withLanguage`, for the task that runs it: tests in parallel never see each other's.
+    public static let languageOverride = TaskLocal<String?>(wrappedValue: nil)
+
+    public static var language: String {
+        get { languageOverride.get() ?? systemLanguage }
+        set { systemLanguage = newValue }
+    }
+    public static func withLanguage<R>(_ language: String, _ body: () throws -> R) rethrows -> R {
+        try languageOverride.withValue(language, operation: body)
+    }
     public static var isSpanish: Bool { language.hasPrefix("es") }
     private static func t(_ en: String, _ es: String) -> String { isSpanish ? es : en }
 
     // MARK: Lookup
     public static var indexing: String { t("Indexing…", "Indexando…") }
     public static var indexingTryAgain: String { t("Indexing… try again in a moment", "Indexando… prueba en un momento") }
+    public static var lookingForCommit: String { t("Looking for its commit…", "Buscando su commit…") }
     public static var notAReference: String { t("Not a known reference", "No es una referencia conocida") }
 
     // MARK: Tooltip

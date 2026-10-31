@@ -4,7 +4,7 @@ import Testing
 @testable import LupitaCore
 
 // D42: the git vocabulary package.
-@Suite(.serialized) struct GitVocabularyTests {
+@Suite(.serialized, .language("es")) struct GitVocabularyTests {
     static func resolver(glossary: Bool = false) -> Resolver {
         var index = RefIndex()
         index.repos = [Repo(name: "atlas", path: "/x/atlas")]
@@ -18,7 +18,6 @@ import Testing
 
     /// Points at the text between ⟦ and ⟧ in `sentence`.
     static func pick(_ sentence: String, glossary: Bool = false) -> Resolution? {
-        S.language = "es"
         GitVocabulary.isEnabled = true
         let start = sentence.range(of: "⟦")!
         let offset = sentence.distance(from: sentence.startIndex, to: start.lowerBound) + 1
@@ -97,12 +96,10 @@ import Testing
 
     @Test func englishCardsAreInEnglish() throws {
         let r = try #require(Self.pick("⟦rebasea⟧ sobre main"))
-        S.language = "en"
-        let again = try #require(Self.resolver().resolveGit("rebase", block: "rebase"))
+        let again = try S.withLanguage("en") { try #require(Self.resolver().resolveGit("rebase", block: "rebase")) }
         #expect(again.definitions[0].title == "Redo your work on top of the latest main version, as if you had started now.")
         #expect(again.definitions[0].summary == "Example: “rebase onto main”")
         #expect(r.definitions[0].rule == .vocabulary)
-        S.language = "es"
     }
 
     @Test func conjugatedVerbsResolve() throws {
@@ -136,7 +133,6 @@ import Testing
     }
 
     @Test func ordinaryProseResolvesNothing() {
-        S.language = "es"
         GitVocabulary.isEnabled = true
         for line in ["push the button to continue", "the main reason is cost", "a branch of the tree fell", "el log de la web es largo",
                      "I need a head start on this", "the fork in the road", "ese tag de precio está mal", "la rama del árbol se rompió",
@@ -179,7 +175,6 @@ import Testing
     @Test func theSwitchTurnsItOff() {
         GitVocabulary.isEnabled = false
         defer { GitVocabulary.isEnabled = true }
-        S.language = "es"
         let line = "hay que rebasear y hacer un force push"
         #expect(!Self.explains(CandidatePicker.pick(line: line, cursorOffset: 10, resolver: Self.resolver())))
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row(line), resolver: Self.resolver()).isEmpty)
@@ -188,7 +183,6 @@ import Testing
     // MARK: OCR and highlight
 
     @Test func ocrWordsUseTheNearbyRowsAsContext() throws {
-        S.language = "es"
         GitVocabulary.isEnabled = true
         let words = HighlightPickerTests.row("sube la rama", y: 0) + HighlightPickerTests.row("antes de hacer push", y: 20)
         let push = try #require(words.last)
@@ -200,7 +194,6 @@ import Testing
     }
 
     @Test func theHighlightUnderlinesGitWords() {
-        S.language = "es"
         GitVocabulary.isEnabled = true
         let resolver = Self.resolver()
         // push, main, branch: three weak words that vouch for each other; rebasear and the phrase count alone.
@@ -224,7 +217,6 @@ import Testing
     }
 
     @Test func prIsNotLeftOutByTheHighlight() {
-        S.language = "es"
         GitVocabulary.isEnabled = true
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("abro PR hoy"), resolver: Self.resolver()).count == 1)
         #expect(HighlightPicker.marks(words: HighlightPickerTests.row("abro (PR) hoy"), resolver: Self.resolver()).count == 1)
@@ -261,7 +253,7 @@ import Testing
     }
 
     @Test func aCodeStyledWordCountsAsBackticks() {
-        S.language = "es"; GitVocabulary.isEnabled = true
+        GitVocabulary.isEnabled = true
         let plain = HighlightPickerTests.row("Ya está en main")
         let styled = plain.map { $0.text == "main" ? OCRWord(text: $0.text, box: $0.box, codeStyled: true) : $0 }
         let main = styled.last!
@@ -273,7 +265,7 @@ import Testing
     }
 
     @Test func aMonospacedRunCountsAsBackticks() {
-        S.language = "es"; GitVocabulary.isEnabled = true
+        GitVocabulary.isEnabled = true
         let line = "Ya está en main"
         let range = NSRange(location: 11, length: 4)
         #expect(!Self.explains(CandidatePicker.pick(line: line, cursorOffset: 12, resolver: Self.resolver())))
@@ -306,7 +298,7 @@ import Testing
     // Round 4: Accessibility answers on release, without the code box; the app asks OCR for ambiguous words.
 
     @Test func theAppCanTellAnAmbiguousMissFromAnOrdinaryOne() {
-        S.language = "es"; GitVocabulary.isEnabled = true
+        GitVocabulary.isEnabled = true
         #expect(GitVocabulary.isAmbiguous("main"))
         #expect(GitVocabulary.isAmbiguous("`rama`,"))
         #expect(!GitVocabulary.isAmbiguous("rebasear"))
@@ -319,7 +311,7 @@ import Testing
     }
 
     @Test func theDiagnosisSaysWhy() {
-        S.language = "es"; GitVocabulary.isEnabled = true
+        GitVocabulary.isEnabled = true
         #expect(GitVocabulary.diagnose("main", block: "Ya está en main", marked: false).contains("git words in block=1"))
         #expect(GitVocabulary.diagnose("main", block: "Ya está en main", marked: true).contains("marked") == false)
         #expect(GitVocabulary.diagnose("main", block: "Ya está en main", marked: true).contains("backticks/code-style=true"))

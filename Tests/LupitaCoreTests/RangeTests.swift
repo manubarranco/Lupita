@@ -19,8 +19,7 @@ import Testing
         return Resolver(index: index)
     }
 
-    @Test func aRangeListsEveryID() throws {
-        S.language = "en"
+    @Test(.language("en")) func aRangeListsEveryID() throws {
         let r = Self.resolver().resolve("D022-D026", preferredRepo: "atlas")
         let list = try #require(r.range)
         #expect(list.count == 5)
@@ -87,9 +86,7 @@ import Testing
         #expect(resolver.resolve("E2-S3b").range == nil)
     }
 
-    @Test func spanishTexts() {
-        S.language = "es"
-        defer { S.language = "en" }
+    @Test(.language("es")) func spanishTexts() {
         #expect(S.rangeHeader(5, noun: S.rangeNoun(prefix: "D", file: "x.md")) == "Rango · 5 decisiones")
         #expect(S.rangeMore(11) == "… 11 más")
         #expect(S.notDefined == "no definida")
