@@ -54,6 +54,9 @@ public struct RefIndex: Codable, Sendable {
     /// `decisions.md` is found wherever it lives, with no search on disk.
     public var markdownByName: [String: [String]] = [:]
     public var fileCount: Int { filesPerRepo.values.reduce(0, +) }
+    /// While indexing: repo → task keys a `.md` of it cites as `Task 5` or `Subtask 5.2`. Not saved. A bare `Subtask 1` is
+    /// a phase of someone's own work (`ReDoS Subtask 1`), not a line of `tasks.json`.
+    var firmTaskCites: [String: Set<String>] = [:]
 
     public init() {}
 
@@ -102,6 +105,7 @@ public struct RefIndex: Codable, Sendable {
     private mutating func remove(repoNamed name: String) {
         repos.removeAll { $0.name == name }
         filesPerRepo[name] = nil
+        firmTaskCites[name] = nil
         for key in Array(markdownByName.keys) {
             let kept = markdownByName[key]!.filter { !$0.hasPrefix(name + "/") }
             markdownByName[key] = kept.isEmpty ? nil : kept
@@ -142,9 +146,11 @@ public struct RefIndex: Codable, Sendable {
 
     /// Indexes one JSON, YAML or TOML file (D60), after the `.md` files of its repo: an object with an ID and a title
     /// defines that ID only if a `.md` of the repo cites it and no `.md` of the repo defines it. Exposed for tests.
-    public mutating func addStructured(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String) {
-        for c in StructuredFiles.candidates(fileName: fileName, text: text) {
-            guard (mentions[c.key]?.byFile.keys.contains { $0.hasPrefix(repo + "/") }) == true,
+    public mutating func addStructured(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String,
+                                       everything: Bool = StructuredFiles.readsEverything) {
+        for c in StructuredFiles.candidates(fileName: fileName, text: text, everything: everything) {
+            guard c.key.hasPrefix("TASK ") ? firmTaskCites[repo]?.contains(c.key) == true
+                    : (mentions[c.key]?.byFile.keys.contains { $0.hasPrefix(repo + "/") }) == true,
                   !(definitions[c.key] ?? []).contains(where: { $0.repo == repo && $0.rule != .structured }) else { continue }
             definitions[c.key, default: []].append(Definition(
                 id: c.display, key: c.key, repo: repo, path: relativePath, line: c.line, rule: .structured,
@@ -193,6 +199,9 @@ public struct RefIndex: Codable, Sendable {
             var skipDefinition = definedOnLine[i]
             for token in IDGrammar.tokens(in: line) {
                 if token.id.key == skipDefinition { skipDefinition = nil; continue }
+                if token.id.key.hasPrefix("TASK "), token.id.display.hasPrefix("Task") || token.id.key.contains(".") {
+                    firmTaskCites[repo, default: []].insert(token.id.key)
+                }
                 mentions[token.id.key, default: Mentions()].byFile["\(repo)/\(relativePath)", default: 0] += 1
             }
         }

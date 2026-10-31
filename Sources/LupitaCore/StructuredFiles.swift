@@ -4,6 +4,15 @@ import Foundation
 /// `id` and a `title` is also a Figma node, a catalogue entry or a fixture. So such an ID defines something only when a
 /// `.md` of the same repo cites it, and a `.md` that defines it wins.
 public enum StructuredFiles {
+    /// Reading every JSON, YAML and TOML outside the deny list was measured on 77 repos and did not hold: of 24 pairs
+    /// (citation, definition) 3 were right (D60). Off; what is read is the closed list below. The code stays so the
+    /// decision can be reopened with its data.
+    public static let readsEverything = false
+    /// Plan B, a closed list: Taskmaster's own task file. `tasks.json` anywhere else is an app's data or an editor's config.
+    static func isClosedList(name: String, parents: [String]) -> Bool {
+        name.lowercased() == "tasks.json" && parents.contains(".taskmaster")
+    }
+
     /// Bigger files are skipped (lockfiles, exports, data dumps).
     public static let maxBytes = 2_000_000
     public static let extensions: Set<String> = ["json", "yaml", "yml", "toml"]
@@ -32,7 +41,8 @@ public enum StructuredFiles {
     ]
 
     /// Whether the file at `parents` (folder names from the repo root) called `name` is read.
-    static func isRead(name: String, parents: [String]) -> Bool {
+    static func isRead(name: String, parents: [String], everything: Bool = readsEverything) -> Bool {
+        if !everything { return isClosedList(name: name, parents: parents) }
         let lower = name.lowercased()
         guard extensions.contains((lower as NSString).pathExtension), !lower.hasPrefix(".") else { return false }
         if parents.contains(where: { skippedDirs.contains($0.lowercased()) || $0.lowercased().hasSuffix("-worktrees") }) { return false }
@@ -60,7 +70,7 @@ public enum StructuredFiles {
     static let idFields = ["id", "key", "code"]
     static let titleFields = ["title", "name", "description", "summary"]
 
-    static func candidates(fileName: String, text: String) -> [Candidate] {
+    static func candidates(fileName: String, text: String, everything: Bool = readsEverything) -> [Candidate] {
         guard fileName.lowercased().hasSuffix(".json"),
               let data = text.data(using: .utf8),
               let root = try? JSONSerialization.jsonObject(with: data) else { return [] }
@@ -90,7 +100,7 @@ public enum StructuredFiles {
                             found.append(Candidate(key: id.key, display: id.display, title: Snippet.truncate(title), summary: Snippet.truncate(summary),
                                                    line: lineOf(field, raw)))
                         }
-                    } else if raw.rangeOfCharacter(from: .whitespaces) == nil, let id = IDGrammar.parse(raw), id.scope != .section {
+                    } else if everything, raw.rangeOfCharacter(from: .whitespaces) == nil, let id = IDGrammar.parse(raw), id.scope != .section {
                         found.append(Candidate(key: id.key, display: id.display, title: Snippet.truncate(title), summary: Snippet.truncate(summary),
                                                line: lineOf(field, raw)))
                     }
