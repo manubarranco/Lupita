@@ -24,12 +24,7 @@ final class OnboardingWindow {
         self.model = OnboardingModel(store: store)
         self.addFolder = addFolder
         store.onChange = { [weak self] in self?.model.indexChanged() }
-        // The onboarding is the welcome step and the folders: with folders already chosen there is nothing left to ask.
-        welcome.onFinish = { [weak self] in
-            guard let self else { return }
-            model.showWelcome = false
-            if !model.roots.isEmpty { window?.close() }
-        }
+        welcome.onFinish = { [weak self] in self?.model.showWelcome = false }
         model.onDone = { [weak self] in self?.window?.close() }
     }
 
@@ -165,10 +160,17 @@ final class OnboardingModel: ObservableObject {
         roots = store.roots
         editors = Editor.installed()
         copied = nil
-        if roots.isEmpty {
+        // The onboarding always ends on the folders: the ones already chosen come first and stay ticked.
+        if roots.isEmpty || inOnboarding {
+            let current = roots
             Task.detached(priority: .userInitiated) {
                 let found = RepoDiscovery.candidateRoots()
-                await MainActor.run { self.candidates = found; self.selected = Set(found.map(\.path)) }
+                let known = current.filter { root in !found.contains { $0.path == root } }
+                    .map { (path: $0, repos: RepoDiscovery.repos(under: [$0]).count) }
+                await MainActor.run {
+                    self.candidates = known + found
+                    self.selected = current.isEmpty ? Set(found.map(\.path)) : Set(current)
+                }
             }
         }
         reload()
@@ -270,7 +272,7 @@ private struct OnboardingView: View {
 
     var body: some View {
         Group {
-            if model.showWelcome { WelcomeStep(scene: welcome) } else if model.inOnboarding && !model.roots.isEmpty { Color.clear } else if model.roots.isEmpty { FoldersStep(model: model) } else { ReposStep(model: model, addFolder: addFolder) }
+            if model.showWelcome { WelcomeStep(scene: welcome) } else if model.inOnboarding || model.roots.isEmpty { FoldersStep(model: model) } else { ReposStep(model: model, addFolder: addFolder) }
         }
         .padding(20)
         .frame(minWidth: 480, minHeight: 360)

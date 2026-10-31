@@ -51,6 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let openOnboarding = note.userInfo?["onboarding"] != nil
             let openAbout = note.userInfo?["about"] != nil
             let openTutorial = note.userInfo?["tutorial"] != nil
+            let pastWelcome = note.userInfo?["tutorial"] as? String == "folders"
             let menuMode = note.userInfo?["menu"] as? String
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
@@ -63,6 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
                 } else if openTutorial {
                     self?.onboarding?.showTutorial()
+                    if pastWelcome { self?.onboarding?.welcome.finish() }
                 } else if openOnboarding {
                     self?.onboarding?.show()
                 } else if let hold {

@@ -59,6 +59,8 @@ case "poke":
     if args.contains("--onboarding") { info["onboarding"] = "1" }
     // With --tutorial, the welcome step (D56).
     if args.contains("--tutorial") { info["tutorial"] = "1" }
+    // With --tutorial-folders, the same but past the welcome, on the folders step.
+    if args.contains("--tutorial-folders") { info["tutorial"] = "folders" }
     // With --about, the About panel.
     if args.contains("--about") { info["about"] = "1" }
     if args.contains("--menu") { info["menu"] = args.contains("--confirm") ? "confirm" : args.contains("--expand") ? "expand" : "1" }
