@@ -25,6 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var scrollMonitors: [Any] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        TriggerLog.append(app: "launch", method: "start", ms: 0, result: nil)
         IndexStore.migrateLegacyRoots()
         LoginItem.turnOnOnce()
         VocabularyPackages.apply()
@@ -317,7 +318,7 @@ enum TriggerLog {
         let url = dir.appendingPathComponent("lookups.log")
         let line = [ISO8601DateFormatter().string(from: Date()), app ?? "?", method, "\(ms)ms",
                     result?.query ?? "-", result?.kind.rawValue ?? "nil", result?.key ?? "-",
-                    result?.definitions.first?.repo ?? "-"].joined(separator: "\t") + "\n"
+                    result?.definitions.first?.repo ?? "-", Debug.batch].joined(separator: "\t") + "\n"
         if let handle = try? FileHandle(forWritingTo: url) {
             handle.seekToEndOfFile()
             handle.write(Data(line.utf8))
