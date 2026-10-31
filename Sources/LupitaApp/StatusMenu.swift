@@ -102,11 +102,9 @@ final class StatusMenu: NSObject, NSMenuDelegate {
 
     // MARK: ⌥ while the menu is open (D45)
 
-    /// ⌥ shows the repos' hide buttons and «Send ID report…», also when pressed with the menu already
-    /// open. A menu in tracking gets no key events for that: a timer in the tracking run loop mode
+    /// ⌥ shows «Send ID report…», also when pressed with the menu already open. A menu in tracking gets no key events for that: a timer in the tracking run loop mode
     /// watches the modifier.
     private var optionDown = false
-    private var hideRows: [MenuRow] = []
     private var optionTimer: Timer?
     private var reindexItem: NSMenuItem?
     private var loginRow: MenuRow?
@@ -130,7 +128,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private func optionChanged(_ down: Bool) {
         guard down != optionDown else { return }
         optionDown = down
-        hideRows.forEach { $0.showsHide = down }
         showReportItem(down)
     }
 
@@ -148,7 +145,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         menu.autoenablesItems = false
         folderRows = []
         stateRows = []
-        hideRows = []
         optionDown = NSEvent.modifierFlags.contains(.option)
         refreshNote()
         menu.addItem(viewItem(header))
@@ -248,7 +244,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         folderRows.forEach(menu.removeItem)
         folderRows = []
         stateRows = []
-        hideRows = []
         var index = menu.index(of: noteItem)
         for item in store.roots.flatMap(folderItems) {
             index += 1
@@ -346,12 +341,10 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         switch node {
         case .repo(let repo, let title):
             let row = MenuRow(title: title, on: true, indent: indent, slot: .hide, tooltip: repo.path)
-            row.showsHide = optionDown
             row.onRemove = { [weak self] in
                 self?.store.setHidden(repo.path, hidden: true)
                 DispatchQueue.main.async { self?.renderFolders() }
             }
-            hideRows.append(row)
             let state: () -> SwitchState = { [weak self] in
                 self?.store.disabledRepos.contains(repo.path) == true ? .off : .on
             }
