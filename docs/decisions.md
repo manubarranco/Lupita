@@ -282,3 +282,6 @@ The onboarding is now two steps, the welcome (D56) and «Add your repo folders»
 
 ## D58 — The Spanish name of «Appearance» is «Apariencia», not «Aspecto»
 The menu item and the window are «Apariencia» in Spanish, as in macOS's own System Settings. Only the visible strings change; the code keeps `Aspecto*` names. Older decisions (D54, D55) keep saying «Aspecto» as they were written. Why: Manu asked, 2026-10-31; «Aspecto» reads as a look, «Apariencia» is the word the system already teaches.
+
+## D59 — The ⊖ to hide a repo is always visible
+Each repo row in the menu shows its ⊖ all the time, not only while ⌥ is held. It still hides the repo in one click, and the repo waits under «Hidden (N)» with a ⊕ to bring it back, as in D45. ⌥ keeps one job: it shows the hidden «Send ID report…» (D40). Why: a button that only exists with a modifier cannot be found; Manu, 2026-10-31. Replaces the ⌥ rule of D45 for the ⊖.

@@ -70,12 +70,10 @@ final class MenuRow: NSView {
     var onToggle: ((Bool) -> Void)?
     var onChevron: (() -> Void)?
     var onRemove: (() -> Void)?
-    /// What the button in the remove slot does: ⊖ remove (a folder), ⊖ hide (a repo, only while ⌥ is
-    /// held) or ⊕ bring back (a hidden repo).
+    /// What the button in the remove slot does: ⊖ remove (a folder), ⊖ hide (a repo) or ⊕ bring back
+    /// (a hidden repo).
     enum Slot { case none, remove, hide, restore }
     private let slot: Slot
-    /// A hide button shows only while ⌥ is held (D45).
-    var showsHide = false { didSet { if slot == .hide { remove?.isHidden = !showsHide } } }
     var onFind: (() -> Void)?
 
     init(title: String, on: Bool, indent: CGFloat = 0, chevron: Bool = false, removable: Bool = false, missing: Bool = false,
@@ -107,7 +105,6 @@ final class MenuRow: NSView {
             button.target = self
             button.action = #selector(removeClicked)
             button.toolTip = name
-            button.isHidden = self.slot == .hide
             self.remove = button
             addSubview(button)
         }
