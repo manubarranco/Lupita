@@ -129,9 +129,13 @@ public struct Resolver: Sendable {
         let idShaped = IDGrammar.parse(query) != nil
         if !idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
 
+        // A word made only of digits (`002`) is a number, not an ID misread by OCR: no "did you mean D02". It is
+        // an ID only inside a list (`FR-001, 002`), which was tried above.
+        let digitsOnly = !query.isEmpty && query.allSatisfy { $0.isASCII && $0.isNumber }
+
         // Fewest substitutions first; stop at the first distance that yields any match.
         // An ID is short: trying every look-alike swap of a long word (`FontBuilder`) found nothing and cost ~0.5 s.
-        for distance in 1...Self.maxSubstitutions where query.count <= Self.maxCorrectableLength {
+        for distance in 1...Self.maxSubstitutions where query.count <= Self.maxCorrectableLength && !digitsOnly {
             let keys = Set(variants(of: query, substitutions: distance).compactMap { variant -> String? in
                 guard let key = IDGrammar.parse(variant)?.key, index.definitions[key] != nil else { return nil }
                 return key
@@ -148,7 +152,7 @@ public struct Resolver: Sendable {
 
         // Several look-alikes at once in the number part (`LOoz` → `L002`): read everything after
         // the prefix as digits. Only when exactly one real ID comes out.
-        let tailKeys = Set(numericTailReadings(of: query).compactMap { variant -> String? in
+        let tailKeys = Set((digitsOnly ? [] : numericTailReadings(of: query)).compactMap { variant -> String? in
             guard let key = IDGrammar.parse(variant)?.key, index.definitions[key] != nil else { return nil }
             return key
         })

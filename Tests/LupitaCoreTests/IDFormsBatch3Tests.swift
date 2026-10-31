@@ -124,6 +124,15 @@ import Testing
         #expect(r.resolve("003", preferredRepo: "r", context: "", fromPath: "docs/a.md", block: "total 003 items").definitions.isEmpty)
     }
 
+    @Test func aBareNumberIsNeverOfferedAsAMisreadId() {
+        let r = Self.resolver(["a.md": "## D02 — Second\n\n## DD2 — Other\n\n## D2 — Third"])
+        for number in ["002", "02", "2"] {
+            #expect(r.resolve(number, preferredRepo: "r", context: "see ", fromPath: "b.md").definitions.isEmpty, "\(number)")
+        }
+        // A real misreading still works: a letter read as a zero.
+        #expect(!r.resolve("D0Z", preferredRepo: "r").definitions.isEmpty)
+    }
+
     @Test func aBareNumberOutsideAListIsNotAnId() {
         let r = Self.resolver(["docs/pu.md": "- **PU-03**: Third item"])
         #expect(r.resolve("03", preferredRepo: "r", context: "chapter ", fromPath: "docs/a.md").definitions.isEmpty)
