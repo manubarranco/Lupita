@@ -23,6 +23,22 @@ import Testing
         }
     }
 
+    /// `FR-` at the end of a line and `001, 002 y 003` on the next, with a sidebar word between on the same screen row:
+    /// the first half, the joined ID and the numbers that follow are all marked.
+    @Test func aListBrokenAcrossLinesIsMarkedWithItsNumbers() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "atlas", path: "/x/atlas")]
+        index.add(text: "- **FR-001**: One\n- **FR-002**: Two\n- **FR-003**: Three\n", fileName: "fr.md", repo: "atlas", relativePath: "docs/fr.md", absolutePath: "/x/atlas/docs/fr.md")
+        index.rank()
+        let r = Resolver(index: index)
+        // Row 1: a sidebar word far left, then the sentence ending in `FR-`. Row 2: another sidebar word, then the list.
+        let row1 = [OCRWord(text: "Hoy", box: CGRect(x: 0, y: 0, width: 30, height: 14))] + Self.row("una lista FR-", y: 0).map { OCRWord(text: $0.text, box: $0.box.offsetBy(dx: 300, dy: 0)) }
+        let row2 = [OCRWord(text: "Resultados", box: CGRect(x: 0, y: 20, width: 100, height: 14))] + Self.row("001, 002 y 003.", y: 20).map { OCRWord(text: $0.text, box: $0.box.offsetBy(dx: 300 + 40, dy: 0)) }
+        let marks = HighlightPicker.marks(words: row1 + row2, resolver: r)
+        // `FR-`, `001,`, `002` and `003.`
+        #expect(marks.count == 4)
+    }
+
     @Test func marksIDsTermsAndCommands() {
         let marks = HighlightPicker.marks(words: Self.row("per D023 we use fast-forward and git stash"), resolver: Self.resolver())
         #expect(marks.count == 3)
