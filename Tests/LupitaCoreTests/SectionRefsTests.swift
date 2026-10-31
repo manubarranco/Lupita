@@ -136,6 +136,17 @@ import Testing
         #expect(res.isShown && res.definitions.first?.title == "Autonomy" && res.definitions.first?.path == "spec/spec.md")
     }
 
+    @Test func thePickerReadsTheSectionUnderTheCursor() {
+        let r = Self.resolver(["spec/spec.md": Self.spec, "n/n.md": "ok"])
+        let line = "as in spec §4.4 above"
+        let at = (line as NSString).range(of: "§4.4").location + 1
+        let res = CandidatePicker.pick(line: line, cursorOffset: at, resolver: r, preferredRepo: "r", fromPath: "n/n.md")
+        #expect(res?.definitions.first?.title == "Autonomy" && res?.definitions.first?.path == "spec/spec.md")
+        // With no file known, every document of the repo that numbers it is listed.
+        let any = CandidatePicker.pick(line: "see §4.4", cursorOffset: 5, resolver: r, preferredRepo: "r")
+        #expect(any?.definitions.first?.title == "Autonomy")
+    }
+
     @Test func requirementFormsKeepWorking() {
         let r = Self.resolver(["docs/spec.md": "### Requirement 3: Login\n\n- **FR-001**: Do it\n"])
         let a = r.resolve("FR-001", preferredRepo: "r", fromPath: "docs/spec.md")
