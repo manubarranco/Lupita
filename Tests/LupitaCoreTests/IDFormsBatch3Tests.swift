@@ -286,6 +286,12 @@ import Testing
         #expect(none.definitions.first?.rule == .commit && !none.fromOtherRepo)
     }
 
+    @Test func theHighlightUnderlinesAKeyThatSomeCommitCites() {
+        guard Git.executable != nil else { return }
+        #expect(HighlightPicker.kind(of: "PLAT-443341,", resolver: resolver(), block: "") == .id)
+        #expect(HighlightPicker.kind(of: "PLAT-99999", resolver: resolver(), block: "") == nil)
+    }
+
     @Test func aBranchNamedAfterTheKeyIsShownWhenNoCommitCitesIt() {
         guard Git.executable != nil else { return }
         let r = resolver().resolve("PLAT-99887", preferredRepo: "atlas")

@@ -305,6 +305,9 @@ public enum HighlightPicker {
         // `002` in `FR-001, 002`, even when the list wraps to the next line: an ID defined somewhere.
         if IDGrammar.parse(word) == nil, let id = Resolver.inheritedID(word, context: before, block: block),
            resolver.index.definitions[id.key] != nil { return .id }
+        // A tracker key no file defines is underlined when some repo has a commit that cites it.
+        if let id = IDGrammar.parse(word), IDGrammar.isTrackerKey(id.display), resolver.index.definitions[id.key] == nil,
+           resolver.hasTrackerCommit(id) { return .id }
         if let id = IDGrammar.parse(word), IDGrammar.adrAliases(of: id.key).contains(where: { resolver.index.definitions[$0] != nil }) { return .id }
         if resolver.rangeList(word) != nil { return .id }
         // A repo name points at a place, like an ID. A plain lowercase name (`app`, `nib`) needs its exact case, so

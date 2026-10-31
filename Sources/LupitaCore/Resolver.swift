@@ -180,6 +180,15 @@ public struct Resolver: Sendable {
         return RepoRefs.commitCiting(id.display, repo: repo)
     }
 
+    /// Whether some repo has a commit (or branch) that names the tracker key: what the highlight needs to underline `PLAT-443341`.
+    /// A git search per word on every pass would be slow, so answers are kept for half a minute.
+    public func hasTrackerCommit(_ id: RefID, preferredRepo: String? = nil) -> Bool {
+        guard IDGrammar.isTrackerKey(id.display) else { return false }
+        return TrackerCache.answer(for: id.display) {
+            trackerCommit(for: id, preferredRepo: preferredRepo) != nil || trackerCommitElsewhere(for: id, except: preferredRepo) != nil
+        }
+    }
+
     /// The commit of any other repo that names the key; the search of all of them shares one second.
     func trackerCommitElsewhere(for id: RefID, except preferredRepo: String?) -> Definition? {
         let deadline = Date().addingTimeInterval(RepoRefs.keySearchTimeout)
@@ -424,5 +433,22 @@ public struct Resolver: Sendable {
             let after = r.upperBound == lower.endIndex ? " " : lower[r.upperBound]
             return !(before.isLetter || before.isNumber) && !(after.isLetter || after.isNumber)
         }
+    }
+}
+
+
+/// Answers of the tracker-key searches, so the highlight does not run git on every pass.
+enum TrackerCache {
+    nonisolated(unsafe) private static var answers: [String: (found: Bool, at: Date)] = [:]
+    private static let lock = NSLock()
+    static let lifetime: TimeInterval = 30
+
+    static func answer(for key: String, compute: () -> Bool) -> Bool {
+        lock.lock()
+        if let hit = answers[key], Date().timeIntervalSince(hit.at) < lifetime { lock.unlock(); return hit.found }
+        lock.unlock()
+        let found = compute()
+        lock.lock(); answers[key] = (found, Date()); lock.unlock()
+        return found
     }
 }
