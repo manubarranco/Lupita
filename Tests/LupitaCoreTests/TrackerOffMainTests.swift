@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import LupitaCore
 
-// D046: the git search for a tracker key runs off the main thread; the card shows the key at once and the commit is added.
+// The git search for a tracker key runs off the main thread; the card shows the key at once and the commit is added.
 
 @Suite(.serialized) struct TrackerOffMainTests {
     let root: URL
