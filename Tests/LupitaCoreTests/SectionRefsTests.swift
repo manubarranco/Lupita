@@ -73,6 +73,14 @@ import Testing
         #expect(Self.lookup(r, "arch.md §4.1 / §4.4", from: "docs/n.md").paths == ["docs/arch.md"])
     }
 
+    @Test func aNamedDocumentWithoutThatSectionShowsNothing() {
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/inbound-from-122.md": "## 3 Three\n", "docs/n.md": "x"])
+        #expect(Self.lookup(r, "the inbound §3", from: "docs/n.md").paths.isEmpty)
+        #expect(Self.lookup(r, "wordpress-thesis inbound §3", from: "docs/n.md").paths.isEmpty)
+        #expect(Self.lookup(r, "the plan §4.4", from: "docs/n.md").paths.isEmpty)
+        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md").paths == ["docs/spec.md"])
+    }
+
     @Test func aNameCanBeTheLastWordOfTheFileName() {
         let r = Self.resolver(["docs/design-outline.md": "## 7.2 Contract\n", "docs/n.md": "x"])
         #expect(Self.lookup(r, "outline § 7.2", from: "docs/n.md").route == .named)

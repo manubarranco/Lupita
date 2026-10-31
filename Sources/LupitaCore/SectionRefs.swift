@@ -91,7 +91,7 @@ public enum SectionRefs {
         if let m = linkBefore.firstMatch(in: text, range: whole), let name = normalizeName(b.substring(with: m.range(at: 1))) { return (name, false) }
         if let m = wordBefore.firstMatch(in: text, range: whole) {
             let word = b.substring(with: m.range(at: 1))
-            if let name = normalizeName(word) { return (name, word.first!.isUppercase || word.contains(where: \.isNumber)) }
+            if let name = normalizeName(word) { return (name, true) }
         }
         let t = tail as NSString
         if let m = after.firstMatch(in: tail, range: NSRange(location: 0, length: t.length)),
@@ -135,7 +135,7 @@ public enum SectionRefs {
         let base = (file as NSString).deletingPathExtension
         if squash(base) == want || parts.dropLast().contains(where: { squash($0) == want }) { return true }
         let words = base.lowercased().split { $0 == "-" || $0 == "_" || $0 == " " }.map(String.init)
-        return want.count >= 4 && words.count > 1 && (squash(words.last!) == want || squash(words.first!) == want)
+        return want.count >= 4 && words.count > 1 && squash(words.last!) == want
     }
 
     /// Numbered headings of a markdown file: `(0-based line, section number, title)`. Fenced code is skipped.
@@ -168,10 +168,10 @@ extension Resolver {
                 if let name = id.document {
                     let named = own.filter { SectionRefs.isDocument(name, path: $0.path) }
                     if !named.isEmpty { return (k, named, .named) }
-                    // A name with a folder or `.md` is a precise reference: another file is not what it points at.
-                    if name.contains("/") || name.hasSuffix(".md") { return (id.key, [], nil) }
+                    // A document is named and has no such section: it is not the reader's file or its neighbours that are meant.
+                    return (id.key, [], nil)
                 }
-                // `RFC 7009 §2.1`, `agent2 §1`: a §, but of something that is not a document here.
+                // `RFC 7009 §2.1`: a § of something that is not a document here.
                 if id.citesOther { return (id.key, [], nil) }
                 guard let fromPath else { return (k, own, .repoWide) }
                 let mine = fromPath.split(separator: "/").dropLast().map(String.init)
