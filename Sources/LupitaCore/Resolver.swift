@@ -207,7 +207,7 @@ public struct Resolver: Sendable {
     public func pendingResolution(for resolution: Resolution, preferredRepo: String?) -> Resolution {
         let repo = index.repos.first { $0.name.caseInsensitiveCompare(preferredRepo ?? "") == .orderedSame } ?? index.repos.first
         let d = Definition(id: resolution.query, key: resolution.key ?? resolution.query, repo: repo?.name ?? "", path: "", line: 0,
-                           rule: .commit, title: S.lookingForCommit, summary: "", absolutePath: repo?.path ?? "")
+                           rule: .commit, title: S.lookingForCommit, summary: "\u{A0}", absolutePath  // the blank line keeps the card the size it will have: repo?.path ?? "")
         var r = Resolution(query: resolution.query, kind: .exact, key: resolution.key, definitions: [d], mentions: nil, alternatives: [])
         r.isPending = true
         return r

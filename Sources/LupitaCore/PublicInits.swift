@@ -36,3 +36,7 @@ extension RangeList {
         RangeList(entries: entries.map { Entry(id: $0.id, definition: $0.definition) }, noun: noun, sharedRepo: sharedRepo, sharedPath: sharedPath)
     }
 }
+
+extension Repo {
+    public static func made(name: String, path: String) -> Repo { Repo(name: name, path: path) }
+}

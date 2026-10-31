@@ -34,6 +34,12 @@ if let i = CommandLine.arguments.firstIndex(of: "--render-vocabulary") {
     exit(code)
 }
 
+// Development aid: the card of a tracker key in its three states, next to two that already worked.
+if let i = CommandLine.arguments.firstIndex(of: "--render-tracker-states") {
+    let code = MainActor.assumeIsolated { TrackerSheet.run(CommandLine.arguments.dropFirst(i + 1).first) }
+    exit(code)
+}
+
 // Development aid: the underline of IDs (solid) and terms (dashed) drawn to PNG.
 if let i = CommandLine.arguments.firstIndex(of: "--render-underline") {
     let code = MainActor.assumeIsolated { TooltipGallery.runUnderline(CommandLine.arguments.dropFirst(i + 1).first) }
