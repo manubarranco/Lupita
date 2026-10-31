@@ -30,23 +30,45 @@ struct ActiveContext {
             context.repo = resolver.repoNamed(in: title)
         }
         // 3. A window that says no file (a chat app): the repo its texts name most (`Entorno LiOS`, the chat's title).
-        if context.repo == nil {
-            let texts = texts(of: window)
-            context.repo = resolver.repoMostNamed(in: texts)
-            if let repo = context.repo { context.path = openFile(in: texts, repo: repo, resolver: resolver) }
+        // 3. A window that says no file (a chat app with a file pane): the pane under the pointer, going up from it, until
+        // one of its texts is a file name of a repo (the pane's title, `lios-intention.md`).
+        if context.repo == nil, let file = paneFile(at: point, resolver: resolver) {
+            context.repo = file.repo
+            context.path = file.path
+            return context
         }
+        // 4. Otherwise the repo the window's texts name most (`Entorno LiOS`, the chat's title).
+        if context.repo == nil { context.repo = resolver.repoMostNamed(in: texts(of: window)) }
         return context
     }
 
-    /// A text that is just a file name of `repo` (a tab or a pane title: `lios-intention.md`), found once in it: the file
-    /// the window shows. A name inside a sentence does not count, nor one the repo has twice.
-    private static func openFile(in texts: [String], repo: String, resolver: Resolver) -> String? {
+    /// Up to `paneLevels` parents of the element under the pointer; at each, its texts (bounded) are searched for a file name.
+    static let paneLevels = 8
+
+    private static func paneFile(at point: CGPoint, resolver: Resolver) -> (repo: String, path: String)? {
+        var element: AXUIElement?
+        guard AXIsProcessTrusted(),
+              AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(point.x), Float(point.y), &element) == .success,
+              var current = element else { return nil }
+        let started = Date()
+        for _ in 0..<paneLevels {
+            guard let parent: AXUIElement = TextUnderCursor.attribute(current, kAXParentAttribute) else { return nil }
+            current = parent
+            if let found = openFile(in: texts(of: current), resolver: resolver) { return found }
+            if Date().timeIntervalSince(started) > budget * 2 { return nil }
+        }
+        return nil
+    }
+
+    /// A text that is just a file name (a tab or a pane title: `lios-intention.md`) that one repo has once: that file.
+    /// A name inside a sentence does not count, nor one found in two places.
+    private static func openFile(in texts: [String], resolver: Resolver) -> (repo: String, path: String)? {
         for text in texts {
             let name = text.trimmingCharacters(in: .whitespacesAndNewlines)
             guard name.lowercased().hasSuffix(".md"), !name.contains(" "), name.count < 120 else { continue }
-            let file = (name as NSString).lastPathComponent.lowercased()
-            let paths = (resolver.index.markdownByName[file] ?? []).filter { $0.hasPrefix(repo + "/") }
-            if paths.count == 1 { return String(paths[0].dropFirst(repo.count + 1)) }
+            let paths = resolver.index.markdownByName[(name as NSString).lastPathComponent.lowercased()] ?? []
+            guard paths.count == 1, let slash = paths[0].firstIndex(of: "/") else { continue }
+            return (String(paths[0][..<slash]), String(paths[0][paths[0].index(after: slash)...]))
         }
         return nil
     }

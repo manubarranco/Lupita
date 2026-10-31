@@ -6,7 +6,7 @@ import Foundation
 enum Debug {
     static var isOn: Bool { UserDefaults.standard.bool(forKey: "debugLog") }
     /// The batch of ID forms this build carries; every line of the lookup log says it, so a log tells which version was running (L044).
-    static let batch = "batch=5d window-file"
+    static let batch = "batch=5e pane-file"
 }
 
 /// Debug log of the git vocabulary's decisions (D42), only with `Debug.isOn`: one line per lookup in
