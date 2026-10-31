@@ -57,10 +57,13 @@ public struct RefIndex: Codable, Sendable {
     /// While indexing: repo → task keys a `.md` of it cites as `Task 5` or `Subtask 5.2`. Not saved. A bare `Subtask 1` is
     /// a phase of someone's own work (`ReDoS Subtask 1`), not a line of `tasks.json`.
     var firmTaskCites: [String: Set<String>] = [:]
+    /// `repo/path` of a file → the markdown documents it names (`data-model.md`, `docs/spec.md`), as lowercase file stems.
+    /// A `§4` with no document in its sentence may take a neighbour only if the reader names that neighbour somewhere.
+    public var documentRefs: [String: [String]] = [:]
 
     public init() {}
 
-    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo, markdownByName }
+    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo, markdownByName, documentRefs }
 
     /// Indexes saved before terms existed still load.
     public init(from decoder: Decoder) throws {
@@ -71,6 +74,7 @@ public struct RefIndex: Codable, Sendable {
         terms = try c.decodeIfPresent([String: [Definition]].self, forKey: .terms) ?? [:]
         filesPerRepo = try c.decode([String: Int].self, forKey: .filesPerRepo)
         markdownByName = try c.decodeIfPresent([String: [String]].self, forKey: .markdownByName) ?? [:]
+        documentRefs = try c.decodeIfPresent([String: [String]].self, forKey: .documentRefs) ?? [:]
     }
 
     public static func build(roots: [String], excluding: Set<String> = []) -> RefIndex {
@@ -106,6 +110,7 @@ public struct RefIndex: Codable, Sendable {
         repos.removeAll { $0.name == name }
         filesPerRepo[name] = nil
         firmTaskCites[name] = nil
+        for key in Array(documentRefs.keys) where key.hasPrefix(name + "/") { documentRefs[key] = nil }
         for key in Array(markdownByName.keys) {
             let kept = markdownByName[key]!.filter { !$0.hasPrefix(name + "/") }
             markdownByName[key] = kept.isEmpty ? nil : kept
@@ -161,6 +166,8 @@ public struct RefIndex: Codable, Sendable {
     /// Indexes one file's content. Exposed for tests.
     public mutating func add(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String) {
         markdownByName[fileName.lowercased(), default: []].append(repo + "/" + relativePath)
+        let named = SectionRefs.documentsNamed(in: text)
+        if !named.isEmpty { documentRefs[repo + "/" + relativePath] = named }
         let lines = text.components(separatedBy: .newlines)
         let hits = DefinitionRules.definitions(fileName: fileName, lines: lines,
                                                folder: relativePath.split(separator: "/").dropLast().last.map(String.init) ?? "")

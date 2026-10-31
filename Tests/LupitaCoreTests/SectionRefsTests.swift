@@ -57,7 +57,7 @@ import Testing
     }
 
     @Test func aSectionOfSomethingElseIsNotTakenFromTheNeighbours() {
-        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "x"])
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "see spec.md"])
         for cite in ["per RFC 7009 §4.4", "agent2 §4.4", "see Open Questions §4.4", "spec 2 §4.4"] {
             #expect(Self.lookup(r, cite, from: "docs/n.md").paths.isEmpty, "\(cite)")
         }
@@ -74,7 +74,7 @@ import Testing
     }
 
     @Test func aNamedDocumentWithoutThatSectionShowsNothing() {
-        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/inbound-from-122.md": "## 3 Three\n", "docs/n.md": "x"])
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/inbound-from-122.md": "## 3 Three\n", "docs/n.md": "see spec.md"])
         #expect(Self.lookup(r, "the inbound §3", from: "docs/n.md").paths.isEmpty)
         #expect(Self.lookup(r, "wordpress-thesis inbound §3", from: "docs/n.md").paths.isEmpty)
         #expect(Self.lookup(r, "the plan §4.4", from: "docs/n.md").paths.isEmpty)
@@ -87,7 +87,7 @@ import Testing
     }
 
     @Test func aWordThatNamesNoDocumentIsIgnored() {
-        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "in §4.4"])
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "in §4.4, see spec.md"])
         let got = Self.lookup(r, "in §4.4", from: "docs/n.md")
         #expect(got.paths == ["docs/spec.md"] && got.route == .nearby)
         #expect(Self.lookup(r, "Section §4.4", from: "docs/n.md").route == .nearby)
@@ -102,13 +102,18 @@ import Testing
 
     // Path (c): the nearest folder going up.
     @Test func theNearestFolderGoingUpWins() {
-        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/deep/x.md": "see §4.4", "docs/deep/sub/y.md": "## 4.4 Near\n", "other/z.md": "## 4.4 Far\n"])
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/deep/x.md": "see §4.4 in spec.md", "docs/deep/sub/y.md": "## 4.4 Near\n", "docs/deep/sub/q.md": "see y.md", "other/z.md": "## 4.4 Far\n"])
         #expect(Self.lookup(r, "§4.4", from: "docs/deep/x.md").paths == ["docs/spec.md"])
         #expect(Self.lookup(r, "§4.4", from: "docs/deep/sub/q.md").paths == ["docs/deep/sub/y.md"])
     }
 
+    @Test func aNeighbourTheReaderNeverNamesIsNotTaken() {
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "see §4.4 and other.md"])
+        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md").paths.isEmpty)
+    }
+
     @Test func severalDocumentsAtTheNearestLevelAreAmbiguous() {
-        let r = Self.resolver(["docs/a.md": "## 4.4 A\n", "docs/b.md": "## 4.4 B\n", "docs/c.md": "§4.4"])
+        let r = Self.resolver(["docs/a.md": "## 4.4 A\n", "docs/b.md": "## 4.4 B\n", "docs/c.md": "§4.4 (a.md, b.md)"])
         let got = Self.lookup(r, "§4.4", from: "docs/c.md")
         #expect(got.paths == ["docs/a.md", "docs/b.md"] && got.route == .nearby)
     }

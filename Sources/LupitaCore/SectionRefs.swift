@@ -139,6 +139,19 @@ public enum SectionRefs {
         return want.count >= 4 && words.count > 1 && squash(words.last!) == want
     }
 
+    static let markdownName = try! NSRegularExpression(pattern: #"([A-Za-z0-9_][A-Za-z0-9_.\-]*)\.md(?![A-Za-z0-9_])"#)
+
+    /// The distinct file stems (lowercase) of the `.md` documents `text` names, in no order.
+    static func documentsNamed(in text: String) -> [String] {
+        guard text.utf8.count > 4, text.contains(".md") else { return [] }
+        let ns = text as NSString
+        var seen = Set<String>()
+        for m in markdownName.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+            seen.insert(ns.substring(with: m.range(at: 1)).lowercased())
+        }
+        return seen.sorted()
+    }
+
     /// The first line of text under a heading, cut short: a section has thousands of them, so no cleaning of markdown here.
     static func firstLine(after index: Int, in lines: [String]) -> String {
         var i = index + 1
@@ -196,8 +209,14 @@ extension Resolver {
                 let mine = fromPath.split(separator: "/").dropLast().map(String.init)
                 let here = own.filter { $0.path == fromPath }
                 if !here.isEmpty { return (k, here, .ownFile) }
+                // A neighbour counts only if the reader names it somewhere (`data-model.md`, a link): no other evidence ties
+                // a bare `§4` to a document that is not its own (measured: without this, 9 of 20 were the wrong document).
+                let named = Set((preferredRepo.flatMap { index.documentRefs[$0 + "/" + fromPath] } ?? []))
                 for depth in stride(from: mine.count, through: 0, by: -1) {
-                    let level = own.filter { $0.path.split(separator: "/").dropLast().map(String.init) == Array(mine.prefix(depth)) }
+                    let level = own.filter {
+                        $0.path.split(separator: "/").dropLast().map(String.init) == Array(mine.prefix(depth))
+                            && named.contains((($0.path as NSString).lastPathComponent as NSString).deletingPathExtension.lowercased())
+                    }
                     if !level.isEmpty { return (k, level, .nearby) }
                 }
             }
