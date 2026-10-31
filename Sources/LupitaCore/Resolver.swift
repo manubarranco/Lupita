@@ -107,6 +107,12 @@ public struct Resolver: Sendable {
             r.range = list
             return r
         }
+        if raw.contains("§"), let id = SectionRefs.id(for: raw, context: context, block: block) {
+            let (key, defs, _) = sectionLookup(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+            if !defs.isEmpty {
+                return result(id.display, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: true)
+            }
+        }
         if CodeRefs.looksLikeAddress(raw) || CodeRefs.looksLikeCommand(raw),
            let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after, codeStyled: codeStyled) {
             return code
@@ -289,6 +295,10 @@ public struct Resolver: Sendable {
             }
             return (id.key, [])
         }
+        if id.scope == .section {
+            let found = sectionLookup(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+            return (found.key, found.defs)
+        }
         var key: String? = id.key
         while let k = key {
             let own = (index.definitions[k] ?? []).filter { d in
@@ -324,7 +334,7 @@ public struct Resolver: Sendable {
     static func reaches(_ definitionPath: String, from mentionPath: String, scope: IDScope) -> Bool {
         let theirs = definitionPath.split(separator: "/").dropLast(), mine = mentionPath.split(separator: "/").dropLast()
         switch scope {
-        case .none: return true
+        case .none, .section: return true
         case .folder:
             return theirs.count <= mine.count && zip(mine, theirs).allSatisfy { $0 == $1 }
         case .topFolder:

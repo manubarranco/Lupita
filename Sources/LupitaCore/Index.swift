@@ -148,6 +148,12 @@ public struct RefIndex: Codable, Sendable {
                 rule: hit.rule, title: title, summary: summary, absolutePath: absolutePath))
             if hit.line >= 0 { definedOnLine[hit.line] = hit.id.key }
         }
+        for h in SectionRefs.headings(lines: lines) {
+            let key = "§" + h.number
+            definitions[key, default: []].append(Definition(
+                id: key, key: key, repo: repo, path: relativePath, line: h.line + 1, rule: .heading,
+                title: h.title, summary: "", absolutePath: absolutePath))
+        }
         for hit in Glossary.terms(fileName: fileName, lines: lines) {
             for name in hit.names {
                 let key = Glossary.normalize(name)
