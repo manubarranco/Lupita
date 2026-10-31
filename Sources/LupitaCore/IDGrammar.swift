@@ -241,6 +241,15 @@ public enum IDGrammar {
         return out
     }
 
+    /// `003šŚš`: OCR glues glyphs of the interface (an icon) to the end of a number. The digits, when the word is 1 to 4
+    /// ASCII digits followed only by non-ASCII characters; nil otherwise (`003abc` is not a number).
+    public static func digitsBeforeJunk(_ word: String) -> String? {
+        let digits = word.prefix { $0.isASCII && $0.isNumber }
+        let rest = word.dropFirst(digits.count)
+        guard (1...4).contains(digits.count), !rest.isEmpty, rest.allSatisfy({ !$0.isASCII }) else { return nil }
+        return String(digits)
+    }
+
     static let adrKey = try! NSRegularExpression(pattern: #"^ADR(\d{1,4})$"#)
 
     /// Every way a repo writes the same ADR number (`ADR7`, `ADR07`, `ADR007`, `ADR0007`), the key itself first.

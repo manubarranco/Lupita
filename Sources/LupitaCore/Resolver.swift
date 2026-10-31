@@ -201,7 +201,8 @@ public struct Resolver: Sendable {
 
     /// A bare number that ends a list with an omitted prefix (`PU-02, 03 y 26` with the pointer on `03`): the ID it
     /// inherits, read from the text before it, or nil.
-    static func inheritedID(_ word: String, context: String?, block: String? = nil) -> RefID? {
+    static func inheritedID(_ rawWord: String, context: String?, block: String? = nil) -> RefID? {
+        let word = IDGrammar.digitsBeforeJunk(rawWord) ?? rawWord
         guard word.count >= 1, word.count <= 4, word.allSatisfy(\.isASCII), word.allSatisfy(\.isNumber) else { return nil }
         func inherited(_ before: String) -> RefID? {
             let text = before + (before.last?.isWhitespace ?? true ? "" : " ") + word

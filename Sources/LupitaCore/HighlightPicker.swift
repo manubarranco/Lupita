@@ -226,7 +226,8 @@ public enum HighlightPicker {
     }
 
     static func clean(_ text: String) -> String {
-        Resolver.latinize(text).trimmingCharacters(in: leading).trimmingCharacters(in: trailing)
+        let cleaned = Resolver.latinize(text).trimmingCharacters(in: leading).trimmingCharacters(in: trailing)
+        return IDGrammar.digitsBeforeJunk(cleaned) ?? cleaned
     }
 
     static func closes(_ word: OCRWord) -> Bool {

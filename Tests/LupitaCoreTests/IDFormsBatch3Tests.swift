@@ -124,6 +124,14 @@ import Testing
         #expect(r.resolve("003", preferredRepo: "r", context: "", fromPath: "docs/a.md", block: "total 003 items").definitions.isEmpty)
     }
 
+    @Test func glyphsGluedToANumberByOCRAreIgnored() {
+        #expect(IDGrammar.digitsBeforeJunk("003šŚš") == "003")
+        #expect(IDGrammar.digitsBeforeJunk("003abc") == nil && IDGrammar.digitsBeforeJunk("003") == nil && IDGrammar.digitsBeforeJunk("šŚš") == nil)
+        let r = Self.resolver(["docs/fr.md": "- **FR-003**: Third"])
+        #expect(r.resolve("003šŚš", preferredRepo: "r", context: "FR-001, 002, ", fromPath: "docs/a.md").definitions.first?.path == "docs/fr.md")
+        #expect(HighlightPicker.clean("003šŚš") == "003")
+    }
+
     @Test func aBareNumberIsNeverOfferedAsAMisreadId() {
         let r = Self.resolver(["a.md": "## D02 — Second\n\n## DD2 — Other\n\n## D2 — Third"])
         for number in ["002", "02", "2"] {
