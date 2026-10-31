@@ -15,6 +15,9 @@ public enum SectionRoute: String, Sendable {
 /// Section references, `§4.7`: they point at a numbered heading (`## 4.7 Title`, `### §4.7 Title`) of a document.
 /// Few of them name the document, so the reader's own file and its folders say which one it is.
 public enum SectionRefs {
+    /// A `§N` that names no document and is not in a file that numbers it may take a neighbouring document of the reader
+    /// (`.nearby`). Measured on 77 repos, 3 attempts: 11, 8 and 15 right of 20. Off (D60); the code stays to reopen it with its data.
+    public static let readsNeighbours = false
     /// `§4.7`, `§ 4`. A trailing `.` ends the sentence; a letter or a further `.N` makes it something else (`§4a`).
     static let tokenRegex = try! NSRegularExpression(
         pattern: #"(?<![A-Za-z0-9_§])§\s?(\d{1,3}(?:\.\d{1,3}){0,3})(?![A-Za-z0-9_]|\.\d)"#)
@@ -202,7 +205,8 @@ extension Resolver {
     /// The headings a `§N` may point at, and how it found them. The sentence names the document: only that one.
     /// Otherwise the reader's own file; otherwise the nearest folder going up with such a heading (several there
     /// are ambiguous, listed together). With no file known, all of the repo's. Nothing numbered N: nothing.
-    public func sectionLookup(for id: RefID, preferredRepo: String?, fromPath: String?) -> (key: String, defs: [Definition], route: SectionRoute?) {
+    public func sectionLookup(for id: RefID, preferredRepo: String?, fromPath: String?,
+                              neighbours: Bool = SectionRefs.readsNeighbours) -> (key: String, defs: [Definition], route: SectionRoute?) {
         var key: String? = id.key
         while let k = key {
             let own = (index.definitions[k] ?? []).filter { d in
@@ -222,6 +226,7 @@ extension Resolver {
                 let mine = fromPath.split(separator: "/").dropLast().map(String.init)
                 let here = own.filter { $0.path == fromPath }
                 if !here.isEmpty { return (k, here, .ownFile) }
+                guard neighbours else { key = k.contains(".") ? String(k[..<k.lastIndex(of: ".")!]) : nil; continue }
                 // A neighbour counts only if the reader names it somewhere (`data-model.md`, a link): no other evidence ties
                 // a bare `§4` to a document that is not its own (measured: without this, 9 of 20 were the wrong document).
                 let named = Set((preferredRepo.flatMap { index.documentRefs[$0 + "/" + fromPath] } ?? []))

@@ -13,9 +13,9 @@ import Testing
         return Resolver(index: index)
     }
 
-    static func lookup(_ r: Resolver, _ text: String, from path: String?) -> (paths: [String], route: SectionRoute?) {
+    static func lookup(_ r: Resolver, _ text: String, from path: String?, neighbours: Bool = false) -> (paths: [String], route: SectionRoute?) {
         let id = IDGrammar.tokens(in: text).first { $0.id.scope == .section }!.id
-        let found = r.sectionLookup(for: id, preferredRepo: "r", fromPath: path)
+        let found = r.sectionLookup(for: id, preferredRepo: "r", fromPath: path, neighbours: neighbours)
         return (found.defs.map(\.path), found.route)
     }
 
@@ -61,7 +61,7 @@ import Testing
         for cite in ["per RFC 7009 §4.4", "agent2 §4.4", "see Open Questions §4.4", "spec 2 §4.4"] {
             #expect(Self.lookup(r, cite, from: "docs/n.md").paths.isEmpty, "\(cite)")
         }
-        #expect(Self.lookup(r, "per the §4.4", from: "docs/n.md").paths == ["docs/spec.md"])
+        #expect(Self.lookup(r, "per the §4.4", from: "docs/n.md", neighbours: true).paths == ["docs/spec.md"])
         // A document written with `.md` that has no such section is a precise reference too.
         #expect(Self.lookup(r, "`other.md` §4.4", from: "docs/n.md").paths.isEmpty)
     }
@@ -78,7 +78,7 @@ import Testing
         #expect(Self.lookup(r, "the inbound §3", from: "docs/n.md").paths.isEmpty)
         #expect(Self.lookup(r, "wordpress-thesis inbound §3", from: "docs/n.md").paths.isEmpty)
         #expect(Self.lookup(r, "the plan §4.4", from: "docs/n.md").paths.isEmpty)
-        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md").paths == ["docs/spec.md"])
+        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md", neighbours: true).paths == ["docs/spec.md"])
     }
 
     @Test func aNameCanBeTheLastWordOfTheFileName() {
@@ -88,9 +88,9 @@ import Testing
 
     @Test func aWordThatNamesNoDocumentIsIgnored() {
         let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "in §4.4, see spec.md"])
-        let got = Self.lookup(r, "in §4.4", from: "docs/n.md")
+        let got = Self.lookup(r, "in §4.4", from: "docs/n.md", neighbours: true)
         #expect(got.paths == ["docs/spec.md"] && got.route == .nearby)
-        #expect(Self.lookup(r, "Section §4.4", from: "docs/n.md").route == .nearby)
+        #expect(Self.lookup(r, "Section §4.4", from: "docs/n.md", neighbours: true).route == .nearby)
     }
 
     // Path (b): the file being read.
@@ -103,18 +103,18 @@ import Testing
     // Path (c): the nearest folder going up.
     @Test func theNearestFolderGoingUpWins() {
         let r = Self.resolver(["docs/spec.md": Self.spec, "docs/deep/x.md": "see §4.4 in spec.md", "docs/deep/sub/y.md": "## 4.4 Near\n", "docs/deep/sub/q.md": "see y.md", "other/z.md": "## 4.4 Far\n"])
-        #expect(Self.lookup(r, "§4.4", from: "docs/deep/x.md").paths == ["docs/spec.md"])
-        #expect(Self.lookup(r, "§4.4", from: "docs/deep/sub/q.md").paths == ["docs/deep/sub/y.md"])
+        #expect(Self.lookup(r, "§4.4", from: "docs/deep/x.md", neighbours: true).paths == ["docs/spec.md"])
+        #expect(Self.lookup(r, "§4.4", from: "docs/deep/sub/q.md", neighbours: true).paths == ["docs/deep/sub/y.md"])
     }
 
     @Test func aNeighbourTheReaderNeverNamesIsNotTaken() {
         let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "see §4.4 and other.md"])
-        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md").paths.isEmpty)
+        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md", neighbours: true).paths.isEmpty)
     }
 
     @Test func severalDocumentsAtTheNearestLevelAreAmbiguous() {
         let r = Self.resolver(["docs/a.md": "## 4.4 A\n", "docs/b.md": "## 4.4 B\n", "docs/c.md": "§4.4 (a.md, b.md)"])
-        let got = Self.lookup(r, "§4.4", from: "docs/c.md")
+        let got = Self.lookup(r, "§4.4", from: "docs/c.md", neighbours: true)
         #expect(got.paths == ["docs/a.md", "docs/b.md"] && got.route == .nearby)
     }
 
@@ -164,5 +164,14 @@ extension SectionRefsTests {
     @Test func documentsNamedFindsMarkdownFileStems() {
         #expect(SectionRefs.documentsNamed(in: "see `Data-Model.md`, [x](docs/spec.md#a) and notes.md. Not foo.mdx or bar.md5 or .md") == ["data-model", "notes", "spec"])
         #expect(SectionRefs.documentsNamed(in: "nothing here").isEmpty)
+    }
+}
+
+extension SectionRefsTests {
+    @Test func neighboursAreOffByDefault() {
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "see §4.4 and spec.md"])
+        #expect(SectionRefs.readsNeighbours == false)
+        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md").paths.isEmpty)
+        #expect(Self.lookup(r, "see §4.4", from: "docs/n.md", neighbours: true).paths == ["docs/spec.md"])
     }
 }
