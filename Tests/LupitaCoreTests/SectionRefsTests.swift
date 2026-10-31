@@ -159,3 +159,10 @@ import Testing
         #expect(a.isShown && b.isShown)
     }
 }
+
+extension SectionRefsTests {
+    @Test func documentsNamedFindsMarkdownFileStems() {
+        #expect(SectionRefs.documentsNamed(in: "see `Data-Model.md`, [x](docs/spec.md#a) and notes.md. Not foo.mdx or bar.md5 or .md") == ["data-model", "notes", "spec"])
+        #expect(SectionRefs.documentsNamed(in: "nothing here").isEmpty)
+    }
+}

@@ -139,15 +139,28 @@ public enum SectionRefs {
         return want.count >= 4 && words.count > 1 && squash(words.last!) == want
     }
 
-    static let markdownName = try! NSRegularExpression(pattern: #"([A-Za-z0-9_][A-Za-z0-9_.\-]*)\.md(?![A-Za-z0-9_])"#)
-
-    /// The distinct file stems (lowercase) of the `.md` documents `text` names, in no order.
+    /// The distinct file stems (lowercase) of the `.md` documents `text` names, sorted. One pass over the bytes: a regex
+    /// over every file of every repo doubled the time to index.
     static func documentsNamed(in text: String) -> [String] {
-        guard text.utf8.count > 4, text.contains(".md") else { return [] }
-        let ns = text as NSString
         var seen = Set<String>()
-        for m in markdownName.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
-            seen.insert(ns.substring(with: m.range(at: 1)).lowercased())
+        var contiguous = text
+        contiguous.makeContiguousUTF8()
+        contiguous.utf8.withContiguousStorageIfAvailable { bytes in
+            let n = bytes.count
+            func isName(_ b: UInt8) -> Bool {
+                (b >= 0x30 && b <= 0x39) || (b >= 0x41 && b <= 0x5A) || (b >= 0x61 && b <= 0x7A) || b == 0x5F || b == 0x2D || b == 0x2E
+            }
+            var i = 3
+            while i < n {
+                // `.md` ends here at i+3: the byte before `.` ... find it by looking for `md` after a `.`
+                if bytes[i - 2] == 0x2E, bytes[i - 1] == 0x6D, bytes[i] == 0x64, i + 1 == n || !(isName(bytes[i + 1]) && bytes[i + 1] != 0x2E) {
+                    var j = i - 2
+                    while j > 0, isName(bytes[j - 1]) { j -= 1 }
+                    while j < i - 2, bytes[j] == 0x2E || bytes[j] == 0x2D { j += 1 }
+                    if j < i - 2 { seen.insert(String(decoding: UnsafeBufferPointer(rebasing: bytes[j..<(i - 2)]), as: UTF8.self).lowercased()) }
+                }
+                i += 1
+            }
         }
         return seen.sorted()
     }
