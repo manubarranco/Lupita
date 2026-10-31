@@ -192,7 +192,6 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         add.onClick = { [weak self] in self?.closeMenu(then: { self?.addRoot() }) }
         menu.addItem(viewItem(add))
         menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
-        menu.addItem(action(S.showTutorial, #selector(showTutorial)))
         let reindex = action(S.reindex, #selector(reindex))
         menu.addItem(reindex)
         reindexItem = reindex
@@ -208,6 +207,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         menu.addItem(.separator())
 
+        menu.addItem(action(S.showTutorial, #selector(showTutorial)))
         menu.addItem(action(S.appearanceMenu, #selector(showAppearance)))
         menu.addItem(action(S.about, #selector(showAbout)))
         menu.addItem(action(S.help, #selector(openHelp)))

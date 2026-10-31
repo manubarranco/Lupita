@@ -239,10 +239,12 @@ public enum S {
     // MARK: First run: welcome (D56)
     public static var showTutorial: String { t("Show the tutorial…", "Ver el tutorial…") }
     public static var welcomeWindowTitle: String { t("Welcome to Lupita", "Te damos la bienvenida a Lupita") }
-    public static var welcomeTitle: String { t("Hi, I'm Lupita", "Hola, soy Lupita") }
+    public static var welcomeTitle: String {
+        t("Your agent says D23. Lupita tells you what it means.", "Tu agente dice D23. Lupita te dice qué significa.")
+    }
     public static var welcomeIntro: String {
-        t("Your coding agents write decisions, questions and lessons in .md files and cite them by code. Lupita tells you what each one is, right where you are reading.",
-          "Tus agentes de código escriben decisiones, preguntas y lecciones en archivos .md y las citan por su código. Lupita te dice qué es cada una justo donde estás leyendo.")
+        t("Point at any reference, in any app, and read its definition from your repos. Everything stays on your Mac.",
+          "Apunta a una referencia, en cualquier app, y lee su definición desde tus repos. Todo se queda en tu Mac.")
     }
     public static var welcomeNoteFile: String { t("agent-notes.md", "notas-del-agente.md") }
     /// The three lines of the sample note, each with the reference the user can point at.
@@ -273,6 +275,7 @@ public enum S {
     public static var welcomeOpened: String {
         t("In your repos, a click opens the file in your editor.", "En tus repos, un clic abre el archivo en tu editor.")
     }
+    public static var doneLabel: String { t("Done", "Listo") }
     public static var welcomeSkip: String { t("I already know how", "Ya sé usarla") }
     /// The definitions behind the three references: each one teaches a part of the gesture.
     public static var welcomeDefinitions: [String: (title: String, summary: String, repo: String)] {
@@ -343,8 +346,8 @@ public enum S {
     }
 
     // MARK: Appearance window (D55)
-    public static var appearanceMenu: String { t("Appearance…", "Aspecto…") }
-    public static var appearanceTitle: String { t("Appearance", "Aspecto") }
+    public static var appearanceMenu: String { t("Appearance…", "Apariencia…") }
+    public static var appearanceTitle: String { t("Appearance", "Apariencia") }
     public static var appearanceTheme: String { t("Theme", "Tema") }
     public static var appearanceMode: String { t("Mode", "Modo") }
     public static var appearanceSize: String { t("Size", "Tamaño") }
