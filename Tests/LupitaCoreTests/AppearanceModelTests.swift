@@ -83,7 +83,7 @@ import Foundation
     }
 
     @Test func appearanceStringsExistInBothLanguages() {
-        S.withLanguage("es") { #expect(S.appearanceTitle == "Aspecto" && S.densityAiry == "Amplia") }
+        S.withLanguage("es") { #expect(S.appearanceTitle == "Apariencia" && S.densityAiry == "Amplia") }
         S.withLanguage("en") { #expect(S.appearanceTitle == "Appearance" && S.appearanceMenu == "Appearance…") }
     }
 }

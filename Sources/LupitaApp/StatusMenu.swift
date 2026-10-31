@@ -8,6 +8,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let store: IndexStore
     private let onHotkeyChange: (HotkeyChoice) -> Void
     var onPrepareRepos: (() -> Void)?
+    var onTutorial: (() -> Void)?
     var onIDReport: (() -> Void)?
     var onAppearance: (() -> Void)?
 
@@ -206,6 +207,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         }
         menu.addItem(.separator())
 
+        menu.addItem(action(S.showTutorial, #selector(showTutorial)))
         menu.addItem(action(S.appearanceMenu, #selector(showAppearance)))
         menu.addItem(action(S.about, #selector(showAbout)))
         menu.addItem(action(S.help, #selector(openHelp)))
@@ -493,6 +495,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     @objc private func showAppearance() { onAppearance?() }
 
     @objc private func prepareRepos() { onPrepareRepos?() }
+    @objc private func showTutorial() { onTutorial?() }
 
     @objc func addRoot() {
         let panel = NSOpenPanel()

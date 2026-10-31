@@ -11,3 +11,5 @@
 - **papel tipográfico** — uso del texto al que un tema asigna una fuente: `heading`, `body` o `code` (D55).
 - **escala de texto** — los cuatro pasos de tamaño (S, M, L, XL), cada uno una jerarquía completa válida en todos los temas (D55).
 - **densidad** — ajuste de espacios (compacta, normal, amplia) independiente del tema (D55).
+- **welcome step** — primer paso del onboarding: enseña el gesto (mantener, apuntar, soltar) sobre una nota de muestra antes de pedir carpetas (D56).
+- **keycap** — dibujo de una tecla del atajo en el paso de bienvenida; se rellena mientras el atajo está pulsado (D56).

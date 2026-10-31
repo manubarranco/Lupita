@@ -37,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         onboarding = OnboardingWindow(store: store) { [weak self] in self?.menu?.addRoot() }
         menu?.onPrepareRepos = { [weak self] in self?.onboarding?.show() }
+        menu?.onTutorial = { [weak self] in self?.onboarding?.showTutorial() }
         menu?.onIDReport = { [weak self] in self.map { $0.idReport.show(index: $0.store.index) } }
         menu?.onAppearance = { [weak self] in self?.appearance.show() }
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
@@ -49,6 +50,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let hold = (note.userInfo?["hold"] as? String).flatMap(Double.init)
             let openOnboarding = note.userInfo?["onboarding"] != nil
             let openAbout = note.userInfo?["about"] != nil
+            let openTutorial = note.userInfo?["tutorial"] != nil
+            let pastWelcome = note.userInfo?["tutorial"] as? String == "folders"
             let menuMode = note.userInfo?["menu"] as? String
             let at = (note.userInfo?["at"] as? String).map { $0.split(separator: ",").compactMap { Double($0) } }
             MainActor.assumeIsolated {
@@ -59,11 +62,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 } else if openAbout {
                     NSApp.activate(ignoringOtherApps: true)
                     NSApp.orderFrontStandardAboutPanel(options: [.applicationVersion: Updater.installedVersion])
+                } else if openTutorial {
+                    self?.onboarding?.showTutorial()
+                    if pastWelcome { self?.onboarding?.welcome.finish() }
                 } else if openOnboarding {
                     self?.onboarding?.show()
                 } else if let hold {
-                    self?.holdChanged(true)
-                    Task { try? await Task.sleep(for: .seconds(hold)); self?.holdChanged(false) }
+                    if let welcome = self?.onboarding?.activeWelcome {
+                        welcome.holdChanged(true)
+                        Task { try? await Task.sleep(for: .seconds(hold)); welcome.holdChanged(false); welcome.released() }
+                    } else {
+                        self?.holdChanged(true)
+                        Task { try? await Task.sleep(for: .seconds(hold)); self?.holdChanged(false) }
+                    }
                 } else if let lens {
                     self?.lens.begin()
                     Task { try? await Task.sleep(for: .seconds(lens)); self?.lens.end() }
@@ -86,8 +97,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         lens.end()
         trigger = makeTrigger(HotkeyChoice.current, hold: { [weak self] down in
             if down { self?.lens.begin() } else { self?.lens.end() }
-            self?.holdChanged(down)
-        }) { [weak self] in self?.lookUp() }
+            // While the welcome step is in front it stages the gesture on its own sample note (D56).
+            if let welcome = self?.onboarding?.activeWelcome { welcome.holdChanged(down) } else { self?.holdChanged(down) }
+        }) { [weak self] in
+            if let welcome = self?.onboarding?.activeWelcome { welcome.released() } else { self?.lookUp() }
+        }
     }
 
     // MARK: Highlight mode (D39)

@@ -236,6 +236,64 @@ public enum S {
         t("No repos with an AGENTS.md or CLAUDE.md found in your folders.", "No hay repos con AGENTS.md o CLAUDE.md en tus carpetas.")
     }
 
+    // MARK: First run: welcome (D56)
+    public static var showTutorial: String { t("Show the tutorial…", "Ver el tutorial…") }
+    public static var welcomeWindowTitle: String { t("Welcome to Lupita", "Te damos la bienvenida a Lupita") }
+    public static var welcomeTitle: String {
+        t("Your agent says D23. Lupita tells you what it means.", "Tu agente dice D23. Lupita te dice qué significa.")
+    }
+    public static var welcomeIntro: String {
+        t("Point at any reference, in any app, and read its definition from your repos. Everything stays on your Mac.",
+          "Apunta a una referencia, en cualquier app, y lee su definición desde tus repos. Todo se queda en tu Mac.")
+    }
+    public static var welcomeNoteFile: String { t("agent-notes.md", "notas-del-agente.md") }
+    /// The three lines of the sample note, each with the reference the user can point at.
+    public static var welcomeNote: [(before: String, id: String, after: String)] {
+        isSpanish
+            ? [("Seguimos la ", "D001", " para el índice."), ("Sigue abierta la ", "Q01", " sobre los permisos."), ("Antes de tocarlo, lee la ", "L01", ".")]
+            : [("We follow ", "D001", " for the index."), ("Still open: ", "Q01", ", about permissions."), ("Before touching it, read ", "L01", ".")]
+    }
+    public static var welcomeHold: String { t("Press and hold", "Mantén pulsado") }
+    public static var welcomePoint: String { t("Now point at a reference", "Ahora apunta a una referencia") }
+    public static var welcomeRelease: String { t("Let go to see what it is", "Suelta para ver qué es") }
+    public static var welcomeDone: String { t("That's it: you know how to use Lupita", "Eso es todo: ya sabes usar Lupita") }
+    public static var welcomeHoldSub: String {
+        t("A magnifier appears and underlines the references it knows.", "Aparecerá una lupa y subrayará las referencias que conoce.")
+    }
+    public static var welcomePointSub: String {
+        t("Keep holding. Underlined means Lupita can explain it.", "Sigue sin soltar. Subrayado significa que Lupita puede explicarlo.")
+    }
+    public static var welcomeDoneSub: String {
+        t("Try the other two if you like. Then tell Lupita where your repos are.", "Prueba con las otras dos si quieres. Luego dile dónde están tus repos.")
+    }
+    public static var welcomeTooShort: String {
+        t("Hold a little longer, until the references are underlined.", "Mantenlo un poco más, hasta que se subrayen las referencias.")
+    }
+    public static var welcomeNoTarget: String {
+        t("Point at an underlined reference before you let go.", "Apunta a una referencia subrayada antes de soltar.")
+    }
+    public static var welcomeOpened: String {
+        t("In your repos, a click opens the file in your editor.", "En tus repos, un clic abre el archivo en tu editor.")
+    }
+    public static var doneLabel: String { t("Done", "Listo") }
+    public static var welcomeSkip: String { t("I already know how", "Ya sé usarla") }
+    /// The definitions behind the three references: each one teaches a part of the gesture.
+    public static var welcomeDefinitions: [String: (title: String, summary: String, repo: String)] {
+        let repo = t("your-project", "tu-proyecto")
+        return [
+            "D001": (t("Letting go over a reference shows its definition",
+                       "Al soltar el atajo sobre una referencia, se muestra su definición"),
+                     t("Click the definition to open its file. To close it, click anywhere else or press Esc.",
+                       "Haz clic en la definición para abrir su archivo. Para cerrarla, pulsa fuera o Esc."), repo),
+            "Q01": (t("What will I see with the references in my repos?", "¿Qué veré con las referencias de mis repos?"),
+                    t("The same as here: its title, a summary and the file where it lives. Lupita reads it from your files, on your Mac.",
+                      "Lo mismo que aquí: su título, un resumen y el archivo donde vive. Lupita lo lee de tus archivos, en tu Mac."), repo),
+            "L01": (t("What is underlined, Lupita knows", "Lo que está subrayado, Lupita lo conoce"),
+                    t("A solid line marks codes like D12 or Q07; a dashed one marks terms from your vocabulary.",
+                      "Un trazo continuo marca códigos como D12 o Q07; uno discontinuo, términos de tu vocabulario."), repo),
+        ]
+    }
+
     // MARK: First run: folders (D24)
     public static var foldersTitle: String { t("Add your repo folders", "Añade tus carpetas de repos") }
     public static var foldersIntro: String {
@@ -288,8 +346,8 @@ public enum S {
     }
 
     // MARK: Appearance window (D55)
-    public static var appearanceMenu: String { t("Appearance…", "Aspecto…") }
-    public static var appearanceTitle: String { t("Appearance", "Aspecto") }
+    public static var appearanceMenu: String { t("Appearance…", "Apariencia…") }
+    public static var appearanceTitle: String { t("Appearance", "Apariencia") }
     public static var appearanceTheme: String { t("Theme", "Tema") }
     public static var appearanceMode: String { t("Mode", "Modo") }
     public static var appearanceSize: String { t("Size", "Tamaño") }
