@@ -185,6 +185,16 @@ import Testing
         #expect(Self.keys("DP-1 and FLINK-1") == ["DP1", "FLINK1"])
     }
 
+    @Test func labelsAndPaddedNumbersAreNotLookedUpInGit() {
+        #expect(!IDGrammar.isTrackerKey("FR-004") && !IDGrammar.isTrackerKey("ACCEPT-01") && !IDGrammar.isTrackerKey("T-001"))
+        #expect(IDGrammar.isTrackerKey("FR-4") && IDGrammar.isTrackerKey("INFRENG-812"))
+    }
+
+    @Test func aDatedFileInAnAdrFolderIsNotAnAdr() {
+        #expect(DefinitionRules.definitions(fileName: "2026-08-16-learnings.md", lines: [], folder: "adr").isEmpty)
+        #expect(DefinitionRules.definitions(fileName: "0007-use-foo.md", lines: [], folder: "adr").count == 1)
+    }
+
     @Test func existingShortFormsKeepTheirKeys() {
         #expect(Self.keys("BUG-01, D23, ADR-004, E2-S3b") == ["BUG01", "D23", "ADR004", "E2-S3b"])
     }

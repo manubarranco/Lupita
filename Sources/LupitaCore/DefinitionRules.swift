@@ -175,13 +175,15 @@ public enum DefinitionRules {
         return DefinitionHit(id: first.id, rule: .fileName, line: -1, title: title)
     }
 
+    // `2026-08-16-notes.md` is a dated note, not ADR 2026.
+    static let datedFile = try! NSRegularExpression(pattern: #"^\d{4}-\d{2}-\d{2}"#)
     static let adrFolders: Set<String> = ["adr", "adrs", "decisions", "architecture-decisions"]
     static let adrFile = try! NSRegularExpression(pattern: #"^(?:[Aa][Dd][Rr]-?)?(\d{1,4})-([A-Za-z0-9].*)\.md$"#)
 
     /// `docs/adr/0007-use-foo.md` (or `adr007-use-foo.md`) defines `ADR-0007`, written with the digits the file has. A numbered file
     /// anywhere else is not an ADR.
     static func adrFileDefinition(_ fileName: String, folder: String) -> DefinitionHit? {
-        guard adrFolders.contains(folder.lowercased()), let m = match(adrFile, fileName) else { return nil }
+        guard adrFolders.contains(folder.lowercased()), let m = match(adrFile, fileName), match(datedFile, fileName) == nil else { return nil }
         let title = m[2].replacingOccurrences(of: "-", with: " ").replacingOccurrences(of: "_", with: " ")
         return DefinitionHit(id: RefID(display: "ADR-" + m[1], key: "ADR" + m[1], prefix: "ADR"), rule: .fileName, line: -1, title: title)
     }

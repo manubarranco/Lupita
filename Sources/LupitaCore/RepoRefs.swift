@@ -119,6 +119,7 @@ public enum RepoRefs {
     /// The latest commit (any branch) whose message names the tracker key `PLAT-443341`, or else a branch whose name
     /// does: the only thing Lupita can say about a key that no `.md` defines. Looked up on demand, never indexed.
     static func commitCiting(_ key: String, repo: Repo) -> Definition? {
+        let started = Date()
         let escaped = NSRegularExpression.escapedPattern(for: key)
         let args = ["log", "--all", "-1", "-E", "--grep=(^|[^A-Za-z0-9_-])\(escaped)($|[^A-Za-z0-9_])", "--format=%H%x1f%s%x1f%ad%x1f%h", "--date=short"]
         if let out = Git.output(repo.path, args, timeout: keySearchTimeout)?.trimmingCharacters(in: .newlines), !out.isEmpty {
@@ -129,7 +130,8 @@ public enum RepoRefs {
                                   summary: "\(f[2]) · \(f[3])", absolutePath: repo.path)
             }
         }
-        if let branch = Git.lines(repo.path, ["branch", "-a", "--list", "*\(key)*", "--format=%(refname:short)"], timeout: keySearchTimeout)?.first {
+        // One second for the whole lookup: a search that already took long does not try the branches.
+        if Date().timeIntervalSince(started) < keySearchTimeout / 2, let branch = Git.lines(repo.path, ["branch", "-a", "--list", "*\(key)*", "--format=%(refname:short)"], timeout: keySearchTimeout)?.first {
             return liveBranch(branch.hasPrefix("origin/") ? String(branch.dropFirst("origin/".count)) : branch, repo: repo)
         }
         return nil

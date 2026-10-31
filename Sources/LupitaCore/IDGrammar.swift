@@ -128,9 +128,11 @@ public enum IDGrammar {
 
     /// `PLAT-4433` as the tracker key it is when written with a hyphen, or false.
     public static func isTrackerKey(_ display: String) -> Bool {
-        guard let m = trackerRegex.firstMatch(in: display, range: NSRange(location: 0, length: (display as NSString).length)),
-              m.range.length == (display as NSString).length else { return false }
-        return !notTrackers.contains((display as NSString).substring(with: m.range(at: 1))) && !stoplist.contains((display as NSString).substring(with: m.range(at: 1)))
+        let ns = display as NSString
+        guard let m = trackerRegex.firstMatch(in: display, range: NSRange(location: 0, length: ns.length)), m.range.length == ns.length else { return false }
+        let prefix = ns.substring(with: m.range(at: 1)), digits = ns.substring(with: m.range(at: 2))
+        // Same shape the scanner reads: no zero first, and a long word needs three digits (`ACCEPT-01`, `FR-004` are not keys).
+        return !notTrackers.contains(prefix) && !stoplist.contains(prefix) && digits.first != "0" && !(prefix.count >= 6 && digits.count < 3)
     }
 
     /// Keys the prefix grammar does not read (a prefix over five letters or a number over four digits). A hand-written
