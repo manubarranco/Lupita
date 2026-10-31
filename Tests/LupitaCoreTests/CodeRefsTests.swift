@@ -589,12 +589,8 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
     }
 
     @Test func spanishTextWhenTheMacIsInSpanish() {
-        let saved = S.language
-        defer { S.language = saved }
-        S.language = "es-ES"
-        #expect(first("git status")?.title.hasPrefix("Muestra") == true)
-        S.language = "en-GB"
-        #expect(first("git status")?.title.hasPrefix("Shows") == true)
+        S.withLanguage("es-ES") { #expect(first("git status")?.title.hasPrefix("Muestra") == true) }
+        S.withLanguage("en-GB") { #expect(first("git status")?.title.hasPrefix("Shows") == true) }
     }
 
     @Test func resolverSendsMultiWordCommandsToCodeBeforeRepoReferences() {
@@ -650,12 +646,8 @@ func resolveCode(_ text: String, _ repos: [Repo], window: String? = nil) -> Reso
     }
 
     @Test func spanishDictionary() {
-        let saved = S.language
-        defer { S.language = saved }
-        S.language = "es-ES"
-        #expect(first("ENOENT")?.title.hasPrefix("No existe") == true)
-        S.language = "en-GB"
-        #expect(first("ENOENT")?.title.hasPrefix("No such") == true)
+        S.withLanguage("es-ES") { #expect(first("ENOENT")?.title.hasPrefix("No existe") == true) }
+        S.withLanguage("en-GB") { #expect(first("ENOENT")?.title.hasPrefix("No such") == true) }
     }
 }
 

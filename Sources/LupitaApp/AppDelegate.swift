@@ -18,6 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private static let holdThreshold: Duration = .milliseconds(250)
     private var holdTask: Task<Void, Never>?
     private var holdGeneration = 0
+    /// Which lookup the tooltip's pending card belongs to: an answer from an older one never replaces a newer one.
+    private var lookupGeneration = 0
     /// What the OCR read for the marks, kept so the lookup on release does not read the window again.
     /// Dropped when the text may have moved (scroll, another app) and at the next hold.
     private var windowRead: OCR.WindowRead?
@@ -116,7 +118,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task { [weak self] in
             let read = await pending.value
             guard let self, generation == holdGeneration, let read else { return }
-            let marks = HighlightPicker.classified(words: read.words, resolver: resolver)
+            // No git on the main thread: a tracker key is underlined only if its answer is cached; the rest comes below.
+            let marks = HighlightPicker.classified(words: read.words, resolver: resolver.withoutGit())
             windowRead = read
             if Debug.isOn {
                 // Why a form like `(Task 2.3,` or `Requirement` / `3` is not underlined: what OCR gave for its rows (and the
@@ -132,6 +135,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             highlight.show(marks.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: read.words) ?? read.isDark, $0.kind) })
             watchForChanges()
             showSymbols(generation, read: read, marks: marks, resolver: resolver)
+            if Resolver.takeUncachedTrackerKeys() { refineTrackerMarks(generation, read: read, marks: marks, resolver: resolver) }
+        }
+    }
+
+    /// Tracker keys whose commit is not cached yet: one pass with git, off the main thread, adds the marks it finds.
+    private func refineTrackerMarks(_ generation: Int, read: OCR.WindowRead, marks: [HighlightPicker.Mark], resolver: Resolver) {
+        let words = read.words, windowDark = read.isDark
+        Task.detached(priority: .userInitiated) {
+            let added = HighlightPicker.classified(words: words, resolver: resolver).filter { !marks.contains($0) }
+            guard !added.isEmpty else { return }
+            Task { @MainActor [weak self] in
+                guard let self, generation == self.holdGeneration, self.highlight.showing else { return }
+                self.highlight.add(added.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: words) ?? windowDark, $0.kind) }, staggered: true)
+            }
         }
     }
 
@@ -175,14 +192,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func lookUp() {
         // Presses while an OCR pass runs are dropped, not queued.
         guard !inFlight else { return }
+        lookupGeneration += 1
         let start = Date()
         let mouse = NSEvent.mouseLocation  // bottom-left origin
         let point = Screen.topLeft(mouse)  // what AX and ScreenCaptureKit use
         lens.keep()
-        guard let resolver = store.resolver else {
+        guard let full = store.resolver else {
             notice(S.indexingTryAgain, at: mouse)
             return
         }
+        // This runs on the main thread: no git here. A tracker key nothing defines comes back `undefined` and `present` searches it.
+        let resolver = full.withoutGit()
         // Pointing at the tooltip itself: read it by OCR (its text is not reachable through AX) and look
         // up in the repo and file of what it shows, so `answered by D006` resolves where Q01 lives.
         if let shown = tooltip.resolution, let frame = tooltip.frame, frame.contains(mouse) {
@@ -253,22 +273,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// window's repo once (D16) before saying "not known"; the watcher covers the rest.
     private func show(_ result: Resolution?, at mouse: NSPoint?, method: String, start: Date, context: ActiveContext) {
         guard let result, result.kind == .undefined, let repo = context.repo else {
-            present(result, at: mouse, method: method, start: start, app: context.bundleID)
+            present(result, at: mouse, method: method, start: start, context: context)
             return
         }
+        let generation = lookupGeneration
         Task {
-            if await store.refreshNow(repoNamed: repo),
-               let again = store.resolver?.resolve(result.query, preferredRepo: repo, fromPath: context.path),
+            let rescanned = await store.refreshNow(repoNamed: repo)
+            // A newer press while the rescan ran: its answer is the one on screen, this one is dropped.
+            guard generation == lookupGeneration else { return }
+            if rescanned,
+               let again = store.resolver?.withoutGit().resolve(result.query, preferredRepo: repo, fromPath: context.path),
                again.kind != .undefined {
-                present(again, at: mouse, method: method + "+rescan", start: start, app: context.bundleID)
+                present(again, at: mouse, method: method + "+rescan", start: start, context: context)
             } else {
-                present(result, at: mouse, method: method, start: start, app: context.bundleID)
+                present(result, at: mouse, method: method, start: start, context: context)
             }
         }
     }
 
     /// `mouse == nil`: a `lupita poke --query` check, logged but not shown.
-    private func present(_ result: Resolution?, at mouse: NSPoint?, method: String, start: Date, app: String?) {
+    private func present(_ result: Resolution?, at mouse: NSPoint?, method: String, start: Date, context: ActiveContext) {
+        let app = context.bundleID
+        if let result, let full = store.resolver, let id = full.withoutGit().pendingTrackerKey(result) {
+            searchCommit(of: id, for: result, in: full, at: mouse, method: method, start: start, context: context)
+            return
+        }
         if let mouse {
             switch result?.kind {
             case .exact?, .corrected?, .ambiguous?:
@@ -279,6 +308,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         TriggerLog.append(app: app, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
+    }
+
+    /// A tracker key no file defines: git looks for the commit off the main thread and the answer is shown once, finished:
+    /// the card with the commit, or «not known» when there is none. No provisional card (it flashed, unreadable).
+    private func searchCommit(of id: RefID, for result: Resolution, in resolver: Resolver, at mouse: NSPoint?,
+                              method: String, start: Date, context: ActiveContext) {
+        lookupGeneration += 1
+        let generation = lookupGeneration
+        let (query, repo) = (result.query, context.repo)
+        Task.detached(priority: .userInitiated) {
+            let found = resolver.trackerResolution(query: query, id: id, preferredRepo: repo)
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                // A newer press while git searched: its answer is the one on screen, this one is dropped.
+                if let mouse, generation == self.lookupGeneration {
+                    if let found {
+                        self.tooltip.show(found, at: mouse)
+                        self.lens.react(found: true, near: self.tooltip.frame)
+                    } else {
+                        self.notice(S.notAReference, at: mouse)
+                    }
+                }
+                TriggerLog.append(app: context.bundleID, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: found ?? result)
+            }
+        }
     }
 
     /// With the lens beside it, the notice closes 2 s after the lens gets there (D18); without
@@ -296,7 +350,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         var context = ActiveContext()
         context.repo = repo
         context.bundleID = "poke"
-        show(resolver.resolve(query, preferredRepo: repo), at: point, method: "query", start: Date(), context: context)
+        show(resolver.withoutGit().resolve(query, preferredRepo: repo), at: point, method: "query", start: Date(), context: context)
     }
 }
 

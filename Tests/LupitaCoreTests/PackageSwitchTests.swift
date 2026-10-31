@@ -24,11 +24,10 @@ import Testing
     }
 
     func prose(_ sentence: String) -> Bool {
-        S.language = "es"
         let start = sentence.range(of: "⟦")!
         let offset = sentence.distance(from: sentence.startIndex, to: start.lowerBound) + 1
         let line = sentence.replacingOccurrences(of: "⟦", with: "").replacingOccurrences(of: "⟧", with: "")
-        return CandidatePicker.pick(line: line, cursorOffset: offset, resolver: resolver)?.isShown ?? false
+        return S.withLanguage("es") { CandidatePicker.pick(line: line, cursorOffset: offset, resolver: resolver)?.isShown ?? false }
     }
 
     static let gitThings = ["git stash", "git rebase main", "git reset --hard", "git push --force"]
