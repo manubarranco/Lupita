@@ -60,7 +60,7 @@ Where this repo already has a format for these, keep it.
 <!-- /lupita -->
 ```
 
-La ventana **Prepara tus repos…** (menú de la barra, y en el primer arranque) lista los repos con
+La ventana **Prepara tus repos…** (menú de la barra) lista los repos con
 `AGENTS.md` o `CLAUDE.md`, cuántas referencias aún no explica nada y si la regla está puesta.
 **Copiar y abrir** copia el prompt y abre el repo en tu editor (Cursor, VS Code, Windsurf, Zed o
 Finder), listo para pegar.

@@ -58,7 +58,7 @@ Where this repo already has a format for these, keep it.
 <!-- /lupita -->
 ```
 
-The **Prepare your repos…** window (menu bar, and on first launch) lists the repos that have an
+The **Prepare your repos…** window (menu bar) lists the repos that have an
 `AGENTS.md` or `CLAUDE.md`, how many references nothing explains yet, and whether the rule is in
 place. **Copy and open** copies the prompt and opens the repo in your editor (Cursor, VS Code,
 Windsurf, Zed or Finder), ready to paste.
