@@ -43,7 +43,9 @@ public enum SectionRefs {
         return tokenRegex.matches(in: text, range: NSRange(location: 0, length: ns.length)).map { m in
             let number = ns.substring(with: m.range(at: 1))
             var id = RefID(display: ns.substring(with: m.range), key: "§" + number, prefix: "§", scope: .section)
-            id.document = document(before: ns.substring(to: m.range.location), after: ns.substring(from: m.range.location + m.range.length))
+            let named = document(before: ns.substring(to: m.range.location), after: ns.substring(from: m.range.location + m.range.length))
+            id.document = named.document
+            id.citesOther = named.other
             return (id, m.range)
         }
     }
@@ -66,42 +68,74 @@ public enum SectionRefs {
                 tail = String(block[r.upperBound...])
             }
         }
-        id.document = document(before: before + ns.substring(to: m.range.location), after: tail)
+        let named = document(before: before + ns.substring(to: m.range.location), after: tail)
+        id.document = named.document
+        id.citesOther = named.other
         return id
     }
 
+    /// `§4.1 /` or `§4–`: an earlier `§` of the same list; the document is named before the first of them.
+    static let chainedBefore = try! NSRegularExpression(
+        pattern: #"(?:§\s?\d+(?:\.\d+)*\s*(?:[–—\-/,&]|\b(?:and|or|y|e)\b)\s*)+$"#)
+
     /// The document a sentence names around a `§`: the word before it (`spec §4`), a link before it, or `of X` after it.
-    static func document(before: String, after tail: String) -> String? {
-        let b = before as NSString
+    /// `other`: a word that is no document (`RFC 7009 §2.1`, `agent2 §1`, `Open Questions §2`) says the `§` belongs to
+    /// something else, so the reader's own file and folders are not asked.
+    static func document(before: String, after tail: String) -> (document: String?, other: Bool) {
+        var text = before
+        if let m = chainedBefore.firstMatch(in: text, range: NSRange(location: 0, length: (text as NSString).length)) {
+            text = (text as NSString).substring(to: m.range.location)
+        }
+        let b = text as NSString
         let whole = NSRange(location: 0, length: b.length)
-        if let m = linkBefore.firstMatch(in: before, range: whole), let name = normalizeName(b.substring(with: m.range(at: 1))) { return name }
-        if let m = wordBefore.firstMatch(in: before, range: whole), let name = normalizeName(b.substring(with: m.range(at: 1))) { return name }
+        if let m = linkBefore.firstMatch(in: text, range: whole), let name = normalizeName(b.substring(with: m.range(at: 1))) { return (name, false) }
+        if let m = wordBefore.firstMatch(in: text, range: whole) {
+            let word = b.substring(with: m.range(at: 1))
+            if let name = normalizeName(word) { return (name, word.first!.isUppercase || word.contains(where: \.isNumber)) }
+        }
         let t = tail as NSString
         if let m = after.firstMatch(in: tail, range: NSRange(location: 0, length: t.length)),
-           let name = normalizeName(t.substring(with: m.range(at: 1))) { return name }
-        return nil
+           let name = normalizeName(t.substring(with: m.range(at: 1))) { return (name, false) }
+        // The last word before the `§`, with its punctuation: a number, a capitalised word or an acronym is not a preposition.
+        let last = text.trimmingCharacters(in: CharacterSet(charactersIn: " \t`*_)]\"'’,:;(")).split(separator: " ").last.map(String.init) ?? ""
+        let bare = last.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        let other = !bare.isEmpty && !notDocuments.contains(bare.lowercased())
+            && (bare.contains(where: \.isNumber) || bare.first!.isUppercase)
+        return (nil, other)
     }
 
-    /// `docs/Spec.md` → `spec`; nil for a word that names nothing.
+    /// `docs/Spec.md` → `docs/spec.md`, `Spec` → `spec`; nil for a word that names nothing. The extension stays: a name
+    /// written with `.md` (or folders) is an exact reference.
     static func normalizeName(_ raw: String) -> String? {
-        var name = (raw.split(separator: "/").last.map(String.init) ?? raw).lowercased()
-        if name.hasSuffix(".md") { name = String(name.dropLast(3)) }
-        name = name.trimmingCharacters(in: CharacterSet(charactersIn: ".-_"))
-        guard name.count >= 2, name.contains(where: \.isLetter), !notDocuments.contains(name) else { return nil }
+        var name = raw.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: ".-_/"))
+        while name.hasPrefix("./") { name = String(name.dropFirst(2)) }
+        let bare = name.hasSuffix(".md") ? String(name.dropLast(3)) : name
+        guard bare.count >= 2, bare.contains(where: \.isLetter), !notDocuments.contains(bare) else { return nil }
         return name
     }
 
     /// Lowercase letters and digits only, to compare `data-model` with `DATA_MODEL`.
     static func squash(_ s: String) -> String { String(s.lowercased().filter { $0.isLetter || $0.isNumber }) }
 
-    /// Whether `path` is the document called `name`: its file name or one of its folders.
+    /// Whether `path` is the document called `name`: its file name, one of its folders, or (a name with folders) the end
+    /// of its path. `design-outline.md` answers to `outline`.
     static func isDocument(_ name: String, path: String) -> Bool {
-        let want = squash(name)
+        var wanted = name
+        if wanted.hasSuffix(".md") { wanted = String(wanted.dropLast(3)) }
+        if wanted.contains("/") {
+            var full = path.lowercased()
+            if full.hasSuffix(".md") { full = String(full.dropLast(3)) }
+            let want = wanted.hasPrefix("../") ? String(wanted.drop { $0 == "." || $0 == "/" }) : wanted
+            return full == want || full.hasSuffix("/" + want)
+        }
+        let want = squash(wanted)
         guard !want.isEmpty else { return false }
         let parts = path.split(separator: "/").map(String.init)
         guard let file = parts.last else { return false }
         let base = (file as NSString).deletingPathExtension
-        return squash(base) == want || parts.dropLast().contains { squash($0) == want }
+        if squash(base) == want || parts.dropLast().contains(where: { squash($0) == want }) { return true }
+        let words = base.lowercased().split { $0 == "-" || $0 == "_" || $0 == " " }.map(String.init)
+        return want.count >= 4 && words.count > 1 && (squash(words.last!) == want || squash(words.first!) == want)
     }
 
     /// Numbered headings of a markdown file: `(0-based line, section number, title)`. Fenced code is skipped.
@@ -134,7 +168,11 @@ extension Resolver {
                 if let name = id.document {
                     let named = own.filter { SectionRefs.isDocument(name, path: $0.path) }
                     if !named.isEmpty { return (k, named, .named) }
+                    // A name with a folder or `.md` is a precise reference: another file is not what it points at.
+                    if name.contains("/") || name.hasSuffix(".md") { return (id.key, [], nil) }
                 }
+                // `RFC 7009 §2.1`, `agent2 §1`: a §, but of something that is not a document here.
+                if id.citesOther { return (id.key, [], nil) }
                 guard let fromPath else { return (k, own, .repoWide) }
                 let mine = fromPath.split(separator: "/").dropLast().map(String.init)
                 let here = own.filter { $0.path == fromPath }

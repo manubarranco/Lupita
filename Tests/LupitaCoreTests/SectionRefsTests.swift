@@ -49,6 +49,35 @@ import Testing
         #expect(Self.lookup(r, "[x](docs/other.md) §4.4", from: "notes/n.md").paths == ["docs/other.md"])
     }
 
+    @Test func aNamedPathMustEndTheDocumentsPath() {
+        let r = Self.resolver(["specs/108/quickstart.md": "## 6 Six\n", "specs/107/quickstart.md": "## 7 Seven\n"])
+        #expect(Self.lookup(r, "`specs/107/quickstart.md` §7", from: "specs/108/quickstart.md").paths == ["specs/107/quickstart.md"])
+        // The named spec does not number a §6: nothing is shown from the neighbour's file of the same name.
+        #expect(Self.lookup(r, "`specs/107/quickstart.md` §6", from: "specs/108/quickstart.md").paths.isEmpty)
+    }
+
+    @Test func aSectionOfSomethingElseIsNotTakenFromTheNeighbours() {
+        let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "x"])
+        for cite in ["per RFC 7009 §4.4", "agent2 §4.4", "see Open Questions §4.4", "spec 2 §4.4"] {
+            #expect(Self.lookup(r, cite, from: "docs/n.md").paths.isEmpty, "\(cite)")
+        }
+        #expect(Self.lookup(r, "per the §4.4", from: "docs/n.md").paths == ["docs/spec.md"])
+        // A document written with `.md` that has no such section is a precise reference too.
+        #expect(Self.lookup(r, "`other.md` §4.4", from: "docs/n.md").paths.isEmpty)
+    }
+
+    @Test func aListOfSectionsKeepsTheDocumentOfItsFirst() {
+        let r = Self.resolver(["docs/arch.md": "## 4.1 One\n## 4.4 Four\n", "docs/guide.md": "## 4.4 Else\n", "docs/n.md": "x"])
+        let ids = IDGrammar.tokens(in: "see `arch.md` §4.1 / §4.4 and [arch](arch.md) §4–§5").filter { $0.id.scope == .section }
+        #expect(ids.map(\.id.document) == ["arch.md", "arch.md", "arch.md", "arch.md"])
+        #expect(Self.lookup(r, "arch.md §4.1 / §4.4", from: "docs/n.md").paths == ["docs/arch.md"])
+    }
+
+    @Test func aNameCanBeTheLastWordOfTheFileName() {
+        let r = Self.resolver(["docs/design-outline.md": "## 7.2 Contract\n", "docs/n.md": "x"])
+        #expect(Self.lookup(r, "outline § 7.2", from: "docs/n.md").route == .named)
+    }
+
     @Test func aWordThatNamesNoDocumentIsIgnored() {
         let r = Self.resolver(["docs/spec.md": Self.spec, "docs/n.md": "in §4.4"])
         let got = Self.lookup(r, "in §4.4", from: "docs/n.md")

@@ -19,6 +19,8 @@ public struct RefID: Hashable, Codable, Sendable {
     public var scope: IDScope = .none
     /// For a section reference: the document the sentence names (`spec` in `spec §4.4`), lowercased.
     public var document: String? = nil
+    /// For a section reference: the sentence ties the `§` to something that is not a document (`RFC 7009 §2.1`).
+    public var citesOther = false
 }
 
 /// How far a definition reaches. Forms with a word and a number (`Requirement 3`, `Task 1.1`) are
