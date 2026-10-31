@@ -207,6 +207,9 @@ extension Resolver {
     /// are ambiguous, listed together). With no file known, all of the repo's. Nothing numbered N: nothing.
     public func sectionLookup(for id: RefID, preferredRepo: String?, fromPath: String?,
                               neighbours: Bool = SectionRefs.readsNeighbours) -> (key: String, defs: [Definition], route: SectionRoute?) {
+        // No repo from the window and no document named: a bare `§4` could be any repo's, so nothing is shown
+        // (with every repo on, DesignerPunk's came before LiOS's).
+        if preferredRepo == nil, id.document == nil { return (id.key, [], nil) }
         var key: String? = id.key
         while let k = key {
             let own = (index.definitions[k] ?? []).filter { d in
@@ -241,5 +244,20 @@ extension Resolver {
             key = k.contains(".") ? String(k[..<k.lastIndex(of: ".")!]) : nil
         }
         return (id.key, [], nil)
+    }
+}
+
+extension SectionRefs {
+    /// `§4/§7`, `§2–§3` read as one word: the `§` piece that holds `offset` (UTF-16, within `word`), as a range of
+    /// `word`. Nil when the word holds one `§` or none, so the caller keeps the whole word.
+    public static func piece(of word: String, at offset: Int) -> NSRange? {
+        let ns = word as NSString
+        var starts: [Int] = []
+        for i in 0..<ns.length where ns.character(at: i) == 0xA7 { starts.append(i) }
+        guard starts.count > 1 else { return nil }
+        starts[0] = 0
+        let i = starts.lastIndex { $0 <= offset } ?? 0
+        let end = i + 1 < starts.count ? starts[i + 1] : ns.length
+        return NSRange(location: starts[i], length: end - starts[i])
     }
 }

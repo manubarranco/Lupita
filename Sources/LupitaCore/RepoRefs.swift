@@ -169,9 +169,18 @@ public enum RepoRefs {
         return d
     }
 
-    /// A deleted branch survives in the message of the commit that merged it.
+    /// `feature/x`, `claude/modest-archimedes`: ASCII parts with at least one lowercase letter, not `HTML/JSON` or `0/12`.
+    static let branchName = try! NSRegularExpression(pattern: #"^(?=.*[a-z])[A-Za-z0-9][A-Za-z0-9._-]*(?:/[A-Za-z0-9._-]+)+$"#)
+    /// The first part of a branch name that a commit cites without merging it (`explore/highlight` in a message).
+    static let branchPrefixes: Set<String> = ["feature", "feat", "fix", "bugfix", "hotfix", "explore", "exp", "review", "auto",
+                                              "claude", "backup", "release", "chore", "docs", "wip", "spike", "refactor", "test"]
+
+    /// A deleted branch survives in the message of the commit that merged it. A commit that only mentions it counts when
+    /// the name starts like a branch (`feature/…`): otherwise any `qué/por` or `0/12` in a message was a «deleted branch».
     private static func goneBranch(_ name: String, repo: Repo) -> Definition? {
-        for extra in [["--merges"], []] {
+        guard matches(branchName, name) else { return nil }
+        let cited = branchPrefixes.contains(name.split(separator: "/")[0].lowercased())
+        for extra in [["--merges"], []] where !extra.isEmpty || cited {
             let args = ["log", "--all", "-1", "-F", "--grep=\(name)", "--format=%H%x1f%s%x1f%ad", "--date=short"] + extra
             guard let fields = Git.fields(repo.path, args), fields.count == 3 else { continue }
             let summary = extra.isEmpty ? S.branchCitedIn(fields[2], fields[1]) : S.branchMergedOn(fields[2], fields[1])
@@ -352,6 +361,31 @@ public enum RepoRefs {
             return value.isEmpty ? nil : value
         }
         return nil
+    }
+
+    private static let readmeNames = Cache()
+    private final class Cache: @unchecked Sendable {
+        let lock = NSLock()
+        var names: [String: String] = [:]
+    }
+
+    /// The first word of the README's title (`# Lupita` → `Lupita`, within its first 20 lines), read once per repo: how the repo writes its own name.
+    static func readmeName(of repo: Repo) -> String? {
+        readmeNames.lock.lock()
+        defer { readmeNames.lock.unlock() }
+        if let known = readmeNames.names[repo.path] { return known.isEmpty ? nil : known }
+        let text = (try? String(contentsOfFile: (repo.path as NSString).appendingPathComponent("README.md"), encoding: .utf8)) ?? ""
+        let title = text.split(separator: "\n").prefix(20).first { $0.hasPrefix("# ") }.map(String.init) ?? ""
+        let name = title.hasPrefix("# ") ? String(title.dropFirst(2).prefix { $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" }) : ""
+        readmeNames.names[repo.path] = name
+        return name.isEmpty ? nil : name
+    }
+
+    /// `raw` without the quotes, brackets and closing punctuation around it, as `resolve` reads it.
+    static func bare(_ raw: String) -> String {
+        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
+        while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
+        return text.trimmingCharacters(in: wrappers)
     }
 
     static func matches(_ regex: NSRegularExpression, _ text: String) -> Bool {

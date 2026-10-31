@@ -47,7 +47,10 @@ public enum CandidatePicker {
             guard distance <= slack, distance < (best?.distance ?? .max) else { continue }
             best = (range, distance, n)
         }
-        guard let best else { return nil }
+        guard var best else { return nil }
+        if let piece = SectionRefs.piece(of: ns.substring(with: best.range), at: cursorOffset - best.range.location) {
+            best.range = NSRange(location: best.range.location + piece.location, length: piece.length)
+        }
         let tail = ns.substring(with: NSRange(location: best.range.location + best.range.length,
                                               length: min(3, ns.length - best.range.location - best.range.length)))
         let styled = codeRanges.contains { NSIntersectionRange($0, best.range).length > 0 }
@@ -168,6 +171,15 @@ public enum CandidatePicker {
                case let r = resolver.resolve(joined, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath, block: block), isFound(r) {
                 return r
             }
+        }
+        // `§4/§7` is one OCR word: the pointer's place in its box says which `§`.
+        let fraction = target.box.width > 0 ? (cursor.x - target.box.minX) / target.box.width : 0
+        if let piece = SectionRefs.piece(of: target.text, at: Int(fraction * CGFloat((target.text as NSString).length))) {
+            let ns = target.text as NSString
+            let r = resolver.resolve(ns.substring(with: piece), preferredRepo: preferredRepo,
+                                     context: context(index) + " " + ns.substring(to: piece.location), fromPath: fromPath, block: block,
+                                     codeStyled: target.codeStyled)
+            if isFound(r) { return r }
         }
         let single = resolver.resolve(target.text, preferredRepo: preferredRepo, context: context(index), fromPath: fromPath, block: block,
                                       codeStyled: target.codeStyled)
