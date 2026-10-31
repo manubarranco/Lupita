@@ -52,9 +52,9 @@ public enum IDGrammar {
     )
 
     /// A word and a number: `Requirement 3`, `Story 2.3`, `Epic 2`, `Property 7`, `Decision 4`, `Task Group 2`,
-    /// `Task 1.1`, `Subtask 5.2`. Groups: word, number (up to three parts).
+    /// `Task 1.1`, `Subtask 5.2`; agents also write `task 5` in lowercase. Groups: word, number (up to three parts).
     static let wordRegex = try! NSRegularExpression(
-        pattern: #"(?<![A-Za-z0-9_\-])(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d_]|\.[A-Za-z0-9])(?![A-Za-z_])"#
+        pattern: #"(?<![A-Za-z0-9_\-])(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task|subtask|task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d_]|\.[A-Za-z0-9])(?![A-Za-z_])"#
     )
 
     /// A task in a checklist, `- [ ] 1.1 Create the table` or `- [x]* 2. Wire it`: the number alone is the token.
@@ -81,7 +81,7 @@ public enum IDGrammar {
     static let wordKeys: [String: String] = [
         "Requirement": "REQUIREMENT", "Requirements": "REQUIREMENT", "Story": "STORY", "Epic": "EPIC", "Epics": "EPIC",
         "Property": "PROPERTY", "Properties": "PROPERTY", "Decision": "DECISION", "Task Group": "TASK GROUP",
-        "Subtask": "TASK", "Task": "TASK",
+        "Subtask": "TASK", "Task": "TASK", "subtask": "TASK", "task": "TASK",
     ]
 
     /// All IDs in `text`, with their UTF-16 ranges.

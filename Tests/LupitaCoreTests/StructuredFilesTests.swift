@@ -108,3 +108,11 @@ import Testing
         #expect(found.markdown.count == 1)
     }
 }
+
+extension StructuredFilesTests {
+    @Test func aLowercaseTaskIsTheSameTask() {
+        #expect(IDGrammar.tokens(in: "finish task 5, subtask #1.2 and Task 7").map(\.id.key) == ["TASK 5", "TASK 1.2", "TASK 7"])
+        let r = Resolver(index: Self.index(["notes.md": "we are on task 1 now"], structured: ["tasks.json": Self.taskmaster]))
+        #expect(r.resolve("task 1", preferredRepo: "r", fromPath: "notes.md").definitions.first?.title == "Set up the project")
+    }
+}
