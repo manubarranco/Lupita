@@ -276,8 +276,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             present(result, at: mouse, method: method, start: start, context: context)
             return
         }
+        let generation = lookupGeneration
         Task {
-            if await store.refreshNow(repoNamed: repo),
+            let rescanned = await store.refreshNow(repoNamed: repo)
+            // A newer press while the rescan ran: its answer is the one on screen, this one is dropped.
+            guard generation == lookupGeneration else { return }
+            if rescanned,
                let again = store.resolver?.withoutGit().resolve(result.query, preferredRepo: repo, fromPath: context.path),
                again.kind != .undefined {
                 present(again, at: mouse, method: method + "+rescan", start: start, context: context)
