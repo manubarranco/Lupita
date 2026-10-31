@@ -17,6 +17,10 @@ public struct RefID: Hashable, Codable, Sendable {
     /// Where a definition has to live to count for this mention. `.none` for every form that has
     /// a prefix and a number of its own (`D23`, `ADR-004`).
     public var scope: IDScope = .none
+    /// For a section reference: the document the sentence names (`spec` in `spec §4.4`), lowercased.
+    public var document: String? = nil
+    /// For a section reference: the sentence ties the `§` to something that is not a document (`RFC 7009 §2.1`).
+    public var citesOther = false
 }
 
 /// How far a definition reaches. Forms with a word and a number (`Requirement 3`, `Task 1.1`) are
@@ -27,6 +31,8 @@ public enum IDScope: String, Codable, Sendable {
     case folder
     /// The definition is in the same first-level folder as the mention, and neither is a framework's own file.
     case topFolder
+    /// A section reference, `§4.7` (D60): the document it points at is found by `Resolver.sectionLookup`.
+    case section
 }
 
 public enum IDGrammar {
@@ -113,6 +119,7 @@ public enum IDGrammar {
         }
         found += trackerTokens(in: text, ns: ns, existing: found)
         found += wordTokens(in: text)
+        found += SectionRefs.tokens(in: text, ns)
         return found.sorted { $0.range.location < $1.range.location }
     }
 

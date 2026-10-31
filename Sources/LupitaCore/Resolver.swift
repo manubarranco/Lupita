@@ -107,6 +107,12 @@ public struct Resolver: Sendable {
             r.range = list
             return r
         }
+        if raw.contains("§"), let id = SectionRefs.id(for: raw, context: context, block: block) {
+            let (key, defs, _) = sectionLookup(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+            if !defs.isEmpty {
+                return result(id.display, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: true)
+            }
+        }
         if CodeRefs.looksLikeAddress(raw) || CodeRefs.looksLikeCommand(raw),
            let code = CodeRefs.resolve(raw, repos: index.repos, preferredRepo: preferredRepo, before: context, after: after, codeStyled: codeStyled) {
             return code
@@ -289,6 +295,10 @@ public struct Resolver: Sendable {
             }
             return (id.key, [])
         }
+        if id.scope == .section {
+            let found = sectionLookup(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
+            return (found.key, found.defs)
+        }
         var key: String? = id.key
         while let k = key {
             let own = (index.definitions[k] ?? []).filter { d in
@@ -297,7 +307,8 @@ public struct Resolver: Sendable {
             }
             let kept: [Definition]
             if let fromPath {
-                kept = own.filter { Self.reaches($0.path, from: fromPath, scope: id.scope) }
+                // A task of `tasks.json` is the repo's, not its folder's: the file lives away from the documents that cite it.
+                kept = own.filter { $0.rule == .structured || Self.reaches($0.path, from: fromPath, scope: id.scope) }
             } else {
                 // The window does not say which file it shows: every definition of the repo is listed, each with
                 // its file, instead of picking one that may belong to another spec.
@@ -324,7 +335,7 @@ public struct Resolver: Sendable {
     static func reaches(_ definitionPath: String, from mentionPath: String, scope: IDScope) -> Bool {
         let theirs = definitionPath.split(separator: "/").dropLast(), mine = mentionPath.split(separator: "/").dropLast()
         switch scope {
-        case .none: return true
+        case .none, .section: return true
         case .folder:
             return theirs.count <= mine.count && zip(mine, theirs).allSatisfy { $0 == $1 }
         case .topFolder:
@@ -457,6 +468,28 @@ public struct Resolver: Sendable {
     }
 
     /// The longest known repo name that appears as a word in `text`.
+    /// The repo the texts of a window name most often (`Entorno LiOS`, a chat about `LiOS`), or nil: what a window that says
+    /// no file (a chat app) is about. A tie goes to the name seen first.
+    public func repoMostNamed(in texts: [String]) -> String? {
+        var counts: [String: Int] = [:], order: [String] = []
+        for text in texts {
+            let lower = text.lowercased()
+            for name in repoNames where name.count >= 4 {
+                var from = lower.startIndex
+                while let r = lower.range(of: name.lowercased(), range: from..<lower.endIndex) {
+                    let before = r.lowerBound == lower.startIndex ? " " : lower[lower.index(before: r.lowerBound)]
+                    let after = r.upperBound == lower.endIndex ? " " : lower[r.upperBound]
+                    if !(before.isLetter || before.isNumber) && !(after.isLetter || after.isNumber) {
+                        if counts[name] == nil { order.append(name) }
+                        counts[name, default: 0] += 1
+                    }
+                    from = r.upperBound
+                }
+            }
+        }
+        return order.max { (counts[$0] ?? 0, -order.firstIndex(of: $0)!) < (counts[$1] ?? 0, -order.firstIndex(of: $1)!) }
+    }
+
     public func repoNamed(in text: String) -> String? {
         let lower = text.lowercased()
         return repoNames.first { name in

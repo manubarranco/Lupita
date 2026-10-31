@@ -4,8 +4,8 @@ import Foundation
 /// Which OCR words Lupita could explain, for the highlight mode (D39). Only what is cheap to check:
 /// indexed IDs, glossary terms and the fixed dictionaries (git/shell commands, error names), repo names
 /// (D48), files that exist in a repo (D49, a check on disk), and what is told by its shape or one cheap check
-/// (D51): colours, local addresses, `PR #12`, CSS tokens, Claude commands and package scripts. Never symbols,
-/// commits or branches: they cost a search in the repos for every word.
+/// (D51): colours, local addresses, `PR #12`, CSS tokens, Claude commands and package scripts. Symbols, commits,
+/// branches and `§` cost a search or need the reader's file: they come in a second layer, after the rest.
 public enum HighlightPicker {
     /// A box per known word or phrase, in the same coordinates as the words. Phrases of 2 to 4 words
     /// (`fast-forward merge`, `git stash`) give one box.
@@ -24,10 +24,21 @@ public enum HighlightPicker {
     /// The words shaped like code symbols (`build_glyphs`, `ARM_TENSION`, `bakeBowlStemOpen`, `slider()`, or in
     /// a code font) that no first-layer mark covers, by name. Looking one up costs a search through the repos'
     /// source files (about 0.1 s), so these are underlined after the rest, as each lookup comes back.
+    /// Commits (`58fd19f`), branches (`feature/x`) and sections (`§4`) join them: each needs git or the reader's file.
     public static func symbolCandidates(words: [OCRWord], excluding marks: [Mark]) -> [String: [CGRect]] {
         var out: [String: [CGRect]] = [:]
         for word in words where !marks.contains(where: { $0.box.intersects(word.box) }) {
-            let text = CodeRefs.Text(text: clean(word.text), codeMarked: word.codeStyled, before: "")
+            let cleaned = clean(word.text)
+            if cleaned.contains("§") {
+                for (piece, box) in sectionPieces(word) { out[piece, default: []].append(box) }
+                continue
+            }
+            let bare = RepoRefs.bare(cleaned)
+            if RepoRefs.matches(RepoRefs.sha, bare) || RepoRefs.matches(RepoRefs.branchName, bare) {
+                out[bare, default: []].append(trimmed(ArraySlice([word])))
+                continue
+            }
+            let text = CodeRefs.Text(text: cleaned, codeMarked: word.codeStyled, before: "")
             guard let name = CodeRefs.Symbols.symbolName(text) else { continue }
             // Only the name itself: `obj.method()` marks the whole word, as the tooltip shows the method.
             out[name, default: []].append(trimmed(ArraySlice([word])))
@@ -39,7 +50,9 @@ public enum HighlightPicker {
     /// the order the answers come back (on a background thread). `stop` is checked before each lookup, so
     /// letting go of the shortcut drops what has not started.
     /// `near`: the pointer; the names closest to it are looked up first, and past `maxSymbolLookups` the far ones wait.
+    /// `preferredRepo`, `fromPath`: the window's repo and file, which a `§` needs to know its document.
     public static func findSymbols(_ candidates: [String: [CGRect]], resolver: Resolver, near: CGPoint? = nil,
+                                   preferredRepo: String? = nil, fromPath: String? = nil,
                                    stop: @escaping @Sendable () -> Bool, found: @escaping @Sendable ([Mark]) -> Void) {
         func distance(_ name: String) -> CGFloat {
             guard let near else { return 0 }
@@ -49,9 +62,27 @@ public enum HighlightPicker {
         let repos = resolver.index.repos
         DispatchQueue.concurrentPerform(iterations: names.count) { i in
             guard !stop() else { return }
-            let text = CodeRefs.Text(text: names[i], codeMarked: true, before: "")
-            guard CodeRefs.Symbols.resolve(text, repos: repos, preferredRepo: nil) != nil else { return }
-            found((candidates[names[i]] ?? []).map { Mark(box: $0, kind: .id) })
+            let name = names[i]
+            if name.contains("§") {
+                guard resolver.resolve(name, preferredRepo: preferredRepo, fromPath: fromPath).definitions.isEmpty == false else { return }
+            } else if RepoRefs.matches(RepoRefs.sha, name) || RepoRefs.matches(RepoRefs.branchName, name) {
+                guard RepoRefs.resolve(name, repos: repos, preferredRepo: preferredRepo) != nil else { return }
+            } else {
+                let text = CodeRefs.Text(text: name, codeMarked: true, before: "")
+                guard CodeRefs.Symbols.resolve(text, repos: repos, preferredRepo: nil) != nil else { return }
+            }
+            found((candidates[name] ?? []).map { Mark(box: $0, kind: .id) })
+        }
+    }
+
+    /// The `§` pieces of an OCR word with the part of its box each one takes: `§4/§7` gives `§4` and `§7`.
+    static func sectionPieces(_ word: OCRWord) -> [(String, CGRect)] {
+        let ns = word.text as NSString
+        let ranges = SectionRefs.tokenRegex.matches(in: word.text, range: NSRange(location: 0, length: ns.length)).map(\.range)
+        let per = word.box.width / CGFloat(max(ns.length, 1))
+        return ranges.map { r in
+            (ns.substring(with: r), CGRect(x: word.box.minX + per * CGFloat(r.location), y: word.box.minY,
+                                           width: per * CGFloat(r.length), height: word.box.height))
         }
     }
 
@@ -290,6 +321,11 @@ public enum HighlightPicker {
     static func kind(of text: String, resolver: Resolver, block: String, marked: Bool = false, before: String = "") -> Kind? {
         let word = clean(text)
         guard word.count >= 2 else { return nil }
+        // `.claude/commands`: cleaning drops the leading dot, so the path is checked as written.
+        var written = text.trimmingCharacters(in: leading)
+        while let last = written.unicodeScalars.last, trailing.contains(last) { written.removeLast() }
+        if written.hasPrefix("."), written.contains("/"),
+           RepoRefs.isFile(written, repos: resolver.index.repos, byName: resolver.index.markdownByName) { return .id }
         if let found = known(word, resolver: resolver, block: block, marked: marked, before: before) { return found }
         // OCR misreads one of a pair of «» as a letter: the opening one as `k` (`kstashear»`), the closing one as
         // `s` (`«stashears`). With only one of the pair read, the letter on the other end is retried without it.
@@ -320,7 +356,10 @@ public enum HighlightPicker {
         // A repo name points at a place, like an ID. A plain lowercase name (`app`, `nib`) needs its exact case, so
         // it does not mark every «app»; any other (`LiOS`, `vector-ui-studio`) any case, as OCR reads `LiOS` as `LioS`.
         if word.count >= 3, resolver.index.repos.contains(where: { repo in
-            repo.name.allSatisfy(\.isLowercase) ? repo.name == word : repo.name.caseInsensitiveCompare(word) == .orderedSame
+            // `Lupita` for the repo `lupita`: the capitalised name counts when the repo's README calls itself that.
+            repo.name.allSatisfy(\.isLowercase)
+                ? repo.name == word || (repo.name.capitalized == word && RepoRefs.readmeName(of: repo) == word)
+                : repo.name.caseInsensitiveCompare(word) == .orderedSame
         }) { return .id }
         // A file or folder of a repo (`docs/decisions.md`, `CLAUDE.md:12`): also a place. Checked on disk only (D49).
         if RepoRefs.isFile(word, repos: resolver.index.repos, byName: resolver.index.markdownByName) { return .id }

@@ -54,10 +54,16 @@ public struct RefIndex: Codable, Sendable {
     /// `decisions.md` is found wherever it lives, with no search on disk.
     public var markdownByName: [String: [String]] = [:]
     public var fileCount: Int { filesPerRepo.values.reduce(0, +) }
+    /// While indexing: repo → task keys a `.md` of it cites as `Task 5` or `Subtask 5.2`. Not saved. A bare `Subtask 1` is
+    /// a phase of someone's own work (`ReDoS Subtask 1`), not a line of `tasks.json`.
+    var firmTaskCites: [String: Set<String>] = [:]
+    /// `repo/path` of a file → the markdown documents it names (`data-model.md`, `docs/spec.md`), as lowercase file stems.
+    /// A `§4` with no document in its sentence may take a neighbour only if the reader names that neighbour somewhere.
+    public var documentRefs: [String: [String]] = [:]
 
     public init() {}
 
-    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo, markdownByName }
+    private enum CodingKeys: String, CodingKey { case repos, definitions, mentions, terms, filesPerRepo, markdownByName, documentRefs }
 
     /// Indexes saved before terms existed still load.
     public init(from decoder: Decoder) throws {
@@ -68,6 +74,7 @@ public struct RefIndex: Codable, Sendable {
         terms = try c.decodeIfPresent([String: [Definition]].self, forKey: .terms) ?? [:]
         filesPerRepo = try c.decode([String: Int].self, forKey: .filesPerRepo)
         markdownByName = try c.decodeIfPresent([String: [String]].self, forKey: .markdownByName) ?? [:]
+        documentRefs = try c.decodeIfPresent([String: [String]].self, forKey: .documentRefs) ?? [:]
     }
 
     public static func build(roots: [String], excluding: Set<String> = []) -> RefIndex {
@@ -102,6 +109,8 @@ public struct RefIndex: Codable, Sendable {
     private mutating func remove(repoNamed name: String) {
         repos.removeAll { $0.name == name }
         filesPerRepo[name] = nil
+        firmTaskCites[name] = nil
+        for key in Array(documentRefs.keys) where key.hasPrefix(name + "/") { documentRefs[key] = nil }
         for key in Array(markdownByName.keys) {
             let kept = markdownByName[key]!.filter { !$0.hasPrefix(name + "/") }
             markdownByName[key] = kept.isEmpty ? nil : kept
@@ -124,7 +133,8 @@ public struct RefIndex: Codable, Sendable {
 
     private mutating func indexFiles(of repo: Repo) {
         var count = 0
-        for file in RepoDiscovery.markdownFiles(in: repo) {
+        let files = RepoDiscovery.files(in: repo)
+        for file in files.markdown {
             guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
             count += 1
             let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
@@ -132,11 +142,32 @@ public struct RefIndex: Codable, Sendable {
                 relativePath: relative, absolutePath: absolute)
         }
         filesPerRepo[repo.name] = count
+        for file in files.structured {
+            guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
+            let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
+            addStructured(text: text, fileName: file.lastPathComponent, repo: repo.name, relativePath: relative, absolutePath: absolute)
+        }
+    }
+
+    /// Indexes one JSON, YAML or TOML file (D60), after the `.md` files of its repo: an object with an ID and a title
+    /// defines that ID only if a `.md` of the repo cites it and no `.md` of the repo defines it. Exposed for tests.
+    public mutating func addStructured(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String,
+                                       everything: Bool = StructuredFiles.readsEverything) {
+        for c in StructuredFiles.candidates(fileName: fileName, text: text, everything: everything) {
+            guard c.key.hasPrefix("TASK ") ? firmTaskCites[repo]?.contains(c.key) == true
+                    : (mentions[c.key]?.byFile.keys.contains { $0.hasPrefix(repo + "/") }) == true,
+                  !(definitions[c.key] ?? []).contains(where: { $0.repo == repo && $0.rule != .structured }) else { continue }
+            definitions[c.key, default: []].append(Definition(
+                id: c.display, key: c.key, repo: repo, path: relativePath, line: c.line, rule: .structured,
+                title: c.title, summary: c.summary, absolutePath: absolutePath))
+        }
     }
 
     /// Indexes one file's content. Exposed for tests.
     public mutating func add(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String) {
         markdownByName[fileName.lowercased(), default: []].append(repo + "/" + relativePath)
+        let named = SectionRefs.documentsNamed(in: text)
+        if !named.isEmpty { documentRefs[repo + "/" + relativePath] = named }
         let lines = text.components(separatedBy: .newlines)
         let hits = DefinitionRules.definitions(fileName: fileName, lines: lines,
                                                folder: relativePath.split(separator: "/").dropLast().last.map(String.init) ?? "")
@@ -164,9 +195,18 @@ public struct RefIndex: Codable, Sendable {
         for (i, line) in lines.enumerated() {
             if line.trimmingCharacters(in: .whitespaces).hasPrefix("```") { inFence.toggle(); continue }
             if inFence { continue }
+            if let h = SectionRefs.heading(line) {
+                let key = "§" + h.number
+                definitions[key, default: []].append(Definition(
+                    id: key, key: key, repo: repo, path: relativePath, line: i + 1, rule: .heading,
+                    title: h.title, summary: SectionRefs.firstLine(after: i, in: lines), absolutePath: absolutePath))
+            }
             var skipDefinition = definedOnLine[i]
             for token in IDGrammar.tokens(in: line) {
                 if token.id.key == skipDefinition { skipDefinition = nil; continue }
+                if token.id.key.hasPrefix("TASK "), token.id.display.hasPrefix("Task") || token.id.key.contains(".") {
+                    firmTaskCites[repo, default: []].insert(token.id.key)
+                }
                 mentions[token.id.key, default: Mentions()].byFile["\(repo)/\(relativePath)", default: 0] += 1
             }
         }

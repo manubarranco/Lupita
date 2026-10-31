@@ -92,9 +92,14 @@ public enum RepoDiscovery {
 
     /// Markdown files of a repo, without descending into nested repos or worktrees.
     public static func markdownFiles(in repo: Repo) -> [URL] {
-        var files: [URL] = []
-        walkForMarkdown(URL(fileURLWithPath: repo.path), parents: nil, into: &files)
-        return files.sorted { $0.path < $1.path }
+        files(in: repo).markdown
+    }
+
+    /// The markdown files of a repo and, in the same walk, its JSON, YAML and TOML files that can define IDs (D60).
+    public static func files(in repo: Repo) -> (markdown: [URL], structured: [URL]) {
+        var markdown: [URL] = [], structured: [URL] = []
+        walkForMarkdown(URL(fileURLWithPath: repo.path), parents: nil, into: &markdown, structured: &structured)
+        return (markdown.sorted { $0.path < $1.path }, structured.sorted { $0.path < $1.path })
     }
 
     private static func walkForRepos(_ dir: URL, into found: inout [Repo]) {
@@ -110,7 +115,7 @@ public enum RepoDiscovery {
     }
 
     /// `parents`: folder names from the repo root down to `dir`'s parent; nil for the root itself.
-    private static func walkForMarkdown(_ dir: URL, parents: [String]?, into files: inout [URL]) {
+    private static func walkForMarkdown(_ dir: URL, parents: [String]?, into files: inout [URL], structured: inout [URL]) {
         let fm = FileManager.default
         if parents != nil, fm.fileExists(atPath: dir.appendingPathComponent(".git").path) { return }
         // Hidden entries are listed: the closed list of framework folders lives among them.
@@ -122,9 +127,12 @@ public enum RepoDiscovery {
             if (try? item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
                 let chain = parents.map { $0 + [dir.lastPathComponent] } ?? []
                 guard entersDirectory(name, under: chain) else { continue }
-                walkForMarkdown(item, parents: chain, into: &files)
+                walkForMarkdown(item, parents: chain, into: &files, structured: &structured)
             } else if !name.hasPrefix("."), item.pathExtension.lowercased() == "md" {
                 files.append(item)
+            } else if StructuredFiles.isRead(name: name, parents: parents.map { $0 + [dir.lastPathComponent] } ?? []),
+                      ((try? item.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0) <= StructuredFiles.maxBytes {
+                structured.append(item)
             }
         }
     }
@@ -141,9 +149,10 @@ public enum RepoDiscovery {
     /// Whether a changed file would be indexed: a `.md` inside `repo`, not under a skipped
     /// or hidden folder (bar the closed list of D043). Used by the file watcher to ignore noise.
     public static func isIndexed(path: String, in repo: Repo) -> Bool {
-        guard path.lowercased().hasSuffix(".md"), path.hasPrefix(repo.path + "/") else { return false }
+        guard path.hasPrefix(repo.path + "/") else { return false }
         let parts = path.dropFirst(repo.path.count + 1).split(separator: "/").map(String.init)
-        guard let file = parts.last, !file.hasPrefix(".") else { return false }
+        guard let file = parts.last, !file.hasPrefix("."),
+              path.lowercased().hasSuffix(".md") || StructuredFiles.isRead(name: file, parents: Array(parts.dropLast())) else { return false }
         let folders = parts.dropLast()
         return folders.enumerated().allSatisfy { i, name in
             entersDirectory(name, under: Array(folders.prefix(i)))

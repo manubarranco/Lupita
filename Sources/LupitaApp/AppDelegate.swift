@@ -166,7 +166,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// The second layer (D53): symbols are looked up after the first marks are up, and each one is underlined
+    /// The second layer (D53): symbols, commits, branches and `§` are looked up after the first marks are up, and each one is underlined
     /// as its answer comes back. Letting go, scrolling or switching app stops the lookups not yet started.
     private func showSymbols(_ generation: Int, read: OCR.WindowRead, marks: [HighlightPicker.Mark], resolver: Resolver) {
         let candidates = HighlightPicker.symbolCandidates(words: read.words, excluding: marks)
@@ -175,8 +175,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         currentHold?.end()
         currentHold = live
         let words = read.words, windowDark = read.isDark, pointer = Screen.topLeft(NSEvent.mouseLocation)
+        // A `§` needs the window's repo and file to know its document.
+        let context = ActiveContext.at(pointer, resolver: resolver.withoutGit())
         Task.detached(priority: .userInitiated) {
-            HighlightPicker.findSymbols(candidates, resolver: resolver, near: pointer, stop: { !live.isCurrent }) { found in
+            HighlightPicker.findSymbols(candidates, resolver: resolver, near: pointer, preferredRepo: context.repo, fromPath: context.path,
+                                        stop: { !live.isCurrent }) { found in
                 Task { @MainActor [weak self] in
                     guard let self, live.isCurrent, self.highlight.showing else { return }
                     self.highlight.add(found.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: words) ?? windowDark, $0.kind) })
@@ -321,7 +324,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 notice(S.notAReference, at: mouse)
             }
         }
-        TriggerLog.append(app: app, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
+        TriggerLog.append(app: app, method: method + " win=\(context.repo ?? "-"):\(context.path ?? "-")",
+                          ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
     }
 
     /// A tracker key no file defines: git looks for the commit off the main thread and the answer is shown once, finished:

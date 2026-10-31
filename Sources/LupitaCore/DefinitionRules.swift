@@ -4,6 +4,8 @@ import Foundation
 /// defined more than once in the same repo.
 public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     case frontmatter, heading, fileName, listOrColon, tableRow
+    /// An object with an ID and a title in a JSON, YAML or TOML file, kept only when a `.md` of the repo cites the ID (D60).
+    case structured
     /// A heading with no title (`## P1`) or the same ID heading several sections of one
     /// file (`## D034 bloque 2`): a section *about* the ID, not where it is defined.
     case section
@@ -22,6 +24,7 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .heading: 90
         case .fileName: 80
         case .listOrColon: 60
+        case .structured: 50
         case .tableRow: 40
         case .section: 20
         case .term: 10
