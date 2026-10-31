@@ -8,6 +8,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     private let store: IndexStore
     private let onHotkeyChange: (HotkeyChoice) -> Void
     var onPrepareRepos: (() -> Void)?
+    var onTutorial: (() -> Void)?
     var onIDReport: (() -> Void)?
     var onAppearance: (() -> Void)?
 
@@ -191,6 +192,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
         add.onClick = { [weak self] in self?.closeMenu(then: { self?.addRoot() }) }
         menu.addItem(viewItem(add))
         menu.addItem(action(S.prepareRepos, #selector(prepareRepos)))
+        menu.addItem(action(S.showTutorial, #selector(showTutorial)))
         let reindex = action(S.reindex, #selector(reindex))
         menu.addItem(reindex)
         reindexItem = reindex
@@ -493,6 +495,7 @@ final class StatusMenu: NSObject, NSMenuDelegate {
     @objc private func showAppearance() { onAppearance?() }
 
     @objc private func prepareRepos() { onPrepareRepos?() }
+    @objc private func showTutorial() { onTutorial?() }
 
     @objc func addRoot() {
         let panel = NSOpenPanel()

@@ -25,13 +25,14 @@ final class TooltipPanel {
     /// The answer on screen, if it is a tooltip (not a notice).
     private(set) var resolution: Resolution?
 
-    func show(_ resolution: Resolution, at mouse: NSPoint) {
+    /// - Parameter open: what a click on a definition does; the file opener unless the caller (the welcome step) stages it.
+    func show(_ resolution: Resolution, at mouse: NSPoint, open: ((Definition) -> Void)? = nil) {
         defer { self.resolution = resolution }
         // The theme is read when the tooltip opens, so a change in Aspecto shows the next time.
         let theme = TooltipStyle.current()
         present(TooltipView(resolution: resolution, theme: theme, open: { [weak self] d in
             self?.close()
-            FileOpener.open(d)
+            (open ?? FileOpener.open)(d)
         }), insets: theme.insets(of: theme.containerShadow), at: mouse, autoDismiss: nil)
     }
 
@@ -84,6 +85,11 @@ final class TooltipPanel {
 
         if let local = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: { [weak self] event in
             if event.keyCode == 53 { self?.close(); return nil }
+            return event
+        }) { monitors.append(local) }
+        // Global monitors never see clicks in Lupita's own windows: a click there closes it too.
+        if let local = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown], handler: { [weak self] event in
+            if event.window !== self?.panel { self?.close() }
             return event
         }) { monitors.append(local) }
         if let global = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown, .leftMouseDown, .rightMouseDown], handler: { [weak self] event in

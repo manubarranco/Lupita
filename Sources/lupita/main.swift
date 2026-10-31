@@ -50,11 +50,15 @@ case "poke":
     args.removeFirst()
     var info: [String: String] = [:]
     if let lens = take("--lens", &args) { info["lens"] = lens }
+    // With --hold, the highlight (or the welcome step's) for that many seconds, then released.
+    if let hold = take("--hold", &args) { info["hold"] = hold }
     if let query = take("--query", &args) { info["query"] = query }
     if let repo = take("--repo", &args) { info["repo"] = repo }
     if let at = take("--at", &args) { info["at"] = at }
     // With --onboarding, it opens the "Prepare your repos" window instead.
     if args.contains("--onboarding") { info["onboarding"] = "1" }
+    // With --tutorial, the welcome step (D56).
+    if args.contains("--tutorial") { info["tutorial"] = "1" }
     // With --about, the About panel.
     if args.contains("--about") { info["about"] = "1" }
     if args.contains("--menu") { info["menu"] = args.contains("--confirm") ? "confirm" : args.contains("--expand") ? "expand" : "1" }

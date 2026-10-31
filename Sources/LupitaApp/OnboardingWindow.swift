@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import LupitaCore
 import SwiftUI
 
@@ -11,7 +12,10 @@ final class OnboardingWindow {
     private var window: NSWindow?
     private var timer: Timer?
     private var closeObserver: NSObjectProtocol?
+    private var titleWatch: AnyCancellable?
     private let store: IndexStore
+    /// The welcome step (D56): the shortcut is routed to it while it is in front.
+    let welcome = WelcomeScene()
     private let model: OnboardingModel
     private let addFolder: () -> Void
 
@@ -20,19 +24,34 @@ final class OnboardingWindow {
         self.model = OnboardingModel(store: store)
         self.addFolder = addFolder
         store.onChange = { [weak self] in self?.model.indexChanged() }
+        welcome.onFinish = { [weak self] in self?.model.showWelcome = false }
+    }
+
+    /// The welcome step takes the shortcut only while Lupita is the app in front and the step is on screen.
+    var activeWelcome: WelcomeScene? {
+        model.showWelcome && window?.isVisible == true && NSApp.isActive ? welcome : nil
+    }
+
+    /// «Show the tutorial…» in the menu: the welcome step again, then the screen that was next.
+    func showTutorial() {
+        welcome.reset()
+        model.showWelcome = true
+        show()
     }
 
     /// First launch, once the permissions have been asked for.
     func showFirstTimeIfNeeded() {
         guard !UserDefaults.standard.bool(forKey: Self.shownKey) else { return }
         UserDefaults.standard.set(true, forKey: Self.shownKey)
+        welcome.reset()
+        model.showWelcome = true
         show()
     }
 
     func show() {
         model.open()
         if window == nil {
-            let host = NSHostingController(rootView: OnboardingView(model: model, addFolder: addFolder))
+            let host = NSHostingController(rootView: OnboardingView(model: model, welcome: welcome, addFolder: addFolder))
             // Let the window keep its size: the list scrolls, and three or four repos fit at once.
             host.sizingOptions = []
             let w = NSWindow(contentViewController: host)
@@ -42,9 +61,12 @@ final class OnboardingWindow {
             w.isReleasedWhenClosed = false
             w.center()
             window = w
+            titleWatch = model.$showWelcome.sink { [weak w] welcoming in
+                w?.title = welcoming ? S.welcomeWindowTitle : S.onboardingTitle
+            }
             closeObserver = NotificationCenter.default.addObserver(forName: NSWindow.willCloseNotification,
                                                                    object: w, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated { self?.stopTimer() }
+                MainActor.assumeIsolated { self?.stopTimer(); self?.welcome.reset(); self?.model.showWelcome = false }
             }
         }
         startTimer()
@@ -106,6 +128,8 @@ final class OnboardingModel: ObservableObject {
     @Published var selected: Set<String> = []
     @Published var editors: [Editor] = [.finder]
     @Published var copied: String?
+    /// The welcome step comes before the folders on the first run (D56).
+    @Published var showWelcome = false
     @Published var mode: Mode {
         didSet { UserDefaults.standard.set(mode.rawValue, forKey: Self.modeKey); copied = nil }
     }
@@ -229,11 +253,12 @@ final class OnboardingModel: ObservableObject {
 
 private struct OnboardingView: View {
     @ObservedObject var model: OnboardingModel
+    let welcome: WelcomeScene
     let addFolder: () -> Void
 
     var body: some View {
         Group {
-            if model.roots.isEmpty { FoldersStep(model: model) } else { ReposStep(model: model, addFolder: addFolder) }
+            if model.showWelcome { WelcomeStep(scene: welcome) } else if model.roots.isEmpty { FoldersStep(model: model) } else { ReposStep(model: model, addFolder: addFolder) }
         }
         .padding(20)
         .frame(minWidth: 480, minHeight: 360)
