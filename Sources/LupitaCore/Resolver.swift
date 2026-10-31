@@ -27,6 +27,9 @@ public struct Resolution: Sendable {
     public var fromOtherRepo = false
     /// A range of IDs (D41): the tooltip lists what it spans instead of showing definitions.
     public var range: RangeList?
+    /// A tracker key whose commit is still being searched for: the card shows the key now and is replaced by
+    /// `Resolver.trackerResolution` when git answers (or closed when it has nothing).
+    public var isPending = false
 
     /// The tooltip shows it (anything else says «not a known reference»).
     public var isShown: Bool { [.exact, .corrected, .ambiguous].contains(kind) && !definitions.isEmpty }
@@ -39,6 +42,18 @@ public struct Resolver: Sendable {
     public let index: RefIndex
     /// Longest first, so `harbor-web` wins over a shorter name inside it (`harbor`).
     let repoNames: [String]
+    /// Off: no git command runs inside `resolve`; a tracker key nothing defines stays `undefined` and the caller asks
+    /// `trackerResolution` off the main thread (the app), or a highlight pass reads only the cached answers.
+    public private(set) var searchesGit = true
+    /// The one place a tracker key is searched in a repo's history; replaced by tests to make git slow.
+    var commitSearch: @Sendable (String, Repo, TimeInterval) -> Definition? = { RepoRefs.commitCiting($0, repo: $1, timeout: $2) }
+
+    /// The same resolver, without git commands inside `resolve`.
+    public func withoutGit() -> Resolver {
+        var copy = self
+        copy.searchesGit = false
+        return copy
+    }
 
     public init(index: RefIndex) {
         self.index = index
@@ -107,16 +122,8 @@ public struct Resolver: Sendable {
         if let id = IDGrammar.parse(query) ?? Self.inheritedID(query, context: context, block: block) {
             let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
             if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
-            // A tracker key no file defines: the commit that cites it, if the window's repo has one.
-            if let commit = trackerCommit(for: id, preferredRepo: preferredRepo) {
-                return Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
-            }
-            // The window's repo (or none) has no commit with it: the other repos, flagged, within one second in all.
-            if IDGrammar.isTrackerKey(id.display), let commit = trackerCommitElsewhere(for: id, except: preferredRepo) {
-                var r = Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
-                r.fromOtherRepo = preferredRepo != nil
-                return r
-            }
+            // A tracker key no file defines: the commit that cites it (window's repo first, then the other repos).
+            if searchesGit, let r = trackerResolution(query: query, id: id, preferredRepo: preferredRepo) { return r }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
         // term and a symbol is a term unless the text is shaped like code.
@@ -171,19 +178,56 @@ public struct Resolver: Sendable {
         return Resolution(query: query, kind: .notAnID, key: nil, definitions: [], mentions: nil, alternatives: [])
     }
 
+    /// The card for a tracker key some commit cites, or nil. Runs git: never call it on the main thread. The window's
+    /// repo comes first; the other repos, flagged, share one second.
+    public func trackerResolution(query: String, id: RefID, preferredRepo: String?) -> Resolution? {
+        if let commit = trackerCommit(for: id, preferredRepo: preferredRepo) {
+            return Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+        }
+        if IDGrammar.isTrackerKey(id.display), let commit = trackerCommitElsewhere(for: id, except: preferredRepo) {
+            var r = Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+            r.fromOtherRepo = preferredRepo != nil
+            return r
+        }
+        return nil
+    }
+
+    /// Whether a pass with git off met a tracker key whose answer is not cached (read once, then cleared): the caller then
+    /// repeats the pass with git on, off the main thread, and adds the marks that were missing.
+    public static func takeUncachedTrackerKeys() -> Bool { TrackerCache.takeMisses() }
+
+    /// The key to search for when `resolution` is an `undefined` tracker key and git was off; nil for anything else.
+    public func pendingTrackerKey(_ resolution: Resolution) -> RefID? {
+        guard !searchesGit, resolution.kind == .undefined, let id = IDGrammar.parse(resolution.query),
+              IDGrammar.isTrackerKey(id.display), !index.repos.isEmpty else { return nil }
+        return id
+    }
+
+    /// The card shown at once for a tracker key while git searches: the key and «looking for the commit».
+    public func pendingResolution(for resolution: Resolution, preferredRepo: String?) -> Resolution {
+        let repo = index.repos.first { $0.name.caseInsensitiveCompare(preferredRepo ?? "") == .orderedSame } ?? index.repos.first
+        let d = Definition(id: resolution.query, key: resolution.key ?? resolution.query, repo: repo?.name ?? "", path: "", line: 0,
+                           rule: .commit, title: S.lookingForCommit, summary: "", absolutePath: repo?.path ?? "")
+        var r = Resolution(query: resolution.query, kind: .exact, key: resolution.key, definitions: [d], mentions: nil, alternatives: [])
+        r.isPending = true
+        return r
+    }
+
     /// The latest commit (or branch) of the window's repo that names the tracker key `id`, or nil: no repo, no
     /// commit, or a key that is not shaped like one. A definition in a `.md` always wins over this.
     public func trackerCommit(for id: RefID, preferredRepo: String?) -> Definition? {
         guard let preferredRepo, IDGrammar.isTrackerKey(id.display),
               let repo = index.repos.first(where: { $0.name.caseInsensitiveCompare(preferredRepo) == .orderedSame })
         else { return nil }
-        return RepoRefs.commitCiting(id.display, repo: repo)
+        return commitSearch(id.display, repo, RepoRefs.keySearchTimeout)
     }
 
     /// Whether some repo has a commit (or branch) that names the tracker key: what the highlight needs to underline `PLAT-443341`.
     /// A git search per word on every pass would be slow, so answers are kept for half a minute.
     public func hasTrackerCommit(_ id: RefID, preferredRepo: String? = nil) -> Bool {
         guard IDGrammar.isTrackerKey(id.display) else { return false }
+        // Without git, only an answer already known: an unknown key is noted for a later pass off the main thread.
+        if !searchesGit { return TrackerCache.cached(id.display) ?? { TrackerCache.noteMiss(); return false }() }
         return TrackerCache.answer(for: id.display) {
             trackerCommit(for: id, preferredRepo: preferredRepo) != nil || trackerCommitElsewhere(for: id, except: preferredRepo) != nil
         }
@@ -194,7 +238,7 @@ public struct Resolver: Sendable {
         let deadline = Date().addingTimeInterval(RepoRefs.keySearchTimeout)
         for repo in index.repos where repo.name.caseInsensitiveCompare(preferredRepo ?? "") != .orderedSame {
             guard Date() < deadline else { return nil }
-            if let d = RepoRefs.commitCiting(id.display, repo: repo, timeout: deadline.timeIntervalSinceNow) { return d }
+            if let d = commitSearch(id.display, repo, deadline.timeIntervalSinceNow) { return d }
         }
         return nil
     }
@@ -443,6 +487,17 @@ enum TrackerCache {
     nonisolated(unsafe) private static var answers: [String: (found: Bool, at: Date)] = [:]
     private static let lock = NSLock()
     static let lifetime: TimeInterval = 30
+    nonisolated(unsafe) private static var misses = 0
+
+    /// The answer if it is known and fresh.
+    static func cached(_ key: String) -> Bool? {
+        lock.lock(); defer { lock.unlock() }
+        if let hit = answers[key], Date().timeIntervalSince(hit.at) < lifetime { return hit.found }
+        return nil
+    }
+    static func noteMiss() { lock.lock(); misses += 1; lock.unlock() }
+    /// Whether a no-git pass met a key with no answer yet since the last call.
+    static func takeMisses() -> Bool { lock.lock(); defer { lock.unlock() }; let m = misses > 0; misses = 0; return m }
 
     static func answer(for key: String, compute: () -> Bool) -> Bool {
         lock.lock()
