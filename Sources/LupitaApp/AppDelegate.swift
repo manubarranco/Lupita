@@ -310,25 +310,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         TriggerLog.append(app: app, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
     }
 
-    /// A tracker key no file defines: the card with the key appears now; git looks for the commit off the main thread
-    /// and the card is replaced when it comes back. With no commit the card closes and says «not known», as before.
+    /// A tracker key no file defines: git looks for the commit off the main thread and the answer is shown once, finished:
+    /// the card with the commit, or «not known» when there is none. No provisional card (it flashed, unreadable).
     private func searchCommit(of id: RefID, for result: Resolution, in resolver: Resolver, at mouse: NSPoint?,
                               method: String, start: Date, context: ActiveContext) {
         lookupGeneration += 1
         let generation = lookupGeneration
-        if let mouse { tooltip.show(resolver.pendingResolution(for: result, preferredRepo: context.repo), at: mouse) }
         let (query, repo) = (result.query, context.repo)
         Task.detached(priority: .userInitiated) {
             let found = resolver.trackerResolution(query: query, id: id, preferredRepo: repo)
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                let stillOurs = generation == self.lookupGeneration && self.tooltip.resolution?.isPending == true
-                if let mouse, stillOurs {
+                // A newer press while git searched: its answer is the one on screen, this one is dropped.
+                if let mouse, generation == self.lookupGeneration {
                     if let found {
                         self.tooltip.show(found, at: mouse)
                         self.lens.react(found: true, near: self.tooltip.frame)
                     } else {
-                        self.tooltip.close()
                         self.notice(S.notAReference, at: mouse)
                     }
                 }

@@ -2,7 +2,7 @@ import Foundation
 import Testing
 @testable import LupitaCore
 
-// The git search for a tracker key runs off the main thread; the card shows the key at once and the commit is added.
+// The git search for a tracker key runs off the main thread; the card appears once, finished: with the commit, or the notice.
 
 @Suite(.serialized) struct TrackerOffMainTests {
     let root: URL
@@ -64,26 +64,24 @@ import Testing
         #expect(result.flatMap { fast.pendingTrackerKey($0) }?.display == "PLAT-443341")
     }
 
-    @Test func theCardShowsTheKeyAtOnceAndTheCommitReplacesIt() throws {
+    @Test func theCardIsPresentedOnceWithTheCommit() throws {
         guard Git.executable != nil else { return }
         let fast = resolver().withoutGit()
         let undefined = fast.resolve("PLAT-443341", preferredRepo: "atlas")
         let id = try #require(fast.pendingTrackerKey(undefined))
-        let pending = fast.pendingResolution(for: undefined, preferredRepo: "atlas")
-        #expect(pending.isPending && pending.isShown)
-        #expect(pending.definitions.first?.id == "PLAT-443341")
-        #expect(pending.definitions.first?.title == S.lookingForCommit)
-        // The commit that arrives is the one the lookup with git on gives.
+        // With git off nothing is shown for the key: no provisional card, only the key to search for.
+        #expect(!undefined.isShown)
+        // The one card that is presented has the commit the lookup with git on gives.
         let filled = try #require(resolver().trackerResolution(query: "PLAT-443341", id: id, preferredRepo: "atlas"))
         let direct = resolver().resolve("PLAT-443341", preferredRepo: "atlas")
-        #expect(filled.definitions == direct.definitions && !filled.isPending)
+        #expect(filled.definitions == direct.definitions && filled.isShown)
         #expect(filled.definitions.first?.title == "fix crash on save (PLAT-443341)")
         // From another repo's window it is flagged, as before.
         let other = try #require(resolver().trackerResolution(query: "PLAT-443341", id: id, preferredRepo: "other"))
         #expect(other.fromOtherRepo)
     }
 
-    @Test func aKeyWithoutCommitOrBranchLeavesNothingPending() throws {
+    @Test func aKeyWithoutCommitOrBranchGivesNoCard() throws {
         guard Git.executable != nil else { return }
         let fast = resolver().withoutGit()
         let undefined = fast.resolve("PLAT-12345", preferredRepo: "atlas")

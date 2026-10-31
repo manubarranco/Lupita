@@ -27,9 +27,6 @@ public struct Resolution: Sendable {
     public var fromOtherRepo = false
     /// A range of IDs (D41): the tooltip lists what it spans instead of showing definitions.
     public var range: RangeList?
-    /// A tracker key whose commit is still being searched for: the card shows the key now and is replaced by
-    /// `Resolver.trackerResolution` when git answers (or closed when it has nothing).
-    public var isPending = false
 
     /// The tooltip shows it (anything else says «not a known reference»).
     public var isShown: Bool { [.exact, .corrected, .ambiguous].contains(kind) && !definitions.isEmpty }
@@ -201,16 +198,6 @@ public struct Resolver: Sendable {
         guard !searchesGit, resolution.kind == .undefined, let id = IDGrammar.parse(resolution.query),
               IDGrammar.isTrackerKey(id.display), !index.repos.isEmpty else { return nil }
         return id
-    }
-
-    /// The card shown at once for a tracker key while git searches: the key and «looking for the commit».
-    public func pendingResolution(for resolution: Resolution, preferredRepo: String?) -> Resolution {
-        let repo = index.repos.first { $0.name.caseInsensitiveCompare(preferredRepo ?? "") == .orderedSame } ?? index.repos.first
-        let d = Definition(id: resolution.query, key: resolution.key ?? resolution.query, repo: repo?.name ?? "", path: "", line: 0,
-                           rule: .commit, title: S.lookingForCommit, summary: "\u{A0}", absolutePath: repo?.path ?? "")  // the blank line keeps the card the size it will have
-        var r = Resolution(query: resolution.query, kind: .exact, key: resolution.key, definitions: [d], mentions: nil, alternatives: [])
-        r.isPending = true
-        return r
     }
 
     /// The latest commit (or branch) of the window's repo that names the tracker key `id`, or nil: no repo, no

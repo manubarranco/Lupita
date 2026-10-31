@@ -3,7 +3,7 @@ import LupitaCore
 import SwiftUI
 
 /// Development aid: `LupitaApp --render-tracker-states <dir>` writes `tracker-states-light.png` and `-dark.png`: the card of
-/// a tracker key before its commit arrives, filled, and with no commit (the notice), next to an `FR-001` and a `D045` that
+/// a tracker key with its commit and with no commit (the notice), next to an `FR-001` and a `D045` that
 /// already worked. Synthetic data: no repo is read, no git runs.
 @MainActor
 enum TrackerSheet {
@@ -14,11 +14,6 @@ enum TrackerSheet {
         }
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         S.language = "es"
-        var index = RefIndex()
-        index.repos = [.made(name: "atlas", path: "/Users/demo/atlas")]
-        let resolver = Resolver(index: index).withoutGit()
-        let undefined = resolver.resolve("PLAT-443341", preferredRepo: "atlas")
-        let pending = resolver.pendingResolution(for: undefined, preferredRepo: "atlas")
         let commit = Definition.made(id: "PLAT-443341", key: "9f2c1d7a0b3e", repo: "atlas", rule: .commit,
                                      title: "fix crash on save (PLAT-443341)", summary: "2026-10-28 · en la rama main", absolutePath: "/Users/demo/atlas")
         let filled = Resolution.made(query: "PLAT-443341", key: "PLAT443341", definitions: [commit])
@@ -32,9 +27,8 @@ enum TrackerSheet {
             let theme = TooltipStyle.current(mode: scheme == .dark ? .dark : .light)
             func card(_ r: Resolution) -> AnyView { AnyView(TooltipView(resolution: r, theme: theme, open: { _ in })) }
             let rows: [(String, AnyView)] = [
-                ("PLAT-443341 · antes de rellenarse", card(pending)),
-                ("PLAT-443341 · con su commit", card(filled)),
-                ("PLAT-443341 · sin commit (se cierra y avisa)", AnyView(NoticeView(text: S.notAReference, theme: theme))),
+                ("PLAT-443341 · con su commit (una sola tarjeta, terminada)", card(filled)),
+                ("PLAT-443341 · sin commit (directamente el aviso)", AnyView(NoticeView(text: S.notAReference, theme: theme))),
                 ("FR-001 · como siempre", card(fr)),
                 ("D045 · como siempre", card(d45)),
             ]

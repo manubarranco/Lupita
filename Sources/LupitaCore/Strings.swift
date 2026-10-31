@@ -23,7 +23,6 @@ public enum S {
     // MARK: Lookup
     public static var indexing: String { t("Indexing…", "Indexando…") }
     public static var indexingTryAgain: String { t("Indexing… try again in a moment", "Indexando… prueba en un momento") }
-    public static var lookingForCommit: String { t("Looking for its commit…", "Buscando su commit…") }
     public static var notAReference: String { t("Not a known reference", "No es una referencia conocida") }
 
     // MARK: Tooltip
