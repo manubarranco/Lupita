@@ -104,12 +104,18 @@ public struct Resolver: Sendable {
         // A bar glued to a letter or digit is a misread 1 (`D|` for `D1`), not punctuation.
         let bars = raw.replacingOccurrences(of: #"(?<=[A-Za-z0-9])\|"#, with: "1", options: .regularExpression)
         let query = Self.latinize(bars.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        if let id = IDGrammar.parse(query) ?? Self.inheritedID(query, context: context) {
+        if let id = IDGrammar.parse(query) ?? Self.inheritedID(query, context: context, block: block) {
             let (key, defs) = scopedDefinitions(for: id, preferredRepo: preferredRepo, fromPath: fromPath)
             if !defs.isEmpty { return result(query, .exact, key: key, defs, preferredRepo, fromPath, ownFileFirst: id.scope != .none) }
             // A tracker key no file defines: the commit that cites it, if the window's repo has one.
             if let commit = trackerCommit(for: id, preferredRepo: preferredRepo) {
                 return Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+            }
+            // The window's repo (or none) has no commit with it: the other repos, flagged, within one second in all.
+            if IDGrammar.isTrackerKey(id.display), let commit = trackerCommitElsewhere(for: id, except: preferredRepo) {
+                var r = Resolution(query: query, kind: .exact, key: id.key, definitions: [commit], mentions: nil, alternatives: [])
+                r.fromOtherRepo = preferredRepo != nil
+                return r
             }
         }
         // Code (D29) comes after IDs and repo references and before glossary terms: a name that is both a
@@ -170,14 +176,38 @@ public struct Resolver: Sendable {
         return RepoRefs.commitCiting(id.display, repo: repo)
     }
 
+    /// The commit of any other repo that names the key; the search of all of them shares one second.
+    func trackerCommitElsewhere(for id: RefID, except preferredRepo: String?) -> Definition? {
+        let deadline = Date().addingTimeInterval(RepoRefs.keySearchTimeout)
+        for repo in index.repos where repo.name.caseInsensitiveCompare(preferredRepo ?? "") != .orderedSame {
+            guard Date() < deadline else { return nil }
+            if let d = RepoRefs.commitCiting(id.display, repo: repo, timeout: deadline.timeIntervalSinceNow) { return d }
+        }
+        return nil
+    }
+
     /// A bare number that ends a list with an omitted prefix (`PU-02, 03 y 26` with the pointer on `03`): the ID it
     /// inherits, read from the text before it, or nil.
-    static func inheritedID(_ word: String, context: String?) -> RefID? {
-        guard let context, word.count >= 1, word.count <= 4, word.allSatisfy(\.isASCII), word.allSatisfy(\.isNumber) else { return nil }
-        let text = context + (context.last?.isWhitespace ?? true ? "" : " ") + word
-        guard let last = IDGrammar.tokens(in: text).last, last.id.scope == .folder, last.id.display == word,
-              last.range.location + last.range.length == (text as NSString).length else { return nil }
-        return last.id
+    static func inheritedID(_ word: String, context: String?, block: String? = nil) -> RefID? {
+        guard word.count >= 1, word.count <= 4, word.allSatisfy(\.isASCII), word.allSatisfy(\.isNumber) else { return nil }
+        func inherited(_ before: String) -> RefID? {
+            let text = before + (before.last?.isWhitespace ?? true ? "" : " ") + word
+            guard let last = IDGrammar.tokens(in: text).last, last.id.scope == .folder, last.id.display == word,
+                  last.range.location + last.range.length == (text as NSString).length else { return nil }
+            return last.id
+        }
+        if let context, let id = inherited(context) { return id }
+        // The list is broken across lines (`FR-` / `001, 002`): the text around the word, joined, still has its start.
+        guard let block else { return nil }
+        let joined = block.replacingOccurrences(of: #"-\s+(?=\d)"#, with: "-", options: .regularExpression)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+        var from = joined.startIndex
+        while let r = joined.range(of: word, range: from..<joined.endIndex) {
+            if r.lowerBound > joined.startIndex, joined[joined.index(before: r.lowerBound)] == " ",
+               let id = inherited(String(joined[..<r.lowerBound])) { return id }
+            from = r.upperBound
+        }
+        return nil
     }
 
     /// A numbered form with a word (`Requirement 3`, `Task Group 2`) for `phrase`, or nil. Public so the picker

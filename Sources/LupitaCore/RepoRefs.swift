@@ -118,11 +118,11 @@ public enum RepoRefs {
 
     /// The latest commit (any branch) whose message names the tracker key `PLAT-443341`, or else a branch whose name
     /// does: the only thing Lupita can say about a key that no `.md` defines. Looked up on demand, never indexed.
-    static func commitCiting(_ key: String, repo: Repo) -> Definition? {
+    static func commitCiting(_ key: String, repo: Repo, timeout: TimeInterval = keySearchTimeout) -> Definition? {
         let started = Date()
         let escaped = NSRegularExpression.escapedPattern(for: key)
         let args = ["log", "--all", "-1", "-E", "--grep=(^|[^A-Za-z0-9_-])\(escaped)($|[^A-Za-z0-9_])", "--format=%H%x1f%s%x1f%ad%x1f%h", "--date=short"]
-        if let out = Git.output(repo.path, args, timeout: keySearchTimeout)?.trimmingCharacters(in: .newlines), !out.isEmpty {
+        if let out = Git.output(repo.path, args, timeout: max(0.05, timeout))?.trimmingCharacters(in: .newlines), !out.isEmpty {
             let f = out.components(separatedBy: "\u{1f}")
             if f.count == 4 {
                 // No link to the hosting site: knowing whether the commit was pushed means walking the whole history.

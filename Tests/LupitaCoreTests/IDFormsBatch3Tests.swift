@@ -116,6 +116,14 @@ import Testing
         #expect(r.resolve("26", preferredRepo: "r", context: "PU-02, 03 y", fromPath: "elsewhere/notes.md").definitions.isEmpty)
     }
 
+    @Test func aListBrokenAcrossLinesStillInheritsThePrefix() {
+        let r = Self.resolver(["docs/fr.md": "- **FR-002**: Second\n- **FR-003**: Third"])
+        let block = "see FR-\n001, 002, 003 for details"
+        #expect(r.resolve("002", preferredRepo: "r", context: "001,", fromPath: "docs/a.md", block: block).definitions.first?.path == "docs/fr.md")
+        #expect(r.resolve("003", preferredRepo: "r", context: "001, 002,", fromPath: "docs/a.md", block: block).definitions.first?.path == "docs/fr.md")
+        #expect(r.resolve("003", preferredRepo: "r", context: "", fromPath: "docs/a.md", block: "total 003 items").definitions.isEmpty)
+    }
+
     @Test func aBareNumberOutsideAListIsNotAnId() {
         let r = Self.resolver(["docs/pu.md": "- **PU-03**: Third item"])
         #expect(r.resolve("03", preferredRepo: "r", context: "chapter ", fromPath: "docs/a.md").definitions.isEmpty)
@@ -255,11 +263,18 @@ import Testing
         #expect(r.definitions.first?.rule == .listOrColon)
     }
 
-    @Test func aLongerNumberIsAnotherKeyAndNoRepoMeansNothing() {
+    @Test func aLongerNumberIsAnotherKey() {
         guard Git.executable != nil else { return }
         #expect(resolver().resolve("PLAT-44334", preferredRepo: "atlas").definitions.isEmpty)
-        #expect(resolver().resolve("PLAT-443341", preferredRepo: nil).definitions.isEmpty)
-        #expect(resolver().resolve("PLAT-443341", preferredRepo: "other").definitions.isEmpty)
+        #expect(resolver().resolve("PLAT-44334", preferredRepo: "other").definitions.isEmpty)
+    }
+
+    @Test func aKeyCitedOnlyInAnotherRepoIsShownFlagged() {
+        guard Git.executable != nil else { return }
+        let other = resolver().resolve("PLAT-443341", preferredRepo: "other")
+        #expect(other.definitions.first?.rule == .commit && other.fromOtherRepo)
+        let none = resolver().resolve("PLAT-443341", preferredRepo: nil)
+        #expect(none.definitions.first?.rule == .commit && !none.fromOtherRepo)
     }
 
     @Test func aBranchNamedAfterTheKeyIsShownWhenNoCommitCitesIt() {
