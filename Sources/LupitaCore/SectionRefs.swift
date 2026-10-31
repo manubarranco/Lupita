@@ -25,7 +25,8 @@ public enum SectionRefs {
     static let numberedHeading = try! NSRegularExpression(
         pattern: #"^#{1,6}\s+§?\s?(\d{1,3}(?:\.\d{1,3}){0,3})\.?\s+(\S.*)$"#)
     static let linkBefore = try! NSRegularExpression(pattern: #"\]\(([^)\s#]+?)(?:#[^)\s]*)?\)[\s`*_]*$"#)
-    static let wordBefore = try! NSRegularExpression(pattern: #"([A-Za-z][A-Za-z0-9_.\-/]*)(?:['’]s)?[\s`*_)\]"'’,:;]*$"#)
+    /// Letters of any language: `núcleo` is one word, not `cleo`.
+    static let wordBefore = try! NSRegularExpression(pattern: #"(\p{L}[\p{L}0-9_.\-/]*)(?:['’]s)?[\s`*_)\]"'’,:;(]*$"#)
     static let after = try! NSRegularExpression(
         pattern: #"^[)\]`*_]*\s*(?:\(|,)?\s*(?:of|in|from|de|del|en)\s+(?:the\s+|la\s+|el\s+)?[`\[*_]*([A-Za-z][A-Za-z0-9_.\-/]*)"#,
         options: .caseInsensitive)
@@ -217,14 +218,18 @@ extension Resolver {
                 return d.repo.caseInsensitiveCompare(preferredRepo) == .orderedSame
             }
             if !own.isEmpty {
-                if let name = id.document {
+                // The word before names a document only if the repos have one by that name: `el núcleo (§1)` is prose.
+                let isADocument = id.document.map { name in
+                    (index.markdownByName.values.joined()).contains { SectionRefs.isDocument(name, path: $0) }
+                } ?? false
+                if let name = id.document, isADocument {
                     let named = own.filter { SectionRefs.isDocument(name, path: $0.path) }
                     if !named.isEmpty { return (k, named, .named) }
                     // A document is named and has no such section: it is not the reader's file or its neighbours that are meant.
                     return (id.key, [], nil)
                 }
                 // `RFC 7009 §2.1`: a § of something that is not a document here.
-                if id.citesOther { return (id.key, [], nil) }
+                if id.citesOther, isADocument || id.document == nil { return (id.key, [], nil) }
                 guard let fromPath else { return (k, own, .repoWide) }
                 let mine = fromPath.split(separator: "/").dropLast().map(String.init)
                 let here = own.filter { $0.path == fromPath }

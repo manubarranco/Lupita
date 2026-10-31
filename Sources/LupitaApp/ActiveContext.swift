@@ -30,8 +30,25 @@ struct ActiveContext {
             context.repo = resolver.repoNamed(in: title)
         }
         // 3. A window that says no file (a chat app): the repo its texts name most (`Entorno LiOS`, the chat's title).
-        if context.repo == nil { context.repo = resolver.repoMostNamed(in: texts(of: window)) }
+        if context.repo == nil {
+            let texts = texts(of: window)
+            context.repo = resolver.repoMostNamed(in: texts)
+            if let repo = context.repo { context.path = openFile(in: texts, repo: repo, resolver: resolver) }
+        }
         return context
+    }
+
+    /// A text that is just a file name of `repo` (a tab or a pane title: `lios-intention.md`), found once in it: the file
+    /// the window shows. A name inside a sentence does not count, nor one the repo has twice.
+    private static func openFile(in texts: [String], repo: String, resolver: Resolver) -> String? {
+        for text in texts {
+            let name = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard name.lowercased().hasSuffix(".md"), !name.contains(" "), name.count < 120 else { continue }
+            let file = (name as NSString).lastPathComponent.lowercased()
+            let paths = (resolver.index.markdownByName[file] ?? []).filter { $0.hasPrefix(repo + "/") }
+            if paths.count == 1 { return String(paths[0].dropFirst(repo.count + 1)) }
+        }
+        return nil
     }
 
     /// Texts of a window's elements, a bounded walk: at most `maxElements` and `budget` seconds, so a long chat stays cheap.

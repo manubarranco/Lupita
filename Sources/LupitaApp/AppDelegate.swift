@@ -324,7 +324,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 notice(S.notAReference, at: mouse)
             }
         }
-        TriggerLog.append(app: app, method: method, ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
+        TriggerLog.append(app: app, method: method + " win=\(context.repo ?? "-"):\(context.path ?? "-")",
+                          ms: Int(Date().timeIntervalSince(start) * 1000), result: result)
     }
 
     /// A tracker key no file defines: git looks for the commit off the main thread and the answer is shown once, finished:

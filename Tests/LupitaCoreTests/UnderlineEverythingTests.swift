@@ -106,3 +106,22 @@ final class Found: @unchecked Sendable {
     private(set) var total = 0
     func add(_ n: Int) { lock.lock(); total += n; lock.unlock() }
 }
+
+// `el núcleo (§1)`: a word before that names no document of the repos is prose; the reader's file answers.
+@Suite struct SectionProseBeforeTests {
+    @Test func aSpanishWordBeforeIsNoDocument() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "LiOS", path: "/LiOS")]
+        let spec = "# Spec\n\n## 1. Por qué existe\n\nTexto.\n\n- *Memoria* — el núcleo (§1).\n"
+        index.add(text: spec, fileName: "lios-intention.md", repo: "LiOS", relativePath: "spec/lios-intention.md", absolutePath: "/LiOS/spec/lios-intention.md")
+        index.add(text: "## 1. Otro\n", fileName: "nucleo.md", repo: "LiOS", relativePath: "x/nucleo.md", absolutePath: "/LiOS/x/nucleo.md")
+        index.rank()
+        let r = Resolver(index: index)
+        let line = "- *Memoria* — el núcleo (§1)."
+        let found = CandidatePicker.pick(line: line, cursorOffset: 25, resolver: r, preferredRepo: "LiOS", fromPath: "spec/lios-intention.md")
+        #expect(found?.definitions.first?.title == "Por qué existe")
+        // A real document named before: `nucleo §1` is that file's.
+        #expect(r.resolve("§1", preferredRepo: "LiOS", context: "see nucleo", fromPath: "spec/lios-intention.md", block: "see nucleo §1")
+            .definitions.first?.title == "Otro")
+    }
+}
