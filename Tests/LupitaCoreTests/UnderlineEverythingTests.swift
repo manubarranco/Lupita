@@ -38,6 +38,16 @@ import Testing
         #expect(!r.resolve("§4", context: "the spec", block: "the spec §4").definitions.isEmpty)
     }
 
+    /// A chat window names no file: the repo its texts name most is the one meant.
+    @Test func theRepoAWindowNamesMost() {
+        var index = RefIndex()
+        index.repos = [Repo(name: "LiOS", path: "/x/LiOS"), Repo(name: "lupita", path: "/x/lupita"), Repo(name: "DesignerPunk", path: "/x/dp")]
+        let r = Resolver(index: index)
+        #expect(r.repoMostNamed(in: ["Lupita: próximos pasos", "Entorno LiOS", "en LiOS, el spec de LiOS"]) == "LiOS")
+        #expect(r.repoMostNamed(in: ["Lupita: próximos pasos"]) == "lupita")
+        #expect(r.repoMostNamed(in: ["nada que ver", "Liosa"]) == nil)
+    }
+
     /// The second layer underlines a `§` the reader's file answers, each piece of `§4/§7` on its own part of the box.
     @Test func sectionsAreUnderlinedInTheSecondLayer() {
         let r = Self.sections()

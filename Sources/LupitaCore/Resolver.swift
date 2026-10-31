@@ -468,6 +468,28 @@ public struct Resolver: Sendable {
     }
 
     /// The longest known repo name that appears as a word in `text`.
+    /// The repo the texts of a window name most often (`Entorno LiOS`, a chat about `LiOS`), or nil: what a window that says
+    /// no file (a chat app) is about. A tie goes to the name seen first.
+    public func repoMostNamed(in texts: [String]) -> String? {
+        var counts: [String: Int] = [:], order: [String] = []
+        for text in texts {
+            let lower = text.lowercased()
+            for name in repoNames where name.count >= 4 {
+                var from = lower.startIndex
+                while let r = lower.range(of: name.lowercased(), range: from..<lower.endIndex) {
+                    let before = r.lowerBound == lower.startIndex ? " " : lower[lower.index(before: r.lowerBound)]
+                    let after = r.upperBound == lower.endIndex ? " " : lower[r.upperBound]
+                    if !(before.isLetter || before.isNumber) && !(after.isLetter || after.isNumber) {
+                        if counts[name] == nil { order.append(name) }
+                        counts[name, default: 0] += 1
+                    }
+                    from = r.upperBound
+                }
+            }
+        }
+        return order.max { (counts[$0] ?? 0, -order.firstIndex(of: $0)!) < (counts[$1] ?? 0, -order.firstIndex(of: $1)!) }
+    }
+
     public func repoNamed(in text: String) -> String? {
         let lower = text.lowercased()
         return repoNames.first { name in

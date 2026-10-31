@@ -29,7 +29,27 @@ struct ActiveContext {
         if let title: String = TextUnderCursor.attribute(window, kAXTitleAttribute) {
             context.repo = resolver.repoNamed(in: title)
         }
+        // 3. A window that says no file (a chat app): the repo its texts name most (`Entorno LiOS`, the chat's title).
+        if context.repo == nil { context.repo = resolver.repoMostNamed(in: texts(of: window)) }
         return context
+    }
+
+    /// Texts of a window's elements, a bounded walk: at most `maxElements` and `budget` seconds, so a long chat stays cheap.
+    static let maxElements = 1500
+    static let budget: TimeInterval = 0.04
+
+    private static func texts(of window: AXUIElement) -> [String] {
+        let started = Date()
+        var queue = [window], out: [String] = [], seen = 0
+        while !queue.isEmpty, seen < maxElements, Date().timeIntervalSince(started) < budget {
+            let element = queue.removeFirst()
+            seen += 1
+            for name in [kAXTitleAttribute, kAXValueAttribute, kAXDescriptionAttribute] {
+                if let text: String = TextUnderCursor.attribute(element, name), !text.isEmpty { out.append(String(text.prefix(2000))) }
+            }
+            if let children: [AXUIElement] = TextUnderCursor.attribute(element, kAXChildrenAttribute) { queue += children }
+        }
+        return out
     }
 
     private static func windowUnderCursor(_ point: CGPoint) -> AXUIElement? {
