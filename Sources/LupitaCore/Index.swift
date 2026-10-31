@@ -172,14 +172,6 @@ public struct RefIndex: Codable, Sendable {
                 rule: hit.rule, title: title, summary: summary, absolutePath: absolutePath))
             if hit.line >= 0 { definedOnLine[hit.line] = hit.id.key }
         }
-        for h in SectionRefs.headings(lines: lines) {
-            let key = "§" + h.number
-            let hit = DefinitionHit(id: RefID(display: key, key: key, prefix: "§", scope: .section), rule: .heading, line: h.line, title: h.title)
-            let (title, summary) = Snippet.build(for: hit, lines: lines)
-            definitions[key, default: []].append(Definition(
-                id: key, key: key, repo: repo, path: relativePath, line: h.line + 1, rule: .heading,
-                title: title, summary: summary, absolutePath: absolutePath))
-        }
         for hit in Glossary.terms(fileName: fileName, lines: lines) {
             for name in hit.names {
                 let key = Glossary.normalize(name)
@@ -196,6 +188,12 @@ public struct RefIndex: Codable, Sendable {
         for (i, line) in lines.enumerated() {
             if line.trimmingCharacters(in: .whitespaces).hasPrefix("```") { inFence.toggle(); continue }
             if inFence { continue }
+            if let h = SectionRefs.heading(line) {
+                let key = "§" + h.number
+                definitions[key, default: []].append(Definition(
+                    id: key, key: key, repo: repo, path: relativePath, line: i + 1, rule: .heading,
+                    title: h.title, summary: SectionRefs.firstLine(after: i, in: lines), absolutePath: absolutePath))
+            }
             var skipDefinition = definedOnLine[i]
             for token in IDGrammar.tokens(in: line) {
                 if token.id.key == skipDefinition { skipDefinition = nil; continue }

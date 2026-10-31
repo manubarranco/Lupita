@@ -39,7 +39,8 @@ public enum SectionRefs {
 
     /// Section tokens of `text` with their UTF-16 ranges (the `§N`; the document is carried in `RefID.document`).
     static func tokens(in text: String, _ ns: NSString) -> [(id: RefID, range: NSRange)] {
-        guard ns.range(of: "§").location != NSNotFound else { return [] }
+        // `§` is C2 A7 in UTF-8; a byte test is far cheaper than `NSString.range(of:)`, which runs on every line of every file.
+        guard text.utf8.contains(0xC2) else { return [] }
         return tokenRegex.matches(in: text, range: NSRange(location: 0, length: ns.length)).map { m in
             let number = ns.substring(with: m.range(at: 1))
             var id = RefID(display: ns.substring(with: m.range), key: "§" + number, prefix: "§", scope: .section)
@@ -138,18 +139,36 @@ public enum SectionRefs {
         return want.count >= 4 && words.count > 1 && squash(words.last!) == want
     }
 
-    /// Numbered headings of a markdown file: `(0-based line, section number, title)`. Fenced code is skipped.
-    static func headings(lines: [String]) -> [(line: Int, number: String, title: String)] {
-        var out: [(line: Int, number: String, title: String)] = []
-        var inFence = false
-        for (i, line) in lines.enumerated() {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") { inFence.toggle(); continue }
-            guard !inFence, line.hasPrefix("#"), let m = DefinitionRules.match(numberedHeading, line) else { continue }
-            let title = DefinitionRules.cleanTitle(m[2])
-            if !title.isEmpty { out.append((i, m[1], title)) }
+    /// The first line of text under a heading, cut short: a section has thousands of them, so no cleaning of markdown here.
+    static func firstLine(after index: Int, in lines: [String]) -> String {
+        var i = index + 1
+        while i < lines.count, i <= index + 6 {
+            let line = lines[i].trimmingCharacters(in: .whitespaces)
+            i += 1
+            if line.isEmpty { continue }
+            if line.hasPrefix("#") || line.hasPrefix("```") { break }
+            return Snippet.truncate(line)
         }
-        return out
+        return ""
+    }
+
+    /// The numbered heading on `line` (`## 4.7 Title`), or nil. The caller has already left fenced code out.
+    static func heading(_ line: String) -> (number: String, title: String)? {
+        guard line.utf8.first == 0x23, startsNumbered(line.utf8), let m = DefinitionRules.match(numberedHeading, line) else { return nil }
+        let title = DefinitionRules.cleanTitle(m[2])
+        return title.isEmpty ? nil : (m[1], title)
+    }
+
+    /// `#`s, spaces, then a digit or `§`: the only shapes `numberedHeading` accepts.
+    static func startsNumbered(_ utf8: String.UTF8View) -> Bool {
+        var it = utf8.makeIterator()
+        var hashes = 0
+        var b = it.next()
+        while b == 0x23 { hashes += 1; b = it.next() }
+        guard (1...6).contains(hashes), b == 0x20 || b == 0x09 else { return false }
+        while b == 0x20 || b == 0x09 { b = it.next() }
+        guard let c = b else { return false }
+        return (0x30...0x39).contains(c) || c == 0xC2
     }
 }
 
