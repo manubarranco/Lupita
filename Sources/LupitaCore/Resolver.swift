@@ -307,7 +307,8 @@ public struct Resolver: Sendable {
             }
             let kept: [Definition]
             if let fromPath {
-                kept = own.filter { Self.reaches($0.path, from: fromPath, scope: id.scope) }
+                // A task of `tasks.json` is the repo's, not its folder's: the file lives away from the documents that cite it.
+                kept = own.filter { $0.rule == .structured || Self.reaches($0.path, from: fromPath, scope: id.scope) }
             } else {
                 // The window does not say which file it shows: every definition of the repo is listed, each with
                 // its file, instead of picking one that may belong to another spec.

@@ -124,7 +124,8 @@ public struct RefIndex: Codable, Sendable {
 
     private mutating func indexFiles(of repo: Repo) {
         var count = 0
-        for file in RepoDiscovery.markdownFiles(in: repo) {
+        let files = RepoDiscovery.files(in: repo)
+        for file in files.markdown {
             guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
             count += 1
             let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
@@ -132,6 +133,23 @@ public struct RefIndex: Codable, Sendable {
                 relativePath: relative, absolutePath: absolute)
         }
         filesPerRepo[repo.name] = count
+        for file in files.structured {
+            guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
+            let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
+            addStructured(text: text, fileName: file.lastPathComponent, repo: repo.name, relativePath: relative, absolutePath: absolute)
+        }
+    }
+
+    /// Indexes one JSON, YAML or TOML file (D60), after the `.md` files of its repo: an object with an ID and a title
+    /// defines that ID only if a `.md` of the repo cites it and no `.md` of the repo defines it. Exposed for tests.
+    public mutating func addStructured(text: String, fileName: String, repo: String, relativePath: String, absolutePath: String) {
+        for c in StructuredFiles.candidates(fileName: fileName, text: text) {
+            guard (mentions[c.key]?.byFile.keys.contains { $0.hasPrefix(repo + "/") }) == true,
+                  !(definitions[c.key] ?? []).contains(where: { $0.repo == repo && $0.rule != .structured }) else { continue }
+            definitions[c.key, default: []].append(Definition(
+                id: c.display, key: c.key, repo: repo, path: relativePath, line: c.line, rule: .structured,
+                title: c.title, summary: c.summary, absolutePath: absolutePath))
+        }
     }
 
     /// Indexes one file's content. Exposed for tests.
@@ -150,9 +168,11 @@ public struct RefIndex: Codable, Sendable {
         }
         for h in SectionRefs.headings(lines: lines) {
             let key = "§" + h.number
+            let hit = DefinitionHit(id: RefID(display: key, key: key, prefix: "§", scope: .section), rule: .heading, line: h.line, title: h.title)
+            let (title, summary) = Snippet.build(for: hit, lines: lines)
             definitions[key, default: []].append(Definition(
                 id: key, key: key, repo: repo, path: relativePath, line: h.line + 1, rule: .heading,
-                title: h.title, summary: "", absolutePath: absolutePath))
+                title: title, summary: summary, absolutePath: absolutePath))
         }
         for hit in Glossary.terms(fileName: fileName, lines: lines) {
             for name in hit.names {
