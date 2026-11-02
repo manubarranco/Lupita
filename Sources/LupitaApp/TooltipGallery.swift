@@ -52,7 +52,8 @@ enum TooltipGallery {
 
     // MARK: Git vocabulary sheet (D42)
 
-    static let vocabularyTerms = ["rebasear", "fast-forward merge", "detached HEAD", "stasheo", "force push", "PR"]
+    static let vocabularyTerms = ["rebasear", "fast-forward merge", "detached HEAD", "stasheo", "force push", "PR",
+                                  "interlineado", "kerning", "auto layout", "el build", "regresión", "endpoint"]
 
     /// `LupitaApp --render-vocabulary <dir>` writes `git-vocabulary.png`: the cards of six git terms in Spanish
     /// and the menu with the «Git» switch on and off. It needs no repos: the package is a table in code.
@@ -198,13 +199,14 @@ enum TooltipGallery {
         try? "def build_glyphs(p):\n    pass\n\nARM_TENSION = 0.4\n".write(to: repo.appendingPathComponent("engine.py"), atomically: true, encoding: .utf8)
         let index = RefIndex.build(roots: [repo.deletingLastPathComponent().path])
         let resolver = Resolver(index: index)
-        let w: CGFloat = 560, h: CGFloat = 378, scale: CGFloat = 2
+        let w: CGFloat = 560, h: CGFloat = 414, scale: CGFloat = 2
         let lines = ["Según D023 y Q07, el saldo inicial no cambia.", "Haz un rebase y luego un force push a main.",
                      "En atlas, el <dialog> devuelve HTTP 401 y ENOENT.",
                      "Lee decisions.md y glossary.md:2, no notes.md.",
                      "Usa --accent, no --force, y #1a1a1a en localhost:8130.", "Corre npm run build, lanza /retro y mira PR #123.",
                      "Puedes «stashear» o quedarte en detached HEAD.", "Fue un rebase y luego un fast-", "forward sin conflictos.",
-                     "Llama build_glyphs con ARM_TENSION, no con no_such_thing."]
+                     "Llama build_glyphs con ARM_TENSION, no con no_such_thing.",
+                     "El kerning y el auto layout; el build y el endpoint."]
         var tiles: [NSImage] = []
         for dark in [false, true] {
             let drawing = NSImage(size: NSSize(width: w, height: h), flipped: false) { r in

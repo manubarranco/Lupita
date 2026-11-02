@@ -8,8 +8,10 @@ public enum TermPackage: String, CaseIterable, Sendable {
     case git
     /// Shell commands (`rm`, `chmod`, `cd`) and the common package-manager subcommands (`npm install`).
     case terminal
-    /// Errors (system, JavaScript, Python), HTTP statuses and HTML tags.
+    /// Errors (system, JavaScript, Python), HTTP statuses, HTML tags and the words of development in prose (D62).
     case development
+    /// The words of design in prose (D62).
+    case design
 }
 
 public enum TermPackages {

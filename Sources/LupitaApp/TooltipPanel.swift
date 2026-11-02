@@ -269,7 +269,7 @@ struct TooltipView: View {
                 Text(d.summary).themed(.description, theme).lineLimit(theme.limits.descriptionLines).fixedSize(horizontal: false, vertical: true)
             }
             HStack(spacing: theme.space.inlineGap) {
-                if let kind = Self.kind(d.rule) {
+                if let kind = d.rule == .vocabulary ? TradeVocabulary.label(forKey: d.key) : Self.kind(d.rule) {
                     badge(kind, fg: theme.colors.badgeFg, bg: theme.colors.badgeBg)
                 }
                 if !d.repo.isEmpty { Text(d.repo).themed(.repo, theme) }

@@ -171,9 +171,9 @@ public struct Resolver: Sendable {
         }
 
         if idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
-        // The git package (D42) is last: it only speaks when nothing else knows the word.
+        // The vocabulary packages (D42, D62) are last: they only speak when nothing else knows the word.
         let marked = codeStyled || raw.contains("`") || (context?.hasSuffix("`") ?? false) || (after?.hasPrefix("`") ?? false)
-        if let git = resolveGit(raw, block: block ?? [context, raw, after].compactMap { $0 }.joined(separator: " "), marked: marked) { return git }
+        if let word = resolveVocabulary(raw, block: block ?? [context, raw, after].compactMap { $0 }.joined(separator: " "), marked: marked) { return word }
         if let id = IDGrammar.parse(query) {
             return Resolution(query: query, kind: .undefined, key: id.key, definitions: [],
                               mentions: index.mentions[id.key], alternatives: [])

@@ -114,6 +114,8 @@ public enum S {
     public static var kindTerminal: String { t("terminal command", "comando de terminal") }
     public static func runsScript(_ body: String) -> String { t("Runs: \(body)", "Ejecuta: \(body)") }
     public static var kindGit: String { "git" }
+    public static var kindDesign: String { t("design", "diseño") }
+    public static var kindDevelopment: String { t("development", "desarrollo") }
     public static func seenIn(_ example: String) -> String { t("Example: \(example)", "Ejemplo: \(example)") }
     public static var kindError: String { t("error", "error") }
     public static var kindTag: String { t("HTML tag", "etiqueta HTML") }
@@ -142,6 +144,7 @@ public enum S {
     public static var gitPackage: String { "Git" }
     public static var terminalPackage: String { "Terminal" }
     public static var developmentPackage: String { t("Development", "Desarrollo") }
+    public static var designPackage: String { t("Design", "Diseño") }
     public static var folders: String { t("Folders to search", "Carpetas de búsqueda") }
     public static var permissions: String { t("Permissions", "Permisos") }
     /// The question around the folder path, which the alert draws in its own style.

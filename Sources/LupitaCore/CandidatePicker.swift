@@ -138,8 +138,8 @@ public enum CandidatePicker {
                 if let r = resolver.resolveCode(phrase, preferredRepo: preferredRepo, context: context(start)) {
                     return r
                 }
-                // Last: a phrase of the git package (D42), `fast-forward merge`, `detached HEAD`.
-                if let r = resolver.resolveGit(phrase, block: block) { return r }
+                // Last: a phrase of a vocabulary package (D42, D62), `fast-forward merge`, `auto layout`.
+                if let r = resolver.resolveVocabulary(phrase, block: block) { return r }
             }
         }
         return nil
