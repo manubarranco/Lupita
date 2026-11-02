@@ -338,7 +338,7 @@ private struct VocabularySheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
-            Text("Vocabulario de git · D42").font(.title3.weight(.semibold))
+            Text("Vocabulario · D42, D62").font(.title3.weight(.semibold))
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(440), spacing: 24, alignment: .topLeading), count: 3), alignment: .leading, spacing: 22) {
                 ForEach(Array(cards.enumerated()), id: \.offset) { _, card in
                     VStack(alignment: .leading, spacing: 6) {
@@ -358,7 +358,7 @@ private struct VocabularySheet: View {
             HStack(alignment: .top, spacing: 24) {
                 ForEach(Array(menus.enumerated()), id: \.offset) { n, image in
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(n == 0 ? "Menú · los tres encendidos" : "Menú · Terminal apagado").font(.caption.monospaced()).foregroundStyle(.secondary)
+                        Text(n == 0 ? "Menú · los cuatro encendidos" : "Menú · Terminal apagado").font(.caption.monospaced()).foregroundStyle(.secondary)
                         Image(nsImage: image).overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(.separator))
                     }
                 }

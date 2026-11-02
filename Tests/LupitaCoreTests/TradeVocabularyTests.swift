@@ -107,11 +107,10 @@ import Testing
         #expect(r.definitions.first?.rule == .term)
     }
 
-    /// A glossary called `Build` in another repo still answers the bare word, but not `el build`, where the word is the loan.
-    @Test func theLoanBeatsAGlossaryWordOfTheSameName() throws {
+    /// D22 stands: a glossary of any repo answers before a package, also with the article (`el build`). Decision pending for Manu.
+    @Test func aGlossaryWordOfTheSameNameStillWins() throws {
         let resolver = try Self.resolver(glossary: "- **Build** — crear y mantener las piezas\n")
-        #expect(Self.pick("el ⟦build⟧ falla", resolver)?.definitions.first?.id == "build · compilar")
-        #expect(Self.pick("⟦build⟧", resolver)?.definitions.first?.rule == .term)
+        #expect(Self.pick("el ⟦build⟧ falla", resolver)?.definitions.first?.rule == .term)
     }
 
     @Test func eachSwitchSilencesItsOwnPackage() throws {
