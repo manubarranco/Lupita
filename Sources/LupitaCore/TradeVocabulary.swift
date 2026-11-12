@@ -312,7 +312,7 @@ public enum TradeVocabulary {
         term("full stack", "Quien trabaja en lo que se ve y en lo que no se ve.", "Someone who works on both what you see and what you don't.",
              "«buscamos un full stack»", "“we're looking for a full stack”",
              strong(["full stack", "full-stack", "fullstack"])),
-        term("framework", "Una base ya hecha sobre la que se construye la app, como React.", "A ready-made base the app is built on, like React.",
+        term("framework", "Una base ya hecha sobre la que se construye la app, como Next.js o Django.", "A ready-made base the app is built on, like Next.js or Django.",
              "«con ese framework no se puede»", "“that framework can't do it”",
              strong(["framework", "frameworks"])),
         term("responsive", "Que la pantalla se adapta al tamaño: móvil, tablet, ordenador.", "That the screen adapts to its size: phone, tablet, computer.",
@@ -330,7 +330,7 @@ public enum TradeVocabulary {
         term("caché · cache", "Una copia guardada para no pedir lo mismo otra vez. Por eso a veces ves lo viejo.", "A saved copy so the same thing isn't fetched again. That's why you sometimes see the old one.",
              "«borra la caché y recarga»", "“clear the cache and reload”",
              strong(["caché", "cachés", "caches", "cached", "caching"] + GitVocabulary.spanish("cachear"))),
-        term("consola · console", "El panel del navegador donde salen los avisos y errores del código.", "The browser panel where the code's warnings and errors show up.",
+        term("consola · console", "El panel donde salen los avisos y errores del código, en el navegador o en el terminal.", "The panel where the code's warnings and errors show up, in the browser or in the terminal.",
              "«mira si sale algo en consola»", "“see if anything shows up in the console”",
              strong(["en consola", "in the console"]) + weak(["consola", "console"])),
         // Back: what you do not see
