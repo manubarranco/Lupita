@@ -32,7 +32,8 @@ public enum Versions {
     /// Only the project's own GitHub release assets are downloaded for the in-place update.
     /// `URL.host` ignores user-info, so `https://github.com@evil.example/...` has host `evil.example`.
     public static func isProjectReleaseAsset(_ url: URL) -> Bool {
-        url.scheme == "https" && url.host == "github.com"
-            && url.path.hasPrefix("/manubarranco/lupita/releases/download/")
+        // GitHub writes the repo as it was named (`manubarranco/Lupita`) and treats names without regard to case.
+        url.scheme == "https" && url.host?.lowercased() == "github.com"
+            && url.path.lowercased().hasPrefix("/manubarranco/lupita/releases/download/")
     }
 }
