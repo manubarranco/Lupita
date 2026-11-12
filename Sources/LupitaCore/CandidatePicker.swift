@@ -131,15 +131,15 @@ public enum CandidatePicker {
                 if let r = resolver.resolveWordID(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
                     return r
                 }
-                if let r = resolver.resolveTerm(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
+                if let r = resolver.resolveTerm(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath, block: block) {
                     return r
                 }
                 // Code that is written with spaces (D29): `npm run build`, `git status`, `PR 123`.
                 if let r = resolver.resolveCode(phrase, preferredRepo: preferredRepo, context: context(start)) {
                     return r
                 }
-                // Last: a phrase of the git package (D42), `fast-forward merge`, `detached HEAD`.
-                if let r = resolver.resolveGit(phrase, block: block) { return r }
+                // Last: a phrase of a vocabulary package (D42, D62), `fast-forward merge`, `auto layout`.
+                if let r = resolver.resolveVocabulary(phrase, block: block) { return r }
             }
         }
         return nil

@@ -25,6 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var windowRead: OCR.WindowRead?
     private var currentHold: HoldGeneration?
     private var scrollMonitors: [Any] = []
+    private var activationObserver: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         TriggerLog.append(app: "launch", method: "start", ms: 0, result: nil)
@@ -43,7 +44,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
         // Dev aid: `lupita poke` does what the shortcut does, for automated checks that cannot press keys.
-        DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
+        // Any local process can post this notification, so it is observed only in debug mode
+        // (`defaults write com.manubarranco.lupita debugLog -bool true`, then relaunch).
+        if Debug.isOn { DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
@@ -82,7 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     self?.lookUp(query: query, repo: repo, at: at.flatMap { $0.count == 2 ? NSPoint(x: $0[0], y: $0[1]) : nil })
                 } else { self?.lookUp() }
             }
-        }
+        } }
         store.rebuild()
         Permissions.explainIfNeeded()
         // First run: once the first index exists, offer to prepare the repos (D21).
@@ -135,17 +138,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             // No git on the main thread: a tracker key is underlined only if its answer is cached; the rest comes below.
             let marks = HighlightPicker.classified(words: read.words, resolver: resolver.withoutGit())
             windowRead = read
-            if Debug.isOn {
-                // Why a form like `(Task 2.3,` or `Requirement` / `3` is not underlined: what OCR gave for its rows (and the
-                // row below) and which marks came out over those words.
-                let rows = HighlightPicker.rows(of: read.words)
-                for (n, row) in rows.enumerated() where row.contains(where: { $0.text.contains("ask") || $0.text.contains("Requirement") || $0.text.hasSuffix("-") || $0.text.contains("PLAT") }) {
-                    func show(_ r: [OCRWord]) -> String { r.map { "«\($0.text)» \(Int($0.box.minX))-\(Int($0.box.maxX))" }.joined(separator: " ") }
-                    let hit = marks.filter { m in row.contains { $0.box.intersects(m.box) } }.map { "\($0.kind) \(Int($0.box.minX))-\(Int($0.box.maxX))" }
-                    VocabularyLog.append(["highlight-row", "y=\(Int(row[0].box.minY))", show(row), "marks=\(hit)",
-                                          "next=" + (n + 1 < rows.count ? "y=\(Int(rows[n + 1][0].box.minY)) " + show(rows[n + 1]) : "-")])
-                }
-            }
             highlight.show(marks.map { ($0.box, HighlightPicker.isDark(behind: $0.box, words: read.words) ?? read.isDark, $0.kind) })
             watchForChanges()
             showSymbols(generation, read: read, marks: marks, resolver: resolver)
@@ -192,24 +184,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         currentHold?.end()
         scrollMonitors.forEach(NSEvent.removeMonitor)
         scrollMonitors = []
-        NSWorkspace.shared.notificationCenter.removeObserver(self, name: NSWorkspace.didActivateApplicationNotification, object: nil)
+        if let token = activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(token) }
+        activationObserver = nil
         highlight.hide()
     }
 
     /// Scrolling or switching app moves the text from under the marks: they go away without a fade, and
     /// stay away until the shortcut is pressed again.
     private func watchForChanges() {
+        // Safe to call twice without a stop between: drop what the first call installed.
+        scrollMonitors.forEach(NSEvent.removeMonitor)
+        scrollMonitors = []
+        if let token = activationObserver { NSWorkspace.shared.notificationCenter.removeObserver(token) }
         let gone: () -> Void = { [weak self] in MainActor.assumeIsolated { self?.windowRead = nil; self?.currentHold?.end(); self?.highlight.hide(animated: false) } }
         scrollMonitors.append(NSEvent.addGlobalMonitorForEvents(matching: .scrollWheel) { _ in gone() } as Any)
         scrollMonitors.append(NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { gone(); return $0 } as Any)
-        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { _ in gone() }
+        activationObserver = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { _ in gone() }
     }
 
     /// Hotkey pressed: read the text under the cursor, resolve it, show the tooltip.
     func lookUp() {
-        // Presses while an OCR pass runs are dropped, not queued.
+        // Presses while a lookup is in flight are dropped, not queued.
         guard !inFlight else { return }
         lookupGeneration += 1
+        let generation = lookupGeneration
         let start = Date()
         let mouse = NSEvent.mouseLocation  // bottom-left origin
         let point = Screen.topLeft(mouse)  // what AX and ScreenCaptureKit use
@@ -218,8 +216,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             notice(S.indexingTryAgain, at: mouse)
             return
         }
-        // This runs on the main thread: no git here. A tracker key nothing defines comes back `undefined` and `present` searches it.
+        // Git is off for the tracker-key commit search only; picking and resolving may still run git, lsof or file scans,
+        // so they run off the main thread. A tracker key nothing defines comes back `undefined` and `present` searches it.
         let resolver = full.withoutGit()
+        inFlight = true
+        Task {
+            defer { inFlight = false }
+            await performLookup(resolver: resolver, generation: generation, start: start, mouse: mouse, point: point)
+        }
+    }
+
+    private func performLookup(resolver: Resolver, generation: Int, start: Date, mouse: NSPoint, point: CGPoint) async {
         // Pointing at the tooltip itself: read it by OCR (its text is not reachable through AX) and look
         // up in the repo and file of what it shows, so `answered by D006` resolves where Q01 lives.
         if let shown = tooltip.resolution, let frame = tooltip.frame, frame.contains(mouse) {
@@ -227,25 +234,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             context.bundleID = Bundle.main.bundleIdentifier
             context.repo = shown.definitions.first?.repo
             context.path = shown.definitions.first?.path
-            inFlight = true
-            let keeping = tooltip.windowID
-            Task {
-                defer { inFlight = false }
-                let words = (try? await OCR.words(around: point, keeping: keeping)) ?? []
-                let result = CandidatePicker.pick(words: words, cursor: point, resolver: resolver,
-                                                  preferredRepo: context.repo, fromPath: context.path)
-                show(result, at: mouse, method: (words.isEmpty ? "none" : "ocr") + "<tooltip>",
-                     start: start, context: context)
-            }
+            let (repo, path) = (context.repo, context.path)
+            let words = (try? await OCR.words(around: point, keeping: tooltip.windowID)) ?? []
+            let result = await Task.detached(priority: .userInitiated) {
+                CandidatePicker.pick(words: words, cursor: point, resolver: resolver, preferredRepo: repo, fromPath: path)
+            }.value
+            guard generation == lookupGeneration else { return }
+            show(result, at: mouse, method: (words.isEmpty ? "none" : "ocr") + "<tooltip>",
+                 start: start, context: context)
             return
         }
         let context = ActiveContext.at(point, resolver: resolver)
+        let (repo, path) = (context.repo, context.path)
 
         var ax = TextUnderCursor.viaAccessibility(at: point)
         var axMiss: Resolution?
         if let text = ax.hit {
-            let result = CandidatePicker.pick(line: text.line, cursorOffset: text.offset, resolver: resolver,
-                                              preferredRepo: context.repo, fromPath: context.path, codeRanges: text.codeRanges)
+            let (line, offset, codeRanges) = (text.line, text.offset, text.codeRanges)
+            let result = await Task.detached(priority: .userInitiated) {
+                CandidatePicker.pick(line: line, cursorOffset: offset, resolver: resolver,
+                                     preferredRepo: repo, fromPath: path, codeRanges: codeRanges)
+            }.value
+            guard generation == lookupGeneration else { return }
             // Accessibility answered but nothing was explained: ask OCR too before saying «not known» (D42). AX can
             // give the text without the code box (`main` in inline code has no context), or the text of the
             // wrong word (a static text whose offset is only estimated); OCR sees the screen as it is.
@@ -268,22 +278,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         // Released after a hold: the window was already read for the marks.
         let reused = windowRead.flatMap { $0.frame.contains(point) ? $0.words : nil }
-        inFlight = true
-        Task {
-            defer { inFlight = false }
-            let words = if let reused { reused } else { (try? await OCR.words(around: point)) ?? [] }
-            let result = CandidatePicker.pick(words: words, cursor: point, resolver: resolver,
-                                              preferredRepo: context.repo, fromPath: context.path)
-            if Debug.isOn, let target = CandidatePicker.word(under: point, in: words) {
-                let block = HighlightPicker.nearbyText(of: target, in: words)
-                VocabularyLog.append(["ocr\(reused == nil ? "" : "+reused")", "word=\(target.text)", "codeStyled=\(target.codeStyled)",
-                                      "block=“\(block.prefix(160))”", GitVocabulary.diagnose(target.text, block: block, marked: target.codeStyled),
-                                      "shown=\(result?.isShown ?? false)"])
-            }
-            // OCR found nothing either: say what AX said (the same «not known», as before).
-            show(result?.isShown == true ? result : (axMiss ?? result), at: mouse,
-                 method: (words.isEmpty ? "none" : "ocr") + "<\(ax.diagnostic)>", start: start, context: context)
+        let words = if let reused { reused } else { (try? await OCR.words(around: point)) ?? [] }
+        let result = await Task.detached(priority: .userInitiated) {
+            CandidatePicker.pick(words: words, cursor: point, resolver: resolver, preferredRepo: repo, fromPath: path)
+        }.value
+        guard generation == lookupGeneration else { return }
+        if Debug.isOn, let target = CandidatePicker.word(under: point, in: words) {
+            let block = HighlightPicker.nearbyText(of: target, in: words)
+            VocabularyLog.append(["ocr\(reused == nil ? "" : "+reused")", "word=\(target.text)", "codeStyled=\(target.codeStyled)",
+                                  "block=“\(block.prefix(160))”", GitVocabulary.diagnose(target.text, block: block, marked: target.codeStyled),
+                                  "shown=\(result?.isShown ?? false)"])
         }
+        // OCR found nothing either: say what AX said (the same «not known», as before).
+        show(result?.isShown == true ? result : (axMiss ?? result), at: mouse,
+             method: (words.isEmpty ? "none" : "ocr") + "<\(ax.diagnostic)>", start: start, context: context)
     }
 
     /// Looks like an ID but nothing defines it: an agent may have just written it. Rescan the
@@ -294,13 +302,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         let generation = lookupGeneration
+        let (repoName, path, query) = (repo, context.path, result.query)
+        let current = store.resolver?.withoutGit()
         Task {
-            let rescanned = await store.refreshNow(repoNamed: repo)
+            let rescanned = await store.refreshNow(repoNamed: repoName)
             // A newer press while the rescan ran: its answer is the one on screen, this one is dropped.
             guard generation == lookupGeneration else { return }
-            if rescanned,
-               let again = store.resolver?.withoutGit().resolve(result.query, preferredRepo: repo, fromPath: context.path),
-               again.kind != .undefined {
+            var again: Resolution?
+            if rescanned, let fresh = store.resolver?.withoutGit() ?? current {
+                again = await Task.detached(priority: .userInitiated) {
+                    fresh.resolve(query, preferredRepo: repoName, fromPath: path)
+                }.value
+                guard generation == lookupGeneration else { return }
+            }
+            if let again, again.kind != .undefined {
                 present(again, at: mouse, method: method + "+rescan", start: start, context: context)
             } else {
                 present(result, at: mouse, method: method, start: start, context: context)
@@ -368,7 +383,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         var context = ActiveContext()
         context.repo = repo
         context.bundleID = "poke"
-        show(resolver.withoutGit().resolve(query, preferredRepo: repo), at: point, method: "query", start: Date(), context: context)
+        let quiet = resolver.withoutGit()
+        let start = Date()
+        Task {
+            let result = await Task.detached(priority: .userInitiated) { quiet.resolve(query, preferredRepo: repo) }.value
+            show(result, at: point, method: "query", start: start, context: context)
+        }
     }
 }
 
@@ -385,19 +405,10 @@ enum Screen {
 enum TriggerLog {
     static func append(app: String?, method: String, ms: Int, result: Resolution?) {
         guard Debug.isOn else { return }
-        let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Lupita")
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let url = dir.appendingPathComponent("lookups.log")
         let line = [ISO8601DateFormatter().string(from: Date()), app ?? "?", method, "\(ms)ms",
                     result?.query ?? "-", result?.kind.rawValue ?? "nil", result?.key ?? "-",
                     result?.definitions.first?.repo ?? "-", Debug.batch].joined(separator: "\t") + "\n"
-        if let handle = try? FileHandle(forWritingTo: url) {
-            handle.seekToEndOfFile()
-            handle.write(Data(line.utf8))
-            try? handle.close()
-        } else {
-            try? line.write(to: url, atomically: true, encoding: .utf8)
-        }
+        LogFile.append(line, to: "lookups.log")
     }
 }
 

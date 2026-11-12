@@ -19,6 +19,7 @@ enum VocabularyPackages {
         case .git: S.gitPackage
         case .terminal: S.terminalPackage
         case .development: S.developmentPackage
+        case .design: S.designPackage
         }
     }
 

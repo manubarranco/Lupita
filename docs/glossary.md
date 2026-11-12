@@ -13,3 +13,4 @@
 - **densidad** — ajuste de espacios (compacta, normal, amplia) independiente del tema (D55).
 - **welcome step** — primer paso del onboarding: enseña el gesto (mantener, apuntar, soltar) sobre una nota de muestra antes de pedir carpetas (D56).
 - **keycap** — dibujo de una tecla del atajo en el paso de bienvenida; se rellena mientras el atajo está pulsado (D56).
+- **paquete de oficio** — diccionario fijo de un oficio (git, desarrollo, diseño) con su interruptor en «Explicar términos de:»

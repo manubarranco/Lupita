@@ -132,14 +132,46 @@ public struct RefIndex: Codable, Sendable {
     }
 
     private mutating func indexFiles(of repo: Repo) {
-        var count = 0
         let files = RepoDiscovery.files(in: repo)
-        for file in files.markdown {
-            guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
-            count += 1
-            let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
-            add(text: text, fileName: file.lastPathComponent, repo: repo.name,
-                relativePath: relative, absolutePath: absolute)
+        let markdown = files.markdown
+        // Files are indexed into separate partial indexes, per chunk, and merged in chunk order: same result as one pass.
+        let chunkCount = min(markdown.count, max(1, ProcessInfo.processInfo.activeProcessorCount * 4))
+        var count = 0
+        if chunkCount < 2 {
+            for file in markdown {
+                guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
+                count += 1
+                let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
+                add(text: text, fileName: file.lastPathComponent, repo: repo.name,
+                    relativePath: relative, absolutePath: absolute)
+            }
+        } else {
+            let box = Partials(count: chunkCount)
+            // Task-locals are not inherited by the workers: read them here, bind them again there.
+            let language = S.languageOverride.get()
+            let off = TermPackages.off
+            let total = markdown.count
+            DispatchQueue.concurrentPerform(iterations: chunkCount) { c in
+                let lower = c * total / chunkCount, upper = (c + 1) * total / chunkCount
+                S.languageOverride.withValue(language) {
+                    TermPackages.$off.withValue(off) {
+                        var partial = RefIndex()
+                        var read = 0
+                        for file in markdown[lower..<upper] {
+                            guard let text = try? String(contentsOf: file, encoding: .utf8) else { continue }
+                            read += 1
+                            let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
+                            partial.add(text: text, fileName: file.lastPathComponent, repo: repo.name,
+                                        relativePath: relative, absolutePath: absolute)
+                        }
+                        box.set(c, partial, read)
+                    }
+                }
+            }
+            for (partial, read) in box.ordered {
+                merge(partial)
+                count += read
+            }
         }
         filesPerRepo[repo.name] = count
         for file in files.structured {
@@ -147,6 +179,28 @@ public struct RefIndex: Codable, Sendable {
             let (relative, absolute) = RepoDiscovery.paths(of: file, in: repo)
             addStructured(text: text, fileName: file.lastPathComponent, repo: repo.name, relativePath: relative, absolutePath: absolute)
         }
+    }
+
+    /// Partial indexes written from several threads, read in order afterwards.
+    private final class Partials: @unchecked Sendable {
+        private let lock = NSLock()
+        private var slots: [(RefIndex, Int)?]
+        init(count: Int) { slots = Array(repeating: nil, count: count) }
+        func set(_ i: Int, _ index: RefIndex, _ read: Int) { lock.lock(); slots[i] = (index, read); lock.unlock() }
+        var ordered: [(RefIndex, Int)] { lock.lock(); defer { lock.unlock() }; return slots.compactMap { $0 } }
+    }
+
+    /// Adds what `other` (a partial index of later files) holds after what `self` holds. Does not touch `repos`.
+    private mutating func merge(_ other: RefIndex) {
+        for (key, defs) in other.definitions { definitions[key, default: []].append(contentsOf: defs) }
+        for (key, defs) in other.terms { terms[key, default: []].append(contentsOf: defs) }
+        for (key, m) in other.mentions {
+            for (file, n) in m.byFile { mentions[key, default: Mentions()].byFile[file, default: 0] += n }
+        }
+        for (key, paths) in other.markdownByName { markdownByName[key, default: []].append(contentsOf: paths) }
+        for (repo, keys) in other.firmTaskCites { firmTaskCites[repo, default: []].formUnion(keys) }
+        for (key, docs) in other.documentRefs { documentRefs[key] = docs }
+        for (repo, n) in other.filesPerRepo { filesPerRepo[repo, default: 0] += n }
     }
 
     /// Indexes one JSON, YAML or TOML file (D60), after the `.md` files of its repo: an object with an ID and a title
@@ -215,20 +269,30 @@ public struct RefIndex: Codable, Sendable {
     /// Orders each ID's definitions: strongest rule, then the file that is the prefix's
     /// "home" (most definitions of that prefix), then path.
     public mutating func rank() {
+        // The prefix part of the density key depends only on the ID: computed once per ID.
+        var prefixes: [String: String] = [:]
+        func densityKey(_ d: Definition) -> String {
+            let prefix: String
+            if let cached = prefixes[d.id] { prefix = cached } else {
+                prefix = IDGrammar.tokens(in: d.id).first?.id.prefix ?? d.id
+                prefixes[d.id] = prefix
+            }
+            return "\(d.repo)/\(d.path)|\(prefix)"
+        }
         var density: [String: Int] = [:]  // "repo/path|prefix" → count
         for defs in definitions.values {
             for d in defs { density[densityKey(d), default: 0] += 1 }
         }
         rankTerms()
         pruneWordFormMentions()
-        for (key, defs) in definitions {
-            definitions[key] = defs.sorted {
-                if $0.isArchived != $1.isArchived { return !$0.isArchived }
-                if $0.rule.weight != $1.rule.weight { return $0.rule.weight > $1.rule.weight }
-                let a = density[densityKey($0)] ?? 0, b = density[densityKey($1)] ?? 0
-                if a != b { return a > b }
-                return ($0.repo, $0.path, $0.line) < ($1.repo, $1.path, $1.line)
-            }
+        for (key, defs) in definitions where defs.count > 1 {
+            let decorated = defs.map { (def: $0, density: density[densityKey($0)] ?? 0) }
+            definitions[key] = decorated.sorted {
+                if $0.def.isArchived != $1.def.isArchived { return !$0.def.isArchived }
+                if $0.def.rule.weight != $1.def.rule.weight { return $0.def.rule.weight > $1.def.rule.weight }
+                if $0.density != $1.density { return $0.density > $1.density }
+                return ($0.def.repo, $0.def.path, $0.def.line) < ($1.def.repo, $1.def.path, $1.def.line)
+            }.map(\.def)
         }
     }
 
@@ -250,10 +314,6 @@ public struct RefIndex: Codable, Sendable {
         for (key, defs) in terms {
             terms[key] = defs.sorted { ($0.repo, $0.path, $0.line) < ($1.repo, $1.path, $1.line) }
         }
-    }
-
-    private func densityKey(_ d: Definition) -> String {
-        "\(d.repo)/\(d.path)|\(IDGrammar.tokens(in: d.id).first?.id.prefix ?? d.id)"
     }
 
     public func save(to url: URL) throws {

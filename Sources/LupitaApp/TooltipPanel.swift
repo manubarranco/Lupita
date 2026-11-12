@@ -145,6 +145,9 @@ enum FileOpener {
            let path = d.absolutePath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
            let url = URL(string: "vscode://file\(path):\(max(d.line, 1))") {
             workspace.open(url)
+        } else if FileSafety.runsWhenOpened(d.absolutePath) {
+            // The default app would run or install it: show it in Finder instead.
+            workspace.activateFileViewerSelecting([URL(fileURLWithPath: d.absolutePath)])
         } else {
             workspace.open(URL(fileURLWithPath: d.absolutePath))
         }
@@ -269,7 +272,7 @@ struct TooltipView: View {
                 Text(d.summary).themed(.description, theme).lineLimit(theme.limits.descriptionLines).fixedSize(horizontal: false, vertical: true)
             }
             HStack(spacing: theme.space.inlineGap) {
-                if let kind = Self.kind(d.rule) {
+                if let kind = d.rule == .vocabulary ? TradeVocabulary.label(forKey: d.key) : Self.kind(d.rule) {
                     badge(kind, fg: theme.colors.badgeFg, bg: theme.colors.badgeBg)
                 }
                 if !d.repo.isEmpty { Text(d.repo).themed(.repo, theme) }

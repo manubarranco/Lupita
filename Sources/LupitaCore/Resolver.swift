@@ -137,7 +137,9 @@ public struct Resolver: Sendable {
         // like an ID it also comes before the OCR corrections; ID-shaped text tries the
         // corrections first and falls back to a term only when nothing defines the ID.
         let idShaped = IDGrammar.parse(query) != nil
-        if !idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
+        let marked = codeStyled || raw.contains("`") || (context?.hasSuffix("`") ?? false) || (after?.hasPrefix("`") ?? false)
+        let around = block ?? [context, raw, after].compactMap { $0 }.joined(separator: " ")
+        if !idShaped, let term = termResolution(raw, preferredRepo: preferredRepo, block: around, marked: marked) { return term }
 
         // A word made only of digits (`002`) is a number, not an ID misread by OCR: no "did you mean D02". It is
         // an ID only inside a list (`FR-001, 002`), which was tried above.
@@ -170,10 +172,9 @@ public struct Resolver: Sendable {
             return result(query, .corrected, key: key, index.definitions[key]!, preferredRepo, fromPath)
         }
 
-        if idShaped, let term = termResolution(raw, preferredRepo: preferredRepo) { return term }
-        // The git package (D42) is last: it only speaks when nothing else knows the word.
-        let marked = codeStyled || raw.contains("`") || (context?.hasSuffix("`") ?? false) || (after?.hasPrefix("`") ?? false)
-        if let git = resolveGit(raw, block: block ?? [context, raw, after].compactMap { $0 }.joined(separator: " "), marked: marked) { return git }
+        if idShaped, let term = termResolution(raw, preferredRepo: preferredRepo, block: around, marked: marked) { return term }
+        // The vocabulary packages (D42, D62) are last: they only speak when nothing else knows the word.
+        if let word = resolveVocabulary(raw, block: around, marked: marked) { return word }
         if let id = IDGrammar.parse(query) {
             return Resolution(query: query, kind: .undefined, key: id.key, definitions: [],
                               mentions: index.mentions[id.key], alternatives: [])
@@ -346,10 +347,11 @@ public struct Resolver: Sendable {
 
     /// A glossary term for `phrase` (one to four words), or nil. The repo of the window comes first;
     /// a term from another repo is flagged. Public so the picker can try longer windows (D23).
+    /// `block`: the text around the phrase; with it, a vocabulary package answers before a glossary of another repo (D66).
     public func resolveTerm(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
-                            fromPath: String? = nil) -> Resolution? {
+                            fromPath: String? = nil, block: String? = nil) -> Resolution? {
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
-        return termResolution(phrase, preferredRepo: named ?? preferredRepo)
+        return termResolution(phrase, preferredRepo: named ?? preferredRepo, block: block)
     }
 
     /// Code made of several words (a command, `PR 123`) for `phrase`, or nil. Public so the picker can try
@@ -358,7 +360,11 @@ public struct Resolver: Sendable {
         CodeRefs.resolve(phrase, repos: index.repos, preferredRepo: repoNamed(in: context ?? "") ?? preferredRepo, before: context)
     }
 
-    private func termResolution(_ phrase: String, preferredRepo: String?) -> Resolution? {
+    /// The glossary of the repo being read is its own vocabulary and wins. A glossary of another repo does not hide a
+    /// vocabulary package (D66): a trade word such as `build` rarely means what another project chose to call so.
+    /// With no window repo there is no «other» repo to tell, and the glossary answers as it always did.
+    /// Without `block` (the highlight, which only needs to know that something answers) the glossary answers as before.
+    private func termResolution(_ phrase: String, preferredRepo: String?, block: String? = nil, marked: Bool = false) -> Resolution? {
         guard !index.terms.isEmpty else { return nil }
         for key in Glossary.lookupKeys(phrase) {
             guard let defs = index.terms[key], !defs.isEmpty else { continue }
@@ -369,6 +375,9 @@ public struct Resolver: Sendable {
             var r = Resolution(query: phrase.trimmingCharacters(in: .whitespacesAndNewlines), kind: .exact, key: key,
                                definitions: ordered, mentions: nil, alternatives: [])
             if preferredRepo != nil, let first = ordered.first { r.fromOtherRepo = !isPreferred(first) }
+            // The phrase as written (`el build`), then the glossary's own key for it (`el handoff` → `handoff`).
+            if let block, r.fromOtherRepo,
+               let word = resolveVocabulary(phrase, block: block, marked: marked) ?? resolveVocabulary(key, block: block, marked: marked) { return word }
             return r
         }
         return nil

@@ -132,16 +132,8 @@ extension CodeRefs {
 
         private static func run(_ executable: String, _ args: [String]) -> String? {
             guard FileManager.default.isExecutableFile(atPath: executable) else { return nil }
-            let process = Process()
-            process.executableURL = URL(fileURLWithPath: executable)
-            process.arguments = args
-            let pipe = Pipe()
-            process.standardOutput = pipe
-            process.standardError = FileHandle.nullDevice
-            do { try process.run() } catch { return nil }
-            let data = pipe.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
-            return process.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : nil
+            // lsof can stall (network volumes, many files): give it a second.
+            return ProcessRunner.output(executable, args, timeout: 1)
         }
     }
 }

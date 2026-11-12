@@ -301,7 +301,7 @@ public enum HighlightPicker {
                 return length
             }
             if let command = CodeDictionaries.command(phrase.lowercased()), command.safe { return length }
-            if GitVocabulary.knows(phrase, block: block) { return length }
+            if GitVocabulary.knows(phrase, block: block) || TradeVocabulary.knows(phrase, block: block) { return length }
         }
         return nil
     }
@@ -368,7 +368,7 @@ public enum HighlightPicker {
         let code = CodeRefs.Text(text: word, codeMarked: marked, before: before)
         if CodeRefs.Errors.resolve(code, repos: [], preferredRepo: nil) != nil { return .term }
         if let command = CodeDictionaries.command(word.lowercased()), command.safe { return .term }
-        if GitVocabulary.knows(word, block: block, marked: marked) { return .term }
+        if GitVocabulary.knows(word, block: block, marked: marked) || TradeVocabulary.knows(word, block: block, marked: marked) { return .term }
         return byShape(word, repos: repos, before: before)
     }
 

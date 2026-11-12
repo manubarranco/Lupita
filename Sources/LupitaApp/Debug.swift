@@ -9,17 +9,12 @@ enum Debug {
     static let batch = "batch=5e pane-file"
 }
 
-/// Debug log of the git vocabulary's decisions (D42), only with `Debug.isOn`: one line per lookup in
-/// ~/Library/Logs/Lupita/vocabulary.log with the path taken (Accessibility or OCR), the text read, the word,
-/// why it did or did not count as git, the font Accessibility reported and what the code-box detector said.
-/// It holds the text the user pointed at: it stays on the Mac and the user deletes it when done.
-enum VocabularyLog {
-    static func append(_ fields: [String]) {
-        guard Debug.isOn else { return }
+/// Appends one line to a file in ~/Library/Logs/Lupita, creating the folder and the file when missing.
+enum LogFile {
+    static func append(_ line: String, to name: String) {
         let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Lupita")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        let url = dir.appendingPathComponent("vocabulary.log")
-        let line = ([ISO8601DateFormatter().string(from: Date())] + fields).joined(separator: "\t") + "\n"
+        let url = dir.appendingPathComponent(name)
         if let handle = try? FileHandle(forWritingTo: url) {
             handle.seekToEndOfFile()
             handle.write(Data(line.utf8))
@@ -27,5 +22,17 @@ enum VocabularyLog {
         } else {
             try? line.write(to: url, atomically: true, encoding: .utf8)
         }
+    }
+}
+
+/// Debug log of the git vocabulary's decisions (D42), only with `Debug.isOn`: one line per lookup in
+/// ~/Library/Logs/Lupita/vocabulary.log with the path taken (Accessibility or OCR), the text read, the word,
+/// why it did or did not count as git, the font Accessibility reported and what the code-box detector said.
+/// It holds the text the user pointed at: it stays on the Mac and the user deletes it when done.
+enum VocabularyLog {
+    static func append(_ fields: [String]) {
+        guard Debug.isOn else { return }
+        let line = ([ISO8601DateFormatter().string(from: Date())] + fields).joined(separator: "\t") + "\n"
+        LogFile.append(line, to: "vocabulary.log")
     }
 }

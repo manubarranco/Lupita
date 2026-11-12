@@ -39,7 +39,7 @@ enum Updater {
         if Versions.isNewer(release.tag, than: installedVersion) {
             let version = Versions.parse(release.tag).map(String.init).joined(separator: ".")
             availableVersion = version
-            availableZip = release.zip
+            availableZip = release.zip.flatMap { Versions.isProjectReleaseAsset($0) ? $0 : nil }
             alert(S.newVersion(version), offer: true)
         } else {
             alert(S.upToDate(installedVersion), offer: false)
