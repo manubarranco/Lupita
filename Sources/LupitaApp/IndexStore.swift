@@ -17,6 +17,7 @@ final class IndexStore {
     private var running = false
     private var queued: [String: Repo] = [:]
     private var rediscoverQueued = false
+    private var fullRebuildQueued = false
     private let defaultsKey = "roots"
 
     /// An install from before D24 never chose folders: it was indexing ~/Repos. Keep it so.
@@ -112,20 +113,17 @@ final class IndexStore {
     func rebuild() {
         isBuilding = true
         notify()
-        let roots = activeRoots, excluding = excludedRepos
-        watcher.watch(roots)
-        Task.detached(priority: .utility) {
-            let index = RefIndex.build(roots: roots, excluding: excluding)
-            await self.install(index)
-            await MainActor.run { self.isBuilding = false; self.notify() }
-        }
+        watcher.watch(activeRoots)
+        // The build itself goes through drain(), like every other job: one at a time.
+        fullRebuildQueued = true
+        drain()
     }
 
     /// Rebuilds one repo now and waits for it (lookup miss, D16). Returns false when the repo
     /// is unknown or too slow to rescan inside a lookup.
     func refreshNow(repoNamed name: String, budget: Duration = .milliseconds(300)) async -> Bool {
         // While a watcher job runs it is about to install a fresher index anyway.
-        guard !running, let current = index, let repo = current.repos.first(where: { $0.name == name }),
+        guard !running, !fullRebuildQueued, let current = index, let repo = current.repos.first(where: { $0.name == name }),
               (rebuildCost[name] ?? .zero) <= budget else { return false }
         running = true
         defer { running = false; drain() }
@@ -154,7 +152,27 @@ final class IndexStore {
 
     /// Runs queued work one job at a time, so concurrent rebuilds never overwrite each other.
     private func drain() {
-        guard !running, var index, rediscoverQueued || !queued.isEmpty else { return }
+        guard !running else { return }
+        if fullRebuildQueued {
+            // A full build from the current roots supersedes queued per-repo work; changes that
+            // arrive while it runs are queued again by filesChanged and handled afterwards.
+            fullRebuildQueued = false
+            queued = [:]
+            rediscoverQueued = false
+            running = true
+            let roots = activeRoots, excluding = excludedRepos
+            Task.detached(priority: .utility) {
+                let built = RefIndex.build(roots: roots, excluding: excluding)
+                await MainActor.run {
+                    self.running = false
+                    self.isBuilding = self.fullRebuildQueued
+                    self.install(built)
+                    self.drain()
+                }
+            }
+            return
+        }
+        guard var index, rediscoverQueued || !queued.isEmpty else { return }
         running = true
         let repos = Array(queued.values), rediscover = rediscoverQueued, roots = activeRoots, excluding = excludedRepos
         queued = [:]
@@ -196,6 +214,7 @@ enum WatchLog {
     static func append(_ line: String) {
         let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Lupita/watch.log")
         let text = ISO8601DateFormatter().string(from: Date()) + " " + line + "\n"
+        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
         if let handle = try? FileHandle(forWritingTo: url) {
             handle.seekToEndOfFile(); handle.write(Data(text.utf8)); try? handle.close()
         } else {
