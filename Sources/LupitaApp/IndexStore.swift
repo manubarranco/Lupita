@@ -58,7 +58,15 @@ final class IndexStore {
 
     func setHidden(_ path: String, hidden: Bool) {
         if hidden { hiddenRepos.insert(path) } else { hiddenRepos.remove(path) }
-        rebuild()
+        resync()
+    }
+
+    /// A repo switched on or off, hidden or brought back: only that repo changes. One switched off leaves the
+    /// index at once; one switched on is read alone, while the others keep answering. No full build.
+    private func resync() {
+        guard index != nil else { rebuild(); return }
+        rediscoverQueued = true
+        drain()
     }
     private var activeRoots: [String] { roots.filter { !disabledRoots.contains($0) } }
 
@@ -69,13 +77,13 @@ final class IndexStore {
 
     func setRepo(_ path: String, enabled: Bool) {
         if enabled { disabledRepos.remove(path) } else { disabledRepos.insert(path) }
-        rebuild()
+        resync()
     }
 
     /// Several repos at once (a subfolder's switch), with one rebuild.
     func setRepos(_ paths: [String], enabled: Bool) {
         if enabled { disabledRepos.subtract(paths) } else { disabledRepos.formUnion(paths) }
-        rebuild()
+        resync()
     }
 
     /// A folder that was moved: the new path takes its place, its switch and what was off inside it.
