@@ -308,7 +308,7 @@ public enum TradeVocabulary {
         // Bare «front» and «back» are everyday English: only after a Spanish word.
         term("frontend · front", "La parte que ves y tocas: pantallas y botones.", "The part you see and touch: screens and buttons.",
              "«es un cambio solo de front»", "“it's a front-end-only change”",
-             strong(["frontend", "front-end", "el front", "del front", "de front", "en front", "al front", "que front"])),
+             strong(["frontend", "front-end", "front end", "el front", "del front", "de front", "en front", "al front", "que front"])),
         term("full stack", "Quien trabaja en lo que se ve y en lo que no se ve.", "Someone who works on both what you see and what you don't.",
              "«buscamos un full stack»", "“we're looking for a full stack”",
              strong(["full stack", "full-stack", "fullstack"])),
@@ -369,7 +369,7 @@ public enum TradeVocabulary {
              strong(["latencia", "latency"])),
         term("escalar · escalabilidad", "Que siga funcionando cuando lo usa muchísima más gente.", "That it keeps working when far more people use it.",
              "«eso no escala»", "“that doesn't scale”",
-             strong(["escalabilidad", "scalability", "no escala"]) + weak(["escalar"])),
+             strong(["escalabilidad", "scalability", "scalable", "no escala", "doesn't scale", "does not scale", "won't scale"]) + weak(["escalar"])),
         term("tarea en segundo plano · background job · cron", "Trabajo que el programa hace solo, sin que esperes, o a una hora fija.", "Work the program does on its own, without you waiting, or at a set time.",
              "«lo hace un cron por la noche»", "“a cron does it at night”",
              strong(["tarea en segundo plano", "tareas en segundo plano", "background job", "background jobs", "cron", "cron job", "cron jobs", "crons"])),
@@ -378,7 +378,7 @@ public enum TradeVocabulary {
              strong(["webhook", "webhooks"])),
         term("timeout", "Cuando una respuesta tarda tanto que se da por perdida.", "When an answer takes so long it's given up on.",
              "«da timeout»", "“it times out”",
-             strong(["timeout", "timeouts", "time-out"])),
+             strong(["timeout", "timeouts", "time-out", "times out", "timed out", "timing out"])),
     ]
 }
 

@@ -107,7 +107,7 @@ import Testing
         #expect(r.definitions.first?.rule == .term)
     }
 
-    /// D22 stands: a glossary of any repo answers before a package, also with the article (`el build`). Decision pending for Manu.
+    /// With no window repo a glossary answers before a package, also with the article (`el build`). With one, see D66.
     @Test func aGlossaryWordOfTheSameNameStillWins() throws {
         let resolver = try Self.resolver(glossary: "- **Build** — crear y mantener las piezas\n")
         #expect(Self.pick("el ⟦build⟧ falla", resolver)?.definitions.first?.rule == .term)

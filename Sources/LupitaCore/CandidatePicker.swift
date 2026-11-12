@@ -131,7 +131,7 @@ public enum CandidatePicker {
                 if let r = resolver.resolveWordID(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
                     return r
                 }
-                if let r = resolver.resolveTerm(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath) {
+                if let r = resolver.resolveTerm(phrase, preferredRepo: preferredRepo, context: context(start), fromPath: fromPath, block: block) {
                     return r
                 }
                 // Code that is written with spaces (D29): `npm run build`, `git status`, `PR 123`.
