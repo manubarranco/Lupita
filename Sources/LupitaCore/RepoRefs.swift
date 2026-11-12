@@ -214,7 +214,8 @@ public enum RepoRefs {
         guard path.contains("/") || fileExtensions.contains((path as NSString).pathExtension.lowercased()) else { return false }
         return candidates(path, repos: repos, byName: byName).contains { repo, relative in
             let relative = relative.hasSuffix("/") ? String(relative.dropLast()) : relative
-            return !relative.isEmpty && FileManager.default.fileExists(atPath: (repo.path as NSString).appendingPathComponent(relative))
+            guard !relative.isEmpty, let absolute = insideRepo(repo, relative) else { return false }
+            return FileManager.default.fileExists(atPath: absolute)
         }
     }
 
@@ -250,13 +251,20 @@ public enum RepoRefs {
         return candidates
     }
 
+    /// The absolute path of `relative` in `repo`, or nil when `..` would take it outside the repo.
+    private static func insideRepo(_ repo: Repo, _ relative: String) -> String? {
+        let absolute = ((repo.path as NSString).appendingPathComponent(relative) as NSString).standardizingPath
+        let root = (repo.path as NSString).standardizingPath
+        return absolute == root || absolute.hasPrefix(root + "/") ? absolute : nil
+    }
+
     static func files(_ raw: String, line: Int?, repos: [Repo], byName: [String: [String]] = [:]) -> [Definition] {
         let fm = FileManager.default
         var seen = Set<String>()
         return candidates(raw, repos: repos, byName: byName).compactMap { repo, relative -> Definition? in
             let relative = relative.hasSuffix("/") ? String(relative.dropLast()) : relative
             guard !relative.isEmpty else { return nil }
-            let absolute = (repo.path as NSString).appendingPathComponent(relative)
+            guard let absolute = insideRepo(repo, relative) else { return nil }
             var isDir: ObjCBool = false
             guard fm.fileExists(atPath: absolute, isDirectory: &isDir), seen.insert(absolute).inserted else { return nil }
             let (title, summary) = isDir.boolValue ? folderInfo(absolute) : fileInfo(absolute, relative: relative, repo: repo)
@@ -406,7 +414,8 @@ enum Git {
 
     static func output(_ repo: String, _ args: [String], timeout: TimeInterval? = nil) -> String? {
         guard let git = executable else { return nil }
-        return run(git, ["-C", repo] + args, timeout: timeout)
+        // A repo's own config can name an fsmonitor program that git would run; never let it.
+        return run(git, ["-c", "core.fsmonitor=false", "-C", repo] + args, timeout: timeout)
     }
 
     static func succeeds(_ repo: String, _ args: [String]) -> Bool { output(repo, args) != nil }

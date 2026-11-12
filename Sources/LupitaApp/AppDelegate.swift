@@ -44,7 +44,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         tooltip.onClose = { [weak self] in self?.lens.tooltipClosed() }
         installTrigger()
         // Dev aid: `lupita poke` does what the shortcut does, for automated checks that cannot press keys.
-        DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
+        // Any local process can post this notification, so it is observed only in debug mode
+        // (`defaults write com.manubarranco.lupita debugLog -bool true`, then relaunch).
+        if Debug.isOn { DistributedNotificationCenter.default().addObserver(forName: .init("com.manubarranco.lupita.lookup"),
                                                             object: nil, queue: .main) { [weak self] note in
             let query = note.userInfo?["query"] as? String, repo = note.userInfo?["repo"] as? String
             let lens = (note.userInfo?["lens"] as? String).flatMap(Double.init)
@@ -83,7 +85,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     self?.lookUp(query: query, repo: repo, at: at.flatMap { $0.count == 2 ? NSPoint(x: $0[0], y: $0[1]) : nil })
                 } else { self?.lookUp() }
             }
-        }
+        } }
         store.rebuild()
         Permissions.explainIfNeeded()
         // First run: once the first index exists, offer to prepare the repos (D21).
