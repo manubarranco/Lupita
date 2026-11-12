@@ -39,8 +39,9 @@ your repos too.
 
 ## When things get technical
 
-Besides references, Lupita comes with plain-language dictionaries for development, the terminal
-and Git. If someone mentions a `rebase`, an `HTTP 401` or a `chmod`, it explains it in one line.
+Besides references, Lupita comes with plain-language dictionaries for design, development, the
+terminal and Git. If someone mentions a `rebase`, an `HTTP 401`, a `chmod` or the `kerning`, it
+explains it in one line.
 They are there to close the gap between design, development and business, and you can switch
 them off from the menu if you already know your way around.
 

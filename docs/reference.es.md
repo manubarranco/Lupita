@@ -116,8 +116,9 @@ Commits, ramas y PRs necesitan git (las Command Line Tools); sin ellas, simpleme
 
 **Apaga la jerga que ya conoces.** En **Explicar términos de:** del menú, cada diccionario fijo
 está encendido por defecto: **Git** (palabras de git en prosa y comandos `git …`), **Terminal**
-(comandos de shell como `rm` o `chmod`) y **Development** (errores, estados HTTP y etiquetas
-HTML). Lo que sale de tus repos (IDs, glosarios, commits, ramas, archivos, PRs, símbolos, tokens,
+(comandos de shell como `rm` o `chmod`), **Desarrollo** (errores, estados HTTP, etiquetas HTML y
+las palabras corrientes del desarrollo, como `deploy` o `endpoint`) y **Diseño** (las palabras
+corrientes del diseño, como `kerning` o `wireframe`). Lo que sale de tus repos (IDs, glosarios, commits, ramas, archivos, PRs, símbolos, tokens,
 direcciones locales y scripts de `package.json`) está siempre encendido.
 
 ### Qué repo, cuando los IDs coinciden

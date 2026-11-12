@@ -114,8 +114,9 @@ Commits, branches and PRs need git (the Command Line Tools); without it they are
 
 **Switch off the jargon you already know.** Under **Explain terms of:** in the menu, each fixed
 dictionary is on by default: **Git** (git words in prose and `git …` commands), **Terminal**
-(shell commands such as `rm` or `chmod`) and **Development** (errors, HTTP statuses and HTML
-tags). Whatever comes from your repos (IDs, glossaries, commits, branches, files, PRs, symbols,
+(shell commands such as `rm` or `chmod`), **Development** (errors, HTTP statuses, HTML tags and
+the everyday words of development, such as `deploy` or `endpoint`) and **Design** (the everyday
+words of design, such as `kerning` or `wireframe`). Whatever comes from your repos (IDs, glossaries, commits, branches, files, PRs, symbols,
 tokens, local addresses and `package.json` scripts) is always on.
 
 ### Which repo, when IDs collide

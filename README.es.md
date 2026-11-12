@@ -38,9 +38,9 @@ glosario de tus repos.
 
 ## Cuando la cosa se pone técnica
 
-Además de las referencias, Lupita trae diccionarios de desarrollo, terminal y Git en lenguaje
-llano. Si alguien te habla de un `rebase`, un `HTTP 401` o un `chmod`, te lo explica en una
-línea. Están pensados para acortar distancias entre diseño, desarrollo y negocio, y se pueden
+Además de las referencias, Lupita trae diccionarios de diseño, desarrollo, terminal y Git en
+lenguaje llano. Si alguien te habla de un `rebase`, un `HTTP 401`, un `chmod` o el `kerning`, te
+lo explica en una línea. Están pensados para acortar distancias entre diseño, desarrollo y negocio, y se pueden
 apagar desde el menú si ya los dominas.
 
 ## Todo se queda en tu Mac
