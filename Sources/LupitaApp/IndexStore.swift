@@ -14,10 +14,7 @@ final class IndexStore {
     /// Last measured rebuild time per repo, to decide whether a rescan fits in a lookup.
     private var rebuildCost: [String: Duration] = [:]
     private lazy var watcher = Watcher { [weak self] paths in self?.filesChanged(paths) }
-    private var running = false
-    private var queued: [String: Repo] = [:]
-    private var rediscoverQueued = false
-    private var fullRebuildQueued = false
+    private var queue = IndexJobQueue()
     private let defaultsKey = "roots"
 
     /// An install from before D24 never chose folders: it was indexing ~/Repos. Keep it so.
@@ -65,7 +62,7 @@ final class IndexStore {
     /// index at once; one switched on is read alone, while the others keep answering. No full build.
     private func resync() {
         guard index != nil else { rebuild(); return }
-        rediscoverQueued = true
+        queue.requestRediscover()
         drain()
     }
     private var activeRoots: [String] { roots.filter { !disabledRoots.contains($0) } }
@@ -123,7 +120,7 @@ final class IndexStore {
         notify()
         watcher.watch(activeRoots)
         // The build itself goes through drain(), like every other job: one at a time.
-        fullRebuildQueued = true
+        queue.requestFull()
         drain()
     }
 
@@ -131,10 +128,10 @@ final class IndexStore {
     /// is unknown or too slow to rescan inside a lookup.
     func refreshNow(repoNamed name: String, budget: Duration = .milliseconds(300)) async -> Bool {
         // While a watcher job runs it is about to install a fresher index anyway.
-        guard !running, !fullRebuildQueued, let current = index, let repo = current.repos.first(where: { $0.name == name }),
-              (rebuildCost[name] ?? .zero) <= budget else { return false }
-        running = true
-        defer { running = false; drain() }
+        guard !queue.isRunning, !queue.fullRequested, let current = index,
+              let repo = current.repos.first(where: { $0.name == name }),
+              (rebuildCost[name] ?? .zero) <= budget, queue.beginRefresh() else { return false }
+        defer { queue.finished(); drain() }
         let start = ContinuousClock.now
         let fresh = await Task.detached(priority: .userInitiated) { () -> RefIndex in
             var copy = current
@@ -149,10 +146,10 @@ final class IndexStore {
     private func filesChanged(_ paths: [String]) {
         guard let index else { return }
         // A repo appeared or vanished (`.git` created/removed directly under a folder).
-        if paths.contains(where: { $0.hasSuffix("/.git") }) { rediscoverQueued = true }
+        if paths.contains(where: { $0.hasSuffix("/.git") }) { queue.requestRediscover() }
         for path in paths {
             if let repo = index.repos.first(where: { RepoDiscovery.isIndexed(path: path, in: $0) }) {
-                queued[repo.name] = repo
+                queue.request(repo)
             }
         }
         drain()
@@ -160,44 +157,35 @@ final class IndexStore {
 
     /// Runs queued work one job at a time, so concurrent rebuilds never overwrite each other.
     private func drain() {
-        guard !running else { return }
-        if fullRebuildQueued {
-            // A full build from the current roots supersedes queued per-repo work; changes that
-            // arrive while it runs are queued again by filesChanged and handled afterwards.
-            fullRebuildQueued = false
-            queued = [:]
-            rediscoverQueued = false
-            running = true
-            let roots = activeRoots, excluding = excludedRepos
+        guard let job = queue.next(hasIndex: index != nil) else { return }
+        let roots = activeRoots, excluding = excludedRepos
+        switch job {
+        case .full:
             Task.detached(priority: .utility) {
                 let built = RefIndex.build(roots: roots, excluding: excluding)
                 await MainActor.run {
-                    self.running = false
-                    self.isBuilding = self.fullRebuildQueued
+                    self.queue.finished()
+                    self.isBuilding = self.queue.fullRequested
                     self.install(built)
                     self.drain()
                 }
             }
-            return
-        }
-        guard var index, rediscoverQueued || !queued.isEmpty else { return }
-        running = true
-        let repos = Array(queued.values), rediscover = rediscoverQueued, roots = activeRoots, excluding = excludedRepos
-        queued = [:]
-        rediscoverQueued = false
-        Task.detached(priority: .utility) {
-            var costs: [String: Duration] = [:]
-            if rediscover { index.sync(repos: RepoDiscovery.repos(under: roots, excluding: excluding)) }
-            for repo in repos where index.repos.contains(repo) {
-                let start = ContinuousClock.now
-                index.rebuild(repo: repo)
-                costs[repo.name] = ContinuousClock.now - start
-            }
-            await MainActor.run {
-                self.rebuildCost.merge(costs) { $1 }
-                self.install(index)
-                self.running = false
-                self.drain()
+        case .repos(let repos, let rediscover):
+            guard var index else { queue.finished(); return }
+            Task.detached(priority: .utility) {
+                var costs: [String: Duration] = [:]
+                if rediscover { index.sync(repos: RepoDiscovery.repos(under: roots, excluding: excluding)) }
+                for repo in repos where index.repos.contains(repo) {
+                    let start = ContinuousClock.now
+                    index.rebuild(repo: repo)
+                    costs[repo.name] = ContinuousClock.now - start
+                }
+                await MainActor.run {
+                    self.rebuildCost.merge(costs) { $1 }
+                    self.install(index)
+                    self.queue.finished()
+                    self.drain()
+                }
             }
         }
     }

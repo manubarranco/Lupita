@@ -28,4 +28,11 @@ public enum Versions {
         let zip = assets.first { $0["name"] as? String == "Lupita.zip" }
         return (zip?["browser_download_url"] as? String).flatMap(URL.init(string:))
     }
+
+    /// Only the project's own GitHub release assets are downloaded for the in-place update.
+    /// `URL.host` ignores user-info, so `https://github.com@evil.example/...` has host `evil.example`.
+    public static func isProjectReleaseAsset(_ url: URL) -> Bool {
+        url.scheme == "https" && url.host == "github.com"
+            && url.path.hasPrefix("/manubarranco/lupita/releases/download/")
+    }
 }

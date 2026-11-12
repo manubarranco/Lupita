@@ -145,25 +145,12 @@ enum FileOpener {
            let path = d.absolutePath.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
            let url = URL(string: "vscode://file\(path):\(max(d.line, 1))") {
             workspace.open(url)
-        } else if runsWhenOpened(d.absolutePath) {
+        } else if FileSafety.runsWhenOpened(d.absolutePath) {
             // The default app would run or install it: show it in Finder instead.
             workspace.activateFileViewerSelecting([URL(fileURLWithPath: d.absolutePath)])
         } else {
             workspace.open(URL(fileURLWithPath: d.absolutePath))
         }
-    }
-
-    private static let runnableExtensions: Set<String> = [
-        "command", "tool", "app", "terminal", "pkg", "mpkg", "dmg", "workflow", "action",
-        "scpt", "scptd", "applescript", "jar", "shortcut"]
-
-    /// Whether opening `path` with the default app would run or install it.
-    private static func runsWhenOpened(_ path: String) -> Bool {
-        let ext = (path as NSString).pathExtension.lowercased()
-        if runnableExtensions.contains(ext) { return true }
-        var isDir: ObjCBool = false
-        return ext.isEmpty && FileManager.default.fileExists(atPath: path, isDirectory: &isDir) && !isDir.boolValue
-            && FileManager.default.isExecutableFile(atPath: path)
     }
 }
 

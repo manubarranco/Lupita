@@ -39,17 +39,11 @@ enum Updater {
         if Versions.isNewer(release.tag, than: installedVersion) {
             let version = Versions.parse(release.tag).map(String.init).joined(separator: ".")
             availableVersion = version
-            availableZip = release.zip.flatMap { isProjectRelease($0) ? $0 : nil }
+            availableZip = release.zip.flatMap { Versions.isProjectReleaseAsset($0) ? $0 : nil }
             alert(S.newVersion(version), offer: true)
         } else {
             alert(S.upToDate(installedVersion), offer: false)
         }
-    }
-
-    /// Only the project's own GitHub release assets are downloaded for the in-place update.
-    private static func isProjectRelease(_ url: URL) -> Bool {
-        url.scheme == "https" && url.host == "github.com"
-            && url.path.hasPrefix("/manubarranco/lupita/releases/download/")
     }
 
     /// The menu item, once a newer release is known.
