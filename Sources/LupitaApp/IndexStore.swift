@@ -220,13 +220,6 @@ final class IndexStore {
 /// every file change under the roots would land there).
 enum WatchLog {
     static func append(_ line: String) {
-        let url = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/Lupita/watch.log")
-        let text = ISO8601DateFormatter().string(from: Date()) + " " + line + "\n"
-        try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-        if let handle = try? FileHandle(forWritingTo: url) {
-            handle.seekToEndOfFile(); handle.write(Data(text.utf8)); try? handle.close()
-        } else {
-            try? text.write(to: url, atomically: true, encoding: .utf8)
-        }
+        LogFile.append(ISO8601DateFormatter().string(from: Date()) + " " + line + "\n", to: "watch.log")
     }
 }

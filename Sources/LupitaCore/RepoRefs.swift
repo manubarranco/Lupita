@@ -23,9 +23,7 @@ public enum RepoRefs {
     /// `byName`: the index's markdown files by lowercased name, for a bare `decisions.md` outside the repo root.
     public static func resolve(_ raw: String, repos: [Repo], preferredRepo: String?,
                                byName: [String: [String]] = [:]) -> Resolution? {
-        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
-        while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
-        text = text.trimmingCharacters(in: wrappers)
+        let text = bare(raw)
         guard text.count >= 2, text.count <= 300 else { return nil }
         let ordered = repos.sorted { a, b in
             (a.name.caseInsensitiveCompare(preferredRepo ?? "") == .orderedSame ? 0 : 1)
@@ -206,9 +204,7 @@ public enum RepoRefs {
     /// Whether `raw` names a file or folder in one of `repos`: the same paths `files` tries, checked on disk
     /// only, with no git and no reading (D49: cheap enough for the highlight).
     public static func isFile(_ raw: String, repos: [Repo], byName: [String: [String]] = [:]) -> Bool {
-        var text = raw.trimmingCharacters(in: .whitespacesAndNewlines.union(wrappers))
-        while let last = text.unicodeScalars.last, trailing.contains(last) { text.removeLast() }
-        text = text.trimmingCharacters(in: wrappers)
+        let text = bare(raw)
         guard text.count >= 2, text.count <= 300 else { return false }
         let (path, _) = splitLine(text)
         guard path.contains("/") || fileExtensions.contains((path as NSString).pathExtension.lowercased()) else { return false }
@@ -449,20 +445,9 @@ enum Git {
     static let defaultTimeout: TimeInterval = 2
 
     private static func run(_ executable: String, _ args: [String], timeout: TimeInterval? = nil) -> String? {
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executable)
-        process.arguments = args
         var env = ProcessInfo.processInfo.environment
         env["GIT_OPTIONAL_LOCKS"] = "0"
         env["GIT_TERMINAL_PROMPT"] = "0"
-        process.environment = env
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = FileHandle.nullDevice
-        do { try process.run() } catch { return nil }
-        DispatchQueue.global().asyncAfter(deadline: .now() + (timeout ?? defaultTimeout)) { if process.isRunning { process.terminate() } }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        process.waitUntilExit()
-        return process.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : nil
+        return ProcessRunner.output(executable, args, environment: env, timeout: timeout ?? defaultTimeout)
     }
 }

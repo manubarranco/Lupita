@@ -1,6 +1,5 @@
 import LupitaCore
 import AppKit
-import Carbon.HIToolbox
 
 /// The shortcut that triggers a lookup. Modifier-only chords fire on release, and only if no
 /// other key was pressed meanwhile, so ⌃⌥⌘+key shortcuts of other apps keep working.
@@ -30,30 +29,6 @@ enum HotkeyChoice: String, CaseIterable {
 
 @MainActor
 protocol Trigger: AnyObject {}
-
-/// Key + modifiers via Carbon `RegisterEventHotKey`: needs no permission.
-@MainActor
-final class Hotkey: Trigger {
-    private var ref: EventHotKeyRef?
-    private var handler: EventHandlerRef?
-    private static var action: (() -> Void)?
-
-    init(keyCode: UInt32, modifiers: UInt32, action: @escaping () -> Void) {
-        Hotkey.action = action
-        var spec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-        InstallEventHandler(GetApplicationEventTarget(), { _, _, _ in
-            MainActor.assumeIsolated { Hotkey.action?() }
-            return noErr
-        }, 1, &spec, nil, &handler)
-        let id = EventHotKeyID(signature: OSType(0x4C55_5049), id: 1)  // "LUPI"
-        RegisterEventHotKey(keyCode, modifiers, id, GetApplicationEventTarget(), 0, &ref)
-    }
-
-    isolated deinit {
-        if let ref { UnregisterEventHotKey(ref) }
-        if let handler { RemoveEventHandler(handler) }
-    }
-}
 
 /// Modifier-only chord (⌃⌥⌘, fn⌃⌥). Global monitors need the Accessibility permission.
 @MainActor

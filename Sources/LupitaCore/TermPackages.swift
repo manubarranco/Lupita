@@ -15,13 +15,20 @@ public enum TermPackage: String, CaseIterable, Sendable {
 }
 
 public enum TermPackages {
-    nonisolated(unsafe) static var enabled = Set(TermPackage.allCases)
+    // Written from the main thread (the menu), read from the lookups' threads.
+    private static let lock = NSLock()
+    nonisolated(unsafe) private static var switchedOn = Set(TermPackage.allCases)
+
     /// Switched off for the current task only: tests use it so they do not disturb each other.
     @TaskLocal public static var off: Set<TermPackage> = []
 
-    public static func isOn(_ package: TermPackage) -> Bool { enabled.contains(package) && !off.contains(package) }
+    public static func isOn(_ package: TermPackage) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return switchedOn.contains(package) && !off.contains(package)
+    }
 
     public static func set(_ package: TermPackage, on: Bool) {
-        if on { enabled.insert(package) } else { enabled.remove(package) }
+        lock.lock(); defer { lock.unlock() }
+        if on { switchedOn.insert(package) } else { switchedOn.remove(package) }
     }
 }
