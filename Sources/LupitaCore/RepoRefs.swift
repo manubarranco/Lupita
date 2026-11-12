@@ -436,6 +436,9 @@ enum Git {
     }
 
     /// stdout when the command exits 0, nil otherwise.
+    /// A slow repo must not hang a lookup forever: a command with no timeout of its own gets this one.
+    static let defaultTimeout: TimeInterval = 2
+
     private static func run(_ executable: String, _ args: [String], timeout: TimeInterval? = nil) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executable)
@@ -448,9 +451,7 @@ enum Git {
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
         do { try process.run() } catch { return nil }
-        if let timeout {
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) { if process.isRunning { process.terminate() } }
-        }
+        DispatchQueue.global().asyncAfter(deadline: .now() + (timeout ?? defaultTimeout)) { if process.isRunning { process.terminate() } }
         let data = pipe.fileHandleForReading.readDataToEndOfFile()
         process.waitUntilExit()
         return process.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : nil

@@ -139,6 +139,8 @@ extension CodeRefs {
             process.standardOutput = pipe
             process.standardError = FileHandle.nullDevice
             do { try process.run() } catch { return nil }
+            // lsof can stall (network volumes, many files): give it a second.
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1) { if process.isRunning { process.terminate() } }
             let data = pipe.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
             return process.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : nil
