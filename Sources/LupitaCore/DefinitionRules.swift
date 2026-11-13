@@ -4,6 +4,10 @@ import Foundation
 /// defined more than once in the same repo.
 public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     case frontmatter, heading, fileName, listOrColon, tableRow
+    /// `- **V1 (sintáctico)**: …`: a bold ID with a qualifier in brackets. Below every other rule, so it fills a gap and
+    /// never replaces a heading, a list item or a table row that defines the same ID (the 2026-11-13 measure: 32 of the
+    /// 439 IDs it touches in the corpus took the place of a better definition when it weighed as much as a list item).
+    case qualified
     /// An object with an ID and a title in a JSON, YAML or TOML file, kept only when a `.md` of the repo cites the ID (D60).
     case structured
     /// A heading with no title (`## P1`) or the same ID heading several sections of one
@@ -25,6 +29,7 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .fileName: 80
         case .listOrColon: 60
         case .structured: 50
+        case .qualified: 30
         case .tableRow: 40
         case .section: 20
         case .term: 10
@@ -149,9 +154,9 @@ public enum DefinitionRules {
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
         if allowBoldParen, line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
+            // Like `**Q07**:`, the line needs text after the label: `**PM2 (Node.js)**:` alone heads a block, it explains nothing.
             let rest = cleanTitle(m[5])
-            let title = rest.isEmpty ? m[2] : cleanTitle(m[2] + ": " + rest)
-            return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
+            if !rest.isEmpty { return DefinitionHit(id: id, rule: .qualified, line: index, title: cleanTitle(m[2] + ": " + rest)) }
         }
         if let hit = figureDefinition(line, index: index) { return hit }
         if line.hasPrefix("**Propert"), let m = match(boldProperty, line), let id = IDGrammar.parse(m[1] + " " + m[2]) {

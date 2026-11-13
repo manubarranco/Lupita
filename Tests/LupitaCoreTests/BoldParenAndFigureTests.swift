@@ -37,8 +37,9 @@ import Testing
         #expect(DefinitionRules.definitions(fileName: "notes.md", lines: [line]).first?.id.key == "US4")
     }
 
-    @Test func theQualifierAloneIsTheTitleWhenThereIsNoText() {
-        #expect(Self.hit("- **V2 (semántico):**")?.title == "semántico")
+    @Test func aLabelWithNoTextAfterItDoesNotDefine() {
+        #expect(Self.hit("- **V2 (semántico):**") == nil)
+        #expect(Self.hit("**PM2 (Node.js)**:") == nil)
     }
 
     @Test func figureLabelsAreIDs() {
@@ -63,6 +64,17 @@ import Testing
         let r = Resolver(index: index)
         let defs = r.shownDefinitions(for: IDGrammar.parse("FIG. 1")!, preferredRepo: "nib", fromPath: "PRODUCT.md")
         #expect(defs.first?.path == "viewer/UI.md")
+    }
+
+    @Test func aBoldParenLineFillsAGapAndNeverReplacesARealDefinition() {
+        var index = RefIndex()
+        index.add(text: "| U7 | Component theme reads |", fileName: "tasks.md", repo: "r", relativePath: "tasks.md", absolutePath: "/r/tasks.md")
+        index.add(text: "- **U7 (Task 12)**: rows archived", fileName: "claims.md", repo: "r", relativePath: "completion/claims.md", absolutePath: "/r/completion/claims.md")
+        index.add(text: "- **U8 (Task 13)**: rows archived", fileName: "claims.md", repo: "r", relativePath: "completion/claims.md", absolutePath: "/r/completion/claims.md")
+        index.rank()
+        let r = Resolver(index: index)
+        #expect(r.shownDefinitions(for: IDGrammar.parse("U7")!, preferredRepo: "r", fromPath: nil).first?.rule == .tableRow)
+        #expect(r.shownDefinitions(for: IDGrammar.parse("U8")!, preferredRepo: "r", fromPath: nil).first?.rule == .qualified)
     }
 
     @Test func aBoldParenDefinitionInAnotherRepoDoesNotBeatTheReadersOwn() {

@@ -151,7 +151,7 @@ public enum IDReport {
         switch rule {
         case .heading, .section: .heading
         case .tableRow: .table
-        case .listOrColon: .list
+        case .listOrColon, .qualified: .list
         case .fileName: .fileName
         case .frontmatter: .frontmatter
         default: nil

@@ -9,7 +9,7 @@ public enum Snippet {
         case .heading, .section:
             let level = headingLevel(lines[hit.line])
             return (hit.title, body(lines, from: hit.line + 1, stopAtLevel: level))
-        case .listOrColon:
+        case .listOrColon, .qualified:
             let indent = lines[hit.line].prefix { $0 == " " || $0 == "\t" }.count
             var parts = [hit.title]
             var i = hit.line + 1
