@@ -262,7 +262,8 @@ public enum HighlightPicker {
     }
 
     static func closes(_ word: OCRWord) -> Bool {
-        word.text.unicodeScalars.last.map(CharacterSet(charactersIn: ".,;:!?…").contains) ?? false
+        // `FIG.` is the start of `FIG. 1`, not the end of a sentence.
+        word.text != "FIG." && (word.text.unicodeScalars.last.map(CharacterSet(charactersIn: ".,;:!?…").contains) ?? false)
     }
 
     /// 3 to 2 words from `i` that are a numbered form with a word (`Task Group 2`, `Requirement 3`) some repo defines.

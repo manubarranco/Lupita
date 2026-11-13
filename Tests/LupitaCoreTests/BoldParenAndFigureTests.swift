@@ -85,4 +85,21 @@ import Testing
         let r = Resolver(index: index)
         #expect(r.shownDefinitions(for: IDGrammar.parse("V1")!, preferredRepo: "ds", fromPath: nil).first?.repo == "ds")
     }
+
+    // The picker reads OCR words: `FIG.` and `1` are two words, and the full stop of the first one used to close the phrase.
+    @Test func figureWordsFromOCRResolveFromEitherHalf() {
+        var index = RefIndex()
+        index.add(text: "| **FIG. 1 — glifo** | el glifo |", fileName: "UI.md", repo: "nib", relativePath: "viewer/UI.md", absolutePath: "/nib/viewer/UI.md")
+        index.rank()
+        let r = Resolver(index: index)
+        let words = ["barra", "·", "FIG.", "1", "(glifo", "activo)"].enumerated().map {
+            OCRWord(text: $0.element, box: CGRect(x: CGFloat($0.offset) * 60, y: 0, width: 50, height: 14))
+        }
+        for target in [2, 3] {
+            let cursor = CGPoint(x: CGFloat(target) * 60 + 25, y: 7)
+            let picked = CandidatePicker.pick(words: words, cursor: cursor, resolver: r, preferredRepo: "nib")
+            #expect(picked?.definitions.first?.title.hasPrefix("glifo") == true, "word \(target)")
+        }
+        #expect(HighlightPicker.classified(words: words, resolver: r).filter { $0.kind == .id }.count == 1)
+    }
 }
