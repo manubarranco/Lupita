@@ -64,6 +64,25 @@ public enum IDGrammar {
         pattern: #"(?<![A-Za-z0-9_\-])FIG\. ?(\d{1,2})(?![\d_]|\.\d|[A-Za-z])"#
     )
 
+    /// Whether `text` holds the ASCII bytes `needle`: a byte scan, because `NSString.range(of:)` on every line of every file is slow.
+    static func hasBytes(_ text: String, _ needle: [UInt8]) -> Bool {
+        var t = text
+        return t.withUTF8 { b in
+            guard b.count >= needle.count, let first = needle.first else { return false }
+            var i = 0
+            let last = b.count - needle.count
+            while i <= last {
+                if b[i] == first {
+                    var j = 1
+                    while j < needle.count, b[i + j] == needle[j] { j += 1 }
+                    if j == needle.count { return true }
+                }
+                i += 1
+            }
+            return false
+        }
+    }
+
     /// A task in a checklist, `- [ ] 1.1 Create the table` or `- [x]* 2. Wire it`: the number alone is the token.
     static let taskLineRegex = try! NSRegularExpression(
         pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?(?=\s|$)"#
@@ -234,7 +253,7 @@ public enum IDGrammar {
                            prefix: key, scope: .folder)
             out.append((id, m.range))
         }
-        for m in (ns.range(of: "FIG.").location == NSNotFound ? [] : figureRegex.matches(in: text, range: whole)) {
+        for m in (!Self.hasBytes(text, [0x46, 0x49, 0x47, 0x2E]) ? [] : figureRegex.matches(in: text, range: whole)) {
             out.append((RefID(display: ns.substring(with: m.range), key: "FIG " + ns.substring(with: m.range(at: 1)), prefix: "FIG"), m.range))
         }
         if let m = taskLineRegex.firstMatch(in: text, range: whole) {

@@ -153,7 +153,8 @@ public enum DefinitionRules {
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
-        if allowBoldParen, line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
+        if allowBoldParen, line.utf8.first.map({ $0 == 0x2A || $0 == 0x20 || $0 == 0x09 || $0 == 0x2D || $0 == 0x2B || (0x30...0x39).contains($0) }) == true,
+           IDGrammar.hasBytes(line, [0x29, 0x2A, 0x2A]) || IDGrammar.hasBytes(line, [0x29, 0x3A, 0x2A, 0x2A]), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
             // Like `**Q07**:`, the line needs text after the label: `**PM2 (Node.js)**:` alone heads a block, it explains nothing.
             let rest = cleanTitle(m[5])
             if !rest.isEmpty { return DefinitionHit(id: id, rule: .qualified, line: index, title: cleanTitle(m[2] + ": " + rest)) }
@@ -184,7 +185,7 @@ public enum DefinitionRules {
 
     /// `| **FIG. 1 — glifo** | text |`, `## FIG. 2 — El grupo`: a figure of the document defines `FIG. N`.
     static func figureDefinition(_ line: String, index: Int) -> DefinitionHit? {
-        guard line.contains("FIG."), let m = match(figure, line), let id = IDGrammar.parse("FIG. " + m[1]) else { return nil }
+        guard IDGrammar.hasBytes(line, [0x46, 0x49, 0x47, 0x2E]), let m = match(figure, line), let id = IDGrammar.parse("FIG. " + m[1]) else { return nil }
         let inside = cleanTitle(m[2]), rest = cleanTitle(m[3].replacingOccurrences(of: "|", with: " "))
         let title = inside.isEmpty ? rest : (rest.isEmpty ? inside : inside + ": " + rest)
         return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
