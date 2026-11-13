@@ -107,6 +107,8 @@ public enum DefinitionRules {
         var hits: [DefinitionHit] = []
         if let hit = fileNameDefinition(fileName) ?? adrFileDefinition(fileName, folder: folder) { hits.append(hit) }
         let isTasksFile = fileName.lowercased() == "tasks.md"
+        // A `tasks.md` or a `plan.md` lists the stories and what each depends on (`- **US4 (List)**: Depends on US1`): it cites them.
+        let isOrderingFile = isTasksFile || fileName.lowercased() == "plan.md"
 
         var inFence = false
         var inFrontmatter = lines.first?.trimmingCharacters(in: .whitespaces) == "---"
@@ -121,7 +123,7 @@ public enum DefinitionRules {
             }
             if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") { inFence.toggle(); continue }
             if inFence { continue }
-            if let hit = lineDefinition(line, index: i) { hits.append(hit) }
+            if let hit = lineDefinition(line, index: i, boldParen: !isOrderingFile) { hits.append(hit) }
             else if isTasksFile, let hit = taskDefinition(line, index: i) { hits.append(hit) }
         }
         let headingCounts = Dictionary(grouping: hits.filter { $0.rule == .heading }, by: \.id.key).mapValues(\.count)
@@ -134,7 +136,7 @@ public enum DefinitionRules {
     }
 
     /// A single line as a definition, or nil if it only mentions IDs.
-    public static func lineDefinition(_ line: String, index: Int = 0) -> DefinitionHit? {
+    public static func lineDefinition(_ line: String, index: Int = 0, boldParen allowBoldParen: Bool = true) -> DefinitionHit? {
         if line.hasPrefix("#") {
             if let hit = figureDefinition(line, index: index) { return hit }
             if let m = match(userStory, line), let id = IDGrammar.parse("US" + m[1]) {
@@ -146,7 +148,7 @@ public enum DefinitionRules {
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
-        if line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
+        if allowBoldParen, line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
             let rest = cleanTitle(m[5])
             let title = rest.isEmpty ? m[2] : cleanTitle(m[2] + ": " + rest)
             return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)

@@ -29,6 +29,14 @@ import Testing
         #expect(Self.hit("- **US1 (enrich audit line)**: single choke point")?.id.key == "US1")
     }
 
+    @Test func aTasksOrPlanFileCitesItsStoriesAndDoesNotDefineThemWithBoldBrackets() {
+        let line = "- **US4 (List)**: Depends on US1"
+        for file in ["tasks.md", "plan.md", "Tasks.md"] {
+            #expect(DefinitionRules.definitions(fileName: file, lines: [line]).isEmpty, "\(file)")
+        }
+        #expect(DefinitionRules.definitions(fileName: "notes.md", lines: [line]).first?.id.key == "US4")
+    }
+
     @Test func theQualifierAloneIsTheTitleWhenThereIsNoText() {
         #expect(Self.hit("- **V2 (semántico):**")?.title == "semántico")
     }
