@@ -21,6 +21,14 @@ import Testing
         #expect(Self.hit("- **version 1 (old)**: no") == nil)
     }
 
+    @Test func aPhaseOrPriorityInBracketsOrdersWorkAndDoesNotDefine() {
+        for line in ["- **US4 (Phase 6)**: Depends on Foundational only", "- **US6 (P3)**: Can start after Foundational", "- **US2 (Phase 5, P2)**: Depends on X", "- **US4 (P3, parity)**: Depends on US2"] {
+            #expect(Self.hit(line) == nil, "\(line)")
+        }
+        #expect(Self.hit("- **P0 (CRITICAL)**: fix now")?.id.key == "P0")
+        #expect(Self.hit("- **US1 (enrich audit line)**: single choke point")?.id.key == "US1")
+    }
+
     @Test func theQualifierAloneIsTheTitleWhenThereIsNoText() {
         #expect(Self.hit("- **V2 (semántico):**")?.title == "semántico")
     }

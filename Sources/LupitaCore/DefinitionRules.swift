@@ -64,6 +64,9 @@ public enum DefinitionRules {
     // qualifier is part of the title. Needs a `:` or a dash after the bold, or inside it: `**D008** (aside)` is a mention.
     static let boldParen = try! NSRegularExpression(
         pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?\*\*([A-Z]{1,5}-?\d{1,4}[a-z]?)\s+\(([^)*\n]{1,40})\)(?::\*\*\s*()|\*\*\s*(?:[:—–]|-(?=\s))\s*())(.*)$"#)
+    // A qualifier that is a phase or a priority (`US4 (Phase 6)`, `US2 (P3, parity)`) orders work in a `tasks.md` or a plan: the line
+    // says what the story depends on, not what it is. Measured on the 2026-11-13 sample: 8 of 20 lines were that.
+    static let orderingQualifier = try! NSRegularExpression(pattern: #"^\s*(?:Phase\s*\d|P\d\b|Priority)"#, options: [.caseInsensitive])
     // `| **FIG. 1 — glifo en edición** | text |`, `- **FIG. 3 por bloques**: text`, `## FIG. 2 — El grupo`: a figure of the document.
     static let figure = try! NSRegularExpression(
         pattern: #"^\s*(?:(?:[-*+]|\d+\.)\s+\*\*|\|\s*\*\*|#{1,6}\s+\**)\s*FIG\. ?(\d{1,2})(?![\d_]|\.\d|[A-Za-z])([^*|]*)\**\s*[|:]?\s*(.*)$"#)
@@ -143,7 +146,7 @@ public enum DefinitionRules {
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
-        if line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]) {
+        if line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
             let rest = cleanTitle(m[5])
             let title = rest.isEmpty ? m[2] : cleanTitle(m[2] + ": " + rest)
             return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
