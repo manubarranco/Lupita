@@ -281,7 +281,8 @@ public struct RefIndex: Codable, Sendable {
         }
         var density: [String: Int] = [:]  // "repo/path|prefix" → count
         for defs in definitions.values {
-            for d in defs { density[densityKey(d), default: 0] += 1 }
+            // A bold line with a bracketed qualifier is a gap-filler: it must not tip the tie between two real definitions.
+            for d in defs where d.rule != .qualified { density[densityKey(d), default: 0] += 1 }
         }
         rankTerms()
         pruneWordFormMentions()

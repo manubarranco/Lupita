@@ -266,8 +266,10 @@ public struct Resolver: Sendable {
     /// can try windows of words.
     public func resolveWordID(_ phrase: String, preferredRepo: String? = nil, context: String? = nil,
                               fromPath: String? = nil) -> Resolution? {
-        let trimmed = Self.latinize(phrase.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
-        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none || id.prefix == "ADR" else { return nil }
+        var trimmed = Self.latinize(phrase.trimmingCharacters(in: CharacterSet.alphanumerics.inverted))
+        // The words of `FIG. 1` come with their full stop trimmed from the picker's side.
+        if trimmed.hasPrefix("FIG ") { trimmed = "FIG. " + trimmed.dropFirst(4) }
+        guard trimmed.contains(" "), let id = IDGrammar.parse(trimmed), id.scope != .none || id.prefix == "ADR" || id.prefix == "FIG" else { return nil }
         let named = context.flatMap(repoNamed(in:)) ?? fromPath.flatMap(repoNamed(in:)).flatMap { $0 == preferredRepo ? nil : $0 }
         let repo = named ?? preferredRepo
         let (key, defs) = scopedDefinitions(for: id, preferredRepo: repo, fromPath: named == nil || named == preferredRepo ? fromPath : nil)

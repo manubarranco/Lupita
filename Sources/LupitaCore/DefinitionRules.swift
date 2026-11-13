@@ -4,6 +4,10 @@ import Foundation
 /// defined more than once in the same repo.
 public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
     case frontmatter, heading, fileName, listOrColon, tableRow
+    /// `- **V1 (sintáctico)**: …`: a bold ID with a qualifier in brackets. Below every other rule, so it fills a gap and
+    /// never replaces a heading, a list item or a table row that defines the same ID (the 2026-11-13 measure: 32 of the
+    /// 439 IDs it touches in the corpus took the place of a better definition when it weighed as much as a list item).
+    case qualified
     /// An object with an ID and a title in a JSON, YAML or TOML file, kept only when a `.md` of the repo cites the ID (D60).
     case structured
     /// A heading with no title (`## P1`) or the same ID heading several sections of one
@@ -25,6 +29,7 @@ public enum DefinitionRule: String, Codable, Sendable, CaseIterable {
         case .fileName: 80
         case .listOrColon: 60
         case .structured: 50
+        case .qualified: 30
         case .tableRow: 40
         case .section: 20
         case .term: 10
@@ -60,6 +65,16 @@ public enum DefinitionRules {
     // `- **Q07**: text`, `**Q07:** text`, `Q07: text`, `1. D3 — text`. Bold must close right after the ID.
     static let listOrColon = try! NSRegularExpression(
         pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?(\*\*|__)?([A-Za-z0-9\-.]+?)(?::\1|\1\s*[:—–]|\s*[:—–](?=\s))\s*(.*)$"#)
+    // `- **V1 (sintáctico)**: text`, `**V1 (sintáctico):** text`: the ID, then a short qualifier in brackets, all in bold. The
+    // qualifier is part of the title. Needs a `:` or a dash after the bold, or inside it: `**D008** (aside)` is a mention.
+    static let boldParen = try! NSRegularExpression(
+        pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?\*\*([A-Z]{1,5}-?\d{1,4}[a-z]?)\s+\(([^)*\n]{1,40})\)(?::\*\*\s*()|\*\*\s*(?:[:—–]|-(?=\s))\s*())(.*)$"#)
+    // A qualifier that is a phase or a priority (`US4 (Phase 6)`, `US2 (P3, parity)`) orders work in a `tasks.md` or a plan: the line
+    // says what the story depends on, not what it is. Measured on the 2026-11-13 sample: 8 of 20 lines were that.
+    static let orderingQualifier = try! NSRegularExpression(pattern: #"^\s*(?:Phase\s*\d|P\d\b|Priority)"#, options: [.caseInsensitive])
+    // `| **FIG. 1 — glifo en edición** | text |`, `- **FIG. 3 por bloques**: text`, `## FIG. 2 — El grupo`: a figure of the document.
+    static let figure = try! NSRegularExpression(
+        pattern: #"^\s*(?:(?:[-*+]|\d+\.)\s+\*\*|\|\s*\*\*|#{1,6}\s+\**)\s*FIG\. ?(\d{1,2})(?![\d_]|\.\d|[A-Za-z])([^*|]*)\**\s*[|:]?\s*(.*)$"#)
     // `| Q07 | Title | … |`
     static let tableRow = try! NSRegularExpression(
         pattern: #"^\s*\|\s*\**([A-Za-z0-9\-.]+?)\**\s*\|\s*([^|]*)\|"#)
@@ -97,6 +112,8 @@ public enum DefinitionRules {
         var hits: [DefinitionHit] = []
         if let hit = fileNameDefinition(fileName) ?? adrFileDefinition(fileName, folder: folder) { hits.append(hit) }
         let isTasksFile = fileName.lowercased() == "tasks.md"
+        // A `tasks.md` or a `plan.md` lists the stories and what each depends on (`- **US4 (List)**: Depends on US1`): it cites them.
+        let isOrderingFile = isTasksFile || fileName.lowercased() == "plan.md"
 
         var inFence = false
         var inFrontmatter = lines.first?.trimmingCharacters(in: .whitespaces) == "---"
@@ -111,7 +128,7 @@ public enum DefinitionRules {
             }
             if trimmed.hasPrefix("```") || trimmed.hasPrefix("~~~") { inFence.toggle(); continue }
             if inFence { continue }
-            if let hit = lineDefinition(line, index: i) { hits.append(hit) }
+            if let hit = lineDefinition(line, index: i, boldParen: !isOrderingFile) { hits.append(hit) }
             else if isTasksFile, let hit = taskDefinition(line, index: i) { hits.append(hit) }
         }
         let headingCounts = Dictionary(grouping: hits.filter { $0.rule == .heading }, by: \.id.key).mapValues(\.count)
@@ -124,8 +141,9 @@ public enum DefinitionRules {
     }
 
     /// A single line as a definition, or nil if it only mentions IDs.
-    public static func lineDefinition(_ line: String, index: Int = 0) -> DefinitionHit? {
+    public static func lineDefinition(_ line: String, index: Int = 0, boldParen allowBoldParen: Bool = true) -> DefinitionHit? {
         if line.hasPrefix("#") {
+            if let hit = figureDefinition(line, index: index) { return hit }
             if let m = match(userStory, line), let id = IDGrammar.parse("US" + m[1]) {
                 return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
             }
@@ -135,6 +153,13 @@ public enum DefinitionRules {
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
+        if allowBoldParen, line.utf8.first.map({ $0 == 0x2A || $0 == 0x20 || $0 == 0x09 || $0 == 0x2D || $0 == 0x2B || (0x30...0x39).contains($0) }) == true,
+           IDGrammar.hasBytes(line, [0x29, 0x2A, 0x2A]) || IDGrammar.hasBytes(line, [0x29, 0x3A, 0x2A, 0x2A]), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]), match(orderingQualifier, m[2]) == nil {
+            // Like `**Q07**:`, the line needs text after the label: `**PM2 (Node.js)**:` alone heads a block, it explains nothing.
+            let rest = cleanTitle(m[5])
+            if !rest.isEmpty { return DefinitionHit(id: id, rule: .qualified, line: index, title: cleanTitle(m[2] + ": " + rest)) }
+        }
+        if let hit = figureDefinition(line, index: index) { return hit }
         if line.hasPrefix("**Propert"), let m = match(boldProperty, line), let id = IDGrammar.parse(m[1] + " " + m[2]) {
             return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[3]))
         }
@@ -156,6 +181,14 @@ public enum DefinitionRules {
             return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
         }
         return nil
+    }
+
+    /// `| **FIG. 1 — glifo** | text |`, `## FIG. 2 — El grupo`: a figure of the document defines `FIG. N`.
+    static func figureDefinition(_ line: String, index: Int) -> DefinitionHit? {
+        guard IDGrammar.hasBytes(line, [0x46, 0x49, 0x47, 0x2E]), let m = match(figure, line), let id = IDGrammar.parse("FIG. " + m[1]) else { return nil }
+        let inside = cleanTitle(m[2]), rest = cleanTitle(m[3].replacingOccurrences(of: "|", with: " "))
+        let title = inside.isEmpty ? rest : (rest.isEmpty ? inside : inside + ": " + rest)
+        return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
     }
 
     /// `- [ ] 1.1 Create the table` in a `tasks.md`: defines `Task 1.1`.

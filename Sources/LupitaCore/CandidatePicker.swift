@@ -120,7 +120,7 @@ public enum CandidatePicker {
     static func longerTerm(_ words: [String], at index: Int, closes extra: ((Int) -> Bool)? = nil, resolver: Resolver, preferredRepo: String?,
                            fromPath: String?, block: String, context: (Int) -> String) -> Resolution? {
         let closing = CharacterSet(charactersIn: ".,;:!?…")
-        func closes(_ i: Int) -> Bool { (words[i].unicodeScalars.last.map(closing.contains) ?? false) || (extra?(i) ?? false) }
+        func closes(_ i: Int) -> Bool { words[i] != "FIG." && (words[i].unicodeScalars.last.map(closing.contains) ?? false) || (extra?(i) ?? false) }
         for length in stride(from: maxTermWords, through: 2, by: -1) {
             for start in stride(from: index, through: index - length + 1, by: -1) {
                 let end = start + length - 1
