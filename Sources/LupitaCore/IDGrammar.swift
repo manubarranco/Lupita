@@ -59,6 +59,11 @@ public enum IDGrammar {
         pattern: #"(?<![A-Za-z0-9_\-])(Requirements?|Story|Epics?|Propert(?:y|ies)|Decision|Task Group|Subtask|Task) #?(\d{1,3}(?:\.\d{1,3}){0,2})(?![\d_]|\.[A-Za-z0-9])(?![A-Za-z_])"#
     )
 
+    /// A figure label as design docs write it, `FIG. 1` (capitals, a full stop, a number): a numbered thing of its own document.
+    static let figureRegex = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9_\-])FIG\. ?(\d{1,2})(?![\d_]|\.\d|[A-Za-z])"#
+    )
+
     /// A task in a checklist, `- [ ] 1.1 Create the table` or `- [x]* 2. Wire it`: the number alone is the token.
     static let taskLineRegex = try! NSRegularExpression(
         pattern: #"^\s*[-*+]\s+\[[ xX]\]\*?\s+(\d{1,3}(?:\.\d{1,3}){0,2})\.?(?=\s|$)"#
@@ -228,6 +233,9 @@ public enum IDGrammar {
             let id = RefID(display: ns.substring(with: m.range), key: key + " " + ns.substring(with: m.range(at: 2)),
                            prefix: key, scope: .folder)
             out.append((id, m.range))
+        }
+        for m in (ns.range(of: "FIG.").location == NSNotFound ? [] : figureRegex.matches(in: text, range: whole)) {
+            out.append((RefID(display: ns.substring(with: m.range), key: "FIG " + ns.substring(with: m.range(at: 1)), prefix: "FIG"), m.range))
         }
         if let m = taskLineRegex.firstMatch(in: text, range: whole) {
             let number = ns.substring(with: m.range(at: 1))

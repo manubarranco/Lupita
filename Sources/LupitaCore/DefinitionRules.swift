@@ -60,6 +60,13 @@ public enum DefinitionRules {
     // `- **Q07**: text`, `**Q07:** text`, `Q07: text`, `1. D3 — text`. Bold must close right after the ID.
     static let listOrColon = try! NSRegularExpression(
         pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?(\*\*|__)?([A-Za-z0-9\-.]+?)(?::\1|\1\s*[:—–]|\s*[:—–](?=\s))\s*(.*)$"#)
+    // `- **V1 (sintáctico)**: text`, `**V1 (sintáctico):** text`: the ID, then a short qualifier in brackets, all in bold. The
+    // qualifier is part of the title. Needs a `:` or a dash after the bold, or inside it: `**D008** (aside)` is a mention.
+    static let boldParen = try! NSRegularExpression(
+        pattern: #"^\s*(?:[-*+]\s+|\d+\.\s+)?\*\*([A-Z]{1,5}-?\d{1,4}[a-z]?)\s+\(([^)*\n]{1,40})\)(?::\*\*\s*()|\*\*\s*(?:[:—–]|-(?=\s))\s*())(.*)$"#)
+    // `| **FIG. 1 — glifo en edición** | text |`, `- **FIG. 3 por bloques**: text`, `## FIG. 2 — El grupo`: a figure of the document.
+    static let figure = try! NSRegularExpression(
+        pattern: #"^\s*(?:(?:[-*+]|\d+\.)\s+\*\*|\|\s*\*\*|#{1,6}\s+\**)\s*FIG\. ?(\d{1,2})(?![\d_]|\.\d|[A-Za-z])([^*|]*)\**\s*[|:]?\s*(.*)$"#)
     // `| Q07 | Title | … |`
     static let tableRow = try! NSRegularExpression(
         pattern: #"^\s*\|\s*\**([A-Za-z0-9\-.]+?)\**\s*\|\s*([^|]*)\|"#)
@@ -126,6 +133,7 @@ public enum DefinitionRules {
     /// A single line as a definition, or nil if it only mentions IDs.
     public static func lineDefinition(_ line: String, index: Int = 0) -> DefinitionHit? {
         if line.hasPrefix("#") {
+            if let hit = figureDefinition(line, index: index) { return hit }
             if let m = match(userStory, line), let id = IDGrammar.parse("US" + m[1]) {
                 return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
             }
@@ -135,6 +143,12 @@ public enum DefinitionRules {
             guard let m = match(heading, line), let id = IDGrammar.parse(m[1]) else { return nil }
             return DefinitionHit(id: id, rule: .heading, line: index, title: cleanTitle(m[2]))
         }
+        if line.contains("**"), let m = match(boldParen, line), let id = IDGrammar.parse(m[1]) {
+            let rest = cleanTitle(m[5])
+            let title = rest.isEmpty ? m[2] : cleanTitle(m[2] + ": " + rest)
+            return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
+        }
+        if let hit = figureDefinition(line, index: index) { return hit }
         if line.hasPrefix("**Propert"), let m = match(boldProperty, line), let id = IDGrammar.parse(m[1] + " " + m[2]) {
             return DefinitionHit(id: id, rule: .listOrColon, line: index, title: cleanTitle(m[3]))
         }
@@ -156,6 +170,14 @@ public enum DefinitionRules {
             return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
         }
         return nil
+    }
+
+    /// `| **FIG. 1 — glifo** | text |`, `## FIG. 2 — El grupo`: a figure of the document defines `FIG. N`.
+    static func figureDefinition(_ line: String, index: Int) -> DefinitionHit? {
+        guard line.contains("FIG."), let m = match(figure, line), let id = IDGrammar.parse("FIG. " + m[1]) else { return nil }
+        let inside = cleanTitle(m[2]), rest = cleanTitle(m[3].replacingOccurrences(of: "|", with: " "))
+        let title = inside.isEmpty ? rest : (rest.isEmpty ? inside : inside + ": " + rest)
+        return DefinitionHit(id: id, rule: .listOrColon, line: index, title: title)
     }
 
     /// `- [ ] 1.1 Create the table` in a `tasks.md`: defines `Task 1.1`.
